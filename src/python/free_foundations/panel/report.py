@@ -121,6 +121,53 @@ def ladder_table(comparison: pd.DataFrame) -> list[str]:
     return lines
 
 
+def control_table(comparison: pd.DataFrame) -> list[str]:
+    """Nonspatial covariance controls, each joined one-to-one to its correlation-only row."""
+    keys = ["approach", "kernel"]
+    controls = comparison.loc[comparison["innovation"].eq("control")]
+    correlation = comparison.loc[
+        comparison["innovation"].eq("correlation"), [*keys, "heldout_log_likelihood"]
+    ]
+    joined = controls.merge(
+        correlation, on=keys, suffixes=("", "_correlation"), validate="one_to_one"
+    )
+    lines = ["| Control | Held-out log-likelihood | Correlation-only |", "| --- | ---: | ---: |"]
+    lines += [
+        f"| `{row['approach']}` | {row['heldout_log_likelihood']:,.2f} | "
+        f"{row['heldout_log_likelihood_correlation']:,.2f} |"
+        for row in joined.to_dict("records")
+    ]
+    return lines
+
+
+def contrast_table(contrasts: pd.DataFrame) -> list[str]:
+    """Declared matched-input contrasts with paired intervals and yearly totals."""
+    years = [column for column in contrasts.columns if column.startswith("year_")]
+    lines = [
+        "",
+        "## Declared paired contrasts",
+        "",
+        "Left minus right, summed over held-out days, with 95% stationary-bootstrap intervals",
+        "(21-day expected blocks). The intervals resample realized daily differences and hold",
+        "the fitted coefficients, networks and searched specifications fixed.",
+        "",
+        "| Contrast | Left | Right | Arm | Difference | 21-day interval | "
+        + " | ".join(y.removeprefix("year_") for y in years)
+        + " |",
+        "| --- | --- | --- | --- | ---: | ---: |" + " ---: |" * len(years),
+    ]
+    for row in contrasts.to_dict("records"):
+        left, kernel, innovation = str(row["left"]).split("|")
+        lines.append(
+            f"| {row['contrast']} | `{left}` | `{str(row['right']).split('|')[0]}` | "
+            f"{kernel}/{innovation} | {row['difference']:+,.1f} | "
+            f"[{row['lower_21']:+,.1f}, {row['upper_21']:+,.1f}] | "
+            + " | ".join(f"{row[y]:+,.0f}" for y in years)
+            + " |"
+        )
+    return lines
+
+
 def results(name: str) -> None:
     """Write one design's RESULTS.md from its saved machine-readable tables."""
     design = DESIGNS[name]
@@ -140,7 +187,8 @@ def results(name: str) -> None:
         "",
         (
             f"Characteristics: {', '.join(design.characteristics)}. Network history: "
-            f"{design.history} annual snapshots; cohort requires complete, nonconstant {'- and '.join(map(str, design.cohort_histories))}-year histories. "
+            f"{design.history} annual snapshots; cohort requires complete, nonconstant "
+            f"{'- and '.join(map(str, design.cohort_histories))}-year histories. "
             f"All rows score the same {firm_days:,} held-out firm-days (2020-2025)."
         ),
         "One spatial coefficient per network, kernel and innovation arm is fitted on",
@@ -164,18 +212,8 @@ def results(name: str) -> None:
         "",
         "## Covariance controls",
         "",
-        "| Control | Held-out log-likelihood | Correlation-only |",
-        "| --- | ---: | ---: |",
+        *control_table(comparison),
     ]
-    controls = comparison.loc[comparison["arm"].eq("control")]
-    for row in controls.to_dict("records"):
-        correlation = comparison.loc[
-            comparison["approach"].eq(row["approach"]) & comparison["innovation"].eq("correlation")
-        ]["heldout_log_likelihood"]
-        lines.append(
-            f"| `{row['approach']}` | {row['heldout_log_likelihood']:,.2f} | "
-            f"{float(correlation.iloc[0]):,.2f} |"
-        )
     joint = bootstrap.loc[
         bootstrap["versus"].eq("joint") & bootstrap["column"].str.endswith("|exp|diagonal")
     ]
@@ -197,8 +235,17 @@ def results(name: str) -> None:
             f"[{row['lower_63']:+,.1f}, {row['upper_63']:+,.1f}] | "
             f"{row['politis_white_block']:.1f} |"
         )
-    lines += ["", "## Model confidence sets (size 0.10)", ""]
-    lines += ["| Family | Networks | Included |", "| --- | ---: | --- |"]
+    lines += contrast_table(pd.read_csv(output / "contrasts.csv"))
+    lines += [
+        "",
+        "## Model confidence sets (size 0.10)",
+        "",
+        "Families are networks within one kernel and innovation arm; covariance controls and",
+        "the uniform and zero networks enter every family of their arm. A set ranks within",
+        "its family only; choosing a family after seeing the results is not accounted for.",
+        "",
+    ]
+    lines += ["| Family | Members | Included |", "| --- | ---: | --- |"]
     for family, group in mcs.groupby("family", sort=False):
         included = ", ".join(f"`{c.split('|')[0]}`" for c in group.loc[group["included"], "column"])
         lines.append(f"| {family} | {len(group)} | {included} |")
@@ -219,17 +266,34 @@ def results(name: str) -> None:
         "",
         "## Network concentration",
         "",
-        "Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform.",
+        "Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform. The matched",
+        "kernel targets the joint network's mean effective neighbours under exp each year;",
+        "the last column is the largest achieved miss, in neighbours, over all years. Matching",
+        "the mean leaves row-wise concentration and spectral structure free to differ.",
         "",
-        "| Approach | exp | median | matched |",
-        "| --- | ---: | ---: | ---: |",
+        "| Approach | exp | median | matched | Matched miss |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
     fractions = geometry.pivot_table(
         index="approach", columns="kernel", values="effective_fraction", aggfunc="mean"
     )
+    target = geometry.loc[
+        geometry["approach"].eq("fernandez_joint") & geometry["kernel"].eq("exp")
+    ].set_index("year")["effective_neighbours"]
+    matched = geometry.loc[geometry["kernel"].eq("matched")]
+    miss = (
+        (matched["effective_neighbours"] - matched["year"].map(target))
+        .abs()
+        .groupby(matched["approach"])
+        .max()
+    )
     for approach, row in fractions.iterrows():
         values = [row.get(kernel, np.nan) for kernel in ("exp", "median", "matched")]
-        lines.append(f"| `{approach}` | " + " | ".join(f"{v:.3f}" for v in values) + " |")
+        lines.append(
+            f"| `{approach}` | "
+            + " | ".join(f"{v:.3f}" for v in values)
+            + f" | {miss.get(approach, np.nan):.2g} |"
+        )
     if name == "four" and (ROOT / "comparison.csv").exists():
         check = regression_check(comparison)
         check.to_csv(output / "regression-check.csv", index=False)

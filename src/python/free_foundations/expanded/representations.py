@@ -37,9 +37,24 @@ READOUTS: dict[str, tuple[tuple[str, str, Arm], ...]] = {
         ("item_last_concat", "exaone__item_last_concat", "task"),
     ),
 }
+# Direct-distance ablations: which feature groups a classical distance keeps. Size is
+# log assets and share counts; indicators are the imputer's missingness columns.
+ABLATIONS: dict[str, tuple[str, ...]] = {
+    "": (),
+    "_no_indicators": ("missingindicator_",),
+    "_no_size": ("log_assets", "|shares|"),
+    "_no_changes": ("|change_1y",),
+}
+CLASSICAL: Arm = "classical"
 ARMS: dict[str, Arm] = {
     "direct": "classical",
     "mahalanobis_lw": "classical",
+    **{
+        f"{metric}{suffix}": CLASSICAL
+        for metric in ("direct", "euclidean")
+        for suffix in ABLATIONS
+        if f"{metric}{suffix}" != "direct"
+    },
     "pca16": "control",
     "autoencoder": "control",
     "random_autoencoder": "control",
@@ -56,6 +71,30 @@ def mahalanobis_distance(data: Prepared) -> FloatArray:
     return pairwise_distance(whitened, metric="euclidean")
 
 
+def ablated_distances(data: Prepared) -> dict[str, FloatArray]:
+    """Standardized Euclidean distance, and both direct metrics without each feature group.
+
+    ``direct`` is the chord distance on ``[x, 1]``: angular, so firms with proportional
+    standardized vectors are close. ``euclidean`` keeps magnitude.
+    """
+    distances = {}
+    for suffix, dropped in ABLATIONS.items():
+        keep = [
+            position
+            for position, name in enumerate(data.features)
+            if not any(part in name for part in dropped)
+        ]
+        if not suffix:
+            distances["euclidean"] = pairwise_distance(data.query, metric="euclidean")
+        elif len(keep) < len(data.features):
+            query = data.query[:, keep]
+            distances[f"direct{suffix}"] = pairwise_distance(
+                np.column_stack([query, np.ones(len(query))])
+            )
+            distances[f"euclidean{suffix}"] = pairwise_distance(query, metric="euclidean")
+    return distances
+
+
 def representation_distances(
     data: Prepared,
     *,
@@ -67,6 +106,7 @@ def representation_distances(
     distances = {
         "direct": pairwise_distance(np.column_stack([data.query, np.ones(len(data.query))])),
         "mahalanobis_lw": mahalanobis_distance(data),
+        **ablated_distances(data),
     }
     for name, states in compression_states(data).items():
         distances[name] = pairwise_distance(states)

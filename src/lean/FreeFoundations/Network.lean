@@ -43,6 +43,23 @@ theorem inverse_on_eigenvector (W : Matrix n n ℝ) (c μ : ℝ) (v : n → ℝ)
   conv_rhs => rw [this]
   rw [smul_smul, inv_mul_cancel₀ hμ, one_smul]
 
+/-! ## Every row-normalised network carries an intercept -/
+
+/-- A row-stochastic `W` fixes the constant vector, so `(I − λW)1 = (1 − λ)1`... -/
+theorem rowStochastic_const (W : Matrix n n ℝ) (hW : W *ᵥ (fun _ => 1) = fun _ => 1) (c : ℝ) :
+    (1 - c • W) *ᵥ (fun _ : n => (1 : ℝ)) = (1 - c) • fun _ => 1 := by
+  rw [sub_mulVec, one_mulVec, smul_mulVec, hW]
+  funext i
+  simp
+
+/-- ...and `(I − λW)⁻¹1 = 1/(1 − λ)`: the spatial covariance always contains a common
+component along the constant vector, whose scale grows without bound as `λ → 1`. In a
+no-intercept cross-section it acts as a random intercept. -/
+theorem rowStochastic_inverse_const (W : Matrix n n ℝ) (hW : W *ᵥ (fun _ => 1) = fun _ => 1)
+    (c : ℝ) (hc : c ≠ 1) (h : IsUnit (1 - c • W).det) :
+    (1 - c • W)⁻¹ *ᵥ (fun _ : n => (1 : ℝ)) = (1 - c)⁻¹ • fun _ => 1 :=
+  inverse_on_eigenvector W c (1 - c) _ h (sub_ne_zero.mpr hc.symm) (rowStochastic_const W hW c)
+
 /-! ## The uniform network is a pure common component -/
 
 /-- Equal weight `1/(N − 1)` on every other firm. -/

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import argparse
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from arch.bootstrap import MCS, StationaryBootstrap, optimal_block_length
+
+from free_foundations.panel.design import DESIGNS
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
@@ -71,21 +74,88 @@ def paired(daily: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# Declared matched-input contrasts: (label, left, right) within one rung, kernel and arm.
+# "TabFM" is the early-concatenation state readout.
+RUNG_CONTRASTS = (
+    ("pretrained vs supervised", "tabfm__early_concat", "supervised_mlp16"),
+    ("pretrained vs direct", "tabfm__early_concat", "direct"),
+    ("pretrained vs Mahalanobis", "tabfm__early_concat", "mahalanobis_lw"),
+    ("pretrained vs random autoencoder", "tabfm__early_concat", "random_autoencoder"),
+    ("labels vs constant labels", "tabfm__early_concat", "tabfm__early_concat_labelnull"),
+)
+INPUT_CONTRASTS = ("direct", "tabfm__early_concat")
+CONTRAST_ARMS = (("matched", "diagonal"), ("matched", "correlation"), ("median", "diagonal"))
+
+
+def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
+    """Every declared contrast whose two columns were scored in this design."""
+    pairs: list[tuple[str, str, str]] = []
+    for kernel, innovation in CONTRAST_ARMS:
+
+        def column(name: str, kernel: str = kernel, innovation: str = innovation) -> str:
+            return f"{name}|{kernel}|{innovation}"
+
+        for rung in ("histories", "broad", "metrics"):
+            pairs += [
+                (label, column(f"{rung}__{left}"), column(f"{rung}__{right}"))
+                for label, left, right in RUNG_CONTRASTS
+            ]
+            pairs.append(
+                ("topology", column(f"{rung}__direct"), f"uniform_network|none|{innovation}")
+            )
+        pairs += [
+            (f"inputs ({name})", column(f"metrics__{name}"), column(f"histories__{name}"))
+            for name in INPUT_CONTRASTS
+        ]
+    return [pair for pair in pairs if pair[1] in columns and pair[2] in columns]
+
+
+def contrasts(daily: pd.DataFrame) -> pd.DataFrame:
+    """Direct paired differences for the declared contrasts, with yearly totals.
+
+    Intervals resample realized daily score differences in time blocks. They hold the
+    fitted coefficients, networks and the searched specification fixed.
+    """
+    years = pd.to_datetime(daily.index).year
+    counts = {block: resample_counts(len(daily), block) for block in BLOCKS}
+    rows = []
+    for label, left, right in declared_contrasts(set(map(str, daily.columns))):
+        difference = (daily[left] - daily[right]).to_numpy(dtype=float)
+        row: dict[str, str | float] = {
+            "contrast": label,
+            "left": left,
+            "right": right,
+            "difference": float(difference.sum()),
+        }
+        row |= {
+            f"year_{year}": float(difference[years == year].sum()) for year in sorted(set(years))
+        }
+        for block, matrix in counts.items():
+            sums = matrix @ difference
+            row |= {
+                f"lower_{block}": float(np.percentile(sums, 2.5)),
+                f"upper_{block}": float(np.percentile(sums, 97.5)),
+            }
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 def families(daily: pd.DataFrame) -> dict[str, list[str]]:
-    """MCS families: networks within one kernel and innovation arm, plus the controls."""
+    """MCS families: networks within one kernel and innovation arm, with every control.
+
+    Nonspatial covariance controls and the uniform and zero networks enter every family
+    of their innovation arm, so a family's set is also a comparison with those benchmarks.
+    The heterogeneous-variance controls join the diagonal families.
+    """
     groups: dict[str, list[str]] = {}
     for column in map(str, daily.columns):
         name, kernel, innovation = column.split("|")
-        if "__placebo" in name or innovation == "control":
+        if "__placebo" in name:
             continue
+        arm = "diagonal" if innovation == "control" else innovation
         kernels = ("exp", "median", "matched") if kernel == "none" else (kernel,)
         for selected in kernels:
-            groups.setdefault(f"{innovation}|{selected}", []).append(column)
-    groups["controls|diagonal-exp"] = [
-        column
-        for column in map(str, daily.columns)
-        if "__placebo" not in column and column.endswith(("|control", "|exp|diagonal"))
-    ]
+            groups.setdefault(f"{arm}|{selected}", []).append(column)
     return groups
 
 
@@ -116,3 +186,19 @@ def confidence_set(daily: pd.DataFrame, size: float = 0.10) -> pd.DataFrame:
             for column in columns
         )
     return pd.DataFrame(rows)
+
+
+def main() -> None:
+    """Recompute paired intervals, contrasts and confidence sets from saved daily scores."""
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument("--designs", nargs="+", default=list(DESIGNS), choices=list(DESIGNS))
+    for name in parser.parse_args().designs:
+        output = DESIGNS[name].output
+        daily = pd.read_parquet(output / "daily-scores.parquet")
+        paired(daily).to_csv(output / "bootstrap.csv", index=False)
+        contrasts(daily).to_csv(output / "contrasts.csv", index=False)
+        confidence_set(daily).to_csv(output / "mcs.csv", index=False)
+
+
+if __name__ == "__main__":
+    main()

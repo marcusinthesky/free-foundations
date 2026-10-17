@@ -21,7 +21,13 @@ from free_foundations.panel.evaluation import (
     placebo_table,
     update,
 )
-from free_foundations.panel.inference import BLOCKS, REPLICATES, confidence_set, paired
+from free_foundations.panel.inference import (
+    BLOCKS,
+    REPLICATES,
+    confidence_set,
+    contrasts,
+    paired,
+)
 from free_foundations.panel.networks import distances
 from free_foundations.panel.observations import annual_data
 from free_foundations.pilot.data import write_json
@@ -67,6 +73,7 @@ def run_design(
     pd.DataFrame(panel.geometry).to_csv(output / "geometry.csv", index=False)
     placebo_table(daily).to_csv(output / "placebo.csv", index=False)
     paired(daily).to_csv(output / "bootstrap.csv", index=False)
+    contrasts(daily).to_csv(output / "contrasts.csv", index=False)
     confidence_set(daily).to_csv(output / "mcs.csv", index=False)
     write_json(
         output / "configuration.json",

@@ -43,7 +43,10 @@ CONVENTIONS = (
     ),
     (
         "factor_compounding",
-        "Quarterly long-short factors compounded as prod(1+f)-1",
+        (
+            "Compounded daily-factor proxies: quarterly long-short factors as prod(1+f)-1, "
+            "not French quarterly portfolio legs (prod(1+L)-prod(1+S) differs)"
+        ),
         "R4 extension",
     ),
     (

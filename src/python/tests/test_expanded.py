@@ -21,6 +21,7 @@ from free_foundations.expanded.encoding import (
     query_rows,
     variant,
 )
+from free_foundations.expanded.representations import ARMS, ablated_distances
 from tests.strategies import token_arrays
 
 
@@ -167,3 +168,21 @@ def test_supervised_states_use_support_rows_only() -> None:
     # Training sees support rows only: re-encoding a query subset gives the same rows.
     subset = replace(data, query=data.query[[3, 1]], tickers=("D", "B"))
     assert_allclose(supervised_states(subset), first[[3, 1]], atol=1e-6)
+
+
+def test_ablations_drop_only_their_feature_group() -> None:
+    features = ("a", "log_assets", "x|shares|", "x|USD|", "x|USD||change_1y", "missingindicator_a")
+    query = np.random.default_rng(0).normal(size=(5, len(features)))
+    data = Prepared(query, query, np.zeros(5), features, (), ("A", "B", "C", "D", "E"), 2020, "")
+    distances = ablated_distances(data)
+    assert_allclose(distances["euclidean"], pairwise_distance(query, metric="euclidean"))
+    assert_allclose(
+        distances["euclidean_no_size"],
+        pairwise_distance(query[:, [0, 3, 4, 5]], metric="euclidean"),
+    )
+    kept = query[:, [0, 1, 2, 3, 5]]
+    assert_allclose(
+        distances["direct_no_changes"],
+        pairwise_distance(np.column_stack([kept, np.ones(5)])),
+    )
+    assert set(distances) <= set(ARMS)

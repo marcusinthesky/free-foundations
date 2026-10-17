@@ -44,7 +44,8 @@ def quarterly_data(
     """Compound daily total returns and RF separately before computing quarterly excess.
 
     The market excess return compounds the total market return and subtracts compounded
-    RF. Long-short factors are compounded as prod(1 + f) - 1, a documented convention.
+    RF. Long-short factors are compounded as prod(1 + f) - 1: a compounded daily-factor
+    proxy, not a quarterly payoff built from the factor's long and short legs.
     """
     returns = prices.pct_change(fill_method=None).reindex(factors.index)
     quarterly = (1 + returns).resample("QE").prod(min_count=1) - 1

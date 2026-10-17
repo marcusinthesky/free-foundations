@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
 
 FACTOR_NAMES = ["Mkt-RF", "SMB", "HML", "RMW", "CMA", "Mom"]
+# A close-to-close price ratio beyond tenfold is a broken series, not a return: CHRD's
+# 2020-11-20 "return" of +25,733% splices pre-bankruptcy shares to the new equity.
+PRICE_BREAK = 10.0
 
 
 @dataclass(frozen=True)
@@ -47,6 +50,13 @@ def eligible(
     return values.index[valid]
 
 
+def daily_returns(prices: pd.DataFrame) -> pd.DataFrame:
+    """Simple daily returns, missing where the price ratio is outside [1/10, 10]."""
+    ratio = prices / prices.shift(1)
+    broken = (ratio > PRICE_BREAK) | (ratio < 1 / PRICE_BREAK)
+    return prices.pct_change(fill_method=None).mask(broken)
+
+
 def annual_data(
     four: pd.DataFrame,
     year: int,
@@ -58,7 +68,7 @@ def annual_data(
     """Select on preyear information; drop missing outcome dates identically for all models."""
     prices = pd.read_parquet(SOURCE / "prices.parquet")
     factors = pd.read_parquet(SOURCE / "factors.parquet")
-    returns = prices.pct_change(fill_method=None).sub(factors["RF"], axis=0)
+    returns = daily_returns(prices).sub(factors["RF"], axis=0)
     past = (
         returns.loc[f"{year - 3}-01-01" : f"{year - 1}-12-31"]
         .reindex(factors.index)

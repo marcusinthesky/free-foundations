@@ -12,7 +12,7 @@ from scipy.stats import multivariate_normal
 
 from free_foundations.expanded.encoding import prepare
 from free_foundations.fernandez.models import paper_weights
-from free_foundations.panel import observations
+from free_foundations.panel import inference, observations
 from free_foundations.panel.likelihood import (
     block,
     correlation_only,
@@ -21,6 +21,7 @@ from free_foundations.panel.likelihood import (
     gaussian_daily,
     gaussian_score,
 )
+from free_foundations.panel.report import control_table
 
 
 @given(st.integers(min_value=3, max_value=12), st.floats(min_value=-0.8, max_value=0.8))
@@ -255,3 +256,101 @@ def test_every_scored_column_is_described() -> None:
     assert describe("h3__fernandez_joint")["history"] == "h3"
     assert describe("histories__tabfm__early_concat")["arm"] == "state"
     assert describe("fernandez_joint__placebo3")["arm"] == "fernandez"
+
+
+def test_control_table_lists_each_covariance_control_once() -> None:
+    rows = [
+        ("ff5_mom_diagonal", "none", "control", 1.0),
+        ("ff5_mom_diagonal", "none", "correlation", 2.0),
+        ("raw_sample_covariance", "none", "control", 3.0),
+        ("raw_sample_covariance", "none", "correlation", 4.0),
+    ]
+    rows += [  # PCA controls are networks with every kernel and arm; they are not listed here.
+        ("histories__pca16", kernel, innovation, 9.0)
+        for kernel in ("exp", "median")
+        for innovation in ("spherical", "diagonal", "correlation")
+    ]
+    comparison = pd.DataFrame(
+        rows, columns=["approach", "kernel", "innovation", "heldout_log_likelihood"]
+    )
+    body = control_table(comparison)[2:]
+    assert body == [
+        "| `ff5_mom_diagonal` | 1.00 | 2.00 |",
+        "| `raw_sample_covariance` | 3.00 | 4.00 |",
+    ]
+
+
+def test_price_breaks_are_missing_returns_not_outliers() -> None:
+    prices = pd.DataFrame({"spliced": [0.07, 0.073, 18.84, 19.0], "rally": [10.0, 22.0, 4.0, 4.4]})
+    returns = observations.daily_returns(prices)
+    assert np.isnan(returns["spliced"].iloc[2])
+    assert returns["spliced"].iloc[3] == pytest.approx(19.0 / 18.84 - 1)
+    # A +120% day and a -82% day are large but genuine moves.
+    assert returns["rally"].iloc[1:3].tolist() == pytest.approx([1.2, 4 / 22 - 1])
+
+
+def test_contrasts_are_matched_and_controls_join_every_family() -> None:
+    columns = [
+        "histories__tabfm__early_concat|matched|diagonal",
+        "histories__supervised_mlp16|matched|diagonal",
+        "histories__direct|matched|diagonal",
+        "uniform_network|none|diagonal",
+        "ff5_mom_diagonal|none|control",
+        "histories__direct|exp|diagonal",
+        "histories__direct__placebo0|exp|diagonal",
+    ]
+    rng = np.random.default_rng(0)
+    daily = pd.DataFrame(
+        rng.normal(size=(30, len(columns))),
+        columns=columns,
+        index=pd.date_range("2020-01-02", periods=30).astype(str),
+    )
+    table = inference.contrasts(daily)
+    assert set(table["contrast"]) == {
+        "pretrained vs supervised",
+        "pretrained vs direct",
+        "topology",
+    }
+    first = table.loc[table["contrast"].eq("pretrained vs supervised")].iloc[0]
+    expected = (daily[columns[0]] - daily[columns[1]]).sum()
+    assert first["difference"] == pytest.approx(expected)
+    assert first["year_2020"] == pytest.approx(expected)
+    groups = inference.families(daily)
+    assert "ff5_mom_diagonal|none|control" in groups["diagonal|matched"]
+    assert "ff5_mom_diagonal|none|control" in groups["diagonal|exp"]
+    assert not any("placebo" in column for group in groups.values() for column in group)
+
+
+def test_shared_support_targets_change_only_the_labels() -> None:
+    from free_foundations.expanded.baselines import compression_states  # noqa: PLC0415
+    from free_foundations.expanded.representations import ablated_distances  # noqa: PLC0415
+    from free_foundations.panel import networks  # noqa: PLC0415
+
+    rng = np.random.default_rng(5)
+    tickers = tuple("ABCDEFGH")
+    index = pd.MultiIndex.from_product([range(2010, 2020), tickers], names=["year", "ticker"])
+    four = pd.DataFrame(
+        rng.uniform(0.1, 2, (len(index), 4)),
+        index=index,
+        columns=list(observations.CHARACTERISTICS),
+    )
+    income = rng.normal(size=len(index))
+    income[::5] = np.nan  # the income target is missing for some support rows
+    broad = pd.DataFrame(
+        {networks.ASSETS: rng.uniform(1, 9, len(index)), networks.INCOME: income}, index=index
+    )
+    view = networks.rung_views(four, broad, 2019, observations.CHARACTERISTICS, 3)["histories"]
+    shared = networks.shared_contexts(view, four, broad, tickers, 2019)
+    first, second = shared["market_cap_assets"], shared["income_assets"]
+    assert first.support_ids == second.support_ids
+    assert not np.array_equal(first.targets, second.targets)
+    for name, distance in ablated_distances(first).items():
+        np.testing.assert_array_equal(distance, ablated_distances(second)[name])
+    for name, states in compression_states(first).items():
+        np.testing.assert_array_equal(states, compression_states(second)[name])
+    # The alternative task pipeline, by contrast, selects different support rows.
+    pipeline = networks.context(view, networks.labels(four, broad, "income_assets"), tickers, 2019)
+    primary = networks.context(
+        view, networks.labels(four, broad, "market_cap_assets"), tickers, 2019
+    )
+    assert pipeline.support_ids != primary.support_ids

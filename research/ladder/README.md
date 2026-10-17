@@ -40,7 +40,7 @@ outcome, exposures and estimator fixed; arms are never ranked against each other
 | R2 matched learned | The same history rows: PCA, autoencoder, random autoencoder, supervised MLP, TabPFN, TabFM, EXAONE readouts |
 | R2 alternate target | R2 with next-year net income/assets as the support label |
 | R3 richer inputs | Histories plus 2024 broad SEC concepts, every method |
-| R4 factors | Every network with FF5+momentum MM exposures (six premiums) |
+| R4 factors | Every network with FF5+momentum MM exposures (six premiums); the quarterly long-short factors are compounded daily-factor proxies, prod(1 + f) − 1 |
 
 Foundation-model readouts are labelled by what they condition on. *State* readouts
 (TabFM `early_concat`/`early_mean`, its null-label pass, EXAONE first-layer item

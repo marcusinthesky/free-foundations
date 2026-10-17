@@ -72,17 +72,48 @@ def classical(
     return distances
 
 
-def labels(four: pd.DataFrame, broad: pd.DataFrame, target: str) -> pd.DataFrame:
-    """Support labels and log assets; ``income`` is the encoder interface's label column."""
+def labels(
+    four: pd.DataFrame, broad: pd.DataFrame, target: str, *, shared: bool = False
+) -> pd.DataFrame:
+    """Support labels and log assets; ``income`` is the encoder interface's label column.
+
+    Support rows need both label columns. ``shared`` puts the other target in the second
+    column, so both targets select the same support rows and fit the same preprocessing.
+    """
     core = pd.DataFrame(index=four.index)
     assets = broad[ASSETS].where(lambda values: values > 0).reindex(four.index)
     core["log_assets"] = np.log(assets)
-    if target == "market_cap_assets":
-        core["income"] = four["market_cap_assets"]
-    else:
-        core["income"] = broad[INCOME].reindex(four.index) / assets
-    core["operating_cash"] = core["income"]
+    values = {
+        "market_cap_assets": four["market_cap_assets"],
+        "income_assets": broad[INCOME].reindex(four.index) / assets,
+    }
+    core["income"] = values[target]
+    other = next(name for name in values if name != target)
+    core["operating_cash"] = values[other] if shared else core["income"]
     return core.replace([np.inf, -np.inf], np.nan)
+
+
+def shared_contexts(
+    view: pd.DataFrame,
+    four: pd.DataFrame,
+    broad: pd.DataFrame,
+    tickers: tuple[str, ...],
+    year: int,
+) -> dict[str, Prepared]:
+    """Both support targets on identical support rows and inputs; only the labels differ."""
+    contexts = {
+        target: context(view, labels(four, broad, target, shared=True), tickers, year)
+        for target in TARGETS
+    }
+    first, second = contexts.values()
+    if (
+        first.support_ids != second.support_ids
+        or not np.array_equal(first.support, second.support)
+        or not np.array_equal(first.query, second.query)
+    ):
+        message = f"Shared-support contexts differ beyond their labels in {year}."
+        raise ValueError(message)
+    return contexts
 
 
 def rung_views(
@@ -182,14 +213,22 @@ def distances(  # noqa: PLR0913 -- design inputs plus an optional model subset.
                 matrix=design.save_matrices,
             )
         views = rung_views(four, broad, year, design.characteristics, history)
-        passes = [(rung, "market_cap_assets") for rung in design.rungs]
+        passes = [(rung, "market_cap_assets", rung) for rung in design.rungs]
+        shared: dict[str, Prepared] = {}
         if history != design.history:
-            passes = [("histories", "market_cap_assets")]
+            passes = [("histories", "market_cap_assets", "histories")]
         elif design.alternate_target:
-            passes.append(("histories", "income_assets"))
-        for rung, target in passes:
-            label = rung if target == "market_cap_assets" else f"{rung}@{target}"
-            data = context(views[rung], labels(four, broad, target), tickers, year)
+            # The alternative task pipeline changes support rows and preprocessing with the
+            # target; the shared pair changes only the labels.
+            passes.append(("histories", "income_assets", "histories@income_assets"))
+            shared = shared_contexts(views["histories"], four, broad, tickers, year)
+            passes += [("histories", target, f"histories@shared_{target}") for target in shared]
+        for rung, target, label in passes:
+            data = (
+                shared[target]
+                if label.startswith(f"{rung}@shared_")
+                else context(views[rung], labels(four, broad, target), tickers, year)
+            )
             record_context(root / "contexts" / f"{year}-{prefix}{label}.json", data, target)
             LOGGER.info(
                 "%s %s %s: %s firms, %s features",
@@ -218,7 +257,10 @@ def distances(  # noqa: PLR0913 -- design inputs plus an optional model subset.
                         "representation": representation,
                         "arm": ARMS[representation],
                         "context_digest": data.digest,
-                        "metric": "euclidean" if representation == "mahalanobis_lw" else "chord",
+                        "metric": "euclidean"
+                        if representation == "mahalanobis_lw"
+                        or representation.startswith("euclidean")
+                        else "chord",
                     },
                     matrix=design.save_matrices,
                 )
