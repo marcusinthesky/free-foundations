@@ -1,0 +1,12 @@
+{
+	"name": "@free-foundations/workspace",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"check": "biome check . && tsc --noEmit"
+	}
+}

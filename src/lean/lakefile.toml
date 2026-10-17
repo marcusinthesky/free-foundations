@@ -1,0 +1,6 @@
+name = "free-foundations"
+version = "0.1.0"
+defaultTargets = ["FreeFoundations"]
+
+[[lean_lib]]
+name = "FreeFoundations"

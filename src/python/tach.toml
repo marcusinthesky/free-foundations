@@ -1,0 +1,43 @@
+source_roots = ["."]
+exclude = ["tests/**", ".venv/**"]
+exact = true
+
+[[modules]]
+path = "free_foundations.contracts"
+depends_on = []
+
+[[modules]]
+path = "free_foundations.pooling"
+depends_on = ["free_foundations.contracts"]
+
+[[modules]]
+path = "free_foundations.registry"
+depends_on = []
+
+[[modules]]
+path = "free_foundations.encoding"
+depends_on = ["free_foundations.contracts", "free_foundations.pooling", "free_foundations.registry"]
+
+[[modules]]
+path = "free_foundations"
+depends_on = ["free_foundations.contracts", "free_foundations.pooling", "free_foundations.registry", "free_foundations.encoding"]
+
+[[modules]]
+path = "free_foundations.pilot"
+depends_on = ["free_foundations"]
+
+[[modules]]
+path = "free_foundations.expanded"
+depends_on = ["free_foundations", "free_foundations.pilot"]
+
+[[modules]]
+path = "free_foundations.fernandez"
+depends_on = ["free_foundations.pilot", "free_foundations.expanded"]
+
+[[modules]]
+path = "free_foundations.universe"
+depends_on = ["free_foundations.pilot", "free_foundations.fernandez"]
+
+[[modules]]
+path = "free_foundations.panel"
+depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe"]

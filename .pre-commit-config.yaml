@@ -1,0 +1,162 @@
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  - repo: builtin
+    hooks:
+      # Formatting
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+      # Syntax validation
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+
+      # Security
+      - id: detect-private-key
+        stages: [pre-commit, pre-push]
+      - id: check-added-large-files
+        stages: [pre-commit, pre-push]
+
+      # Cross-platform compatibility
+      - id: check-case-conflict
+      - id: fix-byte-order-marker
+      - id: destroyed-symlinks
+
+      # Quality
+      - id: check-merge-conflict
+      - id: check-vcs-permalinks
+
+  - repo: local
+    hooks:
+      # ── Nix ────────────────────────────────────────────────────────────
+      - id: nixfmt
+        name: nixfmt (RFC 166 format)
+        entry: nixfmt
+        language: system
+        files: \.nix$
+      - id: statix
+        name: statix (Nix anti-patterns)
+        entry: statix check --format errfmt
+        language: system
+        files: \.nix$
+        pass_filenames: false
+      - id: deadnix
+        name: deadnix (unused Nix bindings)
+        entry: deadnix --fail
+        language: system
+        files: \.nix$
+
+      # ── Config ─────────────────────────────────────────────────────────
+      - id: tombi-format
+        name: tombi (TOML format)
+        entry: tombi format --offline
+        language: system
+        types_or: [toml]
+      - id: tombi-lint
+        name: tombi (TOML lint)
+        entry: tombi lint --offline
+        language: system
+        types_or: [toml]
+      - id: prek-validate-config
+        name: prek (config parses)
+        entry: prek validate-config
+        language: system
+        files: (^|/)\.pre-commit-config\.yaml$
+
+      # ── Prose ──────────────────────────────────────────────────────────
+      - id: rumdl-fmt
+        name: rumdl (Markdown format)
+        entry: rumdl fmt
+        language: system
+        files: \.md$
+      - id: rumdl
+        name: rumdl (Markdown lint)
+        entry: rumdl check
+        language: system
+        files: \.md$
+      - id: codespell
+        name: codespell
+        entry: codespell
+        language: system
+      # Network gate: rumdl (MD051/MD057) already owns anchors and relative
+      # paths, so this hook makes only the orthogonal claim that external
+      # destinations still respond. The success cache in lychee.toml keeps the
+      # repository-wide sweep cheap.
+      - id: lychee
+        name: lychee (external link integrity)
+        entry: lychee --config lychee.toml .
+        language: system
+        types: [markdown]
+        pass_filenames: false
+
+      # ── Task runner ────────────────────────────────────────────────────
+      # One `--justfile` invocation per file: a bare `just --fmt` resolves the
+      # ROOT justfile only, so module justfiles would go unchecked while the
+      # gate reported green.
+      - id: just-fmt
+        name: just (format justfiles)
+        entry: >-
+          bash -euc 'rc=0; for f; do just --justfile "$f" --fmt --check --unstable || rc=1; done; exit $rc' --
+        language: system
+        files: (^|/)justfile$
+      # ── Commit messages ────────────────────────────────────────────────
+      - id: convco
+        name: convco (conventional commits)
+        entry: bash -euc 'exec convco check --from-stdin < "$1"' --
+        language: system
+        stages: [commit-msg]
+
+      - id: insitu
+        name: insitu (check projections)
+        entry: uv run --frozen insitu check
+        language: system
+        pass_filenames: false
+        files: \.md$|^insitu/|^insitu\.toml$|^pyproject\.toml$|^uv\.lock$
+      - id: ruff-check
+        name: Ruff lint
+        entry: uv run --project src/python --frozen ruff check
+        language: system
+        files: ^src/python/.*\.py$
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run --project src/python --frozen ruff format --check
+        language: system
+        files: ^src/python/.*\.py$
+      - id: biome
+        name: Biome
+        entry: biome check
+        language: system
+        files: ^src/typescript/.*\.(ts|tsx|js|jsx|json)$
+      - id: typescript
+        name: TypeScript
+        entry: tsc --project src/typescript/tsconfig.json --noEmit
+        language: system
+        pass_filenames: false
+        files: ^src/typescript/.*\.(ts|tsx|json)$
+      - id: lean
+        name: Lean build
+        entry: just lean-build
+        language: system
+        pass_filenames: false
+        files: ^src/lean/.*(\.lean|\.toml|lean-toolchain)$
+      - id: tex-fmt
+        name: LaTeX format
+        entry: tex-fmt --check
+        language: system
+        files: ^src/latex/.*\.(tex|sty|cls)$
+      - id: chktex
+        name: LaTeX lint
+        entry: chktex -q -I0
+        language: system
+        files: ^src/latex/.*\.tex$
+
+      - id: python-quality
+        name: Python types, boundaries, unused code, and tests
+        entry: just python-check
+        language: system
+        pass_filenames: false
+        files: ^src/python/.*\.(py|toml)$|^src/python/uv\.lock$
