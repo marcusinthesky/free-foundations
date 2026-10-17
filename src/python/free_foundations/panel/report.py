@@ -1,7 +1,8 @@
-"""Report pooled calibration and one held-out score per financial topology."""
+"""Report each panel design without selecting a test-period winner."""
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -9,9 +10,17 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from free_foundations.fernandez.models import paper_weights
 from free_foundations.panel.characteristics import ROOT, audit_disclosures
+from free_foundations.panel.design import DESIGNS
 from free_foundations.pilot.data import write_json
+
+# v1 names of unchanged approaches in the original `research/panel` run.
+V1_MODELS = {
+    "tabpfn_fast": "tabpfn_fast__late",
+    "tabpfn_full": "tabpfn_full__late",
+    "tabfm": "tabfm__late",
+    "exaone": "exaone__late",
+}
 
 
 def audit_checkpoints() -> dict[str, dict[str, object]]:
@@ -33,218 +42,256 @@ def audit_checkpoints() -> dict[str, dict[str, object]]:
     return records
 
 
-def audit_geometry() -> None:
-    """Check labeled distances and weights and expose nearly uniform networks."""
-    records: list[dict[str, str | int | float | bool]] = []
-    for path in sorted((ROOT / "distances").glob("*/*.parquet")):
-        matrix = pd.read_parquet(path)
-        sample = json.loads((ROOT / "observations" / f"{path.parent.name}-sample.json").read_text())
-        values = matrix.to_numpy(dtype=float)
-        valid = (
-            list(matrix.index) == sample["tickers"] == list(matrix.columns)
-            and np.isfinite(values).all()
-            and values.min() >= 0
-            and values.max() <= 2 + 1e-8
-            and np.allclose(values, values.T)
-            and np.allclose(np.diag(values), 0)
-        )
-        if not valid:
-            message = f"Invalid annual distance matrix: {path}"
-            raise ValueError(message)
-        weights = pd.read_parquet(ROOT / "weights" / path.parent.name / path.name)
-        expected = paper_weights(values)
-        if list(weights.index) != list(matrix.index) or list(weights.columns) != list(
-            matrix.columns
-        ):
-            message = f"Weight labels disagree with distance labels: {path}"
-            raise ValueError(message)
-        np.testing.assert_allclose(weights.to_numpy(), expected, atol=1e-12, rtol=1e-12)
-        off_diagonal = values[~np.eye(len(values), dtype=bool)]
-        records.append(
+def v1_name(name: str) -> str | None:
+    """Map a v1 approach to its explicitly named successor in the `four` design."""
+    if name == "fernandez_joint_four":
+        return "fernandez_joint"
+    if name.startswith("fernandez_"):
+        return name
+    if name == "ff5_mom_spherical":
+        return "zero_network"
+    if name == "uniform_network":
+        return name
+    rung, _, method = name.partition("__")
+    if rung in {"four", "broad", "metrics"}:
+        return f"{'histories' if rung == 'four' else rung}__{V1_MODELS.get(method, method)}"
+    return None
+
+
+def regression_check(comparison: pd.DataFrame) -> pd.DataFrame:
+    """The refactored exp-kernel spherical arm must reproduce the original panel scores."""
+    original = pd.read_csv(ROOT / "comparison.csv")
+    current = comparison.loc[
+        comparison["innovation"].eq("spherical") & comparison["kernel"].isin(["exp", "none"])
+    ].set_index("approach")
+    rows = []
+    heldout = current["heldout_log_likelihood"].to_dict()
+    intensities = current["lambda"].to_dict()
+    for approach, before, intensity in zip(
+        original["approach"].astype(str),
+        original["heldout_log_likelihood"].to_numpy(dtype=float),
+        original["lambda"].to_numpy(dtype=float),
+        strict=True,
+    ):
+        name = v1_name(approach)
+        if name is None or name not in heldout:
+            continue
+        new = float(heldout[name])
+        rows.append(
             {
-                "year": int(path.parent.name),
-                "approach": path.stem,
-                "firms": len(values),
-                "mean_distance": float(off_diagonal.mean()),
-                "sd_distance": float(off_diagonal.std()),
-                "collapsed": bool(off_diagonal.max() < 1e-10),
-                "mean_effective_neighbors": float(np.mean(1 / np.sum(expected**2, axis=1))),
+                "v1_approach": approach,
+                "approach": name,
+                "v1_heldout": before,
+                "heldout": new,
+                "difference": new - before,
+                "v1_lambda": intensity,
+                "lambda": float(intensities[name]),
             }
         )
-    pd.DataFrame(records).to_csv(ROOT / "geometry-audit.csv", index=False)
+    return pd.DataFrame(rows)
 
 
-def run() -> None:
-    """Keep comparison units, common sample, timing, and replication limits explicit."""
-    audit_geometry()
-    write_json(ROOT / "checkpoints.json", audit_checkpoints())
-    write_json(ROOT / "disclosure-audit.json", audit_disclosures())
-    results = pd.read_csv(ROOT / "comparison.csv").set_index("approach")
+def ladder_table(comparison: pd.DataFrame) -> list[str]:
+    """Gains over the joint benchmark for every network, by kernel and innovation arm."""
+    arms = [
+        ("exp", "spherical"),
+        ("exp", "diagonal"),
+        ("median", "diagonal"),
+        ("matched", "diagonal"),
+        ("exp", "correlation"),
+    ]
+    networks = comparison.loc[~comparison["innovation"].eq("control")]
+    names = list(dict.fromkeys(networks["approach"]))
+    header = "| Approach | Arm | " + " | ".join(f"{k}/{i}" for k, i in arms) + " |"
+    lines = [header, "| --- | --- |" + " ---: |" * len(arms)]
+    indexed = networks.set_index(["approach", "kernel", "innovation"])
+    for name in names:
+        cells = []
+        for kernel, innovation in arms:
+            key = (
+                name,
+                "none" if name in {"uniform_network", "zero_network"} else kernel,
+                innovation,
+            )
+            cells.append(
+                f"{indexed.loc[key, 'gain_vs_joint_exp']:+,.2f}" if key in indexed.index else "—"
+            )
+        arm = networks.loc[networks["approach"].eq(name), "arm"].iloc[0]
+        lines.append(f"| `{name}` | {arm} | " + " | ".join(cells) + " |")
+    return lines
+
+
+def results(name: str) -> None:
+    """Write one design's RESULTS.md from its saved machine-readable tables."""
+    design = DESIGNS[name]
+    output = design.output
+    comparison = pd.read_csv(output / "comparison.csv")
+    bootstrap = pd.read_csv(output / "bootstrap.csv")
+    mcs = pd.read_csv(output / "mcs.csv")
+    placebo = pd.read_csv(output / "placebo.csv")
+    geometry = pd.read_csv(output / "geometry.csv")
     samples = [
         json.loads(path.read_text()) | {"year": int(path.name[:4])}
-        for path in sorted((ROOT / "observations").glob("*-sample.json"))
+        for path in sorted((output / "observations").glob("*-sample.json"))
     ]
-    coverage = pd.DataFrame(
-        [
-            {key: sample[key] for key in ("year", "firms", "past_complete_days", "evaluation_days")}
-            for sample in samples
-        ]
-    )
-    coverage.to_csv(ROOT / "panel-coverage.csv", index=False)
-    overlaps = []
-    for sample in samples:
-        contexts = [
-            set(
-                json.loads((ROOT / "contexts" / f"{sample['year']}-{rung}.json").read_text())[
-                    "support_ids"
-                ]
-            )
-            for rung in ("four", "broad", "metrics")
-        ]
-        overlaps.append(
-            {
-                "year": sample["year"],
-                "common_support_rows": len(set.intersection(*contexts)),
-                "support_rows_per_rung": len(contexts[0]),
-            }
-        )
-    pd.DataFrame(overlaps).to_csv(ROOT / "context-overlap.csv", index=False)
-    baseline = float(results["heldout_log_likelihood"].loc["fernandez_joint_four"])
+    firm_days = int(comparison["firm_days"].iloc[0])
     lines = [
-        "# Chronological matched-panel comparison",
+        f"# Panel design `{name}`",
         "",
-        "One constant spatial coefficient per approach is estimated by Gaussian residual ML",
-        "on 2016-2019 and frozen for 2020-2025. The principal score is summed held-out",
-        "Gaussian log-likelihood of daily excess returns; higher is better. It includes all",
-        "normalizing constants. Returns are decimals, not percentages.",
+        (
+            f"Characteristics: {', '.join(design.characteristics)}. Network history: "
+            f"{design.history} annual snapshots; cohort requires complete, nonconstant {'- and '.join(map(str, design.cohort_histories))}-year histories. "
+            f"All rows score the same {firm_days:,} held-out firm-days (2020-2025)."
+        ),
+        "One spatial coefficient per network, kernel and innovation arm is fitted on",
+        "2016-2019 and frozen. Cells are held-out log-likelihood gains over the joint",
+        "Fernández network (`fernandez_joint`, exp kernel) within the same innovation arm;",
+        "higher is better. Columns are kernel/innovation; `correlation` imposes prior raw",
+        "sample variances on every row so only implied correlations differ.",
         "",
-        "All approaches use the identical annual firms and dates. Every annual spatial",
-        "network combines its input into one W. There is no coefficient per feature or year.",
-        "Annual nuisance variances and factor loadings are estimated using preceding returns.",
-        "No test-year factors or returns enter an annual covariance or expected-return forecast.",
-        "",
-        "| Approach | Frozen lambda | Held-out log-likelihood | Gain vs joint four | Boundary |",
-        "| --- | ---: | ---: | ---: | --- |",
-    ]
-    for name, row in results.iterrows():
-        intensity = "—" if np.isnan(row["lambda"]) else f"{row['lambda']:.4f}"
-        score = float(row["heldout_log_likelihood"])
-        lines.append(
-            f"| {name} | {intensity} | {score:,.2f} | "
-            f"{score - baseline:+,.2f} | {row['boundary']} |"
-        )
-    lines += [
-        "",
-        "## Annual matched cohorts",
+        "## Cohorts",
         "",
         "| Return year | Firms | Prior complete days | Scored days |",
         "| --- | ---: | ---: | ---: |",
+        *[
+            f"| {s['year']} | {s['firms']} | {s['past_complete_days']} | {s['evaluation_days']} |"
+            for s in samples
+        ],
+        "",
+        "## Held-out gains over the joint Fernández network",
+        "",
+        *ladder_table(comparison),
+        "",
+        "## Covariance controls",
+        "",
+        "| Control | Held-out log-likelihood | Correlation-only |",
+        "| --- | ---: | ---: |",
     ]
-    for sample in samples:
+    controls = comparison.loc[comparison["arm"].eq("control")]
+    for row in controls.to_dict("records"):
+        correlation = comparison.loc[
+            comparison["approach"].eq(row["approach"]) & comparison["innovation"].eq("correlation")
+        ]["heldout_log_likelihood"]
         lines.append(
-            f"| {sample['year']} | {sample['firms']} | "
-            f"{sample['past_complete_days']} | {sample['evaluation_days']} |"
+            f"| `{row['approach']}` | {row['heldout_log_likelihood']:,.2f} | "
+            f"{float(correlation.iloc[0]):,.2f} |"
         )
+    joint = bootstrap.loc[
+        bootstrap["versus"].eq("joint") & bootstrap["column"].str.endswith("|exp|diagonal")
+    ]
     lines += [
         "",
-        "## Construction and chronology",
+        "## Paired stationary-bootstrap intervals (exp kernel, diagonal innovations)",
         "",
-        "- The four characteristics are capitalization/assets, market/book, dividend yield,",
-        "  and the strict lease-inclusive noncurrent-debt/total-debt ratio. Missing debt is",
-        "  never interpreted as zero. Known unresolved multiple share classes are excluded.",
-        "- Each annual snapshot uses only 10-K/10-K-A facts filed by December 31, with period",
-        "  ends no more than 550 days old. Original dates and accessions are retained in cache.",
-        "  Capitalization uses shares and split-reversed prices at the share observation date;",
-        "  assets and equity share a balance-sheet date. These dates can differ and are audited.",
-        "  Dividend yield uses trailing cash dividends on the same split basis as price.",
-        "- The strict cohort requires three complete, nonconstant annual histories for all",
-        "  four characteristics and at least 500 prior returns. The three-year history is",
-        "  a coverage compromise and yields relatively coarse Spearman distances.",
-        "  This is a US chronological adaptation, not an exact replication of Fernández's",
-        "  original sample, robust cross-sectional S-APT estimation, or history length.",
-        "- Fernández rows use Spearman chord distances, exp(-distance), zero diagonal,",
-        "  and row normalization. The joint-four RMS row is our extension; the original",
-        "  single-characteristic networks remain explicit references.",
-        "  A uniform network provides a geometry-free reference for the added value of topology.",
-        "- `four` encodes all four three-year histories jointly. `broad` adds up to 200",
-        "  unit- and period-specific SEC concepts in signed-log levels. `metrics` adds",
-        "  up to 100 concepts, asset-normalized dollar measures, their annual changes, and",
-        "  log assets. Schema selection uses past support-period coverage only.",
-        "- Model inputs use support-only median imputation, missingness indicators,",
-        "  standardization and clipping. PCA, autoencoder and random-encoder controls share",
-        "  a deterministic, outcome-independent 256-row historical support cap with the",
-        "  pretrained models. Preprocessing is fit before this cap on eligible past support.",
-        "  Support membership is matched across encoders within a rung. Cross-rung eligibility",
-        "  can differ slightly; common support counts are recorded in context-overlap.csv.",
-        "- Frozen foundation-model readouts use native late row states, not return predictions.",
-        "  The supervised context target is next-snapshot capitalization/assets, available",
-        "  by the network cutoff. Context years, rows, schemas and checkpoint hashes are saved.",
-        "  All learned vectors use unit-sphere chord distance and the same exponential kernel.",
-        "  The direct baseline adds a constant coordinate to avoid zero-vector distances.",
-        "- Factor means, loadings and covariances use the preceding three calendar years.",
-        "  The spatial coefficient is fitted once on calibration-year factor residuals,",
-        "  profiling an innovation variance per calibration year. Each evaluation year's",
-        "  variance is estimated from prior residuals at that fixed coefficient.",
-        "  Covariance forecasts are B Cov(F) B' plus the spatial residual covariance.",
-        "  Mean forecasts are prior mean excess returns. Raw covariance uses the same window.",
-        "- The full sample-residual FF covariance reconstructs raw sample covariance under",
-        "  OLS orthogonality; their equal scores are a useful independent consistency check.",
-        "- The first daily return of each year is excluded: its interval can start before",
-        "  a December 31 after-close filing. Filing dates have no intraday timestamp.",
-        "- Missing future observations remove dates identically for every approach, never",
-        "  firms when forming the network; removed dates are recorded in sample JSON files.",
-        "  Thus scores condition on common observed dates and omit missing outcomes.",
+        "Summed daily differences against the joint network; 95% percentile intervals",
+        "with 21- and 63-day expected blocks. Intervals are descriptive: the approaches",
+        "were not preregistered and these years were inspected during development.",
         "",
-        "## Interpretation and limitations",
-        "",
-        "This is a retrospective public-data experiment on current survivors. Checkpoints",
-        "were released after some evaluated dates; their pretraining provenance is not a",
-        "verified historical information set. The research pipeline prevents panel look-ahead,",
-        "but does not establish absence of checkpoint pretraining contamination.",
-        "",
-        "The raw SEC snapshot schema is broad, not a complete universe of economically",
-        "harmonized accounting ratios. Company-specific extension tags and segment facts",
-        "are outside companyfacts. Dividend nonpayers and firms missing strict debt histories",
-        "are excluded from this matched comparison; the larger acquired universe is not",
-        "the estimation sample. Yahoo share-class alignment remains a limitation.",
-        "",
-        "Daily Gaussian densities are working models; serial dependence, changing volatility,",
-        "and selecting among many encoders prevent treating likelihood differences as",
-        "conventional significance tests. No chi-square p-values are attached to nonnested",
-        "network comparisons. A boundary flag means |lambda| >= 0.985 within (-0.99, 0.99).",
-        "",
-        "See `comparison.csv` for the separate calibration ML likelihood and normalized score,",
-        "`annual-scores.csv` for diagnostics, `panel-coverage.csv` for sample sizes, and",
-        "`distances/<year>/` and `weights/<year>/` for labeled matrices. The geometry audit",
-        "checks those matrices and reports effective neighbor counts. Reproduce with",
-        "`just python-panel`; model readouts and characteristics are cached.",
+        "| Approach | Difference | 21-day interval | 63-day interval | Politis-White block |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
-    (ROOT / "RESULTS.md").write_text("\n".join(lines) + "\n")
-    artifacts = [*ROOT.rglob("*.parquet"), *ROOT.rglob("*.csv"), *ROOT.rglob("*.json")]
+    for row in joint.to_dict("records"):
+        lines.append(
+            f"| `{row['column'].split('|')[0]}` | {row['difference']:+,.2f} | "
+            f"[{row['lower_21']:+,.1f}, {row['upper_21']:+,.1f}] | "
+            f"[{row['lower_63']:+,.1f}, {row['upper_63']:+,.1f}] | "
+            f"{row['politis_white_block']:.1f} |"
+        )
+    lines += ["", "## Model confidence sets (size 0.10)", ""]
+    lines += ["| Family | Networks | Included |", "| --- | ---: | --- |"]
+    for family, group in mcs.groupby("family", sort=False):
+        included = ", ".join(f"`{c.split('|')[0]}`" for c in group.loc[group["included"], "column"])
+        lines.append(f"| {family} | {len(group)} | {included} |")
+    lines += [
+        "",
+        "## Label-permutation placebos (exp kernel, diagonal innovations)",
+        "",
+        "Each prespecified network is compared with 19 permutations P W P' restricted",
+        "within prior-year log-assets terciles; the spectrum, and so the Jacobian, is unchanged.",
+        "",
+        "| Approach | Observed | Placebo mean | Placebo max | Rank p-value |",
+        "| --- | ---: | ---: | ---: | ---: |",
+        *[
+            f"| `{r['approach']}` | {r['observed']:,.2f} | {r['placebo_mean']:,.2f} | "
+            f"{r['placebo_max']:,.2f} | {r['rank_p_value']:.2f} |"
+            for r in placebo.to_dict("records")
+        ],
+        "",
+        "## Network concentration",
+        "",
+        "Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform.",
+        "",
+        "| Approach | exp | median | matched |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    fractions = geometry.pivot_table(
+        index="approach", columns="kernel", values="effective_fraction", aggfunc="mean"
+    )
+    for approach, row in fractions.iterrows():
+        values = [row.get(kernel, np.nan) for kernel in ("exp", "median", "matched")]
+        lines.append(f"| `{approach}` | " + " | ".join(f"{v:.3f}" for v in values) + " |")
+    if name == "four" and (ROOT / "comparison.csv").exists():
+        check = regression_check(comparison)
+        check.to_csv(output / "regression-check.csv", index=False)
+        lines += [
+            "",
+            "## Regression check against the original panel",
+            "",
+            f"{len(check)} unchanged approaches were rescored under the exp kernel and spherical",
+            (
+                "innovations; the largest absolute held-out difference is "
+                f"{check['difference'].abs().max():.2e}."
+            ),
+        ]
+    lines += [
+        "",
+        "## Interpretation limits",
+        "",
+        "Retrospective current-survivor sample; checkpoints postdate some evaluated dates.",
+        "Daily Gaussian densities are working models; differences are paired and dependent,",
+        "and many networks were compared. No row is a selected winner. Designs differ in",
+        "firms and cannot be ranked against each other.",
+    ]
+    (output / "RESULTS.md").write_text("\n".join(lines) + "\n")
+    artifacts = sorted(
+        path
+        for pattern in ("*.csv", "*.json", "*.parquet")
+        for path in output.rglob(pattern)
+        if path.name != "manifest.json"
+    )
+    sources = [
+        *sorted(Path(__file__).parent.parent.rglob("*.py")),
+        *sorted(Path(__file__).parent.parent.rglob("*.R")),
+        Path("src/python/pyproject.toml"),
+        Path("src/python/uv.lock"),
+        Path("research/universe/cache/prices.parquet"),
+        Path("research/universe/cache/factors.parquet"),
+    ]
     write_json(
-        ROOT / "manifest.json",
+        output / "manifest.json",
         {
-            "sha256": {
-                str(path): hashlib.sha256(path.read_bytes()).hexdigest()
-                for path in sorted(artifacts)
-                if path.name != "manifest.json"
-            },
+            "sha256": {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts},
             "source_sha256": {
-                str(path.resolve().relative_to(Path.cwd())): hashlib.sha256(
-                    path.read_bytes()
-                ).hexdigest()
-                for path in [
-                    *sorted(Path(__file__).parent.parent.rglob("*.py")),
-                    Path("src/python/pyproject.toml"),
-                    Path("src/python/uv.lock"),
-                    Path("research/universe/manifest.json"),
-                    Path("research/universe/cache/prices.parquet"),
-                    Path("research/universe/cache/factors.parquet"),
-                ]
+                str(p.resolve().relative_to(Path.cwd())): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in sources
             },
         },
     )
 
 
+def main() -> None:
+    """Report requested designs and shared provenance records."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--designs", nargs="+", default=list(DESIGNS), choices=list(DESIGNS))
+    args = parser.parse_args()
+    checkpoints, disclosures = audit_checkpoints(), audit_disclosures()
+    for name in args.designs:
+        output = DESIGNS[name].output
+        if (output / "comparison.csv").exists():
+            write_json(output / "checkpoints.json", checkpoints)
+            write_json(output / "disclosure-audit.json", disclosures)
+            results(name)
+
+
 if __name__ == "__main__":
-    run()
+    main()

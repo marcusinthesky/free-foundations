@@ -23,9 +23,10 @@ src/latex/build/
 .testmondata*
 .tach/
 *.egg-info/
-research/pilot/cache/
-research/expanded/cache/
-research/fernandez/cache/
-
-research/universe/cache/
-research/panel/cache/
+# Downloads, model weights and expensive intermediates are rebuilt from cached inputs.
+research/**/cache/
+# Labeled matrices, observations and embeddings are hashed in each manifest; small
+# CSV, JSON and Markdown summaries remain trackable.
+research/**/*.parquet
+research/**/*.npz
+research/**/embeddings/

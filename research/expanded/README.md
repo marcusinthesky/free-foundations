@@ -63,7 +63,7 @@ without changing its numerical results.
 All models use frozen pretrained weights on CPU. TabFM uses its checkpoint's
 actual configuration with strict weight loading and bfloat16 computation.
 Its early readouts are still conditioned on the support table and labels;
-“pre-ICL” does not mean context-independent. EXAONE uses one member, uniform
+“pre-ICL” does not mean context-independent. Later panel and ladder runs add a TabFM null-label pass and EXAONE first- and last-layer item summaries; see [`research/panel`](../panel/README.md). EXAONE uses one member, uniform
 weighting and no SVD feature augmentation. These are internal representations,
 not prediction vectors. This compares selected readouts under a common input
 recipe, rather than each vendor's tuned predictive pipeline. The experiment's

@@ -78,6 +78,41 @@ def prepare(
     return Prepared(x_support, x_query, y, names, support_ids, tickers, year, digest.hexdigest())
 
 
+def _digest(data: Prepared, tag: str) -> str:
+    digest = hashlib.sha256((data.digest + tag).encode())
+    for array in (data.support, data.query, data.targets):
+        digest.update(np.ascontiguousarray(array).tobytes())
+    digest.update(json.dumps([data.support_ids, data.tickers]).encode())
+    return digest.hexdigest()
+
+
+def cap_support(
+    data: Prepared, rows: int = 256, tag: str = "panel-support256-v1", salt: str = ""
+) -> Prepared:
+    """Deterministic, outcome-independent support cap shared by every encoder in a rung.
+
+    A nonempty ``salt`` draws a different, equally outcome-independent support set.
+    """
+    order = sorted(
+        range(len(data.support_ids)),
+        key=lambda i: hashlib.sha256((salt + data.support_ids[i]).encode()).hexdigest(),
+    )[:rows]
+    digest = hashlib.sha256((data.digest + repr(order) + tag + salt).encode()).hexdigest()
+    return replace(
+        data,
+        support=data.support[order],
+        targets=data.targets[order],
+        support_ids=tuple(data.support_ids[i] for i in order),
+        digest=digest,
+    )
+
+
+def variant(data: Prepared, tag: str, **changes: Any) -> Prepared:  # noqa: ANN401
+    """An audit variant (query subset, support draw or labels) with a fresh digest."""
+    changed = replace(data, **changes)
+    return replace(changed, digest=_digest(changed, tag))
+
+
 def provenance_context(data: Prepared) -> Context:
     """Include label availability and actual support-observation identities."""
     return Context(
@@ -171,8 +206,14 @@ def load_tabfm(path: str) -> Any:  # noqa: ANN401 -- upstream architecture-speci
     )
 
 
-def tabfm_states(data: Prepared, path: str, checkpoint: str) -> dict[str, FloatArray]:
-    """Capture pre-ICL row summaries and post-ICL normalized states in one forward pass."""
+def tabfm_states(
+    data: Prepared, path: str, checkpoint: str, *, null_labels: bool = False
+) -> dict[str, FloatArray]:
+    """Capture pre-ICL row summaries and post-ICL normalized states in one forward pass.
+
+    Support labels enter TabFM cell embeddings before column attention, so ``early``
+    states are not label-free; ``null_labels`` sets every support label to zero.
+    """
     import torch  # noqa: PLC0415
 
     model = load_tabfm(path)
@@ -190,7 +231,11 @@ def tabfm_states(data: Prepared, path: str, checkpoint: str) -> dict[str, FloatA
         model.icl_predictor.ln.register_forward_hook(capture_late),
     ]
     features = torch.tensor(np.vstack([data.support, data.query]), dtype=torch.float32)[None]
-    labels = StandardScaler().fit_transform(data.targets[:, None]).ravel()
+    labels = (
+        np.zeros(len(data.targets))
+        if null_labels
+        else StandardScaler().fit_transform(data.targets[:, None]).ravel()
+    )
     targets = torch.tensor(
         np.concatenate([labels, np.zeros(len(data.query))]), dtype=torch.float32
     )[None]
@@ -210,8 +255,20 @@ def tabfm_states(data: Prepared, path: str, checkpoint: str) -> dict[str, FloatA
     }
 
 
+def query_rows(output: Tensor, support_size: int, kwargs: dict[str, Any]) -> Tensor:
+    """Query rows of a layer output: compact calls hold queries only, others are joined."""
+    if kwargs.get("compact_cached_support", False):
+        return output
+    return output[:, support_size:]
+
+
 def exaone_states(data: Prepared, path: str, checkpoint: str) -> dict[str, FloatArray]:
-    """Capture the query label-token state entering the regression decoder."""
+    """Capture the decoder-input label token and first/last-layer row summary tokens.
+
+    First-layer item summaries attend within each row before any item attention, so they
+    see support labels only through preprocessing; last-layer summaries are conditioned
+    on support labels after item attention.
+    """
     from exaonetabular import EXAONETabularRegressor, released_manifest  # noqa: PLC0415
 
     manifest = released_manifest("regression")
@@ -226,35 +283,82 @@ def exaone_states(data: Prepared, path: str, checkpoint: str) -> dict[str, Float
         seed=42,
     )
     model.fit(data.support, data.targets)
-    chunks: list[FloatArray] = []
+    chunks: dict[str, list[FloatArray]] = {"late": [], "item_first": [], "item_last": []}
 
     def capture(_module: Module, arguments: tuple[Tensor, ...]) -> None:
-        chunks.append(
+        chunks["late"].append(
             arguments[0].detach().float().numpy().reshape(-1, manifest.model.width).astype(float)
         )
 
-    handle = model.model.transformer.classification_heads["standard"].register_forward_pre_hook(
-        capture
-    )
+    def items(name: str) -> Any:  # noqa: ANN401 -- torch hook signature.
+        def hook(
+            _module: Module,
+            arguments: tuple[Any, ...],
+            kwargs: dict[str, Any],
+            output: tuple[Tensor, Tensor, Tensor],
+        ) -> None:
+            support = int(arguments[3]) if len(arguments) > 3 else int(kwargs["support_size"])
+            rows = query_rows(output[2], support, kwargs)
+            if rows.shape[0] != 1:
+                message = "EXAONE item summaries expected exactly one ensemble member."
+                raise ValueError(message)
+            chunks[name].append(rows[0].detach().float().numpy().reshape(rows.shape[1], -1))
+
+        return hook
+
+    transformer = model.model.transformer
+    handles = [
+        transformer.classification_heads["standard"].register_forward_pre_hook(capture),
+        transformer.layers[0].register_forward_hook(items("item_first"), with_kwargs=True),
+        transformer.layers[-1].register_forward_hook(items("item_last"), with_kwargs=True),
+    ]
     try:
         model.predict(data.query)
     finally:
-        handle.remove()
-    values = np.concatenate(chunks, axis=0)
-    if len(values) != len(data.query):
-        message = "EXAONE decoder hook did not return exactly one state per query."
+        for handle in handles:
+            handle.remove()
+    values = {name: np.concatenate(parts, axis=0).astype(float) for name, parts in chunks.items()}
+    if any(len(array) != len(data.query) for array in values.values()):
+        message = "EXAONE hooks did not return exactly one state per query."
         raise ValueError(message)
+    tokens = int(transformer.item_summary_tokens.shape[2])
+    readouts = {
+        "late": values["late"],
+        "item_first_concat": values["item_first"],
+        "item_first_mean": values["item_first"].reshape(len(data.query), tokens, -1).mean(axis=1),
+        "item_last_concat": values["item_last"],
+    }
+    labels = {
+        "late": "query label token before quantile decoder",
+        "item_first_concat": "first-layer item summary tokens, concatenated",
+        "item_first_mean": "first-layer item summary tokens, mean",
+        "item_last_concat": "last-layer item summary tokens, concatenated",
+    }
     return {
-        "late": wrap_readout(
-            data, values, "exaone", checkpoint, "query label token before quantile decoder"
-        )
+        name: wrap_readout(data, array, "exaone", checkpoint, labels[name])
+        for name, array in readouts.items()
     }
 
 
+READOUT_VERSION = {"exaone": "readout-v2"}
+
+
+def embedding_path(
+    data: Prepared, model: str, checkpoint: str, cache: Path, version: str | None = None
+) -> Path:
+    """Cache key: context digest, checkpoint, model and that model's readout version."""
+    readout = version or READOUT_VERSION.get(model, "readout-v1")
+    key = hashlib.sha256(f"{data.digest}:{checkpoint}:{model}:{readout}".encode()).hexdigest()
+    return cache / "embeddings" / f"{model}-{key}.npz"
+
+
 def foundation_states(
-    data: Prepared, model: str, cache: Path, source: Path
+    data: Prepared, model: str, cache: Path, source: Path, *, store: bool = True
 ) -> dict[str, FloatArray]:
-    """Cache numerical readouts with checkpoint, context, schema and cohort provenance."""
+    """Cache numerical readouts with checkpoint, context, schema and cohort provenance.
+
+    Audit variants pass ``store=False``: they reuse cached readouts but never add files.
+    """
     import torch  # noqa: PLC0415
 
     torch.set_num_threads(2)
@@ -263,31 +367,39 @@ def foundation_states(
         path = metadata["path"]
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['filename']}"
     else:
-        root = cache / "models" / model
+        root = cache / "models" / model.removesuffix("_labelnull")
         metadata = json.loads((root / "provenance.json").read_text())
-        path = str(root / ("regression" if model == "tabfm" else metadata["files"][0]))
+        path = str(root / ("regression" if model.startswith("tabfm") else metadata["files"][0]))
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files']}"
-    key = hashlib.sha256(f"{data.digest}:{checkpoint}:{model}:readout-v1".encode()).hexdigest()
-    destination = cache / "embeddings" / f"{model}-{key}.npz"
+    destination = embedding_path(data, model, checkpoint, cache)
     if destination.exists():
         with np.load(destination) as arrays:
-            return {name: arrays[name] for name in arrays.files if arrays[name].size}
+            return {
+                name: arrays[name].astype(np.float64) for name in arrays.files if arrays[name].size
+            }
     if model.startswith("tabpfn"):
         result = tabpfn_states(data, path, checkpoint, fast=model == "tabpfn_fast")
-    elif model == "tabfm":
-        result = tabfm_states(data, path, checkpoint)
+    elif model in {"tabfm", "tabfm_labelnull"}:
+        result = tabfm_states(data, path, checkpoint, null_labels=model == "tabfm_labelnull")
     elif model == "exaone":
         result = exaone_states(data, path, checkpoint)
+        previous = embedding_path(data, model, checkpoint, cache, version="readout-v1")
+        if previous.exists():
+            with np.load(previous) as arrays:
+                if not np.allclose(arrays["late"], result["late"], atol=1e-6):
+                    message = "EXAONE v2 label-token readout differs from the cached v1 readout."
+                    raise ValueError(message)
     else:
         message = f"Unsupported experiment model: {model}"
         raise ValueError(message)
+    # New readouts are kept at float32 precision whether or not they are stored, so a
+    # rerun from cache reproduces a fresh run exactly. Earlier float64 files are unchanged.
+    result = {name: values.astype(np.float32).astype(np.float64) for name, values in result.items()}
+    if not store:
+        return result
     destination.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(
-        destination,
-        late=result["late"],
-        early_concat=result.get("early_concat", np.empty((0, 0))),
-        early_mean=result.get("early_mean", np.empty((0, 0))),
-    )
+    payload: dict[str, Any] = {name: values.astype(np.float32) for name, values in result.items()}
+    np.savez_compressed(destination, **payload)
     write_json(
         destination.with_suffix(".json"),
         {

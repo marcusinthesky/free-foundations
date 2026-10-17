@@ -170,7 +170,9 @@ A separate paper-style cross-sectional exercise estimated robust MM betas from
 excess returns. Characteristic-specific samples contained 79, 57, 75, and
 13 firms respectively. These unequal samples cannot be ranked by raw likelihood
 as though they were a common comparison. Conditional significance and uncertainty
-from generated betas were not estimated.
+from generated betas were not estimated. **This pilot cross-section is superseded
+by the R0 replication in §3.6**, which uses one common sample per arm on the
+1,000-issuer universe.
 
 ### 3.4 Six-firm combined-network ML demonstration
 
@@ -186,7 +188,8 @@ the broader autoencoder reached 16.664786. However, those two spatial fits and
 many others reached approximately −0.99, the imposed search boundary. These
 six-observation in-sample gains were diagnostic, not evidence of useful
 forecasting or positive shock propagation. Their likelihood scale is unrelated
-to the current daily panel score.
+to the current daily panel score. **Superseded by the cross-sectional ladder in
+§3.7**; the files are retained only as history.
 
 ### 3.5 Universe expansion and chronological panel
 
@@ -198,7 +201,82 @@ not an unchanged replication on a larger sample.
 
 The remainder of this report treats that chronological panel as the principal
 current comparison. Earlier files are retained as research history rather than
-overwritten or pooled with the new results.
+overwritten or pooled with the new results. The first panel run (§7.1–7.3,
+files at the `research/panel/` root) is kept unchanged as the **v1 record**;
+the extended designs in §7.4 write to `research/panel/{four,four-h5,three}/`
+and reproduce the v1 rows exactly where the specification is unchanged.
+
+### 3.6 R0: practical replication of Fernández on the 1,000-issuer universe
+
+[R0](research/ladder/r0/RESULTS.md) re-runs the paper's own exercise as closely
+as US public data permit; every substitution is typed in the
+[replication manifest](research/ladder/r0/replication-manifest.md). Stage one
+fits robust MM CAPM betas (`robustbase::lmrob`, seed reset before every firm)
+on 40 quarterly excess returns, 2016–2025. Stage two regresses each firm's median
+quarterly excess return on its beta without an intercept, by OLS, spatial-lag
+S2SLS (eq. 2 standard errors), and SAR-error concentrated ML; lag-ML is a
+labelled extension. Networks are Spearman chord distances between 2015–2024
+annual characteristic histories under `exp(−d)`, row-normalized, zero diagonal.
+Self-links and a median-scaled kernel are reported as sensitivities.
+
+| Table | Firms | OLS premium | SEM λ (information SE) | SEM λ bootstrap 95% |
+| --- | ---: | ---: | --- | --- |
+| Common four, cap/assets W | 33 | 0.030 | 0.81 (0.14) | [−0.99, 0.87] |
+| Common three, cap/assets W | 395 | 0.031 | 0.96 (0.03) | [0.90, 0.96] |
+| Cap/assets coverage | 653 | 0.031 | 0.97 (0.03) | [0.91, 0.97] |
+| Debt-maturity coverage | 62 | 0.030 | 0.90 (0.07) | [−0.99, 0.92] |
+
+Main points:
+
+- Ten-year complete histories of all four characteristics leave only **33
+  firms**; debt maturity is the binding constraint. On that sample the SAR-error
+  coefficient is not identified once generated-beta uncertainty is included.
+- Without debt maturity, 395 firms remain. OLS-residual Moran's I is positive
+  (p < 0.001 under exact moments) for every network, and the SAR-error coefficient
+  is large and tightly bounded. The spatial premium falls to roughly 0.014 per
+  quarter and its bootstrap interval includes zero.
+- The generated-beta bootstrap (199 stationary-bootstrap quarter resamples, MM
+  refitted, W fixed) gives premium standard errors several times the conditional
+  ones. Conditional p-values in the R0 tables should not be read as final.
+- Coefficients near the paper's 0.85–0.87 are not a calibration target; the
+  sample, market, period and benchmark rate all differ.
+
+### 3.7 Cross-sectional ladder R1–R4
+
+The [ladder](research/ladder/README.md) keeps the R0 sample, outcome and
+exposures fixed and changes one thing per rung: R1 combines characteristics
+(joint RMS, direct and Ledoit–Wolf Mahalanobis distances), R2 replaces the
+distance by representations of the same histories, R3 adds 2024 broad SEC
+concepts, and R4 swaps CAPM for FF5+momentum MM exposures. Each row is one
+SAR-error coefficient for one combined network under three kernels (§5.4).
+The two arms are never ranked against each other.
+
+Three-characteristic arm, 395 firms, CAPM exposures, SAR-error log-likelihood
+gain over OLS (881.88):
+
+| Network | exp | median | matched |
+| --- | ---: | ---: | ---: |
+| Fernández cap/assets | **+39.19** | +34.88 | +35.10 |
+| Fernández market-to-book | +37.43 | +33.69 | +33.58 |
+| Fernández joint | +36.65 | +32.80 | +36.65 |
+| EXAONE label token, + broad | +27.64 | +36.56 | +28.78 |
+| Supervised MLP16 (control) | +31.70 | +36.37 | +27.59 |
+| TabFM late | +24.70 | +33.97 | +29.18 |
+| TabFM early concat (state) | +26.14 | +30.11 | +28.40 |
+| PCA16 | +26.68 | +27.68 | +26.14 |
+| Uniform network | +22.49 | | |
+
+All non-uniform networks beat 99 size-tercile placebo permutations (rank
+p = 0.01). The single cap/assets network remains the best; under the median
+kernel the best learned representations reach the joint network but not the
+single characteristic. With FF5+momentum exposures (R4) the order is unchanged
+and BIC prefers FF5+momentum to CAPM (−1842.9 versus −1819.1 for the joint
+network). Conditional information criteria prefer spatial over nonspatial and
+SAR-error over lag-ML; for rows with equal parameter counts they reproduce the
+likelihood ranking and add nothing.
+
+The 33-firm four-characteristic arm is uninformative: all gains lie between
+0.4 and 2.1 log-likelihood units and most placebo rank p-values exceed 0.1.
 
 ## 4. Current data, characteristics, and sample selection
 
@@ -295,6 +373,18 @@ before a 31 December filing released after market close, while SEC filing dates
 in this pipeline do not resolve intraday availability. This exclusion is applied
 to every approach.
 
+The extended panel (§7.4) adds two cohorts alongside this one. Each requires
+complete, nonconstant histories at every history length its networks use, so
+every network in a design is built on the same firms:
+
+| Design | Characteristics | Cohort histories | Role |
+| --- | --- | --- | --- |
+| `four` | all four | 3 years | primary strict design; reproduces v1 |
+| `four-h5` | all four | 3 and 5 years | history-length sensitivity on one cohort |
+| `three` | cap/assets, M/B, dividend yield | 3 and 5 years | broader cohort without debt maturity |
+
+Designs are never ranked against each other; their firm-days differ.
+
 ## 5. The matched input and representation ladder
 
 ### 5.1 Three input rungs
@@ -368,6 +458,23 @@ model's representation; vectors from different models are not subtracted.
 Table attention can also make a row's representation depend on the rest of the
 query cohort. Annual cohort identity is therefore part of the experiment.
 
+The extended designs separate two readout arms, because every foundation
+readout is `z = E(x | X_s, y_s)` and the support labels `y_s` can enter it:
+
+| Arm | Readouts | Where support labels enter |
+| --- | --- | --- |
+| A, state | TabFM `early_concat` (primary), `early_mean`; EXAONE layer-0 item summaries | TabFM adds support `y` to training cells before column attention; EXAONE layer 0 is label-free |
+| A, label-null check | TabFM `early_concat_labelnull` (support `y ≡ 0`) | none |
+| B, task-conditioned | TabPFN late; TabFM late; EXAONE label token; EXAONE last-layer item summaries; supervised MLP16 | through in-context attention or training |
+
+The supervised MLP16 (width→64→16→1, trained on the same support target) is a
+task-conditioned control without pretraining. Classical rows add a Ledoit–Wolf
+Mahalanobis distance fitted on the support. An alternate support target,
+next-snapshot net income over assets, is run on the histories rung
+(`histories@income_assets`). EXAONE's layer-0 summaries are nearly constant
+across firms and induce an almost uniform network; they are reported, not
+interpreted.
+
 Only the four checkpoint variants above have results in this panel. Registry
 support or a resolving dependency extra does not imply a completed experiment.
 LimiX, Causilo, and SAP are not scored here. Nori was deferred because of recorded
@@ -408,7 +515,20 @@ Every nonuniform spatial network uses the same kernel:
  \quad i\ne j,\qquad W_{ii}=0.
 \]
 
-Bandwidth is fixed at one; no test-return optimization chooses it. A uniform
+Bandwidth is fixed at one; no test-return optimization chooses it. Because
+learned chord distances are compressed, this kernel makes their networks close
+to uniform (mean effective-neighbour fraction 0.94–0.99 versus 0.87 for the
+joint Fernández network). The extended runs therefore report two predetermined
+alternatives, `exp(−d/h)` with the row minimum subtracted before
+exponentiation:
+
+- **median**: `h` is the median positive off-diagonal distance in that year;
+- **matched**: `h` is bisected so that the mean effective number of neighbours
+  equals that of the joint Fernández network in the same year.
+
+Neither choice uses returns. The matched kernel equalizes concentration, so
+remaining differences reflect who is near whom rather than how diffuse the
+network is. A uniform
 network with off-diagonal entries `1/(N−1)` controls for generic cross-sectional
 dependence without characteristic geometry.
 
@@ -435,7 +555,8 @@ The factor and residual specification is
 
 Annual factor regressions, including an intercept, use the preceding three
 calendar years of complete common return dates. The network is frozen within
-an evaluation year. Each approach estimates **one constant** `lambda` using
+an evaluation year. (The extended runs add diagonal innovations; see the end
+of §6.2.) Each approach estimates **one constant** `lambda` using
 pooled 2016–2019 residual Gaussian ML. A separate spherical innovation variance
 is profiled for each calibration year. The coefficient is constrained to
 (−0.99, 0.99); boundary flags use absolute estimates of at least 0.985.
@@ -489,6 +610,27 @@ Only rows using the same definition and data can be compared directly.
 The former is maximized on calibration residuals. The latter evaluates an
 unconditional forecast on later returns and is not maximized on the test set.
 Subtracting one from the other has no useful interpretation here.
+
+**Innovation arms (extended runs).** The v1 spatial rows use spherical
+innovations while the factor benchmark is diagonal, which confounds topology
+with volatility. The extended designs score every network under three arms,
+each with its own frozen λ:
+
+- *spherical*: `ε ~ N(0, σ²_y I)`, the v1 specification, reproduced exactly;
+- *diagonal*: `ε ~ N(0, D_y)` with `D_y,ii = mean_t[((I − λW_y) u_t)_i²]` from
+  prior residuals; at λ = 0 it equals the diagonal FF5+momentum benchmark bitwise;
+- *correlation-only*: `Σ* = S corr(Σ̂) S`, with `S` the prior raw sample
+  standard deviations, applied to every row including the controls, so all rows
+  share identical marginal variances and differ only in correlation structure.
+
+Per-day log densities are saved, and paired score differences against the
+joint Fernández network (exp kernel) and the uniform network are bootstrapped
+with `arch`'s stationary bootstrap (9,999 replicates, expected block 21 days,
+63 days and the Politis–White choice as sensitivities). A model confidence set
+(`method="max"`, size 0.10) is computed within each innovation × kernel family,
+and 19 within-size-tercile `PWPᵀ` permutations of selected networks give
+placebo rank p-values. All of this is development evidence on already
+inspected years; the intervals do not account for the model search.
 
 ### 6.3 Nonspatial and covariance controls
 
@@ -614,6 +756,10 @@ observing the development results.
 | Cohort selection | Determine before the return year | Current-listing selection and strict accounting completeness bias the sample |
 | Missing outcomes | Remove identical dates for all methods | Scores condition on observed dates and omit unavailable outcomes |
 | Year-boundary filing timing | Exclude first daily return each year | Date-level data do not provide a full intraday information audit |
+| Support labels in readouts | Arm A/B split; TabFM label-null pass; shuffled-label audit | Arm A TabFM `early_concat` still sees support `y` (§5.3) |
+| Query-cohort dependence | Audit of halves, reversed order and singletons (`research/panel/audit/`) | FeatureEncoder statistics span support and query rows |
+| Stale cached distances | Distances recomputed every run; sidecar context digest checked | Embedding cache is keyed by context digest, checkpoint and readout version |
+| Kernel choice | Median and matched bandwidths fixed by rule, not by returns | Both rules were added after inspecting v1 geometry |
 
 A past-only PCA or autoencoder is acceptable for this chronological design.
 Fitting either to all years before splitting would leak future distributional
@@ -689,7 +835,12 @@ provenance, cached public data, and labeled matrix exports. The panel
 implementation separates characteristic construction, observations, networks,
 likelihood estimation, orchestration, and reporting.
 
-The last implementation validation recorded **33 passing tests**, including
+The current implementation records **69 passing tests** (the v1 panel had 33),
+including checks of `lag_iv`, `error_ml` and `lag_ml` against PySAL `spreg`, exact
+residual Moran moments with and without self-links, kernel monotonicity and
+placebo spectra, diagonal and correlation-only panel densities, and an R smoke
+test of the MM first stage (outlier robustness, firm-order invariance, identity
+bootstrap replicate). The v1 panel validation recorded 33 tests, including
 Hypothesis-based numerical checks and focused chronology tests. The meaningful
 checks include Gaussian-density equivalence, estimation of one coefficient
 across changing networks, invariance to future preprocessing observations, and
@@ -736,7 +887,11 @@ Earlier interrupted development logs are not the authoritative results.
 | Earlier 100-issuer pilot | [Pilot results](research/pilot/RESULTS.md) |
 | Earlier expanded model grid | [Expanded results](research/expanded/RESULTS.md) |
 | Paper-aligned comparison | [Fernández results](research/fernandez/RESULTS.md) |
-| Six-firm combined fit | [Combined results](research/fernandez/combined/RESULTS.md) |
+| Six-firm combined fit (superseded) | [Combined results](research/fernandez/combined/RESULTS.md) |
+| R0 replication | [R0 results](research/ladder/r0/RESULTS.md), [replication manifest](research/ladder/r0/replication-manifest.md) |
+| Cross-sectional ladder | [Three arm](research/ladder/three/RESULTS.md), [four arm](research/ladder/four/RESULTS.md) |
+| Extended panel designs | [Panel index](research/panel/README.md) and `research/panel/{four,four-h5,three}/RESULTS.md` |
+| Encoder measurement audit | `research/panel/audit/` |
 
 Year-specific contexts live under `research/panel/contexts/`. Labeled pairwise
 distance and weight matrices live under `research/panel/distances/<year>/` and
@@ -752,8 +907,15 @@ access configured:
 
 ```sh
 devenv shell just python-universe
-devenv shell just python-panel
+devenv shell just python-panel            # extended designs: four, four-h5, three
+devenv shell just python-ladder-r0        # R0 replication and generated-beta bootstrap (needs R)
+devenv shell just python-ladder           # R1–R4 cross-sectional ladder
+devenv shell just python-encoder-audit    # context, query-cohort and label audits
 ```
+
+The MM first stage runs `src/python/free_foundations/fernandez/betas.R` with
+`robustbase`; manifests hash `.R` as well as `.py` sources. Embeddings,
+matrices, bootstrap draws and daily scores are parquet/npz files ignored by Git.
 
 Acquisition requires `EDGAR_IDENTITY` in the environment. The panel command uses
 the acquired universe and retained model runtimes, checkpoint files, and caches.

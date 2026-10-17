@@ -4,6 +4,14 @@ The reference is Viviana Fernández, *Spatial linkages in international financia
 markets*, Quantitative Finance 11(2), 237–245 (2011),
 [DOI](https://doi.org/10.1080/14697680903127403).
 Completed forecasting results are in [the comparison report](RESULTS.md).
+
+> **Superseded cross-section.** The paper-style two-stage exercise below used the
+> 100-issuer pilot universe (79/57/75/13 firms on unequal cohorts). It is rebuilt on the
+> 1,000-issuer universe, with one common cohort per characteristic arm, standard errors,
+> exact residual Moran moments and a generated-beta bootstrap, in
+> [`research/ladder`](../ladder/README.md). The files here are retained as history.
+> The residual Moran statistic in `cross-section.csv` re-centred residuals; the code
+> now uses uncentred least-squares residuals, so a rerun changes that column.
 The [combined-network likelihood table](combined/RESULTS.md) uses one scalar
 spatial parameter per model and input set, fitted on exactly the same firms.
 Reproduce it with `devenv shell just python-fernandez-combined`.

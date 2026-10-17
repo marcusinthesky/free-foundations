@@ -1,5 +1,7 @@
 """Metric invariants, label preservation and past-only feature/target preparation."""
 
+import hashlib
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -9,9 +11,16 @@ from hypothesis import given
 from numpy.testing import assert_allclose
 
 from free_foundations.contracts import FloatArray
+from free_foundations.expanded.baselines import supervised_states
 from free_foundations.expanded.disclosures import broad_facts, select_schema
 from free_foundations.expanded.distance import distance_weights, pairwise_distance, save_distance
-from free_foundations.expanded.encoding import prepare
+from free_foundations.expanded.encoding import (
+    Prepared,
+    cap_support,
+    prepare,
+    query_rows,
+    variant,
+)
 from tests.strategies import token_arrays
 
 
@@ -105,3 +114,56 @@ def test_future_data_cannot_change_schema_context_or_scaling() -> None:
     assert_allclose(first.support, second.support)
     assert_allclose(first.targets, second.targets)
     assert_allclose(first.query, second.query)
+
+
+def _prepared(seed: int = 0) -> Prepared:
+    rng = np.random.default_rng(seed)
+    index = pd.MultiIndex.from_product(
+        [range(2015, 2021), list("ABCDEF")], names=["year", "ticker"]
+    )
+    view = pd.DataFrame(rng.normal(size=(len(index), 4)), index=index, columns=list("abcd"))
+    labels = pd.DataFrame(
+        rng.normal(size=(len(index), 2)), index=index, columns=["income", "operating_cash"]
+    )
+    return prepare(view, labels, tuple("ABCDEF"), 2020, "income")
+
+
+def test_support_cap_keeps_the_original_panel_digest_rule() -> None:
+    data = _prepared()
+    capped = cap_support(data, rows=5)
+    order = sorted(
+        range(len(data.support_ids)),
+        key=lambda i: hashlib.sha256(data.support_ids[i].encode()).hexdigest(),
+    )[:5]
+    expected = hashlib.sha256((data.digest + repr(order) + "panel-support256-v1").encode())
+    assert capped.digest == expected.hexdigest()
+    assert capped.support_ids == tuple(data.support_ids[i] for i in order)
+    redraw = cap_support(data, rows=5, salt="audit")
+    assert redraw.digest != capped.digest
+
+
+def test_variants_recompute_digests_and_keep_query_order() -> None:
+    data = _prepared()
+    subset = variant(data, "query:half", query=data.query[[2, 0]], tickers=("C", "A"))
+    assert subset.digest != data.digest
+    assert subset.tickers == ("C", "A")
+    shuffled = variant(data, "labels", targets=data.targets[::-1])
+    assert shuffled.digest not in {data.digest, subset.digest}
+
+
+def test_query_rows_handles_joined_and_compact_layouts() -> None:
+    import torch  # noqa: PLC0415
+
+    joined = torch.arange(2 * 7 * 3).reshape(1, 7, 6)
+    assert query_rows(joined, 4, {}).shape == (1, 3, 6)
+    assert query_rows(joined, 4, {"compact_cached_support": True}).shape == (1, 7, 6)
+
+
+def test_supervised_states_use_support_rows_only() -> None:
+    data = _prepared(1)
+    first = supervised_states(data)
+    assert first.shape == (len(data.query), 16)
+    assert_allclose(supervised_states(data), first)
+    # Training sees support rows only: re-encoding a query subset gives the same rows.
+    subset = replace(data, query=data.query[[3, 1]], tickers=("D", "B"))
+    assert_allclose(supervised_states(subset), first[[3, 1]], atol=1e-6)

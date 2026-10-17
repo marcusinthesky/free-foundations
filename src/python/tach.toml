@@ -41,3 +41,7 @@ depends_on = ["free_foundations.pilot", "free_foundations.fernandez"]
 [[modules]]
 path = "free_foundations.panel"
 depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe"]
+
+[[modules]]
+path = "free_foundations.ladder"
+depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.panel"]

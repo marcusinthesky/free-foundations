@@ -55,6 +55,17 @@ The [expanded experiment](../../research/expanded/README.md) includes reviewed
 TabFM and EXAONE forward-pass extractors alongside full and Fast TabPFN. Supply a reviewed layer readout through the protocol below;
 `from_fitted` rejects entries without a verified native row-embedding API.
 
+`expanded.representations` names every readout used by the panel and cross-sectional
+ladder and labels it *state* (TabFM `early_concat`/`early_mean` and a null-label pass,
+EXAONE first-layer item summaries) or *task-conditioned* (TabPFN query embeddings,
+TabFM post-ICL state, EXAONE label token and last-layer item summaries, a supervised
+MLP control). New readouts are cached at float32 precision under per-model readout
+versions. Spatial estimators live in `fernandez.models` (S2SLS, SEM-ML and lag-ML with
+standard errors, checked against `spreg`), `fernandez.diagnostics` (exact residual
+Moran, conditional information criteria) and `fernandez.kernels`. Paired bootstrap and
+model confidence sets use `arch`. Stage-one MM betas call `fernandez/betas.R` through
+the `Rscript` and `robustbase` supplied by `devenv`.
+
 ### Deferred models
 
 - **Nori:** its current `synthefy` dependency requires HTTPX below 0.28, conflicting

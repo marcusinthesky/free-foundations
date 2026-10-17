@@ -69,7 +69,22 @@ python-fernandez-combined:
 python-universe:
     uv run --project src/python --frozen python -m free_foundations.universe.run
 
-# Shared annual cohorts; one 2016-2019 intensity per approach; 2020-2025 held out.
-python-panel:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.panel.run
-    uv run --project src/python --frozen python -m free_foundations.panel.report
+# Declared designs (four, four-h5, three); one 2016-2019 intensity per network,
+# kernel and innovation arm; 2020-2025 held out. The original v1 output stays at the root.
+python-panel *designs:
+    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.panel.run {{ if designs == "" { "" } else { "--designs " + designs } }}
+    uv run --project src/python --frozen python -m free_foundations.panel.report {{ if designs == "" { "" } else { "--designs " + designs } }}
+
+# Query-cohort, support-draw, support-label and target sensitivity of model geometry.
+python-encoder-audit:
+    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.panel.audit
+
+# R0 replication only: MM betas through Rscript, no foundation models.
+python-ladder-r0:
+    uv run --project src/python --frozen python -m free_foundations.ladder.run --stages r0 bootstrap
+    uv run --project src/python --frozen python -m free_foundations.ladder.report
+
+# R0 plus the R1-R4 matched cross-sectional ladder on both characteristic arms.
+python-ladder:
+    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.ladder.run
+    uv run --project src/python --frozen python -m free_foundations.ladder.report

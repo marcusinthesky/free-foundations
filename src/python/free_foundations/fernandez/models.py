@@ -1,4 +1,4 @@
-"""Paper equations (2), (4), (8) and (9), with explicit numerical conventions."""
+"""Paper equations (2), (4), (9) and (10), with explicit numerical conventions."""
 
 from __future__ import annotations
 
@@ -10,17 +10,43 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import rankdata
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from free_foundations.contracts import FloatArray
+
+BOUNDS = (-0.99, 0.99)
 
 
 @dataclass(frozen=True)
 class CrossSection:
-    """Cross-sectional premium, spatial coefficient and fitted observations."""
+    """One fitted cross-section: premiums, spatial coefficient and their covariance.
 
-    premium: float
+    ``covariance`` orders the premiums first and the spatial coefficient last; that row
+    and column are zero for OLS. ``fitted`` is structural, so it uses realized ``Wy`` for
+    the lag model; ``reduced`` is the corresponding reduced-form mean. Likelihood and
+    parameter counts are absent for two-stage least squares, which maximizes no likelihood.
+    """
+
+    estimator: str
+    premiums: FloatArray
     intensity: float
+    covariance: FloatArray
+    variance: float
+    log_likelihood: float | None
+    parameters: int | None
     fitted: FloatArray
+    reduced: FloatArray
     innovations: FloatArray
+
+    @property
+    def premium(self) -> float:
+        """Market premium: the first regressor is always the market exposure."""
+        return float(self.premiums[0])
+
+    @property
+    def standard_errors(self) -> FloatArray:
+        """Square roots of the covariance diagonal, premiums then spatial coefficient."""
+        return np.sqrt(np.maximum(np.diag(self.covariance), 0))
 
 
 def rank_distance(histories: FloatArray) -> FloatArray:
@@ -48,8 +74,76 @@ def paper_weights(distance: FloatArray, *, self_links: bool = False) -> FloatArr
     return affinity / affinity.sum(axis=1, keepdims=True)
 
 
+def symmetric_spectrum(weights: FloatArray) -> FloatArray:
+    """Eigenvalues of W = D^-1 A for a symmetric nonnegative affinity A.
+
+    W is similar to D^-1/2 A D^-1/2, whose entries equal sqrt(W_ij W_ji). Every network
+    here is a row-normalized symmetric kernel (with or without self-links), a uniform
+    network or zero, so its spectrum is real; label permutations PWP' share it.
+    """
+    return np.asarray(np.linalg.eigvalsh(np.sqrt(weights * weights.T)), dtype=np.float64)
+
+
+def maximize_profile(
+    objective: Callable[[float], float],
+    bounds: tuple[float, float] = BOUNDS,
+    points: int = 201,
+    xatol: float | None = None,
+) -> tuple[float, float]:
+    """Grid search, then bounded refinement between the best grid neighbours."""
+    grid = np.linspace(bounds[0], bounds[1], points)
+    values = np.array([objective(float(point)) for point in grid])
+    best = int(np.argmax(values))
+
+    def negative(value: float) -> float:
+        return -objective(float(value))
+
+    interval = (float(grid[max(0, best - 1)]), float(grid[min(len(grid) - 1, best + 1)]))
+    result = (
+        minimize_scalar(negative, bounds=interval, method="bounded")
+        if xatol is None
+        else minimize_scalar(negative, bounds=interval, method="bounded", options={"xatol": xatol})
+    )
+    if not result.success:
+        message = "Spatial profile likelihood optimization failed."
+        raise RuntimeError(message)
+    return float(result.x), -float(result.fun)
+
+
+def _jacobian(intensity: float, eigenvalues: FloatArray) -> float:
+    return float(np.log(np.abs(1 - intensity * eigenvalues)).sum())
+
+
+def _gaussian(innovations: FloatArray) -> tuple[float, float]:
+    variance = float(innovations @ innovations / len(innovations))
+    return variance, -len(innovations) / 2 * (np.log(2 * np.pi * variance) + 1)
+
+
+def ols(y: FloatArray, x: FloatArray) -> CrossSection:
+    """No-intercept least squares; s^2 uses N-k for SEs and e'e/N for the likelihood."""
+    coefficients = np.linalg.lstsq(x, y, rcond=None)[0]
+    fitted = x @ coefficients
+    residuals = y - fitted
+    variance, log_likelihood = _gaussian(residuals)
+    scale = residuals @ residuals / (len(y) - x.shape[1])
+    covariance = np.zeros((x.shape[1] + 1, x.shape[1] + 1))
+    covariance[:-1, :-1] = scale * np.linalg.inv(x.T @ x)
+    return CrossSection(
+        estimator="ols",
+        premiums=coefficients,
+        intensity=0.0,
+        covariance=covariance,
+        variance=variance,
+        log_likelihood=log_likelihood,
+        parameters=x.shape[1] + 1,
+        fitted=fitted,
+        reduced=fitted,
+        innovations=residuals,
+    )
+
+
 def lag_iv(y: FloatArray, x: FloatArray, weights: FloatArray) -> CrossSection:
-    """Equation (2), instruments [WX, X], no unmentioned W-squared instruments."""
+    """Equation (2): instruments [WX, X], no unmentioned W-squared instruments, s2=e'e/N."""
     design = np.column_stack([weights @ y, x])
     instruments = np.column_stack([weights @ x, x])
     projected = instruments @ np.linalg.lstsq(instruments, design, rcond=None)[0]
@@ -58,30 +152,132 @@ def lag_iv(y: FloatArray, x: FloatArray, weights: FloatArray) -> CrossSection:
         raise ValueError(message)
     coefficients = np.linalg.lstsq(projected, y, rcond=None)[0]
     fitted = design @ coefficients
-    return CrossSection(float(coefficients[-1]), float(coefficients[0]), fitted, y - fitted)
+    innovations = y - fitted
+    variance = float(innovations @ innovations / len(y))
+    inverse = variance * np.linalg.inv(projected.T @ design)
+    order = [*range(1, design.shape[1]), 0]
+    reduced = np.linalg.solve(np.eye(len(y)) - coefficients[0] * weights, x @ coefficients[1:])
+    return CrossSection(
+        estimator="spatial_lag_iv",
+        premiums=coefficients[1:],
+        intensity=float(coefficients[0]),
+        covariance=inverse[np.ix_(order, order)],
+        variance=variance,
+        log_likelihood=None,
+        parameters=None,
+        fitted=fitted,
+        reduced=reduced,
+        innovations=innovations,
+    )
 
 
-def error_ml(y: FloatArray, x: FloatArray, weights: FloatArray) -> CrossSection:
-    """Equation (4): profile beta and spherical innovation variance at each lambda."""
-    identity = np.eye(len(y))
+def _information_traces(
+    weights: FloatArray, intensity: float, eigenvalues: FloatArray
+) -> tuple[float, float, float]:
+    """tr(WA^-1), tr((WA^-1)^2) and tr((WA^-1)'WA^-1) for A = I - intensity W."""
+    ratio = eigenvalues / (1 - intensity * eigenvalues)
+    product = weights @ np.linalg.inv(np.eye(len(weights)) - intensity * weights)
+    return float(ratio.sum()), float((ratio**2).sum()), float(np.sum(product**2))
 
-    def objective(intensity: float) -> float:
-        operator = identity - intensity * weights
-        transformed_y, transformed_x = operator @ y, operator @ x
-        beta = np.linalg.lstsq(transformed_x, transformed_y, rcond=None)[0]
-        innovations = transformed_y - transformed_x @ beta
-        return float(len(y) * np.log(np.mean(innovations**2)) - 2 * np.linalg.slogdet(operator)[1])
 
-    result = minimize_scalar(objective, bounds=(-0.99, 0.99), method="bounded")
-    if not result.success:
-        message = "Spatial-error maximum likelihood failed."
-        raise RuntimeError(message)
-    operator = identity - float(result.x) * weights
-    beta = np.linalg.lstsq(operator @ x, operator @ y, rcond=None)[0]
-    mean = x @ beta
-    residual = y - mean
-    fitted = mean + float(result.x) * weights @ residual
-    return CrossSection(float(beta[-1]), float(result.x), fitted, operator @ residual)
+def error_ml(  # noqa: PLR0913 -- keyword-only numerical options.
+    y: FloatArray,
+    x: FloatArray,
+    weights: FloatArray,
+    *,
+    eigenvalues: FloatArray | None = None,
+    xatol: float | None = 1e-9,
+    standard_errors: bool = True,
+) -> CrossSection:
+    """Equation (4): profile premiums and spherical variance; information-matrix SEs.
+
+    ``standard_errors=False`` skips the O(N^3) information matrix for resampling refits.
+    """
+    spectrum = symmetric_spectrum(weights) if eigenvalues is None else eigenvalues
+    lagged_y, lagged_x = weights @ y, weights @ x
+
+    def fit(intensity: float) -> tuple[FloatArray, FloatArray]:
+        filtered_x = x - intensity * lagged_x
+        filtered_y = y - intensity * lagged_y
+        coefficients = np.linalg.lstsq(filtered_x, filtered_y, rcond=None)[0]
+        return coefficients, filtered_y - filtered_x @ coefficients
+
+    def profile(intensity: float) -> float:
+        return _jacobian(intensity, spectrum) + _gaussian(fit(intensity)[1])[1]
+
+    intensity, log_likelihood = maximize_profile(profile, xatol=xatol)
+    coefficients, innovations = fit(intensity)
+    variance = _gaussian(innovations)[0]
+    filtered_x = x - intensity * lagged_x
+    covariance = np.full((x.shape[1] + 1, x.shape[1] + 1), np.nan)
+    if standard_errors:
+        trace, square, cross = _information_traces(weights, intensity, spectrum)
+        information = np.array(
+            [[square + cross, trace / variance], [trace / variance, len(y) / (2 * variance**2)]]
+        )
+        covariance = np.zeros((x.shape[1] + 1, x.shape[1] + 1))
+        covariance[:-1, :-1] = variance * np.linalg.inv(filtered_x.T @ filtered_x)
+        covariance[-1, -1] = np.linalg.inv(information)[0, 0]
+    mean = x @ coefficients
+    return CrossSection(
+        estimator="spatial_error_ml",
+        premiums=coefficients,
+        intensity=intensity,
+        covariance=covariance,
+        variance=variance,
+        log_likelihood=log_likelihood,
+        parameters=x.shape[1] + 2,
+        fitted=mean + intensity * weights @ (y - mean),
+        reduced=mean,
+        innovations=innovations,
+    )
+
+
+def lag_ml(
+    y: FloatArray,
+    x: FloatArray,
+    weights: FloatArray,
+    *,
+    eigenvalues: FloatArray | None = None,
+    xatol: float | None = 1e-9,
+) -> CrossSection:
+    """Gaussian spatial-lag ML, an extension beside the paper's two-stage least squares."""
+    spectrum = symmetric_spectrum(weights) if eigenvalues is None else eigenvalues
+    lagged_y = weights @ y
+    base = np.linalg.lstsq(x, y, rcond=None)[0]
+    shift = np.linalg.lstsq(x, lagged_y, rcond=None)[0]
+    residual, lagged_residual = y - x @ base, lagged_y - x @ shift
+
+    def profile(intensity: float) -> float:
+        return _jacobian(intensity, spectrum) + _gaussian(residual - intensity * lagged_residual)[1]
+
+    intensity, log_likelihood = maximize_profile(profile, xatol=xatol)
+    coefficients = base - intensity * shift
+    innovations = residual - intensity * lagged_residual
+    variance = _gaussian(innovations)[0]
+    reduced = np.linalg.solve(np.eye(len(y)) - intensity * weights, x @ coefficients)
+    lagged_mean = weights @ reduced
+    trace, square, cross = _information_traces(weights, intensity, spectrum)
+    k = x.shape[1]
+    information = np.zeros((k + 2, k + 2))
+    information[:k, :k] = x.T @ x / variance
+    information[:k, k] = information[k, :k] = x.T @ lagged_mean / variance
+    information[k, k] = square + cross + lagged_mean @ lagged_mean / variance
+    information[k, k + 1] = information[k + 1, k] = trace / variance
+    information[k + 1, k + 1] = len(y) / (2 * variance**2)
+    covariance = np.linalg.inv(information)[: k + 1, : k + 1]
+    return CrossSection(
+        estimator="spatial_lag_ml",
+        premiums=coefficients,
+        intensity=intensity,
+        covariance=covariance,
+        variance=variance,
+        log_likelihood=log_likelihood,
+        parameters=k + 2,
+        fitted=y - innovations,
+        reduced=reduced,
+        innovations=innovations,
+    )
 
 
 def residual_covariance(residuals: FloatArray, weights: FloatArray) -> tuple[FloatArray, float]:
@@ -101,7 +297,7 @@ def residual_covariance(residuals: FloatArray, weights: FloatArray) -> tuple[Flo
             - 2 * np.linalg.slogdet(identity - intensity * weights)[1]
         )
 
-    result = minimize_scalar(objective, bounds=(-0.99, 0.99), method="bounded")
+    result = minimize_scalar(objective, bounds=BOUNDS, method="bounded")
     if not result.success:
         message = "Pooled spatial-error maximum likelihood failed."
         raise RuntimeError(message)

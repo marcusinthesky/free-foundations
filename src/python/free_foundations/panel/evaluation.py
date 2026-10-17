@@ -1,0 +1,250 @@
+"""Calibrate one coefficient per network, kernel and innovation arm; score later years."""
+
+from __future__ import annotations
+
+import logging
+import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+import numpy as np
+import pandas as pd
+
+from free_foundations.expanded.representations import ARMS
+from free_foundations.fernandez.kernels import (
+    KERNELS,
+    effective_neighbours,
+    geometry,
+    kernel_weights,
+    placebo,
+    size_groups,
+)
+from free_foundations.fernandez.models import paper_weights, symmetric_spectrum
+from free_foundations.panel.likelihood import (
+    INNOVATIONS,
+    block,
+    correlation_only,
+    fit,
+    forecast_covariance,
+    gaussian_daily,
+)
+from free_foundations.panel.networks import ASSETS
+
+if TYPE_CHECKING:
+    from free_foundations.contracts import FloatArray
+    from free_foundations.panel.likelihood import Block, Innovations
+    from free_foundations.panel.observations import Annual
+
+LOGGER = logging.getLogger(__name__)
+CALIBRATION, EVALUATION = range(2016, 2020), range(2020, 2026)
+JOINT = "fernandez_joint"
+PLACEBO_DRAWS = 19
+# Prespecified placebo rows: the joint benchmark, direct input, PCA, one model per arm.
+PLACEBO_ROWS = (
+    JOINT,
+    "histories__direct",
+    "histories__pca16",
+    "histories__tabpfn_full__late",
+    "histories__tabfm__early_concat",
+)
+type Key = tuple[str, str]
+
+
+def describe(name: str) -> dict[str, str]:
+    """History prefix, rung/target label, representation and interpretive arm."""
+    match = re.match(r"(h\d+)__(.*)", name)
+    history, rest = (match.group(1), match.group(2)) if match else ("primary", name)
+    rest = rest.split("__placebo")[0]
+    if rest.startswith("fernandez") or rest in {"uniform_network", "zero_network"}:
+        arm = "reference" if rest in {"uniform_network", "zero_network"} else "fernandez"
+        return {"history": history, "rung": "", "representation": rest, "arm": arm}
+    if "__" not in rest:
+        return {"history": history, "rung": "", "representation": rest, "arm": "control"}
+    rung, representation = rest.split("__", 1)
+    return {
+        "history": history,
+        "rung": rung,
+        "representation": representation,
+        "arm": ARMS[representation],
+    }
+
+
+@dataclass
+class Panel:
+    """Accumulated calibration statistics and held-out daily densities for one design."""
+
+    calibration: dict[Key, list[Block]] = field(default_factory=dict)
+    intensities: dict[tuple[str, str, str], tuple[float, float]] = field(default_factory=dict)
+    daily: dict[str, list[FloatArray]] = field(default_factory=dict)
+    dates: list[str] = field(default_factory=list)
+    geometry: list[dict[str, float | str | int]] = field(default_factory=list)
+    annual: list[dict[str, float | str | int]] = field(default_factory=list)
+
+
+def networks(
+    distances: dict[str, FloatArray], groups: FloatArray, year: int
+) -> dict[Key, tuple[FloatArray, float]]:
+    """Every distance under each kernel; matched kernels copy the joint benchmark's spread."""
+    target = effective_neighbours(paper_weights(distances[JOINT]))
+    result: dict[Key, tuple[FloatArray, float]] = {}
+    for name, distance in distances.items():
+        for kernel in KERNELS:
+            result[name, kernel] = kernel_weights(distance, kernel, target=target)
+    firms = len(groups)
+    result["uniform_network", "none"] = (
+        (np.ones((firms, firms)) - np.eye(firms)) / (firms - 1),
+        0.0,
+    )
+    result["zero_network", "none"] = (np.zeros((firms, firms)), 0.0)
+    for name in PLACEBO_ROWS:
+        if name in distances:
+            weights = result[name, "exp"][0]
+            for draw in range(PLACEBO_DRAWS):
+                result[f"{name}__placebo{draw}", "exp"] = (
+                    placebo(weights, groups, seed=year * 100 + draw),
+                    1.0,
+                )
+    return result
+
+
+def innovations_for(name: str) -> tuple[Innovations, ...]:
+    """Placebos use the matched heterogeneous-variance arm only."""
+    return ("diagonal",) if "__placebo" in name else INNOVATIONS
+
+
+def update(
+    panel: Panel,
+    year: int,
+    annual: Annual,
+    distances: dict[str, FloatArray],
+    broad: pd.DataFrame,
+) -> None:
+    """Add one year's calibration blocks or held-out daily log densities."""
+    assets = broad[ASSETS].reindex(pd.MultiIndex.from_product([[year - 1], annual.tickers]))
+    groups = size_groups(np.log(assets.where(assets > 0).to_numpy(dtype=float)))
+    built = networks(distances, groups, year)
+    for (name, kernel), (weights, bandwidth) in built.items():
+        if "__placebo" not in name:
+            panel.geometry.append(
+                {"year": year, "approach": name, "kernel": kernel, "bandwidth": bandwidth}
+                | geometry(distances.get(name), weights)
+            )
+    if year in CALIBRATION:
+        for key, (weights, _) in built.items():
+            panel.calibration.setdefault(key, []).append(block(annual.realized, weights))
+        if year == CALIBRATION[-1]:
+            calibrate(panel)
+        return
+    values = annual.raw_realized - annual.raw_prior.mean(axis=0)
+    panel.dates.extend(annual.dates)
+    for (name, kernel), (weights, _) in built.items():
+        previous = block(annual.prior, weights, symmetric_spectrum(weights))
+        for innovation in innovations_for(name):
+            intensity = panel.intensities[name, kernel, innovation][0]
+            covariance = forecast_covariance(
+                previous, weights, intensity, annual.factor_covariance, innovation
+            )
+            record(panel, f"{name}|{kernel}|{innovation}", year, gaussian_daily(values, covariance))
+            if innovation == "diagonal" and "__placebo" not in name:
+                record(
+                    panel,
+                    f"{name}|{kernel}|correlation",
+                    year,
+                    gaussian_daily(values, correlation_only(covariance, annual.raw_prior)),
+                )
+    factor = annual.factor_covariance
+    controls = {
+        "raw_sample_covariance": np.cov(annual.raw_prior, rowvar=False),
+        "ff5_mom_diagonal": factor + np.diag(np.mean(annual.prior**2, axis=0)),
+        "ff5_mom_sample_residual_covariance": factor + np.cov(annual.prior, rowvar=False),
+    }
+    for name, covariance in controls.items():
+        record(panel, f"{name}|none|control", year, gaussian_daily(values, covariance))
+        record(
+            panel,
+            f"{name}|none|correlation",
+            year,
+            gaussian_daily(values, correlation_only(covariance, annual.raw_prior)),
+        )
+
+
+def record(panel: Panel, column: str, year: int, scores: FloatArray) -> None:
+    """Store daily densities and the annual total for one scored column."""
+    panel.daily.setdefault(column, []).append(scores)
+    panel.annual.append({"column": column, "year": year, "score": float(scores.sum())})
+
+
+def calibrate(panel: Panel) -> None:
+    """One coefficient per network, kernel and innovation arm, from 2016-2019 only."""
+    for (name, kernel), blocks in panel.calibration.items():
+        for innovation in innovations_for(name):
+            if name == "zero_network":
+                value = sum(item.score(0.0, innovation) for item in blocks)
+                panel.intensities[name, kernel, innovation] = (0.0, value)
+            else:
+                panel.intensities[name, kernel, innovation] = fit(blocks, innovation)
+    LOGGER.info("Calibrated %s coefficients", len(panel.intensities))
+
+
+def daily_frame(panel: Panel) -> pd.DataFrame:
+    """Days by scored columns; every column covers exactly the same observed dates."""
+    return pd.DataFrame(
+        {column: np.concatenate(parts) for column, parts in panel.daily.items()},
+        index=pd.Index(panel.dates, name="date"),
+    )
+
+
+def comparison(panel: Panel, daily: pd.DataFrame, firm_days: int) -> pd.DataFrame:
+    """One row per network, kernel and innovation arm with calibration and held-out fit."""
+    rows = []
+    for column in map(str, daily.columns):
+        name, kernel, innovation = column.split("|")
+        if "__placebo" in name:
+            continue
+        lookup = "diagonal" if innovation == "correlation" else innovation
+        intensity, calibration = panel.intensities.get((name, kernel, lookup), (np.nan, np.nan))
+        rows.append(
+            {
+                "approach": name,
+                "kernel": kernel,
+                "innovation": innovation,
+                **describe(name),
+                "lambda": intensity,
+                "calibration_ml_log_likelihood": calibration,
+                "heldout_log_likelihood": float(daily[column].sum()),
+                "firm_days": firm_days,
+                "boundary": bool(abs(intensity) >= 0.985) if np.isfinite(intensity) else False,
+            }
+        )
+    result = pd.DataFrame(rows)
+    for _, group in result.groupby("innovation"):
+        reference = group.loc[group["approach"].eq(JOINT) & group["kernel"].eq("exp")]
+        if not reference.empty:
+            result.loc[group.index, "gain_vs_joint_exp"] = group["heldout_log_likelihood"] - float(
+                reference["heldout_log_likelihood"].iloc[0]
+            )
+    result["score_per_firm_day"] = result["heldout_log_likelihood"] / firm_days
+    return result
+
+
+def placebo_table(daily: pd.DataFrame) -> pd.DataFrame:
+    """Held-out score of each prespecified network against its label-permuted placebos."""
+    rows = []
+    for name in PLACEBO_ROWS:
+        column = f"{name}|exp|diagonal"
+        if column not in daily:
+            continue
+        draws = np.array(
+            [daily[f"{name}__placebo{draw}|exp|diagonal"].sum() for draw in range(PLACEBO_DRAWS)]
+        )
+        observed = float(daily[column].sum())
+        rows.append(
+            {
+                "approach": name,
+                "observed": observed,
+                "placebo_mean": float(draws.mean()),
+                "placebo_max": float(draws.max()),
+                "rank_p_value": (1 + int((draws >= observed).sum())) / (PLACEBO_DRAWS + 1),
+            }
+        )
+    return pd.DataFrame(rows)

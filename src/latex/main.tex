@@ -69,17 +69,24 @@ does not imply larger covariance: loading magnitudes and idiosyncratic risk
 also matter. It motivates tests controlling for conventional exposures and
 industry, rather than a claim of causal shock transmission.
 
-A frozen encoder yields $z_i=E(X_i)$ and normalized vectors
-$v_i=z_i/\norm{z_i}_2$. Define $d_{ij}=\norm{v_i-v_j}_2$ and
+A frozen tabular foundation model is an in-context predictor, so its row state
+depends on a declared support table and label:
+$z_i=E(X_i\mid X_s,y_s)$. We distinguish \emph{state} readouts taken before
+in-context prediction from \emph{task-conditioned} readouts that encode the
+declared support target, and report both; neither is a target-neutral firm
+embedding by construction. With normalized vectors $v_i=z_i/\norm{z_i}_2$,
+define $d_{ij}=\norm{v_i-v_j}_2$ and
 \begin{equation}
   W_{ij}=\frac{\exp(-d_{ij}/h)}{\sum_{k\ne i}\exp(-d_{ik}/h)},\quad i\ne j,
   \qquad W_{ii}=0.
 \end{equation}
-The matched dense-kernel comparison uses $h=1$, following the existing
-Fern\'andez-style construction. Bandwidth and neighbor restrictions, if added,
-must be fixed using training data and applied consistently across methods.
-Dense bounded-distance kernels can become diffuse as the universe grows;
-network concentration and effective neighbor counts must therefore be audited.
+The source-faithful comparison uses $h=1$, as in Fern\'andez. Because distance
+scales differ across representations, two predeclared alternatives apply the
+same rule to classical and learned distances: $h$ equal to the median positive
+distance, and $h$ chosen so that the mean effective neighbor count
+$N^{-1}\sum_i(\sum_j W_{ij}^2)^{-1}$ equals that of the joint characteristic
+network in the same year. The latter separates neighbor ranking from the amount
+of smoothing. No bandwidth is chosen using returns.
 
 Prediction alone does not identify this geometry. For any invertible $T$,
 $\widetilde E=T E$ and $\widetilde h=h_{\rm pred}\circ T^{-1}$ preserve a
@@ -153,6 +160,12 @@ For each encoder and input set, estimate
 \end{equation}
 Economic weights can be endogenous~\cite{qulee}. Chronological construction
 prevents look-ahead but does not by itself identify causal spillovers.
+We report two innovation specifications under the same estimation rule for
+every network: the paper-aligned $D_t=\sigma_t^2I$, and a heterogeneous diagonal
+$D_t$ with one profiled variance per firm and year. At $\lambda=0$ the latter
+is exactly the diagonal factor benchmark, so differences from it isolate the
+network. A third, variance-matched comparison imposes prior sample variances on
+every forecast covariance, so that only implied correlations differ.
 There is one scalar $\lambda$ per approach in a pooled estimation window;
 $W_t$ can change annually. Fixed, predetermined refitting windows must be
 identical across approaches. The main measurement comparison holds $B_t$,
@@ -195,9 +208,16 @@ All already inspected pilot years are development evidence. Any subsequently
 reserved evaluation block must be described honestly; this is not a claim of
 preregistration or a previously untouched holdout.
 
-The existing six-firm fits and boundary estimates are diagnostic results.
-They do not support a claim of superior economic measurement, nor can a
-negative spatial coefficient be relabeled positive shock propagation.
+The earlier six-firm fits and boundary estimates are diagnostic results. The
+cross-sectional replication is now estimated on one common cohort per
+characteristic set from the 1,000-issuer universe, with two-stage least squares
+and maximum-likelihood standard errors, exact residual Moran moments,
+conditional information criteria and a generated-beta bootstrap. Information
+criteria rank networks with equal parameter counts exactly as their likelihoods
+do, so they are reported for nonspatial versus spatial and single-factor versus
+multifactor comparisons. None of these results supports a claim of superior
+economic measurement, nor can a negative spatial coefficient be relabeled
+positive shock propagation.
 If gains do not survive matched-input and chronological controls, the paper
 must report that finding or revise its question rather than select a favorable
 model after examining evaluation returns.

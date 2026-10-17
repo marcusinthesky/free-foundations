@@ -25,6 +25,10 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 MODELS = ("tabpfn_fast", "tabpfn_full", "tabfm", "exaone")
+SUPERSEDED = (
+    "> Superseded by the matched cross-sectional ladder in "
+    "[`research/ladder`](../../ladder/README.md),"
+)
 
 
 def likelihood(y: FloatArray, x: FloatArray, weights: FloatArray) -> dict[str, float | bool]:
@@ -159,6 +163,9 @@ def run() -> None:
     results.to_csv(output / "likelihood.csv")
     lines = [
         "# Combined-network spatial-error ML comparison",
+        "",
+        SUPERSEDED,
+        "> which uses 33 (four-characteristic) and 395 (three-characteristic) firms.",
         "",
         f"All rows use the same {len(tickers)} firms: {', '.join(tickers)}.",
         "",

@@ -1,5 +1,8 @@
 # Combined-network spatial-error ML comparison
 
+> Superseded by the matched cross-sectional ladder in [`research/ladder`](../../ladder/README.md),
+> which uses 33 (four-characteristic) and 395 (three-characteristic) firms.
+
 All rows use the same 6 firms: CVX, MDT, MPC, MU, VLO, WMT.
 
 The likelihood has one observation per firm: median quarterly excess return over

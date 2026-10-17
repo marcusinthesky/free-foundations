@@ -20,6 +20,7 @@ from free_foundations.fernandez.characteristics import CHARACTERISTICS, build_pa
 from free_foundations.fernandez.evaluation import (
     cross_section,
     forecasts,
+    legacy_betas,
     quarterly_data,
     robust_betas,
 )
@@ -43,7 +44,9 @@ def paper_cross_section(
     counts = quarters.groupby("ticker").size()
     complete = counts.index[counts == 40]
     quarters = quarters.loc[quarters["ticker"].isin(complete)]
-    betas = robust_betas(quarters, output)
+    quarters.to_csv(output / "quarterly-returns.csv", index=False)
+    betas = legacy_betas(robust_betas(quarters, output))
+    betas.rename_axis("ticker").reset_index().to_csv(output / "mm-betas.csv", index=False)
     networks = {}
     for characteristic in CHARACTERISTICS:
         history = (
