@@ -464,6 +464,6 @@ correlation|matched,h3__histories__exaone__item_first_mean|matched|correlation,0
 correlation|matched,h3__histories__exaone__item_last_concat|matched|correlation,0.429,True
 correlation|matched,uniform_network|none|correlation,0.038,False
 correlation|matched,zero_network|none|correlation,0.058,False
-correlation|matched,raw_sample_covariance|none|correlation,0.955,True
+correlation|matched,raw_sample_covariance|none|correlation,0.956,True
 correlation|matched,ff5_mom_diagonal|none|correlation,0.058,False
-correlation|matched,ff5_mom_sample_residual_covariance|none|correlation,0.955,True
+correlation|matched,ff5_mom_sample_residual_covariance|none|correlation,0.956,True

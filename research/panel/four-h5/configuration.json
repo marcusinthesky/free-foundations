@@ -21,6 +21,9 @@
   "support_draws": [],
   "excluded_tickers": [],
   "decoded": null,
+  "support_sizes": [],
+  "representations": null,
+  "models": null,
   "calibration": [
     2016,
     2019

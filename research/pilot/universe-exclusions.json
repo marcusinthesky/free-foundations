@@ -1,0 +1,178 @@
+[
+  {
+    "ticker": "GOOG",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "TSM",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "SPCX",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BRK-B",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "SKHY",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "XOM",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "ASML",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "HSBC",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "JPM-PC",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "SHEL",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "JPM-PD",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "NVS",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BABA",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "RY",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "ARM",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "SAP",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "AZN",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BML-PG",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "MUFG",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BML-PH",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "BML-PL",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "BML-PJ",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "TM",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BAC-PB",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "BAC-PE",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "BAC-PK",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "BHP",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "TD",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "TTE",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "SAN",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "NVO",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "WFC-PY",
+    "reason": "no SEC ticker match or duplicate issuer"
+  },
+  {
+    "ticker": "PBR",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BUD",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "SMFG",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "PBR-A",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "RIO",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "UBS",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "SONY",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BBVA",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "UL",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BP",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "BTI",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  },
+  {
+    "ticker": "MFG",
+    "reason": "no USD US-GAAP annual 10-K assets"
+  }
+]

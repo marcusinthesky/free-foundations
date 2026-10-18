@@ -1,0 +1,150 @@
+[
+  {
+    "year": 2016,
+    "eligible_original": 80,
+    "matched_complete": 7,
+    "tickers": [
+      "BA",
+      "COP",
+      "CVX",
+      "HD",
+      "TMO",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2017,
+    "eligible_original": 84,
+    "matched_complete": 9,
+    "tickers": [
+      "BA",
+      "COP",
+      "CVX",
+      "HD",
+      "MPC",
+      "MRK",
+      "TMO",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2018,
+    "eligible_original": 85,
+    "matched_complete": 10,
+    "tickers": [
+      "ABBV",
+      "BA",
+      "COP",
+      "CVX",
+      "HD",
+      "MPC",
+      "MRK",
+      "TMO",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2019,
+    "eligible_original": 87,
+    "matched_complete": 11,
+    "tickers": [
+      "ABBV",
+      "BA",
+      "COP",
+      "CVX",
+      "HD",
+      "MDT",
+      "MPC",
+      "MRK",
+      "TMO",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2020,
+    "eligible_original": 88,
+    "matched_complete": 9,
+    "tickers": [
+      "BA",
+      "COP",
+      "CVX",
+      "MDT",
+      "MPC",
+      "MRK",
+      "TMO",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2021,
+    "eligible_original": 89,
+    "matched_complete": 6,
+    "tickers": [
+      "COP",
+      "CVX",
+      "MDT",
+      "MPC",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2022,
+    "eligible_original": 91,
+    "matched_complete": 7,
+    "tickers": [
+      "COP",
+      "CVX",
+      "MDT",
+      "MPC",
+      "MU",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2023,
+    "eligible_original": 92,
+    "matched_complete": 6,
+    "tickers": [
+      "CVX",
+      "MDT",
+      "MPC",
+      "MU",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2024,
+    "eligible_original": 94,
+    "matched_complete": 6,
+    "tickers": [
+      "CVX",
+      "MDT",
+      "MPC",
+      "MU",
+      "VLO",
+      "WMT"
+    ]
+  },
+  {
+    "year": 2025,
+    "eligible_original": 95,
+    "matched_complete": 7,
+    "tickers": [
+      "ABBV",
+      "CVX",
+      "MDT",
+      "MPC",
+      "MU",
+      "VLO",
+      "WMT"
+    ]
+  }
+]

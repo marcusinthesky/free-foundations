@@ -1,0 +1,6 @@
+outs:
+- md5: edea696975777c484b925174ca91ed7b.dir
+  size: 17496470
+  nfiles: 290
+  hash: md5
+  path: distances

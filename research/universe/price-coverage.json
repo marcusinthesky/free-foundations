@@ -1,0 +1,6002 @@
+[
+  {
+    "ticker": "NVDA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AAPL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GOOGL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSFT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMZN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "META",
+    "observations": 3425,
+    "first_observation": "2012-05-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AVGO",
+    "observations": 4127,
+    "first_observation": "2009-08-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TSLA",
+    "observations": 3902,
+    "first_observation": "2010-06-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BRK-B",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LLY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MU",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WMT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JPM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "V",
+    "observations": 4476,
+    "first_observation": "2008-03-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JNJ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ABBV",
+    "observations": 3270,
+    "first_observation": "2013-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INTC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PLTR",
+    "observations": 1320,
+    "first_observation": "2020-09-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CVX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CSCO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ORCL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UNH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MRK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BAC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LRCX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PM",
+    "observations": 4478,
+    "first_observation": "2008-03-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NFLX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DELL",
+    "observations": 2357,
+    "first_observation": "2016-08-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PANW",
+    "observations": 3382,
+    "first_observation": "2012-07-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RTX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TMO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TXN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WFC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GEV",
+    "observations": 443,
+    "first_observation": "2024-03-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMGN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRWD",
+    "observations": 1649,
+    "first_observation": "2019-06-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LIN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ANET",
+    "observations": 2911,
+    "first_observation": "2014-06-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SHOP",
+    "observations": 2671,
+    "first_observation": "2015-05-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IBM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KLAC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AXP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "C",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MRVL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GILD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DIS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNDK",
+    "observations": 222,
+    "first_observation": "2025-02-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "QCOM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ABT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PEP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BLK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MCD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UNP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TMUS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SCCO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WELL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PFE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NEE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TJX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DHR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "T",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SCHW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ETN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ISRG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NOW",
+    "observations": 3396,
+    "first_observation": "2012-06-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UBER",
+    "observations": 1671,
+    "first_observation": "2019-05-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MPC",
+    "observations": 3652,
+    "first_observation": "2011-06-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VLO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LMT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PGR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VRTX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SPGI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NEM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WDC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FTNT",
+    "observations": 4054,
+    "first_observation": "2009-11-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BKNG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BMY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MDT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PLD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CVS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PSX",
+    "observations": 3451,
+    "first_observation": "2012-04-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MCK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GLW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SYK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SBUX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LOW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNOW",
+    "observations": 1330,
+    "first_observation": "2020-09-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CME",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NET",
+    "observations": 1584,
+    "first_observation": "2019-09-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ABNB",
+    "observations": 1270,
+    "first_observation": "2020-12-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MAR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FCX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HCA",
+    "observations": 3726,
+    "first_observation": "2011-03-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EQIX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BNY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CEG",
+    "observations": 992,
+    "first_observation": "2022-01-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADBE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PWR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DUK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MELI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ELV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "USB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ICE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CSX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EMR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MRSH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MNST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APP",
+    "observations": 1185,
+    "first_observation": "2021-04-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HOOD",
+    "observations": 1112,
+    "first_observation": "2021-07-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DDOG",
+    "observations": 1580,
+    "first_observation": "2019-09-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HWM",
+    "observations": 2304,
+    "first_observation": "2016-11-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CDNS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WMB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNPS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MRNA",
+    "observations": 1776,
+    "first_observation": "2018-12-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INTU",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PNC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MMM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CTAS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MCO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UPS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EOG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DASH",
+    "observations": 1271,
+    "first_observation": "2020-12-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MDLZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "REGN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SHW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TRV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ECL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EPD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VRT",
+    "observations": 1864,
+    "first_observation": "2018-08-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CMCSA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HLT",
+    "observations": 3031,
+    "first_observation": "2013-12-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ITW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KKR",
+    "observations": 3891,
+    "first_observation": "2010-07-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KMI",
+    "observations": 3744,
+    "first_observation": "2011-02-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LITE",
+    "observations": 2627,
+    "first_observation": "2015-07-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RCL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NOC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GM",
+    "observations": 3802,
+    "first_observation": "2010-11-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SLB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NSC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HPE",
+    "observations": 2566,
+    "first_observation": "2015-10-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CMI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BAM",
+    "observations": 773,
+    "first_observation": "2022-12-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ORLY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RSG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TGT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FDX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AEP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HON",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SPG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APO",
+    "observations": 3712,
+    "first_observation": "2011-03-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AJG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DLR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BE",
+    "observations": 1870,
+    "first_observation": "2018-07-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BSX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "URI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MET",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TRGP",
+    "observations": 3790,
+    "first_observation": "2010-12-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TDG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GWW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OXY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AON",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TEL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AFL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LNG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MPWR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MPLX",
+    "observations": 3313,
+    "first_observation": "2012-10-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OKE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FAST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PCAR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NUE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSTR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NXPI",
+    "observations": 3875,
+    "first_observation": "2010-08-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TFC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FANG",
+    "observations": 3323,
+    "first_observation": "2012-10-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AME",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NTRA",
+    "observations": 2642,
+    "first_observation": "2015-07-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KEYS",
+    "observations": 2817,
+    "first_observation": "2014-10-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "D",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DVN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PSA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BKR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NKE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GRMN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SRE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EBAY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "O",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TEAM",
+    "observations": 2530,
+    "first_observation": "2015-12-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NDAQ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BDX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VST",
+    "observations": 2323,
+    "first_observation": "2016-10-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TER",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FIX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AZO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VEEV",
+    "observations": 3071,
+    "first_observation": "2013-10-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ETR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADSK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CTA-PB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HUM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALAB",
+    "observations": 448,
+    "first_observation": "2024-03-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "F",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "A",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PYPL",
+    "observations": 2640,
+    "first_observation": "2015-07-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WAB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TEVA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "XEL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VMRK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CIEN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KDP",
+    "observations": 4442,
+    "first_observation": "2008-05-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "XYZ",
+    "observations": 2543,
+    "first_observation": "2015-11-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LHX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WDAY",
+    "observations": 3323,
+    "first_observation": "2012-10-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COHR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COIN",
+    "observations": 1186,
+    "first_observation": "2021-04-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FITB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CARR",
+    "observations": 1455,
+    "first_observation": "2020-03-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FERG",
+    "observations": 4023,
+    "first_observation": "2010-01-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IDXX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VTR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IQV",
+    "observations": 3182,
+    "first_observation": "2013-05-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HEI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CVNA",
+    "observations": 2182,
+    "first_observation": "2017-04-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WCN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AIG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ONC",
+    "observations": 2493,
+    "first_observation": "2016-02-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ED",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "P",
+    "observations": 2575,
+    "first_observation": "2015-10-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "YUM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SYY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MCHP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NTAP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PRU",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PAYX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LYV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ILMN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PCG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ODFL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DHI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CBRE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTWO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CLS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RVMD",
+    "observations": 1479,
+    "first_observation": "2020-02-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CMG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TWLO",
+    "observations": 2395,
+    "first_observation": "2016-06-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IBKR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HIG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UI",
+    "observations": 3574,
+    "first_observation": "2011-10-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KVUE",
+    "observations": 668,
+    "first_observation": "2023-05-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PEG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MLM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WEC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RBLX",
+    "observations": 1210,
+    "first_observation": "2021-03-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KMB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SKYD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CCL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXPE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACGL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STLD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BIIB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HSY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CNC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EQT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRWV",
+    "observations": 192,
+    "first_observation": "2025-03-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZS",
+    "observations": 1960,
+    "first_observation": "2018-03-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RMD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IRM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FLEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VMC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZTS",
+    "observations": 3249,
+    "first_observation": "2013-02-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OKTA",
+    "observations": 2196,
+    "first_observation": "2017-04-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RKLB",
+    "observations": 1281,
+    "first_observation": "2020-11-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DXCM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRDO",
+    "observations": 986,
+    "first_observation": "2022-01-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EME",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VG",
+    "observations": 236,
+    "first_observation": "2025-01-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AXON",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MDLN",
+    "observations": 10,
+    "first_observation": "2025-12-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GEHC",
+    "observations": 763,
+    "first_observation": "2022-12-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SUNB",
+    "observations": 0,
+    "first_observation": null,
+    "last_observation": null
+  },
+  {
+    "ticker": "MTB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALNY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HBAN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CQP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RKT",
+    "observations": 1358,
+    "first_observation": "2020-08-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NTRS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IR",
+    "observations": 2172,
+    "first_observation": "2017-05-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RJF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RDDT",
+    "observations": 447,
+    "first_observation": "2024-03-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CTSH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DG",
+    "observations": 4057,
+    "first_observation": "2009-11-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WSM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AEE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WTW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JBL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TDY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ATO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KHC",
+    "observations": 2640,
+    "first_observation": "2015-07-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ON",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WRB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZM",
+    "observations": 1686,
+    "first_observation": "2019-04-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VRSN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FTI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OTIS",
+    "observations": 1455,
+    "first_observation": "2020-03-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MDB",
+    "observations": 2061,
+    "first_observation": "2017-10-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RPRX",
+    "observations": 1394,
+    "first_observation": "2020-06-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HPQ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FOXA",
+    "observations": 1713,
+    "first_observation": "2019-03-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DTE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AWK",
+    "observations": 4452,
+    "first_observation": "2008-04-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CNP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CFG",
+    "observations": 2835,
+    "first_observation": "2014-09-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PPL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SN",
+    "observations": 609,
+    "first_observation": "2023-07-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CINF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CPAY",
+    "observations": 3784,
+    "first_observation": "2010-12-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "QSR",
+    "observations": 2780,
+    "first_observation": "2014-12-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VICI",
+    "observations": 2011,
+    "first_observation": "2018-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DGX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CPRT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CPNG",
+    "observations": 1209,
+    "first_observation": "2021-03-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARES",
+    "observations": 2935,
+    "first_observation": "2014-05-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CASY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXPD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ULTA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FISV",
+    "observations": 4528,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LPLA",
+    "observations": 3802,
+    "first_observation": "2010-11-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ATI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ES",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FFIV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AFRM",
+    "observations": 1248,
+    "first_observation": "2021-01-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VRSK",
+    "observations": 4084,
+    "first_observation": "2009-10-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ECHO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VLTO",
+    "observations": 563,
+    "first_observation": "2023-10-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LVS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DRI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HUBB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "XYL",
+    "observations": 3575,
+    "first_observation": "2011-10-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROIV",
+    "observations": 1272,
+    "first_observation": "2020-12-08",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TPL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "Q",
+    "observations": 46,
+    "first_observation": "2025-10-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FCNCA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SYF",
+    "observations": 2873,
+    "first_observation": "2014-07-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TW",
+    "observations": 1696,
+    "first_observation": "2019-04-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PPG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TPR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DLTR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PFG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BRO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IOT",
+    "observations": 1015,
+    "first_observation": "2021-12-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RBRK",
+    "observations": 423,
+    "first_observation": "2024-04-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IFF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NVT",
+    "observations": 1934,
+    "first_observation": "2018-04-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROKU",
+    "observations": 2076,
+    "first_observation": "2017-09-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MKL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INCY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UTHR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FWONK",
+    "observations": 2890,
+    "first_observation": "2014-07-08",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "L",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DINO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GPN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OMC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "USFD",
+    "observations": 2414,
+    "first_observation": "2016-05-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "XPO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NRG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PHM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXE",
+    "observations": 1229,
+    "first_observation": "2021-02-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOW",
+    "observations": 1707,
+    "first_observation": "2019-03-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SW",
+    "observations": 4414,
+    "first_observation": "2008-06-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CMS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TROW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EIX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "THC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JBHT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VTRS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KEY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GH",
+    "observations": 1820,
+    "first_observation": "2018-10-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ENTG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PKG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INSM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PTC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRCL",
+    "observations": 145,
+    "first_observation": "2025-06-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SMCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMRZ",
+    "observations": 134,
+    "first_observation": "2025-06-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LYB",
+    "observations": 3945,
+    "first_observation": "2010-04-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PR",
+    "observations": 2443,
+    "first_observation": "2016-04-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMCR",
+    "observations": 3428,
+    "first_observation": "2012-05-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RGLD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTSI",
+    "observations": 3470,
+    "first_observation": "2012-03-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SBAC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SSNC",
+    "observations": 3964,
+    "first_observation": "2010-03-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BBY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WWD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LUV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TSN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EVRG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OVV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EFX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CDW",
+    "observations": 3148,
+    "first_observation": "2013-06-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SOFI",
+    "observations": 1255,
+    "first_observation": "2021-01-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SWKS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CNH",
+    "observations": 3083,
+    "first_observation": "2013-09-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FIS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FSLR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GPC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WES",
+    "observations": 3285,
+    "first_observation": "2012-12-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LEN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TOST",
+    "observations": 1074,
+    "first_observation": "2021-09-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZBH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NTNX",
+    "observations": 2326,
+    "first_observation": "2016-09-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RIVN",
+    "observations": 1039,
+    "first_observation": "2021-11-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NDSN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PAA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "U",
+    "observations": 1328,
+    "first_observation": "2020-09-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DT",
+    "observations": 1614,
+    "first_observation": "2019-08-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LNT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GIS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NWS",
+    "observations": 3154,
+    "first_observation": "2013-06-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZBRA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FTV",
+    "observations": 2388,
+    "first_observation": "2016-07-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RGA",
+    "observations": 4353,
+    "first_observation": "2008-09-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EWBC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APG",
+    "observations": 1427,
+    "first_observation": "2020-04-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ESS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TSCO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MEDP",
+    "observations": 2361,
+    "first_observation": "2016-08-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RVTY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FDXF",
+    "observations": 0,
+    "first_observation": null,
+    "last_observation": null
+  },
+  {
+    "ticker": "CLH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FTAI",
+    "observations": 2675,
+    "first_observation": "2015-05-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TLN",
+    "observations": 648,
+    "first_observation": "2023-06-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BALL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FICO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WCC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "J",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BURL",
+    "observations": 3081,
+    "first_observation": "2013-10-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WMG",
+    "observations": 1403,
+    "first_observation": "2020-06-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHRW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ROL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INVH",
+    "observations": 2242,
+    "first_observation": "2017-02-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "H",
+    "observations": 4063,
+    "first_observation": "2009-11-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CDE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NVR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RBC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BEN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LDOS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RBA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXEL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KIM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PFGC",
+    "observations": 2579,
+    "first_observation": "2015-09-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRBG",
+    "observations": 826,
+    "first_observation": "2022-09-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LAMR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "YUMC",
+    "observations": 2315,
+    "first_observation": "2016-10-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JHX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LOGI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WPC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ULS",
+    "observations": 432,
+    "first_observation": "2024-04-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TYL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LSCC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "W",
+    "observations": 2829,
+    "first_observation": "2014-10-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SGI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SOLV",
+    "observations": 444,
+    "first_observation": "2024-03-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UNM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RNR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARMK",
+    "observations": 3031,
+    "first_observation": "2013-12-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MKSI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EQH",
+    "observations": 1922,
+    "first_observation": "2018-05-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GEN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CRL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SUI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MAS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PNFP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LECO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DKS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TRU",
+    "observations": 2646,
+    "first_observation": "2015-06-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SITM",
+    "observations": 1536,
+    "first_observation": "2019-11-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JLL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COKE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AIZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SWK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOCU",
+    "observations": 1931,
+    "first_observation": "2018-04-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PAG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HAS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TRMB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GWRE",
+    "observations": 3505,
+    "first_observation": "2012-01-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OHI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HALO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NBIX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NLY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JAZZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SJM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CACI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MAA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GME",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BF-A",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARCC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GDDY",
+    "observations": 2706,
+    "first_observation": "2015-03-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "REG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALLE",
+    "observations": 3048,
+    "first_observation": "2013-11-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AVY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MLI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GGG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CSL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FLUT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CSGP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BAX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BMNR",
+    "observations": 145,
+    "first_observation": "2025-06-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TXT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FN",
+    "observations": 3904,
+    "first_observation": "2010-06-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BJ",
+    "observations": 1888,
+    "first_observation": "2018-06-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STRL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BBIO",
+    "observations": 1638,
+    "first_observation": "2019-06-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CG",
+    "observations": 3436,
+    "first_observation": "2012-05-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CNA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MANH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TKO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SMTC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ERIE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RPM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IONQ",
+    "observations": 1255,
+    "first_observation": "2021-01-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PEN",
+    "observations": 2587,
+    "first_observation": "2015-09-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AKAM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DTM",
+    "observations": 1131,
+    "first_observation": "2021-07-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EHC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MKC-V",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHTR",
+    "observations": 4023,
+    "first_observation": "2010-01-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BWXT",
+    "observations": 3879,
+    "first_observation": "2010-08-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PNW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SEIC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IVZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CCK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PINS",
+    "observations": 1686,
+    "first_observation": "2019-04-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AFG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LII",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TOL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FIVE",
+    "observations": 3383,
+    "first_observation": "2012-07-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WSO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ASTS",
+    "observations": 1549,
+    "first_observation": "2019-11-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NXT",
+    "observations": 726,
+    "first_observation": "2023-02-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AIT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BTSG",
+    "observations": 485,
+    "first_observation": "2024-01-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DVA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WTS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CORT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CR",
+    "observations": 693,
+    "first_observation": "2023-03-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AR",
+    "observations": 3075,
+    "first_observation": "2013-10-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ELS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BWA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CART",
+    "observations": 574,
+    "first_observation": "2023-09-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HUBS",
+    "observations": 2824,
+    "first_observation": "2014-10-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ELAN",
+    "observations": 1830,
+    "first_observation": "2018-09-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TEM",
+    "observations": 388,
+    "first_observation": "2024-06-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MOG-A",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DECK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SMMT",
+    "observations": 2724,
+    "first_observation": "2015-03-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AHR",
+    "observations": 477,
+    "first_observation": "2024-02-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOCN",
+    "observations": 1200,
+    "first_observation": "2021-03-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FRHC",
+    "observations": 1986,
+    "first_observation": "2018-02-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WTRG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALLY",
+    "observations": 3001,
+    "first_observation": "2014-01-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FIG",
+    "observations": 107,
+    "first_observation": "2025-07-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GLPI",
+    "observations": 3073,
+    "first_observation": "2013-10-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CPT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GNRC",
+    "observations": 3997,
+    "first_observation": "2010-02-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TECH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PAYC",
+    "observations": 2947,
+    "first_observation": "2014-04-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "QXO",
+    "observations": 3448,
+    "first_observation": "2012-04-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMH",
+    "observations": 3124,
+    "first_observation": "2013-08-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LULU",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHYM",
+    "observations": 140,
+    "first_observation": "2025-06-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HRL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UHAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RGEN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AVTR",
+    "observations": 1666,
+    "first_observation": "2019-05-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TXRH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UDR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NYT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARW",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UHS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FHN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ONTO",
+    "observations": 1553,
+    "first_observation": "2019-10-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MOH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FNF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JKHY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FDS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HII",
+    "observations": 3718,
+    "first_observation": "2011-03-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SAIL",
+    "observations": 222,
+    "first_observation": "2025-02-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BSY",
+    "observations": 1325,
+    "first_observation": "2020-09-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IESC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GSAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AES",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IREN",
+    "observations": 1034,
+    "first_observation": "2021-11-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BMRN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EGP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KNX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CLX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALGN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FROG",
+    "observations": 1330,
+    "first_observation": "2020-09-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MDGL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMKR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNAP",
+    "observations": 2222,
+    "first_observation": "2017-03-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AGNC",
+    "observations": 4436,
+    "first_observation": "2008-05-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GMED",
+    "observations": 3372,
+    "first_observation": "2012-08-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ENSG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JEF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RRX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DPZ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BPOP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RRC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MUSA",
+    "observations": 3112,
+    "first_observation": "2013-08-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTCH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PBF",
+    "observations": 3282,
+    "first_observation": "2012-12-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PCVX",
+    "observations": 1396,
+    "first_observation": "2020-06-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UMBF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SSB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTMI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OSCR",
+    "observations": 1215,
+    "first_observation": "2021-03-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OGE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AM",
+    "observations": 2178,
+    "first_observation": "2017-05-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PODD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EVR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BIO-B",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AUR",
+    "observations": 1168,
+    "first_observation": "2021-05-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IBRX",
+    "observations": 2624,
+    "first_observation": "2015-07-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GKOS",
+    "observations": 2646,
+    "first_observation": "2015-06-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WTFC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DAR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LFUS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WMS",
+    "observations": 2877,
+    "first_observation": "2014-07-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CFR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ESTC",
+    "observations": 1819,
+    "first_observation": "2018-10-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HSIC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ORI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ONB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSGS",
+    "observations": 2588,
+    "first_observation": "2015-09-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AEIS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RMBS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DRS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BXP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SANM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SOLS",
+    "observations": 51,
+    "first_observation": "2025-10-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DKNG",
+    "observations": 1619,
+    "first_observation": "2019-07-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KRYS",
+    "observations": 2082,
+    "first_observation": "2017-09-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FCFS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APTV",
+    "observations": 3550,
+    "first_observation": "2011-11-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VNO-PM",
+    "observations": 2029,
+    "first_observation": "2017-12-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZION",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FRT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALSN",
+    "observations": 3470,
+    "first_observation": "2012-03-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PCTY",
+    "observations": 2966,
+    "first_observation": "2014-03-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "R",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TXG",
+    "observations": 1585,
+    "first_observation": "2019-09-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SIRI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CGNX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AYI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LTH",
+    "observations": 1063,
+    "first_observation": "2021-10-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HLI",
+    "observations": 2612,
+    "first_observation": "2015-08-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LLYVK",
+    "observations": 605,
+    "first_observation": "2023-08-04",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FLS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BAH",
+    "observations": 3802,
+    "first_observation": "2010-11-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SAIA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTEK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JXN",
+    "observations": 1088,
+    "first_observation": "2021-09-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VICR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TWST",
+    "observations": 1801,
+    "first_observation": "2018-10-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GTLB",
+    "observations": 1058,
+    "first_observation": "2021-10-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CUBE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VNOM",
+    "observations": 2903,
+    "first_observation": "2014-06-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PRI",
+    "observations": 3963,
+    "first_observation": "2010-04-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FPS",
+    "observations": 0,
+    "first_observation": null,
+    "last_observation": null
+  },
+  {
+    "ticker": "RHP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PCOR",
+    "observations": 1160,
+    "first_observation": "2021-05-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAI",
+    "observations": 136,
+    "first_observation": "2025-06-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CTRE",
+    "observations": 2917,
+    "first_observation": "2014-05-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KYMR",
+    "observations": 1347,
+    "first_observation": "2020-08-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CYTK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CTVA",
+    "observations": 1661,
+    "first_observation": "2019-05-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VMI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ESI",
+    "observations": 3067,
+    "first_observation": "2013-10-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PNR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VOYA",
+    "observations": 3187,
+    "first_observation": "2013-05-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BRX",
+    "observations": 3061,
+    "first_observation": "2013-10-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHRD",
+    "observations": 3910,
+    "first_observation": "2010-06-17",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHWY",
+    "observations": 1647,
+    "first_observation": "2019-06-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HUT",
+    "observations": 1966,
+    "first_observation": "2018-03-08",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BRKR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ADC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PTGX",
+    "observations": 2361,
+    "first_observation": "2016-08-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KNSL",
+    "observations": 2371,
+    "first_observation": "2016-07-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SPXC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TGTX",
+    "observations": 3942,
+    "first_observation": "2010-05-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UGI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IDCC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AXSM",
+    "observations": 2543,
+    "first_observation": "2015-11-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "REXR",
+    "observations": 3133,
+    "first_observation": "2013-07-19",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VIAV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FORM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MHK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GAP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "THG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VSAT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WLK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NEU",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AOS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COLB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CBC",
+    "observations": 27,
+    "first_observation": "2025-11-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HNGE",
+    "observations": 154,
+    "first_observation": "2025-05-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IDA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CBSH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZETA",
+    "observations": 1146,
+    "first_observation": "2021-06-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ATR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MOD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NNN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARWR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AAL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OSK",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LEVI",
+    "observations": 1706,
+    "first_observation": "2019-03-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ETSY",
+    "observations": 2695,
+    "first_observation": "2015-04-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZWS",
+    "observations": 3460,
+    "first_observation": "2012-03-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TKR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WYNN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MORN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NTSK",
+    "observations": 73,
+    "first_observation": "2025-09-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CNM",
+    "observations": 1117,
+    "first_observation": "2021-07-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DBX",
+    "observations": 1955,
+    "first_observation": "2018-03-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LNC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HQY",
+    "observations": 2873,
+    "first_observation": "2014-07-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NFG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KTOS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BOKF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LINE",
+    "observations": 361,
+    "first_observation": "2024-07-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KMX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "APPF",
+    "observations": 2645,
+    "first_observation": "2015-06-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "S",
+    "observations": 1132,
+    "first_observation": "2021-06-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SYRE",
+    "observations": 2449,
+    "first_observation": "2016-04-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PACS",
+    "observations": 433,
+    "first_observation": "2024-04-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "URBN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AVT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LW",
+    "observations": 2297,
+    "first_observation": "2016-11-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SLAB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TAP",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RAL",
+    "observations": 132,
+    "first_observation": "2025-06-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SFD",
+    "observations": 234,
+    "first_observation": "2025-01-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MGM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AXS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AGCO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTAN",
+    "observations": 263,
+    "first_observation": "2024-12-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SSD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACA",
+    "observations": 1798,
+    "first_observation": "2018-11-05",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ZG",
+    "observations": 3635,
+    "first_observation": "2011-07-20",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ARE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AXTA",
+    "observations": 2800,
+    "first_observation": "2014-11-12",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MP",
+    "observations": 1390,
+    "first_observation": "2020-06-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PRMB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IONS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CELH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EMN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTDR",
+    "observations": 3499,
+    "first_observation": "2012-02-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AWI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TPG",
+    "observations": 995,
+    "first_observation": "2022-01-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ATH-PA",
+    "observations": 1651,
+    "first_observation": "2019-06-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SARO",
+    "observations": 313,
+    "first_observation": "2024-10-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NE",
+    "observations": 1147,
+    "first_observation": "2021-06-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MATX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "COMP",
+    "observations": 1194,
+    "first_observation": "2021-04-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PPC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VLY",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TRNO",
+    "observations": 3998,
+    "first_observation": "2010-02-10",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VSXY",
+    "observations": 1118,
+    "first_observation": "2021-07-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALKS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CLF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NCLH",
+    "observations": 3258,
+    "first_observation": "2013-01-18",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "STAG",
+    "observations": 3700,
+    "first_observation": "2011-04-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MSA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FSS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MGY",
+    "observations": 2139,
+    "first_observation": "2017-06-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HXL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PRAX",
+    "observations": 1308,
+    "first_observation": "2020-10-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NOV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RUSHB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ELF",
+    "observations": 2332,
+    "first_observation": "2016-09-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PATH",
+    "observations": 1181,
+    "first_observation": "2021-04-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAVA",
+    "observations": 639,
+    "first_observation": "2023-06-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AMRX",
+    "observations": 1925,
+    "first_observation": "2018-05-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VCTR",
+    "observations": 1985,
+    "first_observation": "2018-02-08",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FAF",
+    "observations": 3923,
+    "first_observation": "2010-05-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VFC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NAVN",
+    "observations": 43,
+    "first_observation": "2025-10-30",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DUOL",
+    "observations": 1113,
+    "first_observation": "2021-07-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HIMS",
+    "observations": 1584,
+    "first_observation": "2019-09-13",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GTES",
+    "observations": 1995,
+    "first_observation": "2018-01-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MAC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LNTH",
+    "observations": 2646,
+    "first_observation": "2015-06-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ANF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SSRM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LAD",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MXL",
+    "observations": 3969,
+    "first_observation": "2010-03-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ESE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TXNM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OMF",
+    "observations": 3071,
+    "first_observation": "2013-10-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AAOI",
+    "observations": 3085,
+    "first_observation": "2013-09-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LYFT",
+    "observations": 1700,
+    "first_observation": "2019-03-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACT",
+    "observations": 1078,
+    "first_observation": "2021-09-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "UBSI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ACI",
+    "observations": 1386,
+    "first_observation": "2020-06-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SWX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EPAM",
+    "observations": 3495,
+    "first_observation": "2012-02-08",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RNG",
+    "observations": 3084,
+    "first_observation": "2013-09-27",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FLR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RIG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "POOL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "M",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "QLYS",
+    "observations": 3333,
+    "first_observation": "2012-09-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "G",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OAK-PB",
+    "observations": 1861,
+    "first_observation": "2018-08-07",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AVAV",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OTEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CVLT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INGR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CVI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IOVA",
+    "observations": 3826,
+    "first_observation": "2010-10-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "JSM",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CWEN",
+    "observations": 2674,
+    "first_observation": "2015-05-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PLXS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "INGM",
+    "observations": 297,
+    "first_observation": "2024-10-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SLG-PI",
+    "observations": 3368,
+    "first_observation": "2012-08-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MBLY",
+    "observations": 798,
+    "first_observation": "2022-10-26",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "KNSA",
+    "observations": 1911,
+    "first_observation": "2018-05-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FIGR",
+    "observations": 78,
+    "first_observation": "2025-09-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ENS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "FNB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SFM",
+    "observations": 3124,
+    "first_observation": "2013-08-01",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "AAON",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OWL",
+    "observations": 1268,
+    "first_observation": "2020-12-14",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "POWL",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EXLS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MUR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MOS",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HRB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NPO",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RYTM",
+    "observations": 2069,
+    "first_observation": "2017-10-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CPB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VAL",
+    "observations": 1173,
+    "first_observation": "2021-05-03",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LEA",
+    "observations": 4061,
+    "first_observation": "2009-11-09",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ST",
+    "observations": 3978,
+    "first_observation": "2010-03-11",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CROX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ALGM",
+    "observations": 1299,
+    "first_observation": "2020-10-29",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LGND",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BLCO",
+    "observations": 917,
+    "first_observation": "2022-05-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BLDR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CZR",
+    "observations": 2837,
+    "first_observation": "2014-09-22",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HWC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GATX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BKH",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "HOMB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LOAR",
+    "observations": 423,
+    "first_observation": "2024-04-25",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TEX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WULF",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LSTR",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ESNT",
+    "observations": 3060,
+    "first_observation": "2013-10-31",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MKTX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TTD",
+    "observations": 2333,
+    "first_observation": "2016-09-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CAKE",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "MTG",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "GBCI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CHDN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SXT",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "PEGA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BROS",
+    "observations": 1079,
+    "first_observation": "2021-09-15",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RYN",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "EPRT",
+    "observations": 1893,
+    "first_observation": "2018-06-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "LKQ",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CACC",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DLB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "WH",
+    "observations": 1915,
+    "first_observation": "2018-05-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "RLI",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "CWST",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ECG",
+    "observations": 295,
+    "first_observation": "2024-10-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "VRNS",
+    "observations": 2979,
+    "first_observation": "2014-02-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SAIC",
+    "observations": 3093,
+    "first_observation": "2013-09-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "BXSL",
+    "observations": 1048,
+    "first_observation": "2021-10-28",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "OLLI",
+    "observations": 2632,
+    "first_observation": "2015-07-16",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "TFX",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "SNDR",
+    "observations": 2197,
+    "first_observation": "2017-04-06",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "IMVT",
+    "observations": 1642,
+    "first_observation": "2019-06-21",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "DOCS",
+    "observations": 1136,
+    "first_observation": "2021-06-24",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ORA",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "NIQ",
+    "observations": 113,
+    "first_observation": "2025-07-23",
+    "last_observation": "2025-12-31"
+  },
+  {
+    "ticker": "ASB",
+    "observations": 4529,
+    "first_observation": "2008-01-02",
+    "last_observation": "2025-12-31"
+  }
+]

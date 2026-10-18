@@ -1,0 +1,45 @@
+{
+  "firm_year_states": 1173,
+  "features": 19,
+  "selected_fact_rows": 18517,
+  "future_filing_violations": 0,
+  "future_period_violations": 0,
+  "missing_fraction_by_feature": {
+    "log_assets": 0.0,
+    "liabilities": 0.30434782608695654,
+    "equity": 0.0,
+    "cash": 0.10400682011935208,
+    "receivables": 0.29241261722080136,
+    "inventory": 0.2932651321398124,
+    "current_assets": 0.1526001705029838,
+    "current_liabilities": 0.1526001705029838,
+    "ppe": 0.11082693947144075,
+    "goodwill": 0.07502131287297528,
+    "intangibles": 0.19948849104859334,
+    "retained": 0.0068201193520886615,
+    "revenue": 0.10485933503836317,
+    "income": 0.01875532821824382,
+    "operating_income": 0.2549019607843137,
+    "operating_cash": 0.1474850809889173,
+    "capex": 0.3145780051150895,
+    "research": 0.4416027280477408,
+    "interest": 0.24040920716112532
+  },
+  "annual_cohorts": {
+    "2016": 80,
+    "2017": 84,
+    "2018": 85,
+    "2019": 87,
+    "2020": 88,
+    "2021": 89,
+    "2022": 91,
+    "2023": 92,
+    "2024": 94,
+    "2025": 95
+  },
+  "model_runtime": {
+    "tabpfn": "9.2.0",
+    "torch": "2.14.1+cpu",
+    "huggingface-hub": "0.36.2"
+  }
+}

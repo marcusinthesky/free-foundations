@@ -1,0 +1,101 @@
+ticker,sic,description,classification_vintage
+NVDA,3674,Semiconductors & Related Devices,2026-10-16
+AAPL,3571,Electronic Computers,2026-10-16
+GOOGL,7370,"Services-Computer Programming, Data Processing, Etc.",2026-10-16
+MSFT,7372,Services-Prepackaged Software,2026-10-16
+AMZN,5961,Retail-Catalog & Mail-Order Houses,2026-10-16
+META,7370,"Services-Computer Programming, Data Processing, Etc.",2026-10-16
+AVGO,3674,Semiconductors & Related Devices,2026-10-16
+TSLA,3711,Motor Vehicles & Passenger Car Bodies,2026-10-16
+BRK-A,6331,"Fire, Marine & Casualty Insurance",2026-10-16
+LLY,2834,Pharmaceutical Preparations,2026-10-16
+MU,3674,Semiconductors & Related Devices,2026-10-16
+WMT,5331,Retail-Variety Stores,2026-10-16
+AMD,3674,Semiconductors & Related Devices,2026-10-16
+JPM,6021,National Commercial Banks,2026-10-16
+V,7389,"Services-Business Services, NEC",2026-10-16
+JNJ,2834,Pharmaceutical Preparations,2026-10-16
+MA,7389,"Services-Business Services, NEC",2026-10-16
+INTC,3674,Semiconductors & Related Devices,2026-10-16
+ABBV,2834,Pharmaceutical Preparations,2026-10-16
+PLTR,7372,Services-Prepackaged Software,2026-10-16
+COST,5331,Retail-Variety Stores,2026-10-16
+CSCO,3576,Computer Communications Equipment,2026-10-16
+CVX,2911,Petroleum Refining,2026-10-16
+ORCL,7372,Services-Prepackaged Software,2026-10-16
+KO,2080,Beverages,2026-10-16
+UNH,6324,Hospital & Medical Service Plans,2026-10-16
+PG,2840,"Soap, Detergents, Cleang Preparations, Perfumes, Cosmetics",2026-10-16
+BAC,6021,National Commercial Banks,2026-10-16
+MRK,2834,Pharmaceutical Preparations,2026-10-16
+LRCX,3559,"Special Industry Machinery, NEC",2026-10-16
+AMAT,3674,Semiconductors & Related Devices,2026-10-16
+CAT,3531,Construction Machinery & Equip,2026-10-16
+GE,3600,Electronic & Other Electrical Equipment (No Computer Equip),2026-10-16
+PM,2111,Cigarettes,2026-10-16
+HD,5211,Retail-Lumber & Other Building Materials Dealers,2026-10-16
+PANW,3577,"Computer Peripheral Equipment, NEC",2026-10-16
+NFLX,7841,Services-Video Tape Rental,2026-10-16
+DELL,3571,Electronic Computers,2026-10-16
+MS,6211,"Security Brokers, Dealers & Flotation Companies",2026-10-16
+GS,6211,"Security Brokers, Dealers & Flotation Companies",2026-10-16
+TMO,3829,"Measuring & Controlling Devices, NEC",2026-10-16
+TXN,3674,Semiconductors & Related Devices,2026-10-16
+RTX,3724,Aircraft Engines & Engine Parts,2026-10-16
+CRWD,7372,Services-Prepackaged Software,2026-10-16
+WFC,6021,National Commercial Banks,2026-10-16
+GEV,3600,Electronic & Other Electrical Equipment (No Computer Equip),2026-10-16
+AMGN,2836,"Biological Products, (No Diagnostic Substances)",2026-10-16
+ANET,3576,Computer Communications Equipment,2026-10-16
+SHOP,7372,Services-Prepackaged Software,2026-10-16
+KLAC,3827,Optical Instruments & Lenses,2026-10-16
+LIN,2810,Industrial Inorganic Chemicals,2026-10-16
+IBM,3570,Computer & office Equipment,2026-10-16
+MRVL,3674,Semiconductors & Related Devices,2026-10-16
+AXP,6199,Finance Services,2026-10-16
+C,6021,National Commercial Banks,2026-10-16
+CRM,7372,Services-Prepackaged Software,2026-10-16
+SNDK,3572,Computer Storage Devices,2026-10-16
+APH,3678,Electronic Connectors,2026-10-16
+ADI,3674,Semiconductors & Related Devices,2026-10-16
+GILD,2836,"Biological Products, (No Diagnostic Substances)",2026-10-16
+DIS,7990,Services-Miscellaneous Amusement & Recreation,2026-10-16
+QCOM,3663,Radio & Tv Broadcasting & Communications Equipment,2026-10-16
+VZ,4813,Telephone Communications (No Radiotelephone),2026-10-16
+ABT,2834,Pharmaceutical Preparations,2026-10-16
+DE,3523,Farm Machinery & Equipment,2026-10-16
+PEP,2080,Beverages,2026-10-16
+BLK,6211,"Security Brokers, Dealers & Flotation Companies",2026-10-16
+MCD,5812,Retail-Eating  Places,2026-10-16
+UNP,4011,"Railroads, Line-Haul Operating",2026-10-16
+SCCO,1000,Metal Mining,2026-10-16
+COP,2911,Petroleum Refining,2026-10-16
+WELL,6798,Real Estate Investment Trusts,2026-10-16
+TMUS,4812,Radiotelephone Communications,2026-10-16
+PFE,2834,Pharmaceutical Preparations,2026-10-16
+NEE,4911,Electric Services,2026-10-16
+SCHW,6211,"Security Brokers, Dealers & Flotation Companies",2026-10-16
+DHR,3823,"Industrial Instruments For Measurement, Display, and Control",2026-10-16
+T,4813,Telephone Communications (No Radiotelephone),2026-10-16
+TJX,5651,Retail-Family Clothing Stores,2026-10-16
+STX,3572,Computer Storage Devices,2026-10-16
+ETN,3590,Misc Industrial & Commercial Machinery & Equipment,2026-10-16
+NOW,7372,Services-Prepackaged Software,2026-10-16
+ISRG,3842,"Orthopedic, Prosthetic & Surgical Appliances & Supplies",2026-10-16
+BA,3721,Aircraft,2026-10-16
+UBER,7389,"Services-Business Services, NEC",2026-10-16
+ACN,7389,"Services-Business Services, NEC",2026-10-16
+CB,6331,"Fire, Marine & Casualty Insurance",2026-10-16
+MPC,2911,Petroleum Refining,2026-10-16
+FTNT,3577,"Computer Peripheral Equipment, NEC",2026-10-16
+WDC,3572,Computer Storage Devices,2026-10-16
+VRTX,2834,Pharmaceutical Preparations,2026-10-16
+VLO,2911,Petroleum Refining,2026-10-16
+SPGI,7320,"Services-Consumer Credit Reporting, Collection Agencies",2026-10-16
+BKNG,4700,Transportation Services,2026-10-16
+PGR,6331,"Fire, Marine & Casualty Insurance",2026-10-16
+BMY,2834,Pharmaceutical Preparations,2026-10-16
+MO,2111,Cigarettes,2026-10-16
+LMT,3760,Guided Missiles & Space Vehicles & Parts,2026-10-16
+MDT,3845,Electromedical & Electrotherapeutic Apparatus,2026-10-16
+NEM,1040,Gold and Silver Ores,2026-10-16

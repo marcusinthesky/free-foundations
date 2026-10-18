@@ -79,6 +79,7 @@
     "QXO"
   ],
   "past_complete_days": 554,
+  "reference_firms": 740,
   "evaluation_days": 250,
   "excluded_outcome_dates": [
     "2018-01-02"

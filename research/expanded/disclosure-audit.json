@@ -1,0 +1,14 @@
+{
+  "states": 1300,
+  "candidate_concepts": 5010,
+  "selected_facts": 306560,
+  "future_filings": 0,
+  "future_periods": 0,
+  "units": [
+    "USD",
+    "USD/shares",
+    "pure",
+    "shares"
+  ],
+  "scope": "entity-wide standard US-GAAP, annual 10-K only"
+}

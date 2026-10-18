@@ -45,4 +45,4 @@
 | currency | Local returns converted to USD | USD |
 | inflation | Inflation-adjusted ratios | No inflation adjustment |
 | estimator_software | S-Plus 7.0 | R robustbase and Python (NumPy/SciPy) |
-| standard_errors | Outer product of first derivatives | Information matrix: log|I - lambda W| has no per-observation split |
+| standard_errors | Outer product of first derivatives | Information matrix: log |

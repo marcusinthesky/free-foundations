@@ -61,6 +61,7 @@
   ],
   "excluded_tickers": [],
   "past_complete_days": 754,
+  "reference_firms": 778,
   "evaluation_days": 252,
   "excluded_outcome_dates": [
     "2020-01-02"

@@ -22,9 +22,9 @@ full comparison. The first run downloads a roughly 334 MB Fast checkpoint.
 Subsequent runs reuse cached inputs and embeddings. To run individual stages:
 
 ```sh
-uv run --project src/python --frozen python -m free_foundations.pilot markets
-uv run --project src/python --frozen python -m free_foundations.pilot data
-uv run --project src/python --frozen --extra tabpfn python -m free_foundations.pilot run --pretrained
+uv run --project src/python --frozen free-foundations pilot run --stage markets
+uv run --project src/python --frozen free-foundations pilot run --stage data
+uv run --project src/python --frozen --extra tabpfn free-foundations pilot run --stage run --pretrained
 ```
 
 Omit `--pretrained` for the accounting/PCA baselines alone. The CLI can be called

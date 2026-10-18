@@ -1,0 +1,1818 @@
+schema: '2.0'
+stages:
+  universe:
+    cmd: uv run --project src/python --frozen free-foundations universe run
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/universe/run.json
+      hash: md5
+      md5: 1f7c14d83625d12a35a12408ecb22fef
+      size: 18675
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/universe/README.md
+      hash: md5
+      md5: 4b93ade3cf22c77463fe89f569f11c79
+      size: 2849
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: research/universe/configuration.json
+      hash: md5
+      md5: d5780c5009741d8f87c7654a35a12b9a
+      size: 150
+    - path: research/universe/coverage.csv
+      hash: md5
+      md5: ba474e024161fbd2286625554738a5b2
+      size: 695
+    - path: research/universe/manifest.json
+      hash: md5
+      md5: 0a011268035a8c8060ede94d359f6d43
+      size: 245454
+    - path: research/universe/price-coverage.json
+      hash: md5
+      md5: 7fe1dae2fe8b364377803a9a05581a85
+      size: 132213
+    - path: research/universe/price-failures.json
+      hash: md5
+      md5: 4189ec762bd0106b567bb6993ca0883e
+      size: 32
+    - path: research/universe/status.json
+      hash: md5
+      md5: da5c3368f4625465cdc8050e5761400b
+      size: 213
+    - path: research/universe/universe-exclusions.json
+      hash: md5
+      md5: 65fae72c861b270ccefff126999bcb2f
+      size: 29499
+    - path: research/universe/universe.csv
+      hash: md5
+      md5: 65bc1623ad1151e89dc2f58113149fa1
+      size: 50469
+  pilot:
+    cmd: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra
+      tabpfn free-foundations pilot run --stage all --pretrained
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/pilot/run.json
+      hash: md5
+      md5: d4a739342dde12ede0999c2f3a3e955d
+      size: 36627
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/pilot/annual.csv
+      hash: md5
+      md5: 0323fc8fbc5c038815e2b38131c73c23
+      size: 9408
+    - path: research/pilot/cache
+      hash: md5
+      md5: 8df8fd96108598b5047172fe32a526d5.dir
+      size: 940462566
+      nfiles: 163
+    - path: research/pilot/cohorts.json
+      hash: md5
+      md5: 01a4ff4acd9d73096517c4d8b7dd8167
+      size: 10027
+    - path: research/pilot/comparison.png
+      hash: md5
+      md5: fd5d950ba360b40df282dea9c7365fd9
+      size: 104183
+    - path: research/pilot/comparison.svg
+      hash: md5
+      md5: d4d83321da12f522d823020ada21fd5a
+      size: 70121
+    - path: research/pilot/execution-status.json
+      hash: md5
+      md5: 7ecbd2a1d7c5e89bc8914334788f47a3
+      size: 163
+    - path: research/pilot/manifest.json
+      hash: md5
+      md5: 3291b51c347f7f043c375b54501581e7
+      size: 14969
+    - path: research/pilot/paired-comparisons.csv
+      hash: md5
+      md5: eb20f26fe5b11fe2faf6b370dc750b61
+      size: 809
+    - path: research/pilot/price-coverage.json
+      hash: md5
+      md5: 1cc5f30164440912286c21786f50fb04
+      size: 2304
+    - path: research/pilot/run-summary.json
+      hash: md5
+      md5: b5d82649654ecaf79a387a37a75d131d
+      size: 556
+    - path: research/pilot/summary.csv
+      hash: md5
+      md5: 70600e331c74a18b2a95e38deb9f4483
+      size: 1525
+    - path: research/pilot/universe-exclusions.json
+      hash: md5
+      md5: 9cc5803f8cb451e14c7d19ccc2853d9c
+      size: 3635
+    - path: research/pilot/universe.csv
+      hash: md5
+      md5: 0743f76d37f1563ac49024de153573b4
+      size: 4673
+  expanded_run:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations expanded run
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/expanded/run.json
+      hash: md5
+      md5: 1e435bcc5211d3412e6f7b1bcb36a43c
+      size: 48994
+    - path: research/pilot/cache
+      hash: md5
+      md5: 8df8fd96108598b5047172fe32a526d5.dir
+      size: 940462566
+      nfiles: 163
+    - path: research/pilot/universe.csv
+      hash: md5
+      md5: 0743f76d37f1563ac49024de153573b4
+      size: 4673
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/expanded/annual-2016.csv
+      hash: md5
+      md5: bac24c05461af7e6827675c04b0e474a
+      size: 24211
+    - path: research/expanded/annual-2017.csv
+      hash: md5
+      md5: 21a2b3edb69eee67a732006ccb007602
+      size: 24148
+    - path: research/expanded/annual-2018.csv
+      hash: md5
+      md5: 8750d3619fc91014c71d01ffde92a95a
+      size: 24114
+    - path: research/expanded/annual-2019.csv
+      hash: md5
+      md5: c96b83df1e88b6678c77dd8089659eff
+      size: 24155
+    - path: research/expanded/annual-2020.csv
+      hash: md5
+      md5: 93ce3fc5c12788d9e7bf18a054616763
+      size: 24084
+    - path: research/expanded/annual-2021.csv
+      hash: md5
+      md5: 184756e955bae248ad4904b43bdac76b
+      size: 24071
+    - path: research/expanded/annual-2022.csv
+      hash: md5
+      md5: 5695e477b83cc8edf9601c72313f22f1
+      size: 23989
+    - path: research/expanded/annual-2023.csv
+      hash: md5
+      md5: 421262b8be122ba77266c8a2aad27dfe
+      size: 23965
+    - path: research/expanded/annual-2024.csv
+      hash: md5
+      md5: f6417b6870b1de79093732f1e7ddd7c1
+      size: 24032
+    - path: research/expanded/annual-2025.csv
+      hash: md5
+      md5: 63da594f3b8adcae1084c221d07f1b0b
+      size: 24032
+    - path: research/expanded/annual.csv
+      hash: md5
+      md5: 10d5037f4550dd1fb98b93b28b896bd7
+      size: 240252
+    - path: research/expanded/cache/ages.parquet
+      hash: md5
+      md5: b607f2e9dae91c3258938436d9fbe938
+      size: 6142681
+    - path: research/expanded/cache/broad-audit.parquet
+      hash: md5
+      md5: 2194767a9c3222279c219514921b1461
+      size: 2207781
+    - path: research/expanded/cache/broad.parquet
+      hash: md5
+      md5: d0b1eb281d6a4383e949e9a729a17e35
+      size: 7610270
+    - path: research/expanded/cache/scores-2016.parquet
+      hash: md5
+      md5: a43c0984f88c840bf1a8e89cb5985117
+      size: 1345717
+    - path: research/expanded/cache/scores-2017.parquet
+      hash: md5
+      md5: 8424735cc3aee240c168471954575924
+      size: 1340989
+    - path: research/expanded/cache/scores-2018.parquet
+      hash: md5
+      md5: 5ba4a1db05df0548900c21bcacfa27dc
+      size: 1340992
+    - path: research/expanded/cache/scores-2019.parquet
+      hash: md5
+      md5: 5ed2a76ce6346361edf99f0d2e2e52aa
+      size: 1345717
+    - path: research/expanded/cache/scores-2020.parquet
+      hash: md5
+      md5: eb7e5f0ddf10cabdf85bc5504d77f365
+      size: 1351445
+    - path: research/expanded/cache/scores-2021.parquet
+      hash: md5
+      md5: ed77691fbe1adfca5a5605c492570329
+      size: 1345717
+    - path: research/expanded/cache/scores-2022.parquet
+      hash: md5
+      md5: 56862c55d098620f941bc793d71b57e5
+      size: 1340990
+    - path: research/expanded/cache/scores-2023.parquet
+      hash: md5
+      md5: 0b1e0dc329c26b9e7f2d00307b5ce58d
+      size: 1335683
+    - path: research/expanded/cache/scores-2024.parquet
+      hash: md5
+      md5: a2faaf8aa70a9cca2e8567b06e13f3b5
+      size: 1345721
+    - path: research/expanded/cache/scores-2025.parquet
+      hash: md5
+      md5: 5ebbba6aedd254d21f8c8f9be622fa43
+      size: 1335684
+    - path: research/expanded/cache/submissions
+      hash: md5
+      md5: 1f01da57c4cb6e953812ffb0d99025f0.dir
+      size: 33184906
+      nfiles: 100
+    - path: research/expanded/checkpoints.json
+      hash: md5
+      md5: 8222eb7b6e722ef494dbbf35418992d7
+      size: 1122
+    - path: research/expanded/disclosure-audit.json
+      hash: md5
+      md5: 65f797eace477c0c573baedde468bdcf
+      size: 258
+    - path: research/expanded/distance-inventory.csv
+      hash: md5
+      md5: b375fb56beceaa53c2a40b9b06adb62b
+      size: 180286
+    - path: research/expanded/distances
+      hash: md5
+      md5: 17dc4042c59ec05376a92f9092801e09.dir
+      size: 114492523
+      nfiles: 980
+    - path: research/expanded/execution-status.json
+      hash: md5
+      md5: 1012f56965b3d1da2d195dbe874f2b5b
+      size: 443
+    - path: research/expanded/industry.csv
+      hash: md5
+      md5: b76dc7f7b0e99a74053af23dcb1a71fb
+      size: 5364
+    - path: research/expanded/manifest.json
+      hash: md5
+      md5: 2ee1e659828a779e697f9f2c999e1a64
+      size: 18427
+    - path: research/expanded/schemas
+      hash: md5
+      md5: c2aa83c4ec43d7fcb1d75b997ef4b5fc.dir
+      size: 1499180
+      nfiles: 60
+  expanded_report:
+    cmd: uv run --project src/python --frozen free-foundations expanded report
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/expanded/report.json
+      hash: md5
+      md5: d754a924af86194ec7e5861fa533544e
+      size: 4968
+    - path: research/expanded/annual.csv
+      hash: md5
+      md5: 10d5037f4550dd1fb98b93b28b896bd7
+      size: 240252
+    - path: research/expanded/cache/scores-2016.parquet
+      hash: md5
+      md5: a43c0984f88c840bf1a8e89cb5985117
+      size: 1345717
+    - path: research/expanded/cache/scores-2017.parquet
+      hash: md5
+      md5: 8424735cc3aee240c168471954575924
+      size: 1340989
+    - path: research/expanded/cache/scores-2018.parquet
+      hash: md5
+      md5: 5ba4a1db05df0548900c21bcacfa27dc
+      size: 1340992
+    - path: research/expanded/cache/scores-2019.parquet
+      hash: md5
+      md5: 5ed2a76ce6346361edf99f0d2e2e52aa
+      size: 1345717
+    - path: research/expanded/cache/scores-2020.parquet
+      hash: md5
+      md5: eb7e5f0ddf10cabdf85bc5504d77f365
+      size: 1351445
+    - path: research/expanded/cache/scores-2021.parquet
+      hash: md5
+      md5: ed77691fbe1adfca5a5605c492570329
+      size: 1345717
+    - path: research/expanded/cache/scores-2022.parquet
+      hash: md5
+      md5: 56862c55d098620f941bc793d71b57e5
+      size: 1340990
+    - path: research/expanded/cache/scores-2023.parquet
+      hash: md5
+      md5: 0b1e0dc329c26b9e7f2d00307b5ce58d
+      size: 1335683
+    - path: research/expanded/cache/scores-2024.parquet
+      hash: md5
+      md5: a2faaf8aa70a9cca2e8567b06e13f3b5
+      size: 1345721
+    - path: research/expanded/cache/scores-2025.parquet
+      hash: md5
+      md5: 5ebbba6aedd254d21f8c8f9be622fa43
+      size: 1335684
+    - path: research/expanded/distance-inventory.csv
+      hash: md5
+      md5: b375fb56beceaa53c2a40b9b06adb62b
+      size: 180286
+    - path: research/expanded/distances
+      hash: md5
+      md5: 17dc4042c59ec05376a92f9092801e09.dir
+      size: 114492523
+      nfiles: 980
+    - path: research/expanded/execution-status.json
+      hash: md5
+      md5: 1012f56965b3d1da2d195dbe874f2b5b
+      size: 443
+    outs:
+    - path: research/expanded/RESULTS.md
+      hash: md5
+      md5: 7751b085a80d96ec7916a3a37a88c596
+      size: 3262
+    - path: research/expanded/comparison.png
+      hash: md5
+      md5: 61cef030afaa62ba5e8c6172a993ed58
+      size: 202550
+    - path: research/expanded/comparison.svg
+      hash: md5
+      md5: fc272936f8b2292838e27383516eb683
+      size: 117687
+    - path: research/expanded/distance-audit.json
+      hash: md5
+      md5: 36ebff7fb063839a12b9e0e434d29294
+      size: 464
+    - path: research/expanded/geometry-sensitivity.csv
+      hash: md5
+      md5: dda88d6a2a5320f5cdbdc6fbd854ef2c
+      size: 40335
+    - path: research/expanded/permutation-comparisons.csv
+      hash: md5
+      md5: 0751f072bdce86dc3f734a3e28373f83
+      size: 5774
+    - path: research/expanded/summary.csv
+      hash: md5
+      md5: 0008626b46e9b3dd6987374fefc0a0ab
+      size: 23263
+  fernandez_run:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations fernandez run
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/fernandez/run.json
+      hash: md5
+      md5: f285d82e916ed30375096361455e09d5
+      size: 51509
+    - path: research/expanded/cache/ages.parquet
+      hash: md5
+      md5: b607f2e9dae91c3258938436d9fbe938
+      size: 6142681
+    - path: research/expanded/cache/broad.parquet
+      hash: md5
+      md5: d0b1eb281d6a4383e949e9a729a17e35
+      size: 7610270
+    - path: research/pilot/cache
+      hash: md5
+      md5: 8df8fd96108598b5047172fe32a526d5.dir
+      size: 940462566
+      nfiles: 163
+    - path: src/python/src/free_foundations/fernandez/betas.R
+      hash: md5
+      md5: f7d99ee30855e95c9404de1a1cc2a03d
+      size: 3090
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/fernandez/annual-2016.csv
+      hash: md5
+      md5: 0a6be33cb221a5da455c068cc3b1151d
+      size: 4676
+    - path: research/fernandez/annual-2017.csv
+      hash: md5
+      md5: f3a26ecbfa4c72cdb902556cda960435
+      size: 4649
+    - path: research/fernandez/annual-2018.csv
+      hash: md5
+      md5: 12ac249a3e13cdde4e6b0aafb940d5be
+      size: 4685
+    - path: research/fernandez/annual-2019.csv
+      hash: md5
+      md5: dad618c48f7f214e3d832dd2b8708f28
+      size: 4715
+    - path: research/fernandez/annual-2020.csv
+      hash: md5
+      md5: 926d1cffd9db00444aaa45492e757edc
+      size: 4643
+    - path: research/fernandez/annual-2021.csv
+      hash: md5
+      md5: b6ceb74af5a06015b967024dcee868cf
+      size: 4627
+    - path: research/fernandez/annual-2022.csv
+      hash: md5
+      md5: 09cbd6bbadd885ea631d662c62ae8227
+      size: 4628
+    - path: research/fernandez/annual-2023.csv
+      hash: md5
+      md5: c051baf9ac38115fb0f05125656c2da9
+      size: 4640
+    - path: research/fernandez/annual-2024.csv
+      hash: md5
+      md5: 7681c5c84de07b62bf07edf53af0d131
+      size: 4643
+    - path: research/fernandez/annual-2025.csv
+      hash: md5
+      md5: 47a58fb1450175d307ec395e5b533663
+      size: 4635
+    - path: research/fernandez/annual.csv
+      hash: md5
+      md5: 51dedc99ea14d900544a610a28a1c688
+      size: 46064
+    - path: research/fernandez/cache/characteristics.parquet
+      hash: md5
+      md5: 40b7f20b14e9e4c83ef401a1c742de0a
+      size: 36035
+    - path: research/fernandez/cache/markets
+      hash: md5
+      md5: ce11b18f2edee6b83426b41f9be1e98b.dir
+      size: 8788914
+      nfiles: 100
+    - path: research/fernandez/characteristic-audit.csv
+      hash: md5
+      md5: 48e1f3325fc35a96e97408d326d3fd31
+      size: 111612
+    - path: research/fernandez/cohorts.json
+      hash: md5
+      md5: f90e4969ecf943ad235a951df602f12f
+      size: 2059
+    - path: research/fernandez/context-2016-four_plus_broad.json
+      hash: md5
+      md5: 9a8a03fb5168734bc830e1078a0affdb
+      size: 36295
+    - path: research/fernandez/context-2016-same_four_histories.json
+      hash: md5
+      md5: f88b4d884a209017b22817a8470efe78
+      size: 3921
+    - path: research/fernandez/context-2017-four_plus_broad.json
+      hash: md5
+      md5: 376208a98c90cf60f520fddbd8c92334
+      size: 35960
+    - path: research/fernandez/context-2017-same_four_histories.json
+      hash: md5
+      md5: 1c4ad212852164a1d656f704aed67b65
+      size: 3993
+    - path: research/fernandez/context-2018-four_plus_broad.json
+      hash: md5
+      md5: d0d69cea5fa58dbdfbe324a382723393
+      size: 35677
+    - path: research/fernandez/context-2018-same_four_histories.json
+      hash: md5
+      md5: 6bffac4027c9a3fafd3d99711528f57e
+      size: 4038
+    - path: research/fernandez/context-2019-four_plus_broad.json
+      hash: md5
+      md5: be59e005ffff0d8903a6ad3e683095e6
+      size: 35555
+    - path: research/fernandez/context-2019-same_four_histories.json
+      hash: md5
+      md5: 862165cbf465ba37df3d080438fbdff3
+      size: 4050
+    - path: research/fernandez/context-2020-four_plus_broad.json
+      hash: md5
+      md5: 65a0461ffd55a0211134d720fb21bf30
+      size: 34948
+    - path: research/fernandez/context-2020-same_four_histories.json
+      hash: md5
+      md5: ffa42ede487aafa67de134aa2a2cea72
+      size: 4126
+    - path: research/fernandez/context-2021-four_plus_broad.json
+      hash: md5
+      md5: d3d127bd46fe435ab49a565f5afaf844
+      size: 35137
+    - path: research/fernandez/context-2021-same_four_histories.json
+      hash: md5
+      md5: da609f95320a5f68574c5269b0b91cef
+      size: 4159
+    - path: research/fernandez/context-2022-four_plus_broad.json
+      hash: md5
+      md5: f0bd4e0f944f91c4a28d530b891e52a8
+      size: 35072
+    - path: research/fernandez/context-2022-same_four_histories.json
+      hash: md5
+      md5: 12a177cd4c797d02da1d5d52aefa306f
+      size: 4138
+    - path: research/fernandez/context-2023-four_plus_broad.json
+      hash: md5
+      md5: ca9f1e72edf47cf53cdc2bacccf41ad5
+      size: 34664
+    - path: research/fernandez/context-2023-same_four_histories.json
+      hash: md5
+      md5: ea3d8fe6edd8451176482677a4029f4a
+      size: 4192
+    - path: research/fernandez/context-2024-four_plus_broad.json
+      hash: md5
+      md5: 5b1b0c4eb94468b22928f4e1f9d0e436
+      size: 34803
+    - path: research/fernandez/context-2024-same_four_histories.json
+      hash: md5
+      md5: dc3861cd16a71942f5871129c2203ad5
+      size: 4225
+    - path: research/fernandez/context-2025-four_plus_broad.json
+      hash: md5
+      md5: 6fbf65c0dc3949d97407647f5003766a
+      size: 34496
+    - path: research/fernandez/context-2025-same_four_histories.json
+      hash: md5
+      md5: b96a04206eaffff791d8864b70d8d1fc
+      size: 4206
+    - path: research/fernandez/coverage.csv
+      hash: md5
+      md5: 2e0b0643780eb61ab4fcaf0978edc979
+      size: 288
+    - path: research/fernandez/cross-section.csv
+      hash: md5
+      md5: cb7493e3c281faee850ebf98513fdbb7
+      size: 9609
+    - path: research/fernandez/cross-sectional-distances
+      hash: md5
+      md5: 9f1d43a07139bc13b353dc7f53b3c547.dir
+      size: 1045758
+      nfiles: 16
+    - path: research/fernandez/cross-sectional-weights
+      hash: md5
+      md5: 8798013d1cfdc25c2169d2bde9005445.dir
+      size: 520240
+      nfiles: 8
+    - path: research/fernandez/distance-inventory.csv
+      hash: md5
+      md5: 63cddae1b622374119b30fc03082d330
+      size: 20140
+    - path: research/fernandez/distances
+      hash: md5
+      md5: facfddf9f70b61b1aaaaffb588761afd.dir
+      size: 1260924
+      nfiles: 210
+    - path: research/fernandez/excluded-issuers.csv
+      hash: md5
+      md5: 5eec8af024dbc8364d084479f2a73b1e
+      size: 94
+    - path: research/fernandez/execution-status.json
+      hash: md5
+      md5: 57605a71f42b96bf8392dd3da416b572
+      size: 309
+    - path: research/fernandez/mm-betas.csv
+      hash: md5
+      md5: 10e13de9fbe59d29a11ce824f49ac966
+      size: 5482
+    - path: research/fernandez/quarterly-returns.csv
+      hash: md5
+      md5: 95aefe8549085d3b134fc387e0dccac1
+      size: 201108
+    - path: research/fernandez/summary.csv
+      hash: md5
+      md5: 0b041d209055252836e28626c4e3e662
+      size: 3462
+  fernandez_simulate:
+    cmd: uv run --project src/python --frozen free-foundations fernandez 
+      simulate
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/fernandez/simulate.json
+      hash: md5
+      md5: b0ffed604083e4de3ae13b78caf6afc1
+      size: 4386
+    outs:
+    - path: research/fernandez/simulation.csv
+      hash: md5
+      md5: 6bff040daf3a022ca1a50490e8db88ee
+      size: 5142
+  fernandez_report:
+    cmd: uv run --project src/python --frozen free-foundations fernandez report
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/fernandez/report.json
+      hash: md5
+      md5: 53602b26792a04973904a666ca14b6bd
+      size: 4737
+    - path: research/expanded/checkpoints.json
+      hash: md5
+      md5: 8222eb7b6e722ef494dbbf35418992d7
+      size: 1122
+    - path: research/fernandez/annual.csv
+      hash: md5
+      md5: 51dedc99ea14d900544a610a28a1c688
+      size: 46064
+    - path: research/fernandez/cross-section.csv
+      hash: md5
+      md5: cb7493e3c281faee850ebf98513fdbb7
+      size: 9609
+    - path: research/fernandez/distance-inventory.csv
+      hash: md5
+      md5: 63cddae1b622374119b30fc03082d330
+      size: 20140
+    - path: research/fernandez/distances
+      hash: md5
+      md5: facfddf9f70b61b1aaaaffb588761afd.dir
+      size: 1260924
+      nfiles: 210
+    - path: research/fernandez/simulation.csv
+      hash: md5
+      md5: 6bff040daf3a022ca1a50490e8db88ee
+      size: 5142
+    - path: research/fernandez/summary.csv
+      hash: md5
+      md5: 0b041d209055252836e28626c4e3e662
+      size: 3462
+    - path: research/pilot/manifest.json
+      hash: md5
+      md5: 3291b51c347f7f043c375b54501581e7
+      size: 14969
+    outs:
+    - path: research/fernandez/RESULTS.md
+      hash: md5
+      md5: d0ad09feeff3591b762d17842d38f6a6
+      size: 5148
+    - path: research/fernandez/distance-audit.json
+      hash: md5
+      md5: 5fade6321d73605f1f7a6383978bbbd2
+      size: 40
+    - path: research/fernandez/manifest.json
+      hash: md5
+      md5: fa2fb9805ad190290cc27ce05a20af8c
+      size: 21282
+    - path: research/fernandez/paired-comparisons.csv
+      hash: md5
+      md5: 7d045c0e47be5bee5aa82463e37c9565
+      size: 23263
+  fernandez_combined:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations fernandez combined
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/fernandez/combined.json
+      hash: md5
+      md5: 0c9d15c24e0e9a4667e43860f65229cd
+      size: 35151
+    - path: research/expanded/cache/broad.parquet
+      hash: md5
+      md5: d0b1eb281d6a4383e949e9a729a17e35
+      size: 7610270
+    - path: research/fernandez/cross-sectional-weights
+      hash: md5
+      md5: 8798013d1cfdc25c2169d2bde9005445.dir
+      size: 520240
+      nfiles: 8
+    - path: research/pilot/cache
+      hash: md5
+      md5: 8df8fd96108598b5047172fe32a526d5.dir
+      size: 940462566
+      nfiles: 163
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/fernandez/combined/RESULTS.md
+      hash: md5
+      md5: 09cfb75557855298c34b7889af05c89e
+      size: 2887
+    - path: research/fernandez/combined/context-four_histories.json
+      hash: md5
+      md5: 96bc3a536830a25717b3fa1510a0e382
+      size: 6019
+    - path: research/fernandez/combined/context-four_plus_broad.json
+      hash: md5
+      md5: 2180e06793f9d4822455af6fb192be3b
+      size: 36310
+    - path: research/fernandez/combined/distances
+      hash: md5
+      md5: ee5970c7bdbe12990234c51908c84b8e.dir
+      size: 102035
+      nfiles: 21
+    - path: research/fernandez/combined/likelihood.csv
+      hash: md5
+      md5: ff51dab62108432e9cdf73b7ff491873
+      size: 3447
+    - path: research/fernandez/combined/manifest.json
+      hash: md5
+      md5: 7253aaee5c1c39fbf6eeef83e1c7159a
+      size: 7670
+    - path: research/fernandez/combined/sample.csv
+      hash: md5
+      md5: 67717818196ef9b1881dbf246dacbdf4
+      size: 276
+    - path: research/fernandez/combined/weights
+      hash: md5
+      md5: 348371e995f250bb6ebf0b0a8ca48a23.dir
+      size: 102038
+      nfiles: 21
+  panel_prepare:
+    cmd: uv run --project src/python --frozen free-foundations panel prepare
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/prepare.json
+      hash: md5
+      md5: a03e17908c4751db78f875979d8c7c29
+      size: 15210
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/characteristic-audit.parquet
+      hash: md5
+      md5: ce8a9169a28635f1b405a06a04c322e2
+      size: 457577
+    - path: research/panel/cache/characteristics
+      hash: md5
+      md5: d3ad377f85f3389f528fb74c162ce4c3.dir
+      size: 507914034
+      nfiles: 2000
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/panel/cache/market-tail.parquet
+      hash: md5
+      md5: 45718c77bcc03c1f1bf209172e08c2c5
+      size: 13066851
+    - path: research/panel/characteristic-coverage.csv
+      hash: md5
+      md5: 2c7ef99bf35b18c2e8bff2675b1b9463
+      size: 395
+    - path: research/panel/price-audit.csv
+      hash: md5
+      md5: e874466dd1c24fc5992062b731f16976
+      size: 11907
+  panel_run_four:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel run --design four
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
+      hash: md5
+      md5: 4f732dd11f418eec85aa08a729107ab1
+      size: 95514
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/four/annual-scores.csv
+      hash: md5
+      md5: 34653a0143ed556bb7ff9bdc2749083f
+      size: 788306
+    - path: research/panel/four/attribution.csv
+      hash: md5
+      md5: 1d5aa627df1c310b014fa5038f28b28d
+      size: 2065147
+    - path: research/panel/four/bootstrap.csv
+      hash: md5
+      md5: 0c3f3dc9b6a54d260d71e435a16b9ee7
+      size: 748813
+    - path: research/panel/four/comparison.csv
+      hash: md5
+      md5: a79269dce647a2c4a485b704cee56e5d
+      size: 343050
+    - path: research/panel/four/configuration.json
+      hash: md5
+      md5: 0730a7cbcbafcb5ca4cbf0cf162b58e9
+      size: 2244
+    - path: research/panel/four/contexts
+      hash: md5
+      md5: fe84acdb3484adf48ae68ea2ae702039.dir
+      size: 1113124
+      nfiles: 80
+    - path: research/panel/four/contrasts.csv
+      hash: md5
+      md5: 62314f9ad7459cc6e3aa7a11ebc56c68
+      size: 38898
+    - path: research/panel/four/daily-scores.parquet
+      hash: md5
+      md5: daab4cd22ab818589035af8dc97bfd0b
+      size: 25941159
+    - path: research/panel/four/decoding.csv
+      hash: md5
+      md5: 88b91890f618c965fb722291f332c62d
+      size: 35862
+    - path: research/panel/four/distances
+      hash: md5
+      md5: e0edc3c1fdbee482ea46a51b19d74073.dir
+      size: 106936307
+      nfiles: 3636
+    - path: research/panel/four/geometry.csv
+      hash: md5
+      md5: 5d0a9de880c96f3b00c27f53becd6b78
+      size: 1350623
+    - path: research/panel/four/mcs.csv
+      hash: md5
+      md5: d738997cf379c424f88bcd54744f578b
+      size: 133911
+    - path: research/panel/four/observations
+      hash: md5
+      md5: e715f6859002d313a79f81187c3e5662.dir
+      size: 1713277
+      nfiles: 20
+    - path: research/panel/four/placebo.csv
+      hash: md5
+      md5: a16e37baa55a881986efc8f6698a287b
+      size: 471
+    - path: research/panel/four/target-audit.csv
+      hash: md5
+      md5: 5ff754594a8bd0e6d6c7487b85fb5b34
+      size: 7288
+  panel_report_four:
+    cmd: uv run --project src/python --frozen free-foundations panel report 
+      --design four
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/report.json
+      hash: md5
+      md5: 9297d97bd6814a57dcce9793e5a81de7
+      size: 14227
+    - path: research/panel/comparison.csv
+      hash: md5
+      md5: 0c007d27d385fc3d3f8280a7f9fdd5ec
+      size: 4256
+    - path: research/panel/four/annual-scores.csv
+      hash: md5
+      md5: 34653a0143ed556bb7ff9bdc2749083f
+      size: 788306
+    - path: research/panel/four/attribution.csv
+      hash: md5
+      md5: 1d5aa627df1c310b014fa5038f28b28d
+      size: 2065147
+    - path: research/panel/four/bootstrap.csv
+      hash: md5
+      md5: 0c3f3dc9b6a54d260d71e435a16b9ee7
+      size: 748813
+    - path: research/panel/four/comparison.csv
+      hash: md5
+      md5: a79269dce647a2c4a485b704cee56e5d
+      size: 343050
+    - path: research/panel/four/contrasts.csv
+      hash: md5
+      md5: 62314f9ad7459cc6e3aa7a11ebc56c68
+      size: 38898
+    - path: research/panel/four/daily-scores.parquet
+      hash: md5
+      md5: daab4cd22ab818589035af8dc97bfd0b
+      size: 25941159
+    - path: research/panel/four/decoding.csv
+      hash: md5
+      md5: 88b91890f618c965fb722291f332c62d
+      size: 35862
+    - path: research/panel/four/distances
+      hash: md5
+      md5: e0edc3c1fdbee482ea46a51b19d74073.dir
+      size: 106936307
+      nfiles: 3636
+    - path: research/panel/four/geometry.csv
+      hash: md5
+      md5: 5d0a9de880c96f3b00c27f53becd6b78
+      size: 1350623
+    - path: research/panel/four/mcs.csv
+      hash: md5
+      md5: d738997cf379c424f88bcd54744f578b
+      size: 133911
+    - path: research/panel/four/placebo.csv
+      hash: md5
+      md5: a16e37baa55a881986efc8f6698a287b
+      size: 471
+    - path: research/panel/four/target-audit.csv
+      hash: md5
+      md5: 5ff754594a8bd0e6d6c7487b85fb5b34
+      size: 7288
+    - path: research/pilot/cache/checkpoint.json
+      hash: md5
+      md5: 949db54b9dfcfef3a15d2e023a66f3c9
+      size: 266
+    outs:
+    - path: research/panel/four/RESULTS.md
+      hash: md5
+      md5: ab179cdd9825c22e885e9cb4aedd6d61
+      size: 102508
+    - path: research/panel/four/checkpoints.json
+      hash: md5
+      md5: 9654488b51f8dc6a10624f31ca318005
+      size: 1507
+    - path: research/panel/four/disclosure-audit.json
+      hash: md5
+      md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
+      size: 260
+    - path: research/panel/four/manifest.json
+      hash: md5
+      md5: 193680df7dd37ab4dbd8164c05187127
+      size: 579710
+    - path: research/panel/four/regression-check.csv
+      hash: md5
+      md5: 3c1cc9c23f60263ef51e7b4a7b184376
+      size: 4238
+  panel_run_four_h5:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel run --design four-h5
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
+      hash: md5
+      md5: 4f732dd11f418eec85aa08a729107ab1
+      size: 95514
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/four-h5/annual-scores.csv
+      hash: md5
+      md5: 9ecc6f0a8cee57290c6b83cfa1e7690a
+      size: 224541
+    - path: research/panel/four-h5/attribution.csv
+      hash: md5
+      md5: 8d37ba4a519b19e624472c533b9e06b6
+      size: 533756
+    - path: research/panel/four-h5/bootstrap.csv
+      hash: md5
+      md5: 65a8c5dc2f8f6a1e95e47954ab80afdb
+      size: 201472
+    - path: research/panel/four-h5/comparison.csv
+      hash: md5
+      md5: 255598de9f6df4f12ff01456338801ef
+      size: 85438
+    - path: research/panel/four-h5/configuration.json
+      hash: md5
+      md5: 93a9b74df890c3b6f444dc5a94a05994
+      size: 1752
+    - path: research/panel/four-h5/contexts
+      hash: md5
+      md5: 7380fc7d1c49a4c73fa139393989b95d.dir
+      size: 123030
+      nfiles: 20
+    - path: research/panel/four-h5/contrasts.csv
+      hash: md5
+      md5: df13f96f2f535195c709104a069005f7
+      size: 5842
+    - path: research/panel/four-h5/daily-scores.parquet
+      hash: md5
+      md5: ce8d31c7f1ec3da9007c816ecf3ad5b3
+      size: 8073247
+    - path: research/panel/four-h5/distances
+      hash: md5
+      md5: 554c08a977decce83679af68fd5398a9.dir
+      size: 17775429
+      nfiles: 960
+    - path: research/panel/four-h5/geometry.csv
+      hash: md5
+      md5: 281e1b46dfbc1c5705f46fa8ea06ef44
+      size: 348199
+    - path: research/panel/four-h5/mcs.csv
+      hash: md5
+      md5: 8d71bf4db672a424c7aeca4d70da5091
+      size: 34354
+    - path: research/panel/four-h5/observations
+      hash: md5
+      md5: 873854d4c470381949932f3ca91697b6.dir
+      size: 1262995
+      nfiles: 20
+    - path: research/panel/four-h5/placebo.csv
+      hash: md5
+      md5: c6218ec7a01666be7d77b7111c0e74e0
+      size: 469
+  panel_report_four_h5:
+    cmd: uv run --project src/python --frozen free-foundations panel report 
+      --design four-h5
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/report.json
+      hash: md5
+      md5: 9297d97bd6814a57dcce9793e5a81de7
+      size: 14227
+    - path: research/panel/four-h5/annual-scores.csv
+      hash: md5
+      md5: 9ecc6f0a8cee57290c6b83cfa1e7690a
+      size: 224541
+    - path: research/panel/four-h5/attribution.csv
+      hash: md5
+      md5: 8d37ba4a519b19e624472c533b9e06b6
+      size: 533756
+    - path: research/panel/four-h5/bootstrap.csv
+      hash: md5
+      md5: 65a8c5dc2f8f6a1e95e47954ab80afdb
+      size: 201472
+    - path: research/panel/four-h5/comparison.csv
+      hash: md5
+      md5: 255598de9f6df4f12ff01456338801ef
+      size: 85438
+    - path: research/panel/four-h5/contrasts.csv
+      hash: md5
+      md5: df13f96f2f535195c709104a069005f7
+      size: 5842
+    - path: research/panel/four-h5/daily-scores.parquet
+      hash: md5
+      md5: ce8d31c7f1ec3da9007c816ecf3ad5b3
+      size: 8073247
+    - path: research/panel/four-h5/distances
+      hash: md5
+      md5: 554c08a977decce83679af68fd5398a9.dir
+      size: 17775429
+      nfiles: 960
+    - path: research/panel/four-h5/geometry.csv
+      hash: md5
+      md5: 281e1b46dfbc1c5705f46fa8ea06ef44
+      size: 348199
+    - path: research/panel/four-h5/mcs.csv
+      hash: md5
+      md5: 8d71bf4db672a424c7aeca4d70da5091
+      size: 34354
+    - path: research/panel/four-h5/placebo.csv
+      hash: md5
+      md5: c6218ec7a01666be7d77b7111c0e74e0
+      size: 469
+    - path: research/pilot/cache/checkpoint.json
+      hash: md5
+      md5: 949db54b9dfcfef3a15d2e023a66f3c9
+      size: 266
+    outs:
+    - path: research/panel/four-h5/RESULTS.md
+      hash: md5
+      md5: 75a93d33cabb30fab859420dfa795869
+      size: 31094
+    - path: research/panel/four-h5/checkpoints.json
+      hash: md5
+      md5: 9654488b51f8dc6a10624f31ca318005
+      size: 1507
+    - path: research/panel/four-h5/disclosure-audit.json
+      hash: md5
+      md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
+      size: 260
+    - path: research/panel/four-h5/manifest.json
+      hash: md5
+      md5: 13f336de0c3b1bc7471db64c776f9267
+      size: 157678
+  panel_run_four_xqxo:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel run --design four-xqxo
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
+      hash: md5
+      md5: 4f732dd11f418eec85aa08a729107ab1
+      size: 95514
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/four-xqxo/annual-scores.csv
+      hash: md5
+      md5: 85701a25140a0d26418b03deb4467160
+      size: 131115
+    - path: research/panel/four-xqxo/attribution.csv
+      hash: md5
+      md5: c836ce5fb23d8c1a6340c978aba9632e
+      size: 267180
+    - path: research/panel/four-xqxo/bootstrap.csv
+      hash: md5
+      md5: 1d0c52ef5d91c2fa54e60ea80ecbc9ef
+      size: 101287
+    - path: research/panel/four-xqxo/comparison.csv
+      hash: md5
+      md5: edeadedf9cf0b4078d226018e079d191
+      size: 43724
+    - path: research/panel/four-xqxo/configuration.json
+      hash: md5
+      md5: b144371b80cc37f5deb10f16a452ab01
+      size: 1751
+    - path: research/panel/four-xqxo/contexts
+      hash: md5
+      md5: ec2fc5dd81f2ca8c0e1e0f562336d36e.dir
+      size: 60316
+      nfiles: 10
+    - path: research/panel/four-xqxo/contrasts.csv
+      hash: md5
+      md5: eb98d052c470e831a09454b63c2aa695
+      size: 5838
+    - path: research/panel/four-xqxo/daily-scores.parquet
+      hash: md5
+      md5: 8d2b2992955b882d5fdf123e4c312159
+      size: 4837687
+    - path: research/panel/four-xqxo/distances
+      hash: md5
+      md5: 18acbb419f71273c3a657479c25f7380.dir
+      size: 13136697
+      nfiles: 480
+    - path: research/panel/four-xqxo/geometry.csv
+      hash: md5
+      md5: aa76fff9d2864321b915015cd4f35a7c
+      size: 173697
+    - path: research/panel/four-xqxo/mcs.csv
+      hash: md5
+      md5: 644515614e5cf09655acc6e35d2b46b6
+      size: 17802
+    - path: research/panel/four-xqxo/observations
+      hash: md5
+      md5: d5b6e2798bb9d7b00196006f992c5c35.dir
+      size: 1707841
+      nfiles: 20
+    - path: research/panel/four-xqxo/placebo.csv
+      hash: md5
+      md5: 1de309008adab7ddf907b729953a8cfe
+      size: 469
+  panel_report_four_xqxo:
+    cmd: uv run --project src/python --frozen free-foundations panel report 
+      --design four-xqxo
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/report.json
+      hash: md5
+      md5: 9297d97bd6814a57dcce9793e5a81de7
+      size: 14227
+    - path: research/panel/four-xqxo/annual-scores.csv
+      hash: md5
+      md5: 85701a25140a0d26418b03deb4467160
+      size: 131115
+    - path: research/panel/four-xqxo/attribution.csv
+      hash: md5
+      md5: c836ce5fb23d8c1a6340c978aba9632e
+      size: 267180
+    - path: research/panel/four-xqxo/bootstrap.csv
+      hash: md5
+      md5: 1d0c52ef5d91c2fa54e60ea80ecbc9ef
+      size: 101287
+    - path: research/panel/four-xqxo/comparison.csv
+      hash: md5
+      md5: edeadedf9cf0b4078d226018e079d191
+      size: 43724
+    - path: research/panel/four-xqxo/contrasts.csv
+      hash: md5
+      md5: eb98d052c470e831a09454b63c2aa695
+      size: 5838
+    - path: research/panel/four-xqxo/daily-scores.parquet
+      hash: md5
+      md5: 8d2b2992955b882d5fdf123e4c312159
+      size: 4837687
+    - path: research/panel/four-xqxo/distances
+      hash: md5
+      md5: 18acbb419f71273c3a657479c25f7380.dir
+      size: 13136697
+      nfiles: 480
+    - path: research/panel/four-xqxo/geometry.csv
+      hash: md5
+      md5: aa76fff9d2864321b915015cd4f35a7c
+      size: 173697
+    - path: research/panel/four-xqxo/mcs.csv
+      hash: md5
+      md5: 644515614e5cf09655acc6e35d2b46b6
+      size: 17802
+    - path: research/panel/four-xqxo/placebo.csv
+      hash: md5
+      md5: 1de309008adab7ddf907b729953a8cfe
+      size: 469
+    - path: research/pilot/cache/checkpoint.json
+      hash: md5
+      md5: 949db54b9dfcfef3a15d2e023a66f3c9
+      size: 266
+    outs:
+    - path: research/panel/four-xqxo/RESULTS.md
+      hash: md5
+      md5: 8038f3c950661a260fc29a0a30464ad7
+      size: 22625
+    - path: research/panel/four-xqxo/checkpoints.json
+      hash: md5
+      md5: 9654488b51f8dc6a10624f31ca318005
+      size: 1507
+    - path: research/panel/four-xqxo/disclosure-audit.json
+      hash: md5
+      md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
+      size: 260
+    - path: research/panel/four-xqxo/manifest.json
+      hash: md5
+      md5: 8231dba29389ccfda9ab273933726984
+      size: 84892
+  panel_run_three:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel run --design three
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
+      hash: md5
+      md5: 4f732dd11f418eec85aa08a729107ab1
+      size: 95514
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/three/annual-scores.csv
+      hash: md5
+      md5: 2f86af6fb765850d3887a6eb47728d35
+      size: 874916
+    - path: research/panel/three/attribution.csv
+      hash: md5
+      md5: 4ac654f49f47a6106aa30afc23f8049d
+      size: 2308547
+    - path: research/panel/three/bootstrap.csv
+      hash: md5
+      md5: afc6a8e7e44a4d9b390b8695c8ad2a4c
+      size: 793433
+    - path: research/panel/three/comparison.csv
+      hash: md5
+      md5: 53bbada51c5c929195e710e996b3ea0c
+      size: 382166
+    - path: research/panel/three/configuration.json
+      hash: md5
+      md5: dc5f30f12c38918f7d437d97422882b6
+      size: 2240
+    - path: research/panel/three/contexts
+      hash: md5
+      md5: cd184b3f90551c730c334fccb24aa90e.dir
+      size: 1538457
+      nfiles: 90
+    - path: research/panel/three/contrasts.csv
+      hash: md5
+      md5: f669d0345492b8f48ec07a23ced75196
+      size: 38711
+    - path: research/panel/three/daily-scores.parquet
+      hash: md5
+      md5: 5ec79e604f8d874bf810b3eade7c8fd4
+      size: 28907887
+    - path: research/panel/three/decoding.csv
+      hash: md5
+      md5: 6d99fe60fa79b9b20e9eb974b92a19d1
+      size: 35195
+    - path: research/panel/three/distances
+      hash: md5
+      md5: 7dbdc866f548b290fde3c59753b2a070.dir
+      size: 781814
+      nfiles: 2020
+    - path: research/panel/three/geometry.csv
+      hash: md5
+      md5: ea1a922591506374e327e95cd12b9611
+      size: 1528608
+    - path: research/panel/three/mcs.csv
+      hash: md5
+      md5: f982ec6f037917f92870d40b583a9810
+      size: 149703
+    - path: research/panel/three/observations
+      hash: md5
+      md5: e0783f2f466f8eb2ea2da97184f6a1f3.dir
+      size: 11388390
+      nfiles: 20
+    - path: research/panel/three/placebo.csv
+      hash: md5
+      md5: f6339fefb704d73181debd21ecc385e1
+      size: 472
+    - path: research/panel/three/target-audit.csv
+      hash: md5
+      md5: 5aeb43594ccdc4d1af36f808fb9fb270
+      size: 7305
+  panel_report_three:
+    cmd: uv run --project src/python --frozen free-foundations panel report 
+      --design three
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/report.json
+      hash: md5
+      md5: 9297d97bd6814a57dcce9793e5a81de7
+      size: 14227
+    - path: research/panel/three/annual-scores.csv
+      hash: md5
+      md5: 2f86af6fb765850d3887a6eb47728d35
+      size: 874916
+    - path: research/panel/three/attribution.csv
+      hash: md5
+      md5: 4ac654f49f47a6106aa30afc23f8049d
+      size: 2308547
+    - path: research/panel/three/bootstrap.csv
+      hash: md5
+      md5: afc6a8e7e44a4d9b390b8695c8ad2a4c
+      size: 793433
+    - path: research/panel/three/comparison.csv
+      hash: md5
+      md5: 53bbada51c5c929195e710e996b3ea0c
+      size: 382166
+    - path: research/panel/three/contrasts.csv
+      hash: md5
+      md5: f669d0345492b8f48ec07a23ced75196
+      size: 38711
+    - path: research/panel/three/daily-scores.parquet
+      hash: md5
+      md5: 5ec79e604f8d874bf810b3eade7c8fd4
+      size: 28907887
+    - path: research/panel/three/decoding.csv
+      hash: md5
+      md5: 6d99fe60fa79b9b20e9eb974b92a19d1
+      size: 35195
+    - path: research/panel/three/distances
+      hash: md5
+      md5: 7dbdc866f548b290fde3c59753b2a070.dir
+      size: 781814
+      nfiles: 2020
+    - path: research/panel/three/geometry.csv
+      hash: md5
+      md5: ea1a922591506374e327e95cd12b9611
+      size: 1528608
+    - path: research/panel/three/mcs.csv
+      hash: md5
+      md5: f982ec6f037917f92870d40b583a9810
+      size: 149703
+    - path: research/panel/three/placebo.csv
+      hash: md5
+      md5: f6339fefb704d73181debd21ecc385e1
+      size: 472
+    - path: research/panel/three/target-audit.csv
+      hash: md5
+      md5: 5aeb43594ccdc4d1af36f808fb9fb270
+      size: 7305
+    - path: research/pilot/cache/checkpoint.json
+      hash: md5
+      md5: 949db54b9dfcfef3a15d2e023a66f3c9
+      size: 266
+    outs:
+    - path: research/panel/three/RESULTS.md
+      hash: md5
+      md5: c1b752b519dc5ca86a41563278a54147
+      size: 120095
+    - path: research/panel/three/checkpoints.json
+      hash: md5
+      md5: 9654488b51f8dc6a10624f31ca318005
+      size: 1507
+    - path: research/panel/three/disclosure-audit.json
+      hash: md5
+      md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
+      size: 260
+    - path: research/panel/three/manifest.json
+      hash: md5
+      md5: 47ba307b62b23613b8a9b2cdd23c92bc
+      size: 331106
+  panel_run_three_support:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel run --design three-support
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
+      hash: md5
+      md5: 4f732dd11f418eec85aa08a729107ab1
+      size: 95514
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/three-support/annual-scores.csv
+      hash: md5
+      md5: de9159f52dc1da97ca6c3ee2bf9e801a
+      size: 325543
+    - path: research/panel/three-support/attribution.csv
+      hash: md5
+      md5: 793766dd2131881714ec31055db6b093
+      size: 775884
+    - path: research/panel/three-support/bootstrap.csv
+      hash: md5
+      md5: 4839b1bbf0c412e1fb6c983efa045a2a
+      size: 268109
+    - path: research/panel/three-support/comparison.csv
+      hash: md5
+      md5: 6a3d9b6171f7380fb8c9f9808469599a
+      size: 130825
+    - path: research/panel/three-support/configuration.json
+      hash: md5
+      md5: 844b172066a6df4f1604874be858f150
+      size: 2436
+    - path: research/panel/three-support/contexts
+      hash: md5
+      md5: 51f8c4a814363359987b1f8dc0a164f2.dir
+      size: 413939
+      nfiles: 50
+    - path: research/panel/three-support/contrasts.csv
+      hash: md5
+      md5: 89d2b629729d8185d2be92a529c5d656
+      size: 74378
+    - path: research/panel/three-support/daily-scores.parquet
+      hash: md5
+      md5: cf08d32359bfcf416bbd17db7c88ec8c
+      size: 10671901
+    - path: research/panel/three-support/decoding.csv
+      hash: md5
+      md5: 58bf02b28abbac74d164983f6a9e0d12
+      size: 64654
+    - path: research/panel/three-support/distances
+      hash: md5
+      md5: 352c8ae4d036596bf6e3f9bb273088aa.dir
+      size: 283256
+      nfiles: 670
+    - path: research/panel/three-support/geometry.csv
+      hash: md5
+      md5: 9deb32892b60b0c20abd7d9a1d472887
+      size: 515458
+    - path: research/panel/three-support/mcs.csv
+      hash: md5
+      md5: 83c8ce6d0f80cd631c2677a0328aa8ce
+      size: 52249
+    - path: research/panel/three-support/observations
+      hash: md5
+      md5: e0783f2f466f8eb2ea2da97184f6a1f3.dir
+      size: 11388390
+      nfiles: 20
+    - path: research/panel/three-support/placebo.csv
+      hash: md5
+      md5: f6339fefb704d73181debd21ecc385e1
+      size: 472
+    - path: research/panel/three-support/target-audit.csv
+      hash: md5
+      md5: 5aeb43594ccdc4d1af36f808fb9fb270
+      size: 7305
+  panel_report_three_support:
+    cmd: uv run --project src/python --frozen free-foundations panel report 
+      --design three-support
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/report.json
+      hash: md5
+      md5: 9297d97bd6814a57dcce9793e5a81de7
+      size: 14227
+    - path: research/panel/three-support/annual-scores.csv
+      hash: md5
+      md5: de9159f52dc1da97ca6c3ee2bf9e801a
+      size: 325543
+    - path: research/panel/three-support/attribution.csv
+      hash: md5
+      md5: 793766dd2131881714ec31055db6b093
+      size: 775884
+    - path: research/panel/three-support/bootstrap.csv
+      hash: md5
+      md5: 4839b1bbf0c412e1fb6c983efa045a2a
+      size: 268109
+    - path: research/panel/three-support/comparison.csv
+      hash: md5
+      md5: 6a3d9b6171f7380fb8c9f9808469599a
+      size: 130825
+    - path: research/panel/three-support/contrasts.csv
+      hash: md5
+      md5: 89d2b629729d8185d2be92a529c5d656
+      size: 74378
+    - path: research/panel/three-support/daily-scores.parquet
+      hash: md5
+      md5: cf08d32359bfcf416bbd17db7c88ec8c
+      size: 10671901
+    - path: research/panel/three-support/decoding.csv
+      hash: md5
+      md5: 58bf02b28abbac74d164983f6a9e0d12
+      size: 64654
+    - path: research/panel/three-support/distances
+      hash: md5
+      md5: 352c8ae4d036596bf6e3f9bb273088aa.dir
+      size: 283256
+      nfiles: 670
+    - path: research/panel/three-support/geometry.csv
+      hash: md5
+      md5: 9deb32892b60b0c20abd7d9a1d472887
+      size: 515458
+    - path: research/panel/three-support/mcs.csv
+      hash: md5
+      md5: 83c8ce6d0f80cd631c2677a0328aa8ce
+      size: 52249
+    - path: research/panel/three-support/placebo.csv
+      hash: md5
+      md5: f6339fefb704d73181debd21ecc385e1
+      size: 472
+    - path: research/panel/three-support/target-audit.csv
+      hash: md5
+      md5: 5aeb43594ccdc4d1af36f808fb9fb270
+      size: 7305
+    - path: research/pilot/cache/checkpoint.json
+      hash: md5
+      md5: 949db54b9dfcfef3a15d2e023a66f3c9
+      size: 266
+    outs:
+    - path: research/panel/three-support/RESULTS.md
+      hash: md5
+      md5: c4b2cb430a412c55f2b167f1323919f0
+      size: 87384
+    - path: research/panel/three-support/checkpoints.json
+      hash: md5
+      md5: 9654488b51f8dc6a10624f31ca318005
+      size: 1507
+    - path: research/panel/three-support/disclosure-audit.json
+      hash: md5
+      md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
+      size: 260
+    - path: research/panel/three-support/manifest.json
+      hash: md5
+      md5: 4b5bdd961d61403b887785c78b56aacb
+      size: 127508
+  panel_audit:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations panel audit
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/panel/audit.json
+      hash: md5
+      md5: b7c7b1ffced671870522a3ce2395e2a1
+      size: 75977
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/panel/audit/contexts.csv
+      hash: md5
+      md5: 8a4a74492a56e644712a527607c54167
+      size: 841
+    - path: research/panel/audit/four
+      hash: md5
+      md5: a664ccd61f52ed88d9588f1710e01a5e.dir
+      size: 538472
+      nfiles: 6
+    - path: research/panel/audit/measurement-audit.csv
+      hash: md5
+      md5: efd9e7adfef3176d91cc61337f9ac899
+      size: 51878
+    - path: research/panel/audit/summary.csv
+      hash: md5
+      md5: cbdef846f0d249f929f8ebc1e34408ac
+      size: 8648
+    - path: research/panel/audit/three
+      hash: md5
+      md5: 15a65808e3bb38c2b74b824c4cf0ef9e.dir
+      size: 3354297
+      nfiles: 6
+  ladder_run:
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv 
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra 
+      exaone free-foundations ladder run
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/ladder/run.json
+      hash: md5
+      md5: a03798d760594e878630d99c63b7ca7f
+      size: 99893
+    - path: research/panel/cache/broad.parquet
+      hash: md5
+      md5: 9b4e167227b76977490201800c3f50c2
+      size: 27804844
+    - path: research/panel/cache/four.parquet
+      hash: md5
+      md5: b471d0e03a12a0d35b6e268ee33924f3
+      size: 305007
+    - path: research/universe/cache
+      hash: md5
+      md5: c059e8d1461345bd219e1a6a35295d40.dir
+      size: 415051982
+      nfiles: 2309
+    - path: src/python/src/free_foundations/fernandez/betas.R
+      hash: md5
+      md5: f7d99ee30855e95c9404de1a1cc2a03d
+      size: 3090
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 2a5edd7448c497ef104984bac1ff70f5
+      size: 302510
+    outs:
+    - path: research/ladder/bootstrap-capm-bootstrap.parquet
+      hash: md5
+      md5: 268723574b354adb0c5c9e4e10f7549a
+      size: 3317766
+    - path: research/ladder/bootstrap-ff6-bootstrap.parquet
+      hash: md5
+      md5: 90e09e1049b61720d775e0f35c17fae1
+      size: 6589579
+    - path: research/ladder/cache
+      hash: md5
+      md5: 6300ab0b81548cf42f41efa4681891a3.dir
+      size: 8867753
+      nfiles: 12
+    - path: research/ladder/four/bootstrap.csv
+      hash: md5
+      md5: dd3d36e8f2d82108ea5dcd8fba116ff6
+      size: 66192
+    - path: research/ladder/four/contexts
+      hash: md5
+      md5: c7cc1415222bae6331f86ad57f6439d8.dir
+      size: 54272
+      nfiles: 3
+    - path: research/ladder/four/distances
+      hash: md5
+      md5: b0ad8b352ad6876252200e0620acf9b8.dir
+      size: 1434238
+      nfiles: 106
+    - path: research/ladder/four/estimates.csv
+      hash: md5
+      md5: 34291862a22422d849b0037b32605c99
+      size: 666943
+    - path: research/ladder/four/geometry.csv
+      hash: md5
+      md5: 1dd4a5f7bebb7ba8276d927f30738bfb
+      size: 33072
+    - path: research/ladder/four/placebo.csv
+      hash: md5
+      md5: b41e5ec475ef2effe3a74f0cd258adac
+      size: 16154
+    - path: research/ladder/manifest.json
+      hash: md5
+      md5: 2d38eb37bf41448dfcd3b8df627d91f7
+      size: 42340
+    - path: research/ladder/mm-betas.csv
+      hash: md5
+      md5: 0055def1ec1efd33e265003a7d681493
+      size: 60548
+    - path: research/ladder/mm-runtime.json
+      hash: md5
+      md5: fe941012be3f1e2ecf45e052bec83882
+      size: 299
+    - path: research/ladder/r0/bootstrap.csv
+      hash: md5
+      md5: 122fcb80cbe170c5dbef541bcb6c7d30
+      size: 7055
+    - path: research/ladder/r0/cohorts.json
+      hash: md5
+      md5: 130cbd1680db64fefe034f8e5015ab5a
+      size: 29978
+    - path: research/ladder/r0/estimates.csv
+      hash: md5
+      md5: 8b0b7653b10337dcfcf7a495ebffca17
+      size: 63370
+    - path: research/ladder/three/bootstrap.csv
+      hash: md5
+      md5: c6ff4f05d695a6deb8dd28d77beed157
+      size: 65858
+    - path: research/ladder/three/contexts
+      hash: md5
+      md5: a11f471a0cc5decd358373250a3278dd.dir
+      size: 64304
+      nfiles: 3
+    - path: research/ladder/three/distances
+      hash: md5
+      md5: 0b895669cea305750c5a6278c97232ef.dir
+      size: 66875045
+      nfiles: 104
+    - path: research/ladder/three/estimates.csv
+      hash: md5
+      md5: bf2f31afd7c56b491d5f10b0edddb882
+      size: 668108
+    - path: research/ladder/three/geometry.csv
+      hash: md5
+      md5: 4a3593122eb21b2f89569d9904a429ea
+      size: 32912
+    - path: research/ladder/three/placebo.csv
+      hash: md5
+      md5: 297026b50f35d2aad98d2e05e2b49b5d
+      size: 15857
+  ladder_report:
+    cmd: uv run --project src/python --frozen free-foundations ladder report
+    deps:
+    - path: .semflow/hashes/entrypoints/free-foundations/ladder/report.json
+      hash: md5
+      md5: 407b10d963b7a174ae26b98678b180b3
+      size: 4940
+    - path: research/ladder/four/bootstrap.csv
+      hash: md5
+      md5: dd3d36e8f2d82108ea5dcd8fba116ff6
+      size: 66192
+    - path: research/ladder/four/estimates.csv
+      hash: md5
+      md5: 34291862a22422d849b0037b32605c99
+      size: 666943
+    - path: research/ladder/four/geometry.csv
+      hash: md5
+      md5: 1dd4a5f7bebb7ba8276d927f30738bfb
+      size: 33072
+    - path: research/ladder/four/placebo.csv
+      hash: md5
+      md5: b41e5ec475ef2effe3a74f0cd258adac
+      size: 16154
+    - path: research/ladder/r0/bootstrap.csv
+      hash: md5
+      md5: 122fcb80cbe170c5dbef541bcb6c7d30
+      size: 7055
+    - path: research/ladder/r0/cohorts.json
+      hash: md5
+      md5: 130cbd1680db64fefe034f8e5015ab5a
+      size: 29978
+    - path: research/ladder/r0/estimates.csv
+      hash: md5
+      md5: 8b0b7653b10337dcfcf7a495ebffca17
+      size: 63370
+    - path: research/ladder/three/bootstrap.csv
+      hash: md5
+      md5: c6ff4f05d695a6deb8dd28d77beed157
+      size: 65858
+    - path: research/ladder/three/estimates.csv
+      hash: md5
+      md5: bf2f31afd7c56b491d5f10b0edddb882
+      size: 668108
+    - path: research/ladder/three/geometry.csv
+      hash: md5
+      md5: 4a3593122eb21b2f89569d9904a429ea
+      size: 32912
+    - path: research/ladder/three/placebo.csv
+      hash: md5
+      md5: 297026b50f35d2aad98d2e05e2b49b5d
+      size: 15857
+    outs:
+    - path: research/ladder/four/RESULTS.md
+      hash: md5
+      md5: f785af9ee14b4bb246cdd4b9c1b5c291
+      size: 68604
+    - path: research/ladder/r0/RESULTS.md
+      hash: md5
+      md5: 02bce980ac3121f85a8a6124a3628dcd
+      size: 14075
+    - path: research/ladder/three/RESULTS.md
+      hash: md5
+      md5: 3e01d35c9124f2c382020de63f4bc038
+      size: 68137

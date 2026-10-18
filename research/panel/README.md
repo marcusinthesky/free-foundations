@@ -61,7 +61,10 @@ Every design fits one spatial coefficient per network, kernel and innovation arm
   weight changes under the exp, median and matched kernels.
 
 Distances carry a JSON sidecar fingerprint (context digest, readout, metric, code
-hash) and are always recomputed from the fingerprinted embedding cache. Sidecars are
-hashed in each design's `manifest.json` but not committed; the CSV and JSON summaries
-are.
-Run `devenv shell just python-panel [designs]` and `just python-encoder-audit`.
+hash) and are always recomputed from the fingerprinted embedding cache. Distances,
+sidecars, observations, daily scores and tables over 500 KB are DVC outputs, hashed in
+`dvc.lock` and each design's `manifest.json` and restored with `dvc pull`. The other
+CSV and JSON summaries are in Git. Each design is a `panel_run_<design>` and
+`panel_report_<design>` stage in `dvc.yaml`. Run
+`devenv shell just python-panel [designs]` and `just python-encoder-audit`. Both run
+`dvc repro`, which skips designs whose code fingerprint and inputs are unchanged.

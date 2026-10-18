@@ -71,9 +71,8 @@ neighbour count. None is tuned on returns.
 ## Running
 
 ```sh
-devenv shell just python-ladder-r0   # R0 only; needs Rscript, no model extras
-devenv shell just python-ladder      # R0 and R1-R4, both arms
+devenv shell just python-ladder      # R0 and R1-R4, both arms; R0 needs Rscript
 ```
 
-Parquet matrices, bootstrap draws and R scratch files are ignored by Git and hashed
-in `manifest.json`.
+Parquet matrices, bootstrap draws and R scratch files are ignored by Git, hashed
+in `manifest.json` and held by DVC (`dvc pull research/ladder`).
