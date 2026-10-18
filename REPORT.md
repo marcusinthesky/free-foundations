@@ -1136,6 +1136,12 @@ Earlier interrupted development logs are not the authoritative results.
 | Price review | [Price audit](research/panel/price-audit.csv) |
 | Encoder measurement audit | [Audit summary](research/panel/audit/summary.csv), [all checks](research/panel/audit/measurement-audit.csv) |
 
+Twelve extended-design tables exceed the repository's 500 KB file limit and are
+kept local rather than committed. They are the attribution and geometry tables of
+`four`, `three` and `three-support`, the annual-score and bootstrap tables of
+`four` and `three`, `four-h5`'s attribution table and `four`'s manifest. Each
+design's `RESULTS.md` summarizes them.
+
 Year-specific contexts live under `research/panel/contexts/`. Labeled pairwise
 distance and weight matrices live under `research/panel/distances/<year>/` and
 `research/panel/weights/<year>/`; they and the extended designs' per-distance
