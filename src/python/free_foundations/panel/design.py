@@ -24,8 +24,10 @@ class Design:
     with next-snapshot income/assets as the support label, the same pair on shared
     support rows, and their combination. ``support_draws`` re-encode the history rung on
     differently salted 256-row supports. ``decoded`` adds networks from exposures decoded
-    out of each representation, calibrated to prior-window covariance. ``exclude`` drops
-    named firms from every cohort.
+    out of each representation, calibrated to prior-window reference-factor exposures.
+    ``exclude`` drops named firms from every cohort. ``support_sizes`` re-encode the history
+    rung on nested prefixes of the 256-row support. ``representations`` and ``models``
+    restrict a design to declared readouts; ``None`` keeps every one.
     """
 
     name: str
@@ -38,6 +40,9 @@ class Design:
     support_draws: tuple[str, ...] = ()
     decoded: bool = False
     exclude: tuple[str, ...] = ()
+    support_sizes: tuple[int, ...] = ()
+    representations: tuple[str, ...] | None = None
+    models: tuple[str, ...] | None = None
 
     @property
     def cohort_histories(self) -> tuple[int, ...]:
@@ -51,6 +56,17 @@ class Design:
 
 
 DRAWS = ("redraw1", "redraw2")
+# Smaller nested supports; the native history rung is the 256-row cap.
+SUPPORT_SIZES = (32, 64, 128)
+FOCUSED = (
+    "direct",
+    "pca16",
+    "supervised_mlp16",
+    "tabfm__early_concat",
+    "tabfm__early_concat_labelnull",
+    "tabpfn_full__late",
+    "tabpfn_full_random__late",
+)
 DESIGNS = {
     "four": Design(
         "four", CHARACTERISTICS, 3, alternate_target=True, support_draws=DRAWS, decoded=True
@@ -68,5 +84,20 @@ DESIGNS = {
         save_matrices=False,
         support_draws=DRAWS,
         decoded=True,
+    ),
+    # Declared before any support-size result: no learning, unsupervised and supervised
+    # controls without pretraining, one state readout with its label-null twin, and one
+    # task readout from another family with its untrained-architecture twin.
+    "three-support": Design(
+        "three-support",
+        CHARACTERISTICS[:3],
+        5,
+        ("histories",),
+        extra_histories=(3,),
+        save_matrices=False,
+        decoded=True,
+        support_sizes=SUPPORT_SIZES,
+        representations=FOCUSED,
+        models=("tabpfn_full", "tabpfn_full_random", "tabfm", "tabfm_labelnull"),
     ),
 }

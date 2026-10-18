@@ -89,8 +89,12 @@ def attribute(
     """Exact split of the residual spatial-error log-likelihood (Lean `Likelihood`).
 
     With filtered second moments m = second - 2 lambda cross + lambda^2 spatial and the
-    spatial term split into the Herfindahl-weighted own variances sum_j W_ij^2 s_j and
-    the cross products, the five parts sum to ``Block.score``.
+    spatial term split into the Herfindahl-weighted own second moments sum_j W_ij^2 s_j
+    and the cross products, the five parts sum to ``Block.score``. This is the residual
+    likelihood given realized factors, not the unconditional score. ``s_j`` is the total
+    residual second moment, common and idiosyncratic together, so ``concentration_own`` is
+    not the idiosyncratic-noise term eta of the common-plus-noise model, and
+    ``alignment`` measures weighted residual cross products, not recovered exposures.
     """
     days = item.days
     return {
@@ -107,7 +111,7 @@ def attribute(
 
 
 def own_variance(weights: FloatArray, item: Block) -> FloatArray:
-    """sum_j W_ij^2 s_j: the part of the spatial term from neighbours' own second moments."""
+    """sum_j W_ij^2 s_j: the spatial term's part from neighbours' own total second moments."""
     return (weights**2) @ item.second
 
 

@@ -22,7 +22,7 @@ from free_foundations.expanded.representations import (
 )
 from free_foundations.fernandez.characteristics import history_view
 from free_foundations.fernandez.models import rank_distance
-from free_foundations.panel.decoding import decode
+from free_foundations.panel.decoding import FACTORS, decode
 from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
     from free_foundations.contracts import FloatArray
     from free_foundations.expanded.encoding import Prepared
+    from free_foundations.panel.decoding import Targets
     from free_foundations.panel.design import Design
 
 LOGGER = logging.getLogger(__name__)
@@ -148,18 +149,21 @@ def rung_views(
     }
 
 
-def context(
+def context(  # noqa: PLR0913 -- the support draw and size are keyword options.
     view: pd.DataFrame,
     core: pd.DataFrame,
     tickers: tuple[str, ...],
     year: int,
     salt: str = "",
+    *,
+    rows: int = 256,
 ) -> Prepared:
     """Past-only preprocessing, then the shared deterministic 256-row support cap.
 
     A ``salt`` draws a different, equally outcome-independent set of 256 support rows.
+    A smaller ``rows`` keeps a prefix of the same hash order, so supports are nested.
     """
-    return cap_support(prepare(view, core, tickers, year, "income"), salt=salt)
+    return cap_support(prepare(view, core, tickers, year, "income"), rows=rows, salt=salt)
 
 
 def combined(first: FloatArray, second: FloatArray) -> FloatArray:
@@ -206,7 +210,7 @@ def save(
     write_json(path.with_suffix(".json"), dict(sidecar))
 
 
-def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional model subset and target.
+def distances(  # noqa: C901, PLR0912, PLR0913, PLR0915 -- design inputs, model subset and targets.
     four: pd.DataFrame,
     broad: pd.DataFrame,
     year: int,
@@ -214,17 +218,22 @@ def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional mo
     design: Design,
     *,
     models: tuple[str, ...] | None = None,
-    exposures: FloatArray | None = None,
+    targets: Targets | None = None,
+    quality: list[dict[str, float | str | int]] | None = None,
 ) -> dict[str, FloatArray]:
     """Recompute every network from fingerprinted caches; never reuse a saved matrix.
 
-    ``exposures`` are prior-window covariance exposures of ``tickers``. With them, the
-    design's primary history rung also yields decoded-exposure networks and the
-    ``covariance_exposures`` control.
+    ``targets`` are the year's calibration targets for ``tickers``. With them, the design's
+    primary history rung and each smaller support yield decoded networks, alongside the
+    ``reference_exposures`` and in-panel ``covariance_exposures`` controls. Decoder quality
+    at every audited rank is appended to ``quality``.
     """
     root = design.output
     fingerprint = {"design": design.name, "year": year, "code_sha256": code_digest()}
     result: dict[str, FloatArray] = {}
+
+    def wanted(representation: str) -> bool:
+        return design.representations is None or representation in design.representations
 
     def keep(name: str, distance: FloatArray, sidecar: Mapping[str, object]) -> None:
         result[name] = distance
@@ -236,11 +245,26 @@ def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional mo
             matrix=design.save_matrices,
         )
 
-    if exposures is not None:
+    if targets is not None:
         keep(
             "covariance_exposures",
-            pairwise_distance(exposures, metric="euclidean"),
-            {"representation": "covariance_exposures", "arm": "control", "metric": "euclidean"},
+            pairwise_distance(targets.covariance, metric="euclidean"),
+            {
+                "representation": "covariance_exposures",
+                "target": f"rank-{FACTORS} coordinates of prior residual covariance (in-panel)",
+                "arm": "control",
+                "metric": "euclidean",
+            },
+        )
+        keep(
+            "reference_exposures",
+            pairwise_distance(targets.reference[FACTORS], metric="euclidean"),
+            {
+                "representation": "reference_exposures",
+                "target": f"exposures to rank-{FACTORS} reference residual factors",
+                "arm": "control",
+                "metric": "euclidean",
+            },
         )
     for history in (design.history, *design.extra_histories):
         prefix = "" if history == design.history else f"h{history}__"
@@ -275,12 +299,19 @@ def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional mo
                 ("histories", "market_cap_assets", f"histories@{salt}", salt)
                 for salt in design.support_draws
             ]
+            passes += [
+                ("histories", "market_cap_assets", f"histories@support{rows}", "")
+                for rows in design.support_sizes
+            ]
         encodings: dict[str, dict[str, FloatArray]] = {}
         for rung, target, label, salt in passes:
+            rows = int(label.removeprefix("histories@support")) if "@support" in label else 256
             data = (
                 shared[target]
                 if label.startswith(f"{rung}@shared_")
-                else context(views[rung], labels(four, broad, target), tickers, year, salt)
+                else context(
+                    views[rung], labels(four, broad, target), tickers, year, salt, rows=rows
+                )
             )
             record_context(root / "contexts" / f"{year}-{prefix}{label}.json", data, target)
             LOGGER.info(
@@ -291,35 +322,58 @@ def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional mo
                 len(tickers),
                 len(data.features),
             )
-            selected = models or MODELS
+            selected = models or design.models or MODELS
             states = None
-            if exposures is not None and prefix + label == "histories":
+            # Query-only rows do not depend on the support, so smaller supports skip them.
+            resized = rows != 256
+            if targets is not None and not prefix and (label == "histories" or resized):
                 states = representation_states(
                     data, cache=MODEL_CACHE, source=MODEL_SOURCE, models=selected
                 )
                 for representation, values in states.items():
-                    decoded, quality = decode(values, exposures, tickers)
-                    keep(
-                        f"histories@decoded__{representation}",
-                        pairwise_distance(decoded, metric="euclidean"),
-                        {
-                            "history": history,
-                            "rung": rung,
-                            "target": "prior-window covariance exposures",
-                            "representation": representation,
-                            "arm": "calibrated",
-                            "context_digest": data.digest,
-                            "metric": "euclidean",
-                        }
-                        | quality,
-                    )
+                    if not wanted(representation) or (
+                        resized and representation.startswith(QUERY_ONLY)
+                    ):
+                        continue
+                    for rank, exposures in sorted(targets.reference.items()):
+                        decoded, fit = decode(values, exposures, tickers)
+                        if quality is not None:
+                            quality.append(
+                                {
+                                    "year": year,
+                                    "rung": label,
+                                    "support_rows": len(data.support),
+                                    "representation": representation,
+                                    "rank": rank,
+                                }
+                                | fit
+                            )
+                        if rank != FACTORS:
+                            continue
+                        keep(
+                            f"{label}@decoded__{representation}",
+                            pairwise_distance(decoded, metric="euclidean"),
+                            {
+                                "history": history,
+                                "rung": rung,
+                                "target": f"exposures to rank-{FACTORS} reference residual factors",
+                                "representation": representation,
+                                "arm": "calibrated",
+                                "context_digest": data.digest,
+                                "support_rows": len(data.support),
+                                "metric": "euclidean",
+                            }
+                            | fit,
+                        )
             encoded = representation_distances(
                 data, cache=MODEL_CACHE, source=MODEL_SOURCE, states=states, models=selected
             )
             encodings[label] = encoded
             for representation, distance in encoded.items():
-                # A redraw changes only support-fitted representations; skip the rest.
-                if salt and representation.startswith(QUERY_ONLY):
+                if not wanted(representation):
+                    continue
+                # A redraw or smaller support changes only support-fitted representations.
+                if (salt or resized) and representation.startswith(QUERY_ONLY):
                     continue
                 keep(
                     f"{prefix}{label}__{representation}",

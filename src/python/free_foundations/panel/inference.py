@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from arch.bootstrap import MCS, StationaryBootstrap, optimal_block_length
 
-from free_foundations.panel.design import DESIGNS
+from free_foundations.panel.design import DESIGNS, SUPPORT_SIZES
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
@@ -95,7 +95,38 @@ MEASUREMENT_CONTRASTS = (
     ("decoded vs native", "histories@decoded__{}", "histories__{}"),
     ("decoded vs decoded inputs", "histories@decoded__{}", "histories@decoded__direct"),
 )
+# Support-size contrasts: each pretrained readout against controls without pretraining,
+# labels or trained weights, at every nested support size, native and decoded.
+SUPPORT_CONTRASTS = (
+    ("tabfm__early_concat", "direct"),
+    ("tabfm__early_concat", "pca16"),
+    ("tabfm__early_concat", "supervised_mlp16"),
+    ("tabfm__early_concat", "tabfm__early_concat_labelnull"),
+    ("tabpfn_full__late", "direct"),
+    ("tabpfn_full__late", "pca16"),
+    ("tabpfn_full__late", "supervised_mlp16"),
+    ("tabpfn_full__late", "tabpfn_full_random__late"),
+)
 CONTRAST_ARMS = (("matched", "diagonal"), ("matched", "correlation"), ("median", "diagonal"))
+
+
+def support_contrasts() -> list[tuple[str, str, str]]:
+    """Declared support-size pairs; ``direct`` is query-only, so its 256-row column serves."""
+    pairs: list[tuple[str, str, str]] = []
+    for rows in (*SUPPORT_SIZES, 256):
+        rung = "histories" if rows == 256 else f"histories@support{rows}"
+        for kind, suffix in (("native", ""), ("decoded", "@decoded")):
+            for left, right in SUPPORT_CONTRASTS:
+                base = "histories" if right == "direct" else rung
+                for kernel, innovation in CONTRAST_ARMS:
+                    pairs.append(
+                        (
+                            f"support {rows} {kind}",
+                            f"{rung}{suffix}__{left}|{kernel}|{innovation}",
+                            f"{base}{suffix}__{right}|{kernel}|{innovation}",
+                        )
+                    )
+    return pairs
 
 
 def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
@@ -123,6 +154,8 @@ def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
             for name in MEASURED
             for label, left, right in MEASUREMENT_CONTRASTS
         ]
+    if any("@support" in column for column in columns):
+        pairs += support_contrasts()
     return [pair for pair in pairs if pair[1] in columns and pair[2] in columns]
 
 

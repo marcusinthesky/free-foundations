@@ -24,6 +24,8 @@ MODELS = ("tabpfn_fast", "tabpfn_full", "tabfm", "tabfm_labelnull", "exaone")
 READOUTS: dict[str, tuple[tuple[str, str, Arm], ...]] = {
     "tabpfn_fast": (("late", "tabpfn_fast__late", "task"),),
     "tabpfn_full": (("late", "tabpfn_full__late", "task"),),
+    # The same architecture and preprocessing with untrained weights; not in MODELS.
+    "tabpfn_full_random": (("late", "tabpfn_full_random__late", "control"),),
     "tabfm": (
         ("early_concat", "tabfm__early_concat", "state"),
         ("early_mean", "tabfm__early_mean", "state"),

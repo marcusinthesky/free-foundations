@@ -11,7 +11,8 @@ import numpy as np
 import pandas as pd
 
 from free_foundations.panel.characteristics import ROOT, audit_disclosures
-from free_foundations.panel.design import DESIGNS
+from free_foundations.panel.decoding import FACTORS
+from free_foundations.panel.design import DESIGNS, FOCUSED
 from free_foundations.pilot.data import write_json
 
 # v1 names of unchanged approaches in the original `research/panel` run.
@@ -172,6 +173,7 @@ def contrast_table(contrasts: pd.DataFrame) -> list[str]:
 ATTRIBUTED = (
     "fernandez_joint",
     "covariance_exposures",
+    "reference_exposures",
     "histories__direct",
     "histories__supervised_mlp16",
     "histories__tabfm__early_concat",
@@ -207,14 +209,17 @@ def attribution_table(attribution: pd.DataFrame, geometry: pd.DataFrame) -> list
         "",
         "## Where the residual likelihood comes from",
         "",
-        "Exact split of the held-out spatial-error log-likelihood of factor residuals at the",
-        "frozen coefficient and prior-window variances (Lean `Likelihood.spatial_loss`),",
-        "summed over 2020-2025, minus the uniform network's parts. `alignment` is the term",
-        "linear in lambda (covariance between a firm and its neighbours); the two",
-        "`concentration` terms are quadratic, split into the neighbours' own variances",
-        "weighted by squared weights (the Herfindahl noise cost) and their cross products.",
-        "This is the residual model only; the reported held-out scores add the factor",
-        "covariance. `H` is the mean row Herfindahl index.",
+        "Exact split of the held-out spatial-error log-likelihood of factor residuals,",
+        "conditional on realized factors, at the frozen coefficient and prior-window",
+        "variances (Lean `Likelihood.spatial_loss`), summed over 2020-2025, minus the uniform",
+        "network's parts. `alignment` is the term linear in lambda (weighted cross products",
+        "of a firm's and its neighbours' residuals); the two `concentration` terms are",
+        "quadratic, split into the neighbours' own second moments weighted by squared",
+        "weights and their cross products. Those second moments hold common and",
+        "idiosyncratic variance together, so `concentration_own` is not a pure noise cost,",
+        "and a larger `alignment` is not by itself evidence of recovered exposures. This",
+        "split does not decompose the headline unconditional scores, which add factor",
+        "uncertainty around the prior mean. `H` is the mean row Herfindahl index.",
         "",
     ]
     for kernel, innovation in (("exp", "diagonal"), ("matched", "diagonal")):
@@ -260,23 +265,129 @@ def attribution_table(attribution: pd.DataFrame, geometry: pd.DataFrame) -> list
     return lines
 
 
-def decoding_quality(output: Path) -> pd.DataFrame:
-    """Mean out-of-fold decoder R^2 and exposure-distance agreement per representation."""
-    records = []
-    for path in sorted((output / "distances").glob("*/histories@decoded__*.json")):
-        sidecar = json.loads(path.read_text())
-        records.append(
-            {
-                "representation": sidecar["representation"],
-                "year": sidecar["year"],
-                "decoder_r2": sidecar["decoder_r2"],
-                "exposure_distance_spearman": sidecar["exposure_distance_spearman"],
-            }
-        )
-    return pd.DataFrame(records)
+def ceiling(audit: pd.DataFrame, rank: int = FACTORS) -> tuple[float, float]:
+    """Mean reliability of the reference target: the R^2 and distance-Spearman ceilings."""
+    rows = audit.loc[audit["target"].eq("reference") & audit["rank"].eq(rank)]
+    return float(rows["spearman_brown"].mean()), float(rows["distance_reliability"].mean())
 
 
-def measurement_table(comparison: pd.DataFrame, quality: pd.DataFrame) -> list[str]:
+def target_table(audit: pd.DataFrame, quality: pd.DataFrame) -> list[str]:
+    """Reliability of both calibration targets, and decoder quality across ranks."""
+    summary = audit.groupby(["target", "rank"], sort=False)[
+        [
+            "half_correlation",
+            "spearman_brown",
+            "distance_reliability",
+            "commonality_mean",
+            "effective_firm_fraction",
+        ]
+    ].mean()
+    firms = audit["reference_firms"]
+    lines = [
+        "",
+        "## Calibration targets",
+        "",
+        "`reference` is each cohort firm's OLS loadings on the leading principal components",
+        "of standardized prior factor residuals of firms outside the cohort",
+        f"({firms.min()}-{firms.max()} a year); a held-out firm's returns never reach another",
+        "firm's target. `covariance` is the earlier in-panel construction, the rank-k",
+        "coordinates of the cohort's own residual covariance, kept as a control. Means over",
+        "years. Halves split the prior window; the reference halves share the full-window",
+        "factor series, so the Spearman-Brown value estimates the reliability of the",
+        "full-window target and bounds any decoder's R^2 against it. In-panel coordinates",
+        "rotate between halves, so only their distances are compared. Commonality is the",
+        "share of each firm's residual variance the target explains; the effective firm",
+        "fraction is (1 / sum p_i^2) / N for p_i a firm's share of the target's squared",
+        "mass, low when a few firms hold it, as for a diagonal covariance.",
+        "",
+        (
+            "| Target | Rank | Half-window correlation | Spearman-Brown | Distance reliability "
+            "| Commonality | Effective firm fraction |"
+        ),
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in summary.reset_index().to_dict("records"):
+        cells = [
+            f"{row[column]:.3f}" if np.isfinite(row[column]) else "—" for column in summary.columns
+        ]
+        lines.append(f"| {row['target']} | {row['rank']} | " + " | ".join(cells) + " |")
+    primary = quality.loc[quality["rung"].eq("histories")]
+    by_rank = primary.pivot_table(
+        index="representation", columns="rank", values="decoder_r2", aggfunc="mean", sort=False
+    )
+    lines += [
+        "",
+        "Mean out-of-fold decoder R^2 against the reference target at each rank (history",
+        "rung); networks use rank 5 only.",
+        "",
+        "| Representation | " + " | ".join(f"Rank {rank}" for rank in by_rank.columns) + " |",
+        "| --- |" + " ---: |" * len(by_rank.columns),
+        *[
+            f"| `{rep}` | " + " | ".join(f"{value:.3f}" for value in row) + " |"
+            for rep, row in by_rank.iterrows()
+        ],
+    ]
+    return lines
+
+
+def support_table(
+    comparison: pd.DataFrame, quality: pd.DataFrame, audit: pd.DataFrame, sizes: tuple[int, ...]
+) -> list[str]:
+    """Native and decoded gains, and decoder quality, at each nested support size."""
+    gains = comparison.set_index(["approach", "kernel", "innovation"])["gain_vs_joint_exp"]
+    rungs = {rows: f"histories@support{rows}" for rows in sizes} | {256: "histories"}
+    names = [name for name in FOCUSED if name != "direct"]
+    r2_ceiling, rho_ceiling = ceiling(audit)
+    primary = quality.loc[quality["rank"].eq(FACTORS)]
+    lines = [
+        "",
+        "## Support size",
+        "",
+        "Every row re-encodes the same query firms on a nested prefix of the 256-row support.",
+        "Query-only rows (`direct`) do not depend on the support and appear once. Gains are",
+        "over the joint network (exp kernel), matched kernel with diagonal innovations, the",
+        "arm declared before this design ran.",
+        "",
+    ]
+    for title, pattern in (("Native", "{}__{}"), ("Decoded", "{}@decoded__{}")):
+        lines += [
+            f"### {title} distance",
+            "",
+            "| Representation | " + " | ".join(f"{rows} rows" for rows in sorted(rungs)) + " |",
+            "| --- |" + " ---: |" * len(rungs),
+        ]
+        for name in ("direct", *names):
+            cells = []
+            for rows in sorted(rungs):
+                rung = "histories" if name == "direct" else rungs[rows]
+                key = (pattern.format(rung, name), "matched", "diagonal")
+                cells.append(f"{gains[key]:+,.1f}" if key in gains.index else "—")
+            lines.append(f"| `{name}` | " + " | ".join(cells) + " |")
+        lines.append("")
+    lines += [
+        "### Decoder quality",
+        "",
+        f"Mean out-of-fold R^2 (median in brackets) against the rank-{FACTORS} reference",
+        f"target. The target's own reliability bounds R^2 near {r2_ceiling:.2f} and distance",
+        f"Spearman near {rho_ceiling:.2f}.",
+        "",
+        "| Representation | " + " | ".join(f"{rows} rows" for rows in sorted(rungs)) + " |",
+        "| --- |" + " ---: |" * len(rungs),
+    ]
+    for name in ("direct", *names):
+        cells = []
+        for rows in sorted(rungs):
+            rung = "histories" if name == "direct" else rungs[rows]
+            fit = primary.loc[primary["rung"].eq(rung) & primary["representation"].eq(name)]
+            values = fit["decoder_r2"]
+            cells.append(f"{values.mean():.3f} [{values.median():.3f}]" if len(values) else "—")
+        lines.append(f"| `{name}` | " + " | ".join(cells) + " |")
+    return lines
+
+
+def measurement_table(
+    comparison: pd.DataFrame, quality: pd.DataFrame, audit: pd.DataFrame
+) -> list[str]:
     """One readout per family under each measurement variant, and decoder quality."""
     from free_foundations.panel.inference import MEASURED  # noqa: PLC0415
 
@@ -288,7 +399,8 @@ def measurement_table(comparison: pd.DataFrame, quality: pd.DataFrame) -> list[s
         "Held-out gains over the joint network (exp kernel) for the history rung: the native",
         "readout, two re-encodings on differently salted 256-row supports, the two support",
         "targets on shared rows and their combination (RMS of the two distances), and",
-        "networks built from exposures decoded out of the same states (see `decoding.py`).",
+        "networks built from reference-factor exposures decoded out of the same states",
+        "(see `decoding.py`).",
         "",
     ]
     for kernel, innovation in (("exp", "diagonal"), ("matched", "diagonal")):
@@ -305,20 +417,26 @@ def measurement_table(comparison: pd.DataFrame, quality: pd.DataFrame) -> list[s
                 cells.append(f"{gains[key]:+,.1f}" if key in gains.index else "—")
             lines.append(f"| `{name}` | " + " | ".join(cells) + " |")
         lines.append("")
-    if not quality.empty:
-        summary = quality.groupby("representation")[
-            ["decoder_r2", "exposure_distance_spearman"]
-        ].mean()
+    primary = quality.loc[quality["rung"].eq("histories") & quality["rank"].eq(FACTORS)]
+    if not primary.empty:
+        summary = primary.groupby("representation", sort=False).agg(
+            decoder_r2=("decoder_r2", "mean"),
+            median_r2=("decoder_r2", "median"),
+            exposure_distance_spearman=("exposure_distance_spearman", "mean"),
+        )
+        r2_ceiling, rho_ceiling = ceiling(audit)
         lines += [
-            "Decoders: mean over years of the out-of-fold R^2 of the five prior-covariance",
-            "exposures, and the Spearman correlation between decoded and covariance-exposure",
-            "distances.",
+            f"Decoders: out-of-fold R^2 of the rank-{FACTORS} reference exposures (mean over",
+            "years, median in brackets), and the Spearman correlation between decoded and",
+            f"target distances. The target's reliability bounds R^2 near {r2_ceiling:.2f}",
+            f"and distance Spearman near {rho_ceiling:.2f}; see Calibration targets.",
             "",
             "| Representation | Out-of-fold R^2 | Distance Spearman |",
             "| --- | ---: | ---: |",
             *[
-                f"| `{rep}` | {row['decoder_r2']:.3f} | {row['exposure_distance_spearman']:.3f} |"
-                for rep, row in summary.iterrows()
+                f"| `{row['representation']}` | {row['decoder_r2']:.3f} "
+                f"[{row['median_r2']:.3f}] | {row['exposure_distance_spearman']:.3f} |"
+                for row in summary.reset_index().to_dict("records")
             ],
         ]
     return lines
@@ -355,10 +473,11 @@ def results(name: str) -> None:
         "",
         "## Cohorts",
         "",
-        "| Return year | Firms | Prior complete days | Scored days |",
-        "| --- | ---: | ---: | ---: |",
+        "| Return year | Firms | Prior complete days | Scored days | Reference firms |",
+        "| --- | ---: | ---: | ---: | ---: |",
         *[
-            f"| {s['year']} | {s['firms']} | {s['past_complete_days']} | {s['evaluation_days']} |"
+            f"| {s['year']} | {s['firms']} | {s['past_complete_days']} | {s['evaluation_days']} "
+            f"| {s.get('reference_firms', '—')} |"
             for s in samples
         ],
         "",
@@ -394,8 +513,13 @@ def results(name: str) -> None:
     lines += contrast_table(pd.read_csv(output / "contrasts.csv"))
     if (output / "attribution.csv").exists():
         lines += attribution_table(pd.read_csv(output / "attribution.csv"), geometry)
-    if any(comparison["approach"].str.contains("@redraw|@decoded|@shared_both", regex=True)):
-        lines += measurement_table(comparison, decoding_quality(output))
+    if design.decoded:
+        quality = pd.read_csv(output / "decoding.csv")
+        audit = pd.read_csv(output / "target-audit.csv")
+        lines += measurement_table(comparison, quality, audit)
+        lines += target_table(audit, quality)
+        if design.support_sizes:
+            lines += support_table(comparison, quality, audit, design.support_sizes)
     lines += [
         "",
         "## Model confidence sets (size 0.10)",
@@ -428,11 +552,12 @@ def results(name: str) -> None:
         "",
         "Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform. The matched",
         "kernel targets the joint network's mean effective neighbours under exp each year;",
-        "the last column is the largest achieved miss, in neighbours, over all years. Matching",
-        "the mean leaves row-wise concentration and spectral structure free to differ.",
+        "`Matched miss` is the largest achieved miss, in neighbours, over all years. Matching",
+        "the mean of 1/H_i does not match the mean row Herfindahl H, which the last two",
+        "columns compare (held-out years), nor spectral structure.",
         "",
-        "| Approach | exp | median | matched | Matched miss |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Approach | exp | median | matched | Matched miss | Matched H | Joint exp H |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     fractions = geometry.pivot_table(
         index="approach", columns="kernel", values="effective_fraction", aggfunc="mean"
@@ -447,12 +572,17 @@ def results(name: str) -> None:
         .groupby(matched["approach"])
         .max()
     )
+    held = geometry.loc[geometry["year"] >= 2020]
+    herfindahl = held.loc[held["kernel"].eq("matched")].groupby("approach")["mean_herfindahl"]
+    joint = held.loc[held["approach"].eq("fernandez_joint") & held["kernel"].eq("exp")]
+    joint_h = float(joint["mean_herfindahl"].mean())
     for approach, row in fractions.iterrows():
         values = [row.get(kernel, np.nan) for kernel in ("exp", "median", "matched")]
         lines.append(
             f"| `{approach}` | "
             + " | ".join(f"{v:.3f}" for v in values)
-            + f" | {miss.get(approach, np.nan):.2g} |"
+            + f" | {miss.get(approach, np.nan):.2g} | "
+            + f"{herfindahl.mean().get(approach, np.nan):.4f} | {joint_h:.4f} |"
         )
     if name == "four" and (ROOT / "comparison.csv").exists():
         check = regression_check(comparison)

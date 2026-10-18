@@ -53,6 +53,14 @@ class Annual:
     raw_realized: FloatArray
     factor_covariance: FloatArray
     dates: tuple[str, ...]
+    # Prior residuals, on the same dates, of firms outside the cohort with complete returns.
+    reference: FloatArray
+
+
+def residualize(returns: FloatArray, x: FloatArray) -> tuple[FloatArray, FloatArray]:
+    """Firm-by-firm OLS on the intercept and factors: (coefficients, residuals)."""
+    beta = np.linalg.lstsq(x, returns, rcond=None)[0]
+    return beta, returns - x @ beta
 
 
 def eligible(
@@ -87,28 +95,44 @@ def price_breaks(prices: pd.DataFrame) -> pd.DataFrame:
     return _cells(ratio, (ratio > PRICE_BREAK) | (ratio < 1 / PRICE_BREAK), "ratio")
 
 
+def review(prices: pd.DataFrame) -> None:
+    """Stop on any flagged day without a recorded review, whatever that review decides."""
+    flagged = set(map(tuple, price_breaks(prices)[["ticker", "date"]].to_numpy()))
+    unreviewed = sorted(flagged - set(EVENTS))
+    if unreviewed:
+        message = f"Unreviewed price breaks: {unreviewed}"
+        raise ValueError(message)
+
+
+def errors(frame: pd.DataFrame) -> pd.DataFrame:
+    """Cells of a date-by-ticker frame that a review recorded as series errors."""
+    dates = pd.DatetimeIndex(frame.index).strftime("%Y-%m-%d")
+    selected = pd.DataFrame(data=False, index=frame.index, columns=frame.columns)
+    for (ticker, date), (masked, _) in EVENTS.items():
+        if masked and ticker in frame.columns and date in dates:
+            selected.loc[frame.index[dates == date], ticker] = True
+    return selected
+
+
 def daily_returns(prices: pd.DataFrame) -> pd.DataFrame:
-    """Simple daily returns, missing where the price ratio is outside [1/10, 10]."""
-    ratio = prices / prices.shift(1)
-    broken = (ratio > PRICE_BREAK) | (ratio < 1 / PRICE_BREAK)
-    return prices.pct_change(fill_method=None).mask(broken)
+    """Simple daily returns, missing exactly on reviewed series errors.
+
+    The tenfold rule only flags days for review; the recorded decision sets the mask, so
+    a reviewed genuine move beyond it is kept.
+    """
+    review(prices)
+    return prices.pct_change(fill_method=None).mask(errors(prices))
 
 
 def price_audit(prices: pd.DataFrame) -> pd.DataFrame:
-    """Every flagged or large daily move, with its review; unreviewed masks are an error."""
+    """Every flagged or large daily move, with its review; unreviewed flags are an error."""
+    review(prices)
     returns = prices.pct_change(fill_method=None)
     rows = _cells(returns, returns.abs() > LARGE_MOVE, "return")
-    flagged = set(map(tuple, price_breaks(prices)[["ticker", "date"]].to_numpy()))
-    rows["masked"] = [(t, d) in flagged for t, d in zip(rows["ticker"], rows["date"], strict=True)]
-    rows["reviewed"] = [(t, d) in EVENTS for t, d in zip(rows["ticker"], rows["date"], strict=True)]
-    rows["note"] = [
-        EVENTS.get((t, d), (False, ""))[1]
-        for t, d in zip(rows["ticker"], rows["date"], strict=True)
-    ]
-    unreviewed = sorted(flagged - {key for key, (masked, _) in EVENTS.items() if masked})
-    if unreviewed:
-        message = f"Unreviewed price breaks would be masked: {unreviewed}"
-        raise ValueError(message)
+    keys = list(zip(rows["ticker"], rows["date"], strict=True))
+    rows["masked"] = [EVENTS.get(key, (False, ""))[0] for key in keys]
+    rows["reviewed"] = [key in EVENTS for key in keys]
+    rows["note"] = [EVENTS.get(key, (False, ""))[1] for key in keys]
     return rows
 
 
@@ -147,9 +171,13 @@ def annual_data(  # noqa: PLR0913 -- keyword-only design options.
     observed = future.iloc[1:].dropna()
     x_train = np.column_stack([np.ones(len(training)), factors.loc[training.index, FACTOR_NAMES]])
     x_test = np.column_stack([np.ones(len(observed)), factors.loc[observed.index, FACTOR_NAMES]])
-    beta = np.linalg.lstsq(x_train, training.to_numpy(dtype=float), rcond=None)[0]
-    residual_train = training.to_numpy(dtype=float) - x_train @ beta
+    beta, residual_train = residualize(training.to_numpy(dtype=float), x_train)
     residual_test = observed.to_numpy(dtype=float) - x_test @ beta
+    # The calibration target's factors come from firms outside the cohort, so no cohort
+    # firm's returns enter another cohort firm's target.
+    outside = past.loc[training.index].drop(columns=[*tickers, *exclude], errors="ignore")
+    outside = outside.loc[:, outside.notna().all()]
+    _, reference = residualize(outside.to_numpy(dtype=float), x_train)
     destination = output / "observations"
     destination.mkdir(parents=True, exist_ok=True)
     observed.to_parquet(destination / f"{year}-returns.parquet")
@@ -162,6 +190,7 @@ def annual_data(  # noqa: PLR0913 -- keyword-only design options.
             "history_years": histories,
             "excluded_tickers": exclude,
             "past_complete_days": len(training),
+            "reference_firms": reference.shape[1],
             "evaluation_days": len(observed),
             "excluded_outcome_dates": [
                 str(date.date()) for date in future.index.difference(observed.index)
@@ -178,4 +207,5 @@ def annual_data(  # noqa: PLR0913 -- keyword-only design options.
         raw_realized=observed.to_numpy(dtype=float),
         factor_covariance=beta[1:].T @ np.cov(x_train[:, 1:], rowvar=False) @ beta[1:],
         dates=tuple(str(date.date()) for date in observed.index),
+        reference=reference,
     )

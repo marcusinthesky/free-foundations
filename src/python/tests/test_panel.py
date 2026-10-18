@@ -285,12 +285,35 @@ def test_control_table_lists_each_covariance_control_once() -> None:
 
 
 def test_price_breaks_are_missing_returns_not_outliers() -> None:
-    prices = pd.DataFrame({"spliced": [0.07, 0.073, 18.84, 19.0], "rally": [10.0, 22.0, 4.0, 4.4]})
+    dates = pd.bdate_range("2020-11-18", periods=4)
+    prices = pd.DataFrame(
+        {"CHRD": [0.07, 0.073, 18.84, 19.0], "rally": [10.0, 22.0, 4.0, 4.4]}, index=dates
+    )
     returns = observations.daily_returns(prices)
-    assert np.isnan(returns["spliced"].iloc[2])
-    assert returns["spliced"].iloc[3] == pytest.approx(19.0 / 18.84 - 1)
+    assert np.isnan(returns["CHRD"].iloc[2])
+    assert returns["CHRD"].iloc[3] == pytest.approx(19.0 / 18.84 - 1)
     # A +120% day and a -82% day are large but genuine moves.
     assert returns["rally"].iloc[1:3].tolist() == pytest.approx([1.2, 4 / 22 - 1])
+
+
+def test_the_review_decision_not_the_threshold_sets_the_mask(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dates = pd.bdate_range("2021-01-04", periods=3)
+    prices = pd.DataFrame({"GEN": [1.0, 12.0, 12.6], "ERR": [5.0, 5.5, 5.6]}, index=dates)
+    with pytest.raises(ValueError, match="Unreviewed price breaks"):
+        observations.daily_returns(prices)
+    monkeypatch.setitem(observations.EVENTS, ("GEN", "2021-01-05"), (False, "genuine"))
+    # A recorded error is masked even inside the tenfold band.
+    monkeypatch.setitem(observations.EVENTS, ("ERR", "2021-01-06"), (True, "series error"))
+    returns = observations.daily_returns(prices)
+    assert returns["GEN"].iloc[1] == pytest.approx(11.0)
+    assert np.isnan(returns["ERR"].iloc[2])
+    assert returns["ERR"].iloc[1] == pytest.approx(0.1)
+    audit = observations.price_audit(prices)
+    genuine = audit.loc[audit["ticker"].eq("GEN")]
+    assert genuine["reviewed"].tolist() == [True]
+    assert not genuine["masked"].any()
 
 
 def test_every_masked_price_break_must_be_reviewed() -> None:

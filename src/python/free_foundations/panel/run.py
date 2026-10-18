@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from free_foundations.panel.characteristics import ROOT, SOURCE, build
-from free_foundations.panel.decoding import FACTORS, FOLDS, covariance_exposures
+from free_foundations.panel.decoding import FACTORS, FOLDS, RANKS, reliability, targets
 from free_foundations.panel.design import DESIGNS
 from free_foundations.panel.evaluation import (
     CALIBRATION,
@@ -52,6 +52,8 @@ def run_design(
     output.mkdir(parents=True, exist_ok=True)
     panel = Panel()
     firm_days = 0
+    quality: list[dict[str, float | str | int]] = []
+    audit: list[dict[str, float | str | int]] = []
     for year in YEARS:
         annual = annual_data(
             four,
@@ -64,9 +66,22 @@ def run_design(
         LOGGER.info(
             "%s %s: %s firms, %s days", design.name, year, len(annual.tickers), len(annual.dates)
         )
-        exposures = covariance_exposures(annual.prior) if design.decoded else None
+        calibration = targets(annual.prior, annual.reference) if design.decoded else None
+        if design.decoded:
+            audit += [
+                {"year": year} | row
+                for rank in RANKS
+                for row in reliability(annual.prior, annual.reference, rank)
+            ]
         built = distances(
-            four, broad, year, annual.tickers, design, models=models, exposures=exposures
+            four,
+            broad,
+            year,
+            annual.tickers,
+            design,
+            models=models,
+            targets=calibration,
+            quality=quality,
         )
         update(panel, year, annual, built, broad)
         if year in EVALUATION:
@@ -77,6 +92,9 @@ def run_design(
     pd.DataFrame(panel.attribution).to_csv(output / "attribution.csv", index=False)
     pd.DataFrame(panel.annual).to_csv(output / "annual-scores.csv", index=False)
     pd.DataFrame(panel.geometry).to_csv(output / "geometry.csv", index=False)
+    if design.decoded:
+        pd.DataFrame(quality).to_csv(output / "decoding.csv", index=False)
+        pd.DataFrame(audit).to_csv(output / "target-audit.csv", index=False)
     placebo_table(daily).to_csv(output / "placebo.csv", index=False)
     paired(daily).to_csv(output / "bootstrap.csv", index=False)
     contrasts(daily).to_csv(output / "contrasts.csv", index=False)
@@ -94,11 +112,22 @@ def run_design(
             "support_draws": design.support_draws,
             "excluded_tickers": design.exclude,
             "decoded": {
-                "target": f"top {FACTORS} principal exposures of prior residual covariance",
-                "decoder": f"standardized ridge, {FOLDS}-fold out of fold across firms",
+                "target": (
+                    f"OLS exposures to the top {FACTORS} unit-variance principal components of "
+                    "standardized prior factor residuals of firms outside the cohort"
+                ),
+                "control": f"rank-{FACTORS} coordinates of prior residual covariance (in-panel)",
+                "audited_ranks": RANKS,
+                "decoder": (
+                    f"standardized ridge, {FOLDS}-fold out of fold across firms; held-out "
+                    "states and predictions clipped to the training fold's range"
+                ),
             }
             if design.decoded
             else None,
+            "support_sizes": design.support_sizes,
+            "representations": design.representations,
+            "models": design.models,
             "calibration": [CALIBRATION[0], CALIBRATION[-1]],
             "evaluation": [EVALUATION[0], EVALUATION[-1]],
             "prior_return_years": 3,

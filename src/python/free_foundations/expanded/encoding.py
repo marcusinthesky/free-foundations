@@ -166,10 +166,39 @@ def wrap_readout(
     return result.values  # noqa: PD011 -- our Embeddings contract.
 
 
+def randomize(network: Any) -> None:  # noqa: ANN401 -- upstream architecture module.
+    """Replace pretrained weights in place, keeping the architecture.
+
+    Every module with ``reset_parameters`` takes its default initializer (99.98% of
+    TabPFN 3.5 weights). The remaining learned tensors, CLS tokens and inducing vectors,
+    are redrawn as i.i.d. Gaussians at their pretrained mean and scale; positional and
+    Fourier frequencies are architecture constants and are kept.
+    """
+    import torch  # noqa: PLC0415
+
+    torch.manual_seed(42)
+    reset: set[str] = set()
+    for name, module in network.named_modules():
+        if callable(getattr(module, "reset_parameters", None)):
+            module.reset_parameters()
+            reset |= {
+                f"{name}.{child}" if name else child
+                for child, _ in module.named_parameters(recurse=False)
+            }
+    with torch.no_grad():
+        for name, parameter in network.named_parameters():
+            if name not in reset and not name.endswith(("freqs", "frequencies")):
+                mean, scale = parameter.mean(), parameter.std()
+                parameter.copy_(mean + scale * torch.randn_like(parameter))
+
+
 def tabpfn_states(
-    data: Prepared, path: str, checkpoint: str, *, fast: bool
+    data: Prepared, path: str, checkpoint: str, *, fast: bool, random: bool = False
 ) -> dict[str, FloatArray]:
-    """Use the supported native query-embedding API, one ensemble member."""
+    """Use the supported native query-embedding API, one ensemble member.
+
+    ``random`` re-initializes the fitted network's weights before encoding (`randomize`).
+    """
     from tabpfn import TabPFNRegressor  # noqa: PLC0415
     from tabpfn.constants import ModelVersion  # noqa: PLC0415
 
@@ -181,6 +210,8 @@ def tabpfn_states(
         random_state=42,
     )
     model.fit(data.support, data.targets)
+    if random:
+        randomize(model.models_[0])
     encoder = from_fitted(
         "tabpfn",
         model,
@@ -367,7 +398,7 @@ def foundation_states(
         path = metadata["path"]
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['filename']}"
     else:
-        root = cache / "models" / model.removesuffix("_labelnull")
+        root = cache / "models" / model.removesuffix("_labelnull").removesuffix("_random")
         metadata = json.loads((root / "provenance.json").read_text())
         path = str(root / ("regression" if model.startswith("tabfm") else metadata["files"][0]))
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files']}"
@@ -378,7 +409,9 @@ def foundation_states(
                 name: arrays[name].astype(np.float64) for name in arrays.files if arrays[name].size
             }
     if model.startswith("tabpfn"):
-        result = tabpfn_states(data, path, checkpoint, fast=model == "tabpfn_fast")
+        result = tabpfn_states(
+            data, path, checkpoint, fast=model == "tabpfn_fast", random=model.endswith("_random")
+        )
     elif model in {"tabfm", "tabfm_labelnull"}:
         result = tabfm_states(data, path, checkpoint, null_labels=model == "tabfm_labelnull")
     elif model == "exaone":
