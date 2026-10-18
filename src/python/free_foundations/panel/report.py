@@ -168,6 +168,162 @@ def contrast_table(contrasts: pd.DataFrame) -> list[str]:
     return lines
 
 
+# Rows shown in the attribution table, when scored in a design.
+ATTRIBUTED = (
+    "fernandez_joint",
+    "covariance_exposures",
+    "histories__direct",
+    "histories__supervised_mlp16",
+    "histories__tabfm__early_concat",
+    "histories__tabfm__early_concat_labelnull",
+    "histories__tabpfn_full__late",
+    "histories__exaone__late",
+    "histories@decoded__direct",
+    "histories@decoded__tabfm__early_concat",
+)
+PARTS = (
+    "spectrum",
+    "variance",
+    "baseline",
+    "alignment",
+    "concentration_own",
+    "concentration_cross",
+)
+MEASURED_ROWS = {
+    "native": "histories__{}",
+    "redraw 1": "histories@redraw1__{}",
+    "redraw 2": "histories@redraw2__{}",
+    "shared cap/assets": "histories@shared_market_cap_assets__{}",
+    "shared income/assets": "histories@shared_income_assets__{}",
+    "both shared": "histories@shared_both__{}",
+    "decoded": "histories@decoded__{}",
+}
+
+
+def attribution_table(attribution: pd.DataFrame, geometry: pd.DataFrame) -> list[str]:
+    """Held-out residual log-likelihood parts relative to the uniform network."""
+    held = attribution.loc[attribution["year"] >= 2020]
+    lines = [
+        "",
+        "## Where the residual likelihood comes from",
+        "",
+        "Exact split of the held-out spatial-error log-likelihood of factor residuals at the",
+        "frozen coefficient and prior-window variances (Lean `Likelihood.spatial_loss`),",
+        "summed over 2020-2025, minus the uniform network's parts. `alignment` is the term",
+        "linear in lambda (covariance between a firm and its neighbours); the two",
+        "`concentration` terms are quadratic, split into the neighbours' own variances",
+        "weighted by squared weights (the Herfindahl noise cost) and their cross products.",
+        "This is the residual model only; the reported held-out scores add the factor",
+        "covariance. `H` is the mean row Herfindahl index.",
+        "",
+    ]
+    for kernel, innovation in (("exp", "diagonal"), ("matched", "diagonal")):
+        arm = held.loc[held["innovation"].eq(innovation)]
+        totals = arm.groupby(["approach", "kernel"])[list(PARTS)].sum()
+        if ("uniform_network", "none") not in set(totals.index):
+            continue
+        values = {
+            key: dict(zip(PARTS, row, strict=True))
+            for key, row in zip(totals.index, totals.to_numpy(dtype=float), strict=True)
+        }
+        base = values[("uniform_network", "none")]
+        herfindahl = (
+            geometry.loc[geometry["year"] >= 2020]
+            .groupby(["approach", "kernel"])["mean_herfindahl"]
+            .mean()
+        )
+        lines += [
+            f"### {kernel} kernel, {innovation} innovations",
+            "",
+            "| Approach | lambda | " + " | ".join(PARTS) + " | Total | H |",
+            "| --- | ---: |" + " ---: |" * (len(PARTS) + 2),
+        ]
+        rows = [("uniform_network", "none"), *((n, kernel) for n in ATTRIBUTED)]
+        for approach, row_kernel in rows:
+            if (approach, row_kernel) not in values:
+                continue
+            parts = values[approach, row_kernel]
+            shown = {
+                part: parts[part] - (0.0 if approach == "uniform_network" else base[part])
+                for part in PARTS
+            }
+            selected = arm["approach"].eq(approach) & arm["kernel"].eq(row_kernel)
+            intensity = float(arm.loc[selected, "lambda"].iloc[0])
+            lines.append(
+                f"| `{approach}` | {intensity:.3f} | "
+                + " | ".join(f"{shown[part]:+,.0f}" for part in PARTS)
+                + f" | {sum(shown.values()):+,.0f} | "
+                + f"{float(herfindahl.get((approach, row_kernel), np.nan)):.4f} |"
+            )
+        lines.append("")
+    lines.append("The uniform row shows its own parts; every other row is its difference from it.")
+    return lines
+
+
+def decoding_quality(output: Path) -> pd.DataFrame:
+    """Mean out-of-fold decoder R^2 and exposure-distance agreement per representation."""
+    records = []
+    for path in sorted((output / "distances").glob("*/histories@decoded__*.json")):
+        sidecar = json.loads(path.read_text())
+        records.append(
+            {
+                "representation": sidecar["representation"],
+                "year": sidecar["year"],
+                "decoder_r2": sidecar["decoder_r2"],
+                "exposure_distance_spearman": sidecar["exposure_distance_spearman"],
+            }
+        )
+    return pd.DataFrame(records)
+
+
+def measurement_table(comparison: pd.DataFrame, quality: pd.DataFrame) -> list[str]:
+    """One readout per family under each measurement variant, and decoder quality."""
+    from free_foundations.panel.inference import MEASURED  # noqa: PLC0415
+
+    gains = comparison.set_index(["approach", "kernel", "innovation"])["gain_vs_joint_exp"]
+    lines = [
+        "",
+        "## Measurement variants",
+        "",
+        "Held-out gains over the joint network (exp kernel) for the history rung: the native",
+        "readout, two re-encodings on differently salted 256-row supports, the two support",
+        "targets on shared rows and their combination (RMS of the two distances), and",
+        "networks built from exposures decoded out of the same states (see `decoding.py`).",
+        "",
+    ]
+    for kernel, innovation in (("exp", "diagonal"), ("matched", "diagonal")):
+        lines += [
+            f"### {kernel} kernel, {innovation} innovations",
+            "",
+            "| Representation | " + " | ".join(MEASURED_ROWS) + " |",
+            "| --- |" + " ---: |" * len(MEASURED_ROWS),
+        ]
+        for name in ("direct", *MEASURED):
+            cells = []
+            for pattern in MEASURED_ROWS.values():
+                key = (pattern.format(name), kernel, innovation)
+                cells.append(f"{gains[key]:+,.1f}" if key in gains.index else "—")
+            lines.append(f"| `{name}` | " + " | ".join(cells) + " |")
+        lines.append("")
+    if not quality.empty:
+        summary = quality.groupby("representation")[
+            ["decoder_r2", "exposure_distance_spearman"]
+        ].mean()
+        lines += [
+            "Decoders: mean over years of the out-of-fold R^2 of the five prior-covariance",
+            "exposures, and the Spearman correlation between decoded and covariance-exposure",
+            "distances.",
+            "",
+            "| Representation | Out-of-fold R^2 | Distance Spearman |",
+            "| --- | ---: | ---: |",
+            *[
+                f"| `{rep}` | {row['decoder_r2']:.3f} | {row['exposure_distance_spearman']:.3f} |"
+                for rep, row in summary.iterrows()
+            ],
+        ]
+    return lines
+
+
 def results(name: str) -> None:
     """Write one design's RESULTS.md from its saved machine-readable tables."""
     design = DESIGNS[name]
@@ -236,6 +392,10 @@ def results(name: str) -> None:
             f"{row['politis_white_block']:.1f} |"
         )
     lines += contrast_table(pd.read_csv(output / "contrasts.csv"))
+    if (output / "attribution.csv").exists():
+        lines += attribution_table(pd.read_csv(output / "attribution.csv"), geometry)
+    if any(comparison["approach"].str.contains("@redraw|@decoded|@shared_both", regex=True)):
+        lines += measurement_table(comparison, decoding_quality(output))
     lines += [
         "",
         "## Model confidence sets (size 0.10)",

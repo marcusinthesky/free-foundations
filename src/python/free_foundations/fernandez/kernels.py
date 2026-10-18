@@ -40,8 +40,11 @@ def median_scale(distance: FloatArray) -> float:
 
 
 def effective_neighbours(weights: FloatArray) -> float:
-    """Mean inverse Herfindahl index of each firm's neighbour weights."""
-    return float(np.mean(1 / np.sum(weights**2, axis=1)))
+    """Mean inverse Herfindahl index of each firm's neighbour weights; NaN for empty rows."""
+    herfindahl = np.sum(weights**2, axis=1)
+    if (herfindahl <= 0).any():
+        return float("nan")
+    return float(np.mean(1 / herfindahl))
 
 
 def matched_scale(distance: FloatArray, target: float) -> float:
@@ -100,6 +103,9 @@ def geometry(distance: FloatArray | None, weights: FloatArray) -> dict[str, floa
         "firms": float(firms),
         "effective_neighbours": effective_neighbours(weights),
         "effective_fraction": effective_neighbours(weights) / (firms - 1),
+        # The likelihood's neighbour-noise cost scales with the mean Herfindahl index,
+        # 1/effective neighbours averaged over rows (Lean `Likelihood.herfindahl_ge`).
+        "mean_herfindahl": float(np.mean(np.sum(weights**2, axis=1))),
         "frobenius_gap": float(np.linalg.norm(weights - uniform)),
         "row_total_variation_gap": float(np.mean(0.5 * np.abs(weights - uniform).sum(axis=1))),
         "second_eigenvalue": float(spectrum[-2]) if firms > 1 else 0.0,

@@ -9,10 +9,26 @@ theoretical spine:
 Each module proves one link *given its stated assumptions*. Nothing here shows that a given
 checkpoint satisfies those assumptions, and nothing requires a pretrained model to win.
 
+The results answer four separate questions about a learned measurement. Each needs its own
+evidence, and a yes to one says nothing about the next.
+
+1. **Information.** What does the objective make an optimal model keep? A proper score
+   recovers its target's conditional law or moment (`Score`), and excess risk is the
+   distance to it (`Recovery.excess_risk_condExp`).
+2. **Sufficiency.** Is that enough for the economic state? Only if the economic prediction
+   is a function of the pretraining prediction (`Alignment`, `Sufficiency`).
+3. **Measurement and geometry.** Can the state, and distances between states, be read out
+   stably, and are they identified? (`Recovery`, `Measurement`, `Geometry`)
+4. **Econometric use.** What does the spatial model do with the distances? (`Kernel`,
+   `Network`, `Value`, `Likelihood`, `Stability`)
+
 Left on paper:
 
 - the dependent-data generalisation bounds (mixing, Rademacher complexity);
 - transfer and task-diversity rates;
+- objective-specific routes (contrastive, predictive-latent, diffusion, autoregressive),
+  each of which would pair a proper-score statement with `Sufficiency`;
+- the PFN posterior derivation and a prior-mismatch term;
 - the log-determinant half of the loss-Lipschitz bound, which needs eigenvalue
   perturbation;
 - generated-network inference.
@@ -23,22 +39,30 @@ Left on paper:
 | --- | --- |
 | `Exposure.covariance_eq`, `inner_eq_half` | Common covariance is `½(kᵢ + kⱼ − ρᵢⱼ²)`. Distance alone does not order covariance; communality also matters. |
 | `Score.response_sq` | `ρᵢⱼ² = (bᵢ − bⱼ)'Ω(bᵢ − bⱼ)` is the second moment of the response difference `(bᵢ − bⱼ)'q`, for any shock law with finite second moments. |
-| `Exposure.pricing_error_lipschitz` | `\|αᵢ − αⱼ\| ≤ ρᵢⱼ · (γ'Ω⁻¹γ)^½`. Close exposures cannot carry very different prices of risk; the converse fails. |
+| `Exposure.pricing_error_lipschitz` | `\|⟪aᵢ, g⟫ − ⟪aⱼ, g⟫\| ≤ ρᵢⱼ‖g‖`. If the omitted factors are traded and firms earn no other expected return, close exposures imply close factor-implied expected returns, and `‖g‖ = (γ'Ω⁻¹γ)^½` is their maximum Sharpe ratio. The factor prices `γ` are common to all firms; a firm-specific expected return is not bounded. |
 
-## 2. Task alignment (`Alignment`, `Recovery`): the central result
+## 2. Task alignment (`Alignment`, `Sufficiency`, `Recovery`, `Measurement`): the central result
 
 | Theorem | Statement |
 | --- | --- |
-| `Alignment.optimal_imp_sufficient_iff` | Every target-optimal representation is sufficient iff the target separates what the economic state separates. |
+| `Alignment.optimal_imp_sufficient_iff` | Deterministic core: every target-optimal representation is sufficient iff the target separates what the economic state separates. |
 | `Alignment.state_optimal_iff`, `constant_target_loses_state` | The state can be target-optimal iff the target needs nothing the state ignores. A constant (label-null) target admits an optimal representation that keeps no state. |
 | `Alignment.marginals_free_of_state`, `joint_depends_on_state` | Exact marginal forecasts can discard the state that fixes the joint law. |
+| `Sufficiency.condExp_eq_iff` | Statistical form: a representation `σ(Z) ⊆ σ(H)` attains `E[X \| H]` iff `E[X \| H]` is a.s. `σ(Z)`-measurable. |
+| `Sufficiency.sufficient_iff` | Every representation attaining `E[X \| H]` also attains `E[Y \| H]` iff `E[Y \| H] = g(E[X \| H])` a.s. for a measurable `g`. Conditional laws follow from indicator targets. |
+| `Sufficiency.constant_target_iff` | With an a.s. constant pretraining prediction, the guarantee covers only a.s. constant economic predictions. |
 | `Recovery.aggregate_merges` | Limit: the target `a_f + a_o` merges `(1, 0)` and `(0, 1)`, which are `√2` apart. |
 | `Recovery.diverse_distinguishes` | Diversity: `a_f ± a_o` together give `‖Ca‖² = 2‖a‖²`, so a margin of `√2`. |
+| `Recovery.finrank_le_of_distinguishes`, `scalar_not_distinguishes` | Distinguishing exposures needs at least as many task dimensions as exposure dimensions. One scalar target cannot distinguish exposures of dimension two or more. |
 | `Recovery.exists_decoder` | If tasks distinguish exposures (`‖Ca‖ ≥ κ‖a‖`, κ > 0), a linear decoder with left-inverse property and gain `1/κ` exists (project onto the range, then invert). |
 | `Recovery.exposure_error` | `κ‖â − a‖ ≤ ‖τ̂ − Ca‖`. |
 | `Recovery.exposure_error_mismatch`, `_sq` | With mismatch `τ = Ca + v`: `κ‖â − a‖ ≤ ‖τ̂ − τ‖ + ‖v‖` and `κ²‖â − a‖² ≤ 2(‖τ̂ − τ‖² + ‖v‖²)`. Accuracy cannot remove `v`. |
 | `Recovery.mean_exposure_error` | The same bound in mean square under any measure. |
 | `Recovery.excess_risk`, `excess_risk_condExp` | Excess squared task risk over `E[Y \| X]` equals `‖f − E[Y \| X]‖²` in `L²`. This is the `ε` the exposure bounds take. |
+| `Measurement.measurement_error`, `rms_measurement_error` | Any `K`-Lipschitz readout `g`: `d(g(F̂), s) ≤ K d(F̂, F) + ξ`, and in root mean square `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂` (Minkowski), with alignment error `ξ = d(g(F), s)`. |
+| `Measurement.decoder_lipschitz` | The linear decoder is `1/κ`-Lipschitz, so `Recovery` is the special case `K = 1/κ`. |
+| `Measurement.readout_error_ge`, `aggregate_readout_error` | Lower bound: if a representation merges two histories, every readout misses one state by at least half their distance. Reading `(1, 0)` and `(0, 1)` from their aggregate misses one by at least `√2/2`. |
+| `Measurement.mean_sq_distance`, `sq_norm_mean_le` | `E‖D‖² = ‖E D‖² + E‖D − E D‖²` for `D = Aᵢ − Aⱼ`: distances between posterior-mean exposures understate expected distances by the posterior variance of the difference. |
 | `Recovery.distance_error` | `\|‖âᵢ − âⱼ‖ − ‖aᵢ − aⱼ‖\| ≤ ‖âᵢ − aᵢ‖ + ‖âⱼ − aⱼ‖`. |
 | `Recovery.pairwise_distance_error` | `Σᵢ≠ⱼ (d̂ᵢⱼ − dᵢⱼ)² ≤ 4(N − 1) Σᵢ ‖âᵢ − aᵢ‖²`, with no independence across pairs. |
 | `Recovery.readout_invariant` | Distances between read-out exposures are invariant under any reparametrisation of the states, with the matching readout. |
@@ -49,22 +73,28 @@ Left on paper:
 | --- | --- |
 | `Geometry.optimal_equiv`, `sufficient_equiv` | Any bijection of the representation preserves optimality and sufficiency. |
 | `Geometry.rescale` | Scaling by `c ≠ 0` preserves sufficiency and multiplies every distance by `\|c\|`. |
+| `Geometry.observationally_equivalent` | Task means identify exposures only up to an invertible map: `(C G⁻¹)(G a) = C a`. |
+| `Geometry.distances_preserved_iff` | The two descriptions give the same distances for every configuration iff `G` preserves norms. The common covariance fixes the Gram matrix (`Exposure.inner_eq_half`) and so pins distances down up to rotation. |
 | `Geometry.chord_injective`, `chord_left_inverse` | The direct baseline `[x, 1]/‖[x, 1]‖` is injective (`x = v₁:ₚ/vₚ₊₁`)... |
 | `Geometry.chord_sq_sum`, `chord_dist_sq_le` | ...yet lies on the unit sphere, so every chord distance is at most 2. |
 
-## 4. Kernel and network (`Kernel`, `Network`, `Value`)
+## 4. Kernel, network and likelihood (`Kernel`, `Network`, `Value`, `Likelihood`)
 
 | Theorem | Statement |
 | --- | --- |
 | `Kernel.expRow_scale` | `(d, h)` and `(cd, ch)` give the same network. |
-| `Kernel.normalized_tv_le`, `normalized_tv_le_two` | Weights with ratios in `[1/r, r]` normalise to rows within total variation `min(2, r² − 1)`. |
-| `Kernel.expRow_tv_le`, `expKernel_linfty_le` | Distance error `δ` gives `‖Ŵ − W‖_∞ ≤ min(2, e^{2δ/h} − 1)`. The bound is uniform in `δ`. |
+| `Kernel.normalized_l1_le`, `normalized_l1_le_two` | Weights with ratios in `[1/r, r]` normalise to rows within `ℓ₁` distance `min(2, r² − 1)`, twice the total variation. |
+| `Kernel.expRow_l1_le`, `expKernel_linfty_le` | Distance error `δ` gives `‖Ŵ − W‖_∞ ≤ min(2, e^{2δ/h} − 1)`. The bound is uniform in `δ`. |
 | `Network.inverse_expansion` | `(I − λW)⁻¹ = I + λW + λ²W²(I − λW)⁻¹`. |
 | `Network.rowStochastic_const`, `rowStochastic_inverse_const` | Every row-normalised W has `(I − λW)⁻¹1 = 1/(1 − λ)`, a built-in common component. |
 | `Network.uniform_const`, `uniform_sum_zero`, `inverse_on_eigenvector` | The uniform network is a pure common component. |
 | `Network.placebo_det`, `placebo_group_mass` | `PWPᵀ` keeps `det(I − λW)` and the weight between size groups. |
 | `Value.decomposition` | `⟨W − U, C⟩ = ½Σⱼ(cⱼ − 1)kⱼ − ½Σᵢⱼ(Wᵢⱼ − Uᵢⱼ)ρᵢⱼ²`: hub plus proximity. |
 | `Value.placebo_hub` | Within-group placebos keep the hub term when communality is constant within groups. |
+| `Likelihood.precision_eq`, `logdet_eq`, `quadratic_term`, `spatial_loss` | For `Σ = A⁻¹DA⁻ᵀ`, `A = I − λW`: expected loss `= Σᵢ log dᵢ − 2 log\|det A\| + Σᵢ mᵢ(λ)/dᵢ`, with filtered second moments `mᵢ(λ) = (AMAᵀ)ᵢᵢ`. |
+| `Likelihood.filtered_second_moment` | For `M = Gram(a) + diag(η)` and zero-diagonal W: `mᵢ(λ) = ‖aᵢ − λΣⱼWᵢⱼaⱼ‖² + ηᵢ + λ²ΣⱼWᵢⱼ²ηⱼ`. |
+| `Likelihood.filtered_second_moment_expand` | `mᵢ(λ) = (‖aᵢ‖² + ηᵢ) − 2λΣⱼWᵢⱼ⟪aᵢ, aⱼ⟫ + λ²(‖ΣⱼWᵢⱼaⱼ‖² + ΣⱼWᵢⱼ²ηⱼ)`. With equal `dᵢ`, the linear coefficient sums to `−2⟨W, C⟩/d`, the inner product `Value` decomposes; idiosyncratic variance never enters it. |
+| `Likelihood.herfindahl_ge`, `herfindahl_uniform` | The noise cost `ΣⱼWᵢⱼ²ηⱼ` is `η` times the row's Herfindahl index, at least `1/m`, with equality for equal weights. |
 
 ## 5. Financial consequence (`Stability`)
 

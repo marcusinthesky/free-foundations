@@ -65,7 +65,7 @@ def describe(name: str) -> dict[str, str]:
         "history": history,
         "rung": rung,
         "representation": representation,
-        "arm": ARMS[representation],
+        "arm": "calibrated" if rung.endswith("@decoded") else ARMS[representation],
     }
 
 
@@ -79,6 +79,36 @@ class Panel:
     dates: list[str] = field(default_factory=list)
     geometry: list[dict[str, float | str | int]] = field(default_factory=list)
     annual: list[dict[str, float | str | int]] = field(default_factory=list)
+    own: dict[Key, list[FloatArray]] = field(default_factory=dict)
+    attribution: list[dict[str, float | str | int]] = field(default_factory=list)
+
+
+def attribute(
+    item: Block, own: FloatArray, intensity: float, variances: FloatArray
+) -> dict[str, float]:
+    """Exact split of the residual spatial-error log-likelihood (Lean `Likelihood`).
+
+    With filtered second moments m = second - 2 lambda cross + lambda^2 spatial and the
+    spatial term split into the Herfindahl-weighted own variances sum_j W_ij^2 s_j and
+    the cross products, the five parts sum to ``Block.score``.
+    """
+    days = item.days
+    return {
+        "spectrum": days * float(np.log(np.abs(1 - intensity * item.eigenvalues)).sum()),
+        "variance": -0.5 * days * float(np.log(2 * np.pi * variances).sum()),
+        "baseline": -0.5 * days * float(np.sum(item.second / variances)),
+        "alignment": days * intensity * float(np.sum(item.cross / variances)),
+        "concentration_own": -0.5 * days * intensity**2 * float(np.sum(own / variances)),
+        "concentration_cross": -0.5
+        * days
+        * intensity**2
+        * float(np.sum((item.spatial - own) / variances)),
+    }
+
+
+def own_variance(weights: FloatArray, item: Block) -> FloatArray:
+    """sum_j W_ij^2 s_j: the part of the spatial term from neighbours' own second moments."""
+    return (weights**2) @ item.second
 
 
 def networks(
@@ -131,16 +161,42 @@ def update(
             )
     if year in CALIBRATION:
         for key, (weights, _) in built.items():
-            panel.calibration.setdefault(key, []).append(block(annual.realized, weights))
+            item = block(annual.realized, weights)
+            panel.calibration.setdefault(key, []).append(item)
+            panel.own.setdefault(key, []).append(own_variance(weights, item))
         if year == CALIBRATION[-1]:
             calibrate(panel)
         return
+    evaluate(panel, year, annual, built)
+
+
+def evaluate(
+    panel: Panel, year: int, annual: Annual, built: dict[Key, tuple[FloatArray, float]]
+) -> None:
+    """Score one held-out year for every network and the nonspatial controls."""
     values = annual.raw_realized - annual.raw_prior.mean(axis=0)
     panel.dates.extend(annual.dates)
     for (name, kernel), (weights, _) in built.items():
         previous = block(annual.prior, weights, symmetric_spectrum(weights))
+        realized = block(annual.realized, weights, previous.eigenvalues)
         for innovation in innovations_for(name):
             intensity = panel.intensities[name, kernel, innovation][0]
+            if "__placebo" not in name:
+                panel.attribution.append(
+                    {
+                        "approach": name,
+                        "kernel": kernel,
+                        "innovation": innovation,
+                        "year": year,
+                        "lambda": intensity,
+                    }
+                    | attribute(
+                        realized,
+                        own_variance(weights, realized),
+                        intensity,
+                        previous.variances(intensity, innovation),
+                    )
+                )
             covariance = forecast_covariance(
                 previous, weights, intensity, annual.factor_covariance, innovation
             )
@@ -183,6 +239,20 @@ def calibrate(panel: Panel) -> None:
                 panel.intensities[name, kernel, innovation] = (0.0, value)
             else:
                 panel.intensities[name, kernel, innovation] = fit(blocks, innovation)
+            if "__placebo" in name:
+                continue
+            intensity = panel.intensities[name, kernel, innovation][0]
+            for year, item, own in zip(CALIBRATION, blocks, panel.own[name, kernel], strict=True):
+                panel.attribution.append(
+                    {
+                        "approach": name,
+                        "kernel": kernel,
+                        "innovation": innovation,
+                        "year": year,
+                        "lambda": intensity,
+                    }
+                    | attribute(item, own, intensity, item.variances(intensity, innovation))
+                )
     LOGGER.info("Calibrated %s coefficients", len(panel.intensities))
 
 

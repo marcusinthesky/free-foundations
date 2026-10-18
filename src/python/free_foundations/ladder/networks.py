@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from free_foundations.expanded.representations import ARMS, representation_distances
+from free_foundations.expanded.representations import ARMS, MODELS, representation_distances
 from free_foundations.fernandez.kernels import effective_neighbours, kernel_weights
 from free_foundations.fernandez.models import paper_weights
 from free_foundations.ladder.data import CUTOFF_YEAR, HISTORY
@@ -92,8 +92,9 @@ def ladder_distances(  # noqa: PLR0913 -- one arm's inputs plus an optional mode
         LOGGER.info(
             "Ladder %s %s: %s firms, %s features", arm, label, len(tickers), len(data.features)
         )
-        options = {} if models is None else {"models": models}
-        encoded = representation_distances(data, cache=MODEL_CACHE, source=MODEL_SOURCE, **options)
+        encoded = representation_distances(
+            data, cache=MODEL_CACHE, source=MODEL_SOURCE, models=models or MODELS
+        )
         for representation, distance in encoded.items():
             name = f"{label}__{representation}"
             result[name] = distance

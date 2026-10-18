@@ -68,3 +68,13 @@ def test_uniform_network_has_zero_gap_and_placebo_keeps_spectrum_and_groups() ->
     order = group_permutation(groups, seed=3)
     assert_allclose(permuted, weights[np.ix_(order, order)])
     assert np.array_equal(groups[order], groups)
+
+
+def test_empty_rows_have_no_effective_neighbours_and_herfindahl_is_reported() -> None:
+    from free_foundations.fernandez.kernels import geometry  # noqa: PLC0415
+
+    assert np.isnan(effective_neighbours(np.zeros((4, 4))))
+    uniform = (np.ones((5, 5)) - np.eye(5)) / 4
+    record = geometry(None, uniform)
+    assert_allclose(record["mean_herfindahl"], 1 / 4)
+    assert_allclose(record["effective_neighbours"], 4)

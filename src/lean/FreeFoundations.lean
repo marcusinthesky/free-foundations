@@ -1,9 +1,12 @@
 import FreeFoundations.Exposure
 import FreeFoundations.Alignment
+import FreeFoundations.Sufficiency
 import FreeFoundations.Network
 import FreeFoundations.Recovery
+import FreeFoundations.Measurement
 import FreeFoundations.Geometry
 import FreeFoundations.Kernel
 import FreeFoundations.Stability
 import FreeFoundations.Score
 import FreeFoundations.Value
+import FreeFoundations.Likelihood

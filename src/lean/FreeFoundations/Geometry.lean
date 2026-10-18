@@ -19,6 +19,13 @@ space and distances are not.
 
 So extraction, normalisation and kernel each need their own validation, or a readout that
 fixes the geometry (`Recovery.readout_invariant`).
+
+A readout fitted to task outputs does not fix it on its own. Task means `C a` identify
+exposures only up to an invertible map `G`, since `(C G⁻¹)(G a) = C a`
+(`observationally_equivalent`), and the two descriptions give the same distances only when
+`G` preserves norms (`distances_preserved_iff`). An anchor is needed. The common covariance
+is one: it fixes every inner product `⟪aᵢ, aⱼ⟫`, hence every distance
+(`Exposure.inner_eq_half`), and leaves only rotations free.
 -/
 
 namespace FreeFoundations.Geometry
@@ -95,5 +102,32 @@ theorem chord_dist_sq_le (x y : n → ℝ) : ∑ o, (chord x o - chord y o) ^ 2 
       rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, chord_sq_sum,
         chord_sq_sum]
       norm_num
+
+/-! ## Identification -/
+
+section Identification
+
+variable {A B : Type*} [NormedAddCommGroup A] [InnerProductSpace ℝ A]
+  [NormedAddCommGroup B] [InnerProductSpace ℝ B]
+
+/-- **Observational equivalence.** Task means identify exposures only up to an invertible
+map: `(C G⁻¹)(G a) = C a`. -/
+theorem observationally_equivalent (C : A →ₗ[ℝ] B) (G : A ≃ₗ[ℝ] A) (a : A) :
+    (C ∘ₗ G.symm.toLinearMap) (G a) = C a := by
+  simp
+
+/-- The two descriptions give the same distances for every configuration iff `G` preserves
+norms. Scaling by `c` (`rescale`) is observationally equivalent and multiplies every
+distance by `|c|`. -/
+theorem distances_preserved_iff (G : A →ₗ[ℝ] A) :
+    (∀ x y, ‖G x - G y‖ = ‖x - y‖) ↔ ∀ x, ‖G x‖ = ‖x‖ := by
+  constructor
+  · intro h x
+    simpa using h x 0
+  · intro h x y
+    rw [← map_sub]
+    exact h _
+
+end Identification
 
 end FreeFoundations.Geometry

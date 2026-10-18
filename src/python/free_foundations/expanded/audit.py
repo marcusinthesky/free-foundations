@@ -15,12 +15,15 @@ from free_foundations.expanded.representations import READOUTS
 from free_foundations.pilot.spatial import normalize_weights
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
     from free_foundations.contracts import FloatArray
     from free_foundations.expanded.encoding import Prepared
 
 type Record = dict[str, str | int | float]
+# Distance -> named row-normalized networks, e.g. the panel's median and matched kernels.
+type Networks = Callable[[FloatArray], dict[str, FloatArray]]
 type IntArray = npt.NDArray[np.int64]
 
 
@@ -45,8 +48,12 @@ def _upper(matrix: FloatArray) -> FloatArray:
     return matrix[np.triu_indices(len(matrix), 1)]
 
 
-def compare(reference: FloatArray, other: FloatArray) -> Record:
-    """Embedding drift and distance/network agreement for the same ordered firms."""
+def compare(reference: FloatArray, other: FloatArray, networks: Networks | None = None) -> Record:
+    """Embedding drift and distance/network agreement for the same ordered firms.
+
+    ``max_weight_change`` uses exp(-d) with h = 1, where near-uniform networks hide
+    distance changes; ``networks`` adds the same check for bandwidth-adapting kernels.
+    """
     scale = float(np.linalg.norm(reference, axis=1).mean()) or 1.0
     record: Record = {
         "firms": len(reference),
@@ -61,6 +68,12 @@ def compare(reference: FloatArray, other: FloatArray) -> Record:
                 np.abs(normalize_weights(np.exp(-first)) - normalize_weights(np.exp(-second))).max()
             ),
         }
+        if networks is not None:
+            after = networks(second)
+            record |= {
+                f"max_weight_change_{kernel}": float(np.abs(weights - after[kernel]).max())
+                for kernel, weights in networks(first).items()
+            }
     return record
 
 
@@ -73,7 +86,9 @@ def _states(
     return states
 
 
-def query_cohort_audit(data: Prepared, model: str, cache: Path, source: Path) -> list[Record]:
+def query_cohort_audit(
+    data: Prepared, model: str, cache: Path, source: Path, networks: Networks | None = None
+) -> list[Record]:
     """Re-encode seeded halves, reversed order and singletons with the same support."""
     full = _states(data, model, cache, source, store=True)
     rng = np.random.default_rng(42)
@@ -100,13 +115,15 @@ def query_cohort_audit(data: Prepared, model: str, cache: Path, source: Path) ->
                     "variant": label,
                     "representation": name,
                     "arm": arm,
-                    **compare(full[readout][positions], states[readout]),
+                    **compare(full[readout][positions], states[readout], networks),
                 }
             )
     return records
 
 
-def support_label_audit(data: Prepared, model: str, cache: Path, source: Path) -> list[Record]:
+def support_label_audit(
+    data: Prepared, model: str, cache: Path, source: Path, networks: Networks | None = None
+) -> list[Record]:
     """Shuffle or null the support labels, and redraw the support, holding queries fixed."""
     full = _states(data, model, cache, source, store=True)
     variants = {
@@ -130,15 +147,20 @@ def support_label_audit(data: Prepared, model: str, cache: Path, source: Path) -
                 "variant": label,
                 "representation": name,
                 "arm": arm,
-                **compare(full[readout], states[readout]),
+                **compare(full[readout], states[readout], networks),
             }
             for readout, name, arm in READOUTS[model]
         )
     return records
 
 
-def target_audit(
-    data: Prepared, alternate: Prepared, model: str, cache: Path, source: Path
+def target_audit(  # noqa: PLR0913, PLR0917 -- two contexts, a model and its cache paths.
+    data: Prepared,
+    alternate: Prepared,
+    model: str,
+    cache: Path,
+    source: Path,
+    networks: Networks | None = None,
 ) -> list[Record]:
     """Agreement between geometries conditioned on two declared support targets."""
     first = _states(data, model, cache, source, store=True)
@@ -149,7 +171,7 @@ def target_audit(
             "variant": "income_assets",
             "representation": name,
             "arm": arm,
-            **compare(first[readout], second[readout]),
+            **compare(first[readout], second[readout], networks),
         }
         for readout, name, arm in READOUTS[model]
     ]

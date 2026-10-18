@@ -36,9 +36,16 @@ theorem covariance_eq (Ω : Matrix k k ℝ) (hΩ : Ωᵀ = Ω) (bᵢ bⱼ : k �
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
-/-- **First moment.** In whitened coordinates `aᵢ = Ω^{1/2}bᵢ` and `g = Ω^{-1/2}γ`, pricing
-errors are `αᵢ = ⟪aᵢ, g⟫`. Their difference is at most the exposure distance times
-`‖g‖ = (γ'Ω⁻¹γ)^{1/2}`, the maximum Sharpe ratio of the omitted factors. -/
+/-- **First moment.** For any `aᵢ, aⱼ, g`, `|⟪aᵢ, g⟫ − ⟪aⱼ, g⟫| ≤ ‖aᵢ − aⱼ‖ ‖g‖`
+(Cauchy–Schwarz).
+
+The economic reading needs assumptions the lemma does not supply. In whitened coordinates
+`aᵢ = Ω^{1/2}bᵢ` and `g = Ω^{-1/2}γ`, `⟪aᵢ, g⟫ = bᵢ'γ` is the expected-return contribution
+of the omitted common factors, whose prices `γ` are the same for every firm. If those factors
+are traded and firms earn no other expected return, `αᵢ = bᵢ'γ` is the whole pricing error
+and `‖g‖ = (γ'Ω⁻¹γ)^{1/2}` is the maximum Sharpe ratio attainable from them. Then close
+exposures imply close factor-implied expected returns. The converse fails, and a
+firm-specific expected return is not bounded at all. -/
 theorem pricing_error_lipschitz (aᵢ aⱼ g : E) :
     |inner ℝ aᵢ g - inner ℝ aⱼ g| ≤ ‖aᵢ - aⱼ‖ * ‖g‖ := by
   rw [← inner_sub_left]

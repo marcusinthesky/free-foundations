@@ -12,11 +12,17 @@ import numpy as np
 import pandas as pd
 
 from free_foundations.expanded.disclosures import input_views
-from free_foundations.expanded.distance import save_distance
+from free_foundations.expanded.distance import pairwise_distance, save_distance
 from free_foundations.expanded.encoding import cap_support, prepare
-from free_foundations.expanded.representations import ARMS, representation_distances
+from free_foundations.expanded.representations import (
+    ARMS,
+    MODELS,
+    representation_distances,
+    representation_states,
+)
 from free_foundations.fernandez.characteristics import history_view
 from free_foundations.fernandez.models import rank_distance
+from free_foundations.panel.decoding import decode
 from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
@@ -34,6 +40,13 @@ TARGETS = {
     "market_cap_assets": "next annual snapshot market_cap_assets",
     "income_assets": "next annual snapshot NetIncomeLoss / Assets",
 }
+# Distances computed from query rows and all-past preprocessing only: no support draw.
+QUERY_ONLY = ("direct", "euclidean")
+# Readouts that see support labels, so the two shared targets can differ.
+LABELLED = frozenset(
+    {name for name, arm in ARMS.items() if arm == "task"}
+    | {"tabfm__early_concat", "tabfm__early_mean"}
+)
 CODE = (
     "expanded/encoding.py",
     "expanded/baselines.py",
@@ -41,6 +54,7 @@ CODE = (
     "expanded/representations.py",
     "fernandez/models.py",
     "panel/networks.py",
+    "panel/decoding.py",
 )
 
 
@@ -139,9 +153,21 @@ def context(
     core: pd.DataFrame,
     tickers: tuple[str, ...],
     year: int,
+    salt: str = "",
 ) -> Prepared:
-    """Past-only preprocessing, then the shared deterministic 256-row support cap."""
-    return cap_support(prepare(view, core, tickers, year, "income"))
+    """Past-only preprocessing, then the shared deterministic 256-row support cap.
+
+    A ``salt`` draws a different, equally outcome-independent set of 256 support rows.
+    """
+    return cap_support(prepare(view, core, tickers, year, "income"), salt=salt)
+
+
+def combined(first: FloatArray, second: FloatArray) -> FloatArray:
+    """RMS of two distances: the chord distance of concatenated, separately normalized states.
+
+    For unit vectors, |[u, v] - [u', v']|^2 / 2 = (|u - u'|^2 + |v - v'|^2) / 2.
+    """
+    return np.sqrt((first**2 + second**2) / 2)
 
 
 def record_context(path: Path, data: Prepared, target: str) -> None:
@@ -180,7 +206,7 @@ def save(
     write_json(path.with_suffix(".json"), dict(sidecar))
 
 
-def distances(  # noqa: PLR0913 -- design inputs plus an optional model subset.
+def distances(  # noqa: C901, PLR0912, PLR0913 -- design inputs plus optional model subset and target.
     four: pd.DataFrame,
     broad: pd.DataFrame,
     year: int,
@@ -188,46 +214,73 @@ def distances(  # noqa: PLR0913 -- design inputs plus an optional model subset.
     design: Design,
     *,
     models: tuple[str, ...] | None = None,
+    exposures: FloatArray | None = None,
 ) -> dict[str, FloatArray]:
-    """Recompute every network from fingerprinted caches; never reuse a saved matrix."""
+    """Recompute every network from fingerprinted caches; never reuse a saved matrix.
+
+    ``exposures`` are prior-window covariance exposures of ``tickers``. With them, the
+    design's primary history rung also yields decoded-exposure networks and the
+    ``covariance_exposures`` control.
+    """
     root = design.output
     fingerprint = {"design": design.name, "year": year, "code_sha256": code_digest()}
     result: dict[str, FloatArray] = {}
+
+    def keep(name: str, distance: FloatArray, sidecar: Mapping[str, object]) -> None:
+        result[name] = distance
+        save(
+            root / "distances" / str(year) / f"{name}.parquet",
+            distance,
+            tickers,
+            fingerprint | dict(sidecar),
+            matrix=design.save_matrices,
+        )
+
+    if exposures is not None:
+        keep(
+            "covariance_exposures",
+            pairwise_distance(exposures, metric="euclidean"),
+            {"representation": "covariance_exposures", "arm": "control", "metric": "euclidean"},
+        )
     for history in (design.history, *design.extra_histories):
         prefix = "" if history == design.history else f"h{history}__"
         for name, distance in classical(
             four, year, tickers, design.characteristics, history
         ).items():
-            result[prefix + name] = distance
-            save(
-                root / "distances" / str(year) / f"{prefix}{name}.parquet",
+            keep(
+                prefix + name,
                 distance,
-                tickers,
-                fingerprint
-                | {
+                {
                     "history": history,
                     "representation": name,
                     "arm": "fernandez",
                     "metric": "spearman_chord",
                 },
-                matrix=design.save_matrices,
             )
         views = rung_views(four, broad, year, design.characteristics, history)
-        passes = [(rung, "market_cap_assets", rung) for rung in design.rungs]
+        passes = [(rung, "market_cap_assets", rung, "") for rung in design.rungs]
         shared: dict[str, Prepared] = {}
         if history != design.history:
-            passes = [("histories", "market_cap_assets", "histories")]
-        elif design.alternate_target:
-            # The alternative task pipeline changes support rows and preprocessing with the
-            # target; the shared pair changes only the labels.
-            passes.append(("histories", "income_assets", "histories@income_assets"))
-            shared = shared_contexts(views["histories"], four, broad, tickers, year)
-            passes += [("histories", target, f"histories@shared_{target}") for target in shared]
-        for rung, target, label in passes:
+            passes = [("histories", "market_cap_assets", "histories", "")]
+        else:
+            if design.alternate_target:
+                # The alternative task pipeline changes support rows and preprocessing with
+                # the target; the shared pair changes only the labels.
+                passes.append(("histories", "income_assets", "histories@income_assets", ""))
+                shared = shared_contexts(views["histories"], four, broad, tickers, year)
+                passes += [
+                    ("histories", target, f"histories@shared_{target}", "") for target in shared
+                ]
+            passes += [
+                ("histories", "market_cap_assets", f"histories@{salt}", salt)
+                for salt in design.support_draws
+            ]
+        encodings: dict[str, dict[str, FloatArray]] = {}
+        for rung, target, label, salt in passes:
             data = (
                 shared[target]
                 if label.startswith(f"{rung}@shared_")
-                else context(views[rung], labels(four, broad, target), tickers, year)
+                else context(views[rung], labels(four, broad, target), tickers, year, salt)
             )
             record_context(root / "contexts" / f"{year}-{prefix}{label}.json", data, target)
             LOGGER.info(
@@ -238,30 +291,68 @@ def distances(  # noqa: PLR0913 -- design inputs plus an optional model subset.
                 len(tickers),
                 len(data.features),
             )
-            options = {} if models is None else {"models": models}
+            selected = models or MODELS
+            states = None
+            if exposures is not None and prefix + label == "histories":
+                states = representation_states(
+                    data, cache=MODEL_CACHE, source=MODEL_SOURCE, models=selected
+                )
+                for representation, values in states.items():
+                    decoded, quality = decode(values, exposures, tickers)
+                    keep(
+                        f"histories@decoded__{representation}",
+                        pairwise_distance(decoded, metric="euclidean"),
+                        {
+                            "history": history,
+                            "rung": rung,
+                            "target": "prior-window covariance exposures",
+                            "representation": representation,
+                            "arm": "calibrated",
+                            "context_digest": data.digest,
+                            "metric": "euclidean",
+                        }
+                        | quality,
+                    )
             encoded = representation_distances(
-                data, cache=MODEL_CACHE, source=MODEL_SOURCE, **options
+                data, cache=MODEL_CACHE, source=MODEL_SOURCE, states=states, models=selected
             )
+            encodings[label] = encoded
             for representation, distance in encoded.items():
-                name = f"{prefix}{label}__{representation}"
-                result[name] = distance
-                save(
-                    root / "distances" / str(year) / f"{name}.parquet",
+                # A redraw changes only support-fitted representations; skip the rest.
+                if salt and representation.startswith(QUERY_ONLY):
+                    continue
+                keep(
+                    f"{prefix}{label}__{representation}",
                     distance,
-                    tickers,
-                    fingerprint
-                    | {
+                    {
                         "history": history,
                         "rung": rung,
                         "target": target,
                         "representation": representation,
                         "arm": ARMS[representation],
                         "context_digest": data.digest,
+                        "support_salt": salt,
                         "metric": "euclidean"
                         if representation == "mahalanobis_lw"
                         or representation.startswith("euclidean")
                         else "chord",
                     },
-                    matrix=design.save_matrices,
                 )
+        if shared:
+            first, second = (encodings[f"histories@shared_{target}"] for target in shared)
+            for representation, distance in first.items():
+                # Label-free readouts are identical across the pair; only combine the rest.
+                if representation in LABELLED:
+                    keep(
+                        f"histories@shared_both__{representation}",
+                        combined(distance, second[representation]),
+                        {
+                            "history": history,
+                            "rung": "histories",
+                            "target": "both shared targets (RMS of distances)",
+                            "representation": representation,
+                            "arm": ARMS[representation],
+                            "metric": "rms_of_two",
+                        },
+                    )
     return result

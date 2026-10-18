@@ -10,10 +10,13 @@ network:
 
 * only `d/h` matters, so a distance scale and a bandwidth are never separately
   interpretable;
-* if every distance in a row moves by at most `δ`, the row moves in total variation by at
-  most `min(2, e^{2δ/h} − 1)`. Narrow bandwidths amplify distance error.
+* if every distance in a row moves by at most `δ`, the row moves in `ℓ₁` by at most
+  `min(2, e^{2δ/h} − 1)`. Narrow bandwidths amplify distance error.
 
-The second is uniform in `δ`: an average distance guarantee does not give it.
+The second is uniform in `δ`: an average distance guarantee does not give it. Row bounds here
+are in `ℓ₁`, whose maximum between probability vectors is 2. Total variation in the usual
+probability convention is half of it, `min(1, (e^{2δ/h} − 1)/2)`; the Python geometry
+summaries (`row_total_variation_gap`) use that convention.
 -/
 
 namespace FreeFoundations.Kernel
@@ -23,8 +26,8 @@ open Finset
 variable {ι : Type*}
 
 /-- Two positive weight vectors whose ratios lie in `[1/r, r]` normalise to probability
-vectors within total variation `r² − 1`. -/
-theorem normalized_tv_le (s : Finset ι) (x y : ι → ℝ) {r : ℝ} (hr : 1 ≤ r)
+vectors within `ℓ₁` distance `r² − 1`. -/
+theorem normalized_l1_le (s : Finset ι) (x y : ι → ℝ) {r : ℝ} (hr : 1 ≤ r)
     (hs : s.Nonempty) (hx : ∀ j ∈ s, 0 < x j) (hlo : ∀ j ∈ s, x j ≤ r * y j)
     (hhi : ∀ j ∈ s, y j ≤ r * x j) :
     ∑ j ∈ s, |y j / ∑ k ∈ s, y k - x j / ∑ k ∈ s, x k| ≤ r ^ 2 - 1 := by
@@ -65,8 +68,8 @@ theorem normalized_tv_le (s : Finset ι) (x y : ι → ℝ) {r : ℝ} (hr : 1 �
   calc _ ≤ ∑ j ∈ s, (r ^ 2 - 1) * (x j / X) := sum_le_sum hterm
     _ = r ^ 2 - 1 := by rw [← mul_sum, hsum, mul_one]
 
-/-- Any two normalisations are within total variation 2. -/
-theorem normalized_tv_le_two (s : Finset ι) (x y : ι → ℝ) (hx : ∀ j ∈ s, 0 ≤ x j)
+/-- Any two normalisations are within `ℓ₁` distance 2. -/
+theorem normalized_l1_le_two (s : Finset ι) (x y : ι → ℝ) (hx : ∀ j ∈ s, 0 ≤ x j)
     (hy : ∀ j ∈ s, 0 ≤ y j) :
     ∑ j ∈ s, |y j / ∑ k ∈ s, y k - x j / ∑ k ∈ s, x k| ≤ 2 := by
   have hX := sum_nonneg hx
@@ -92,8 +95,8 @@ theorem expRow_scale (s : Finset ι) (d : ι → ℝ) (h c : ℝ) (hc : c ≠ 0)
   simp only [expRow, key]
 
 /-- **Row sensitivity.** If each distance in the row moves by at most `δ`, the row moves in
-total variation by at most `min(2, e^{2δ/h} − 1)`. -/
-theorem expRow_tv_le (s : Finset ι) (hs : s.Nonempty) (d dh : ι → ℝ) {h δ : ℝ} (hh : 0 < h)
+`ℓ₁` by at most `min(2, e^{2δ/h} − 1)`. -/
+theorem expRow_l1_le (s : Finset ι) (hs : s.Nonempty) (d dh : ι → ℝ) {h δ : ℝ} (hh : 0 < h)
     (hδ : ∀ j ∈ s, |dh j - d j| ≤ δ) :
     ∑ j ∈ s, |expRow s dh h j - expRow s d h j| ≤ min 2 (Real.exp (2 * δ / h) - 1) := by
   obtain ⟨j₀, hj₀⟩ := hs
@@ -104,13 +107,13 @@ theorem expRow_tv_le (s : Finset ι) (hs : s.Nonempty) (d dh : ι → ℝ) {h δ
     intro j _ a b hab
     rw [← Real.exp_add, Real.exp_le_exp, ← add_div, div_le_div_iff_of_pos_right hh]
     linarith [(abs_le.mp hab).2]
-  refine le_min (normalized_tv_le_two s _ _ (fun _ _ => (Real.exp_pos _).le)
+  refine le_min (normalized_l1_le_two s _ _ (fun _ _ => (Real.exp_pos _).le)
     (fun _ _ => (Real.exp_pos _).le)) ?_
   have hsq : Real.exp (2 * δ / h) = Real.exp (δ / h) ^ 2 := by
     rw [sq, ← Real.exp_add]
     ring_nf
   rw [hsq]
-  exact normalized_tv_le s _ _ hr ⟨j₀, hj₀⟩ (fun _ _ => Real.exp_pos _)
+  exact normalized_l1_le s _ _ hr ⟨j₀, hj₀⟩ (fun _ _ => Real.exp_pos _)
     (fun j hj => hbound j hj (dh j) (d j) (hδ j hj))
     (fun j hj => hbound j hj (d j) (dh j) (by rw [abs_sub_comm]; exact hδ j hj))
 
@@ -139,7 +142,7 @@ theorem expKernel_linfty_le (hn : 2 ≤ Fintype.card n) (d dh : Matrix n n ℝ) 
       add_zero]
     rw [sum_congr rfl fun j hj => by rw [if_neg (ne_of_mem_erase hj).symm,
       if_neg (ne_of_mem_erase hj).symm]]
-    exact expRow_tv_le _ hne (d i) (dh i) hh fun j hj => hδ i j (ne_of_mem_erase hj).symm
+    exact expRow_l1_le _ hne (d i) (dh i) hh fun j hj => hδ i j (ne_of_mem_erase hj).symm
   have : Nonempty n := Fintype.card_pos_iff.mp (by omega)
   have h0 : 0 ≤ min 2 (Real.exp (2 * δ / h) - 1) :=
     (sum_nonneg fun _ _ => abs_nonneg _).trans (hrow (Classical.arbitrary n))

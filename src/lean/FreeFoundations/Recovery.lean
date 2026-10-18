@@ -19,8 +19,12 @@ Then a decoder exists (the Moore–Penrose pseudoinverse), and
   exposure errors, with no independence across pairs.
 
 Task accuracy sets the numerator, task diversity sets `κ`, and no amount of accuracy
-removes the mismatch `v`. Two limits sit beside the positive result: an aggregate target
-merges economically distinct firms, and two distinct targets can separate them.
+removes the mismatch `v`. Limits sit beside the positive result. Distinguishing needs at
+least as many task dimensions as exposure dimensions, so one scalar target, such as a single
+in-context support label, cannot do it for exposures of dimension two or more
+(`scalar_not_distinguishes`). An aggregate target merges economically distinct firms, and
+two distinct targets can separate them. The decoder exists given `C`; it is not identified
+from task outputs alone (`Geometry.observationally_equivalent`).
 -/
 
 namespace FreeFoundations.Recovery
@@ -33,6 +37,30 @@ variable {A T : Type*} [NormedAddCommGroup A] [InnerProductSpace ℝ A]
 /-- The tasks `C` distinguish every exposure direction with margin `κ`: `σ_min(C) ≥ κ`. -/
 def Distinguishes (C : A →ₗ[ℝ] T) (κ : ℝ) : Prop := ∀ a, κ * ‖a‖ ≤ ‖C a‖
 
+/-- Tasks that distinguish exposures with a positive margin lose no exposure direction. -/
+theorem Distinguishes.injective {C : A →ₗ[ℝ] T} {κ : ℝ} (hC : Distinguishes C κ) (hκ : 0 < κ) :
+    Function.Injective C := by
+  rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
+  intro a ha
+  have h := hC a
+  rw [ha, norm_zero] at h
+  exact norm_le_zero_iff.mp (nonpos_of_mul_nonpos_right h hκ)
+
+/-- **Dimension.** Tasks that distinguish exposures need at least as many dimensions as the
+exposures. -/
+theorem finrank_le_of_distinguishes [FiniteDimensional ℝ T] {C : A →ₗ[ℝ] T} {κ : ℝ}
+    (hC : Distinguishes C κ) (hκ : 0 < κ) : Module.finrank ℝ A ≤ Module.finrank ℝ T :=
+  LinearMap.finrank_le_finrank_of_injective (hC.injective hκ)
+
+/-- **One target is not enough.** A single scalar task cannot distinguish exposures of
+dimension two or more, however accurately it is predicted. Multiple hidden coordinates do not
+help: the margin is a property of the tasks, not of the representation. -/
+theorem scalar_not_distinguishes (hA : 2 ≤ Module.finrank ℝ A) (C : A →ₗ[ℝ] ℝ) {κ : ℝ}
+    (hκ : 0 < κ) : ¬ Distinguishes C κ := fun hC => by
+  have := finrank_le_of_distinguishes hC hκ
+  rw [Module.finrank_self] at this
+  omega
+
 /-- A left inverse of the tasks whose gain is at most `1/κ`. -/
 structure Decoder (C : A →ₗ[ℝ] T) (κ : ℝ) (L : T →ₗ[ℝ] A) : Prop where
   left_inv : ∀ a, L (C a) = a
@@ -42,12 +70,7 @@ structure Decoder (C : A →ₗ[ℝ] T) (κ : ℝ) (L : T →ₗ[ℝ] A) : Prop 
 project onto the tasks' range, then invert there. -/
 theorem exists_decoder [FiniteDimensional ℝ A] {C : A →ₗ[ℝ] T} {κ : ℝ} (hκ : 0 < κ)
     (hC : Distinguishes C κ) : ∃ L, Decoder C κ L := by
-  have hinj : Function.Injective C := by
-    rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
-    intro a ha
-    have h := hC a
-    rw [ha, norm_zero] at h
-    exact norm_le_zero_iff.mp (nonpos_of_mul_nonpos_right h hκ)
+  have hinj : Function.Injective C := hC.injective hκ
   set K := LinearMap.range C
   let e := LinearEquiv.ofInjective C hinj
   let P := K.orthogonalProjectionOnto

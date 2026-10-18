@@ -271,7 +271,13 @@ only through `Z = f(H)`. At the population optimum, `d(Z) = F(H)`. Then:
   treats as irrelevant.
 
 The proof is a factorization argument: if two histories share `F` but differ in
-`S*`, then `Z = F(H)` is optimal and merges them.
+`S*`, then `Z = F(H)` is optimal and merges them. Both statements are
+machine-checked: `Alignment.optimal_imp_sufficient_iff` in deterministic form and
+`Sufficiency.sufficient_iff` with conditional expectations, almost-sure equality
+and a measurable readout (every representation that attains `E[X | H]` attains
+`E[Y | H]` iff `E[Y | H] = g(E[X | H])` a.s.). The statistical form also says
+what a failure means: the objective alone guarantees nothing, and whatever a
+particular non-optimal checkpoint keeps has to be measured.
 
 This applies to the loss, target and readout together, not to a model family.
 Our foundation readouts are frozen internal states, not trained bottlenecks, so
@@ -298,7 +304,11 @@ capitalization/assets or income/assets), while the evaluation scores the
 which firms co-move. The gains observed are therefore an empirical regularity,
 not something the readouts were asked to deliver. A target that is itself
 joint, such as pairwise co-movement or shared exposure to identified shocks,
-would align the readout with the evaluation.
+would align the readout with the evaluation. The calibrated readouts in the
+panel (`histories@decoded__X`) take the first step: they decode exposures of the
+prior-window residual covariance, a joint target, out of each representation
+and build the network from the decoded exposures (`Measurement` gives the
+error bound such a readout inherits).
 
 ### 5.4 The score already measures lost information
 
@@ -320,7 +330,7 @@ to serial dependence in the daily observations.
 For bounded decision losses, the lost information also bounds decision regret:
 if `0 ≤ ℓ ≤ 1`, the best policy using `Z` loses at most `sqrt(2 I(Y; H | Z))` in
 expected loss relative to the best policy using `H` (total-variation bound on
-regret, then Pinsker and Jensen). This is the decision-theoretic sense in which
+regret, then Pinsker and Jensen; not formalized in `src/lean`). This is the decision-theoretic sense in which
 Blackwell sufficiency for a class of portfolio decisions is weaker than full
 distributional sufficiency, and why a network can be adequate for minimum
 variance portfolios without preserving the whole joint law.

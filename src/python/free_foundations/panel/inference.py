@@ -84,6 +84,17 @@ RUNG_CONTRASTS = (
     ("labels vs constant labels", "tabfm__early_concat", "tabfm__early_concat_labelnull"),
 )
 INPUT_CONTRASTS = ("direct", "tabfm__early_concat")
+# Measurement contrasts on the history rung, for one readout per model family and the
+# supervised control: support redraw, two shared targets against one, decoded exposures
+# against native distance, and decoded states against decoded inputs.
+MEASURED = ("tabfm__early_concat", "tabpfn_full__late", "exaone__late", "supervised_mlp16")
+MEASUREMENT_CONTRASTS = (
+    ("support redraw", "histories@redraw1__{}", "histories__{}"),
+    ("support redraw", "histories@redraw2__{}", "histories__{}"),
+    ("both targets vs one", "histories@shared_both__{}", "histories@shared_market_cap_assets__{}"),
+    ("decoded vs native", "histories@decoded__{}", "histories__{}"),
+    ("decoded vs decoded inputs", "histories@decoded__{}", "histories@decoded__direct"),
+)
 CONTRAST_ARMS = (("matched", "diagonal"), ("matched", "correlation"), ("median", "diagonal"))
 
 
@@ -106,6 +117,11 @@ def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
         pairs += [
             (f"inputs ({name})", column(f"metrics__{name}"), column(f"histories__{name}"))
             for name in INPUT_CONTRASTS
+        ]
+        pairs += [
+            (label, column(left.format(name)), column(right.format(name)))
+            for name in MEASURED
+            for label, left, right in MEASUREMENT_CONTRASTS
         ]
     return [pair for pair in pairs if pair[1] in columns and pair[2] in columns]
 

@@ -21,7 +21,11 @@ class Design:
     ``history`` is the principal network history length. ``extra_histories`` add
     Fernández and history-rung networks of other lengths on the same firms, so the
     cohort requires the longest history. ``alternate_target`` adds the history rung
-    with next-snapshot income/assets as the support label.
+    with next-snapshot income/assets as the support label, the same pair on shared
+    support rows, and their combination. ``support_draws`` re-encode the history rung on
+    differently salted 256-row supports. ``decoded`` adds networks from exposures decoded
+    out of each representation, calibrated to prior-window covariance. ``exclude`` drops
+    named firms from every cohort.
     """
 
     name: str
@@ -31,6 +35,9 @@ class Design:
     extra_histories: tuple[int, ...] = ()
     alternate_target: bool = False
     save_matrices: bool = True
+    support_draws: tuple[str, ...] = ()
+    decoded: bool = False
+    exclude: tuple[str, ...] = ()
 
     @property
     def cohort_histories(self) -> tuple[int, ...]:
@@ -43,9 +50,14 @@ class Design:
         return ROOT / self.name
 
 
+DRAWS = ("redraw1", "redraw2")
 DESIGNS = {
-    "four": Design("four", CHARACTERISTICS, 3, alternate_target=True),
+    "four": Design(
+        "four", CHARACTERISTICS, 3, alternate_target=True, support_draws=DRAWS, decoded=True
+    ),
     "four-h5": Design("four-h5", CHARACTERISTICS, 5, ("histories",), (3,)),
+    # QXO's genuine -80% repricing on 2024-07-30 sits in the 2024 returns and 2025 prior.
+    "four-xqxo": Design("four-xqxo", CHARACTERISTICS, 3, ("histories",), exclude=("QXO",)),
     # About 450 firms a year: keep fingerprints, not every N x N matrix, on a full disk.
     "three": Design(
         "three",
@@ -54,5 +66,7 @@ DESIGNS = {
         extra_histories=(3,),
         alternate_target=True,
         save_matrices=False,
+        support_draws=DRAWS,
+        decoded=True,
     ),
 }

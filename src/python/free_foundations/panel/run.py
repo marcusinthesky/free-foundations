@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from free_foundations.panel.characteristics import build
+from free_foundations.panel.characteristics import ROOT, SOURCE, build
+from free_foundations.panel.decoding import FACTORS, FOLDS, covariance_exposures
 from free_foundations.panel.design import DESIGNS
 from free_foundations.panel.evaluation import (
     CALIBRATION,
@@ -29,7 +30,7 @@ from free_foundations.panel.inference import (
     paired,
 )
 from free_foundations.panel.networks import distances
-from free_foundations.panel.observations import annual_data
+from free_foundations.panel.observations import annual_data, price_audit
 from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
@@ -58,17 +59,22 @@ def run_design(
             characteristics=design.characteristics,
             histories=design.cohort_histories,
             output=output,
+            exclude=design.exclude,
         )
         LOGGER.info(
             "%s %s: %s firms, %s days", design.name, year, len(annual.tickers), len(annual.dates)
         )
-        built = distances(four, broad, year, annual.tickers, design, models=models)
+        exposures = covariance_exposures(annual.prior) if design.decoded else None
+        built = distances(
+            four, broad, year, annual.tickers, design, models=models, exposures=exposures
+        )
         update(panel, year, annual, built, broad)
         if year in EVALUATION:
             firm_days += annual.realized.size
     daily = daily_frame(panel)
     daily.to_parquet(output / "daily-scores.parquet")
     comparison(panel, daily, firm_days).to_csv(output / "comparison.csv", index=False)
+    pd.DataFrame(panel.attribution).to_csv(output / "attribution.csv", index=False)
     pd.DataFrame(panel.annual).to_csv(output / "annual-scores.csv", index=False)
     pd.DataFrame(panel.geometry).to_csv(output / "geometry.csv", index=False)
     placebo_table(daily).to_csv(output / "placebo.csv", index=False)
@@ -85,6 +91,14 @@ def run_design(
             "cohort_history_years": design.cohort_histories,
             "rungs": design.rungs,
             "alternate_target": ALTERNATE if design.alternate_target else None,
+            "support_draws": design.support_draws,
+            "excluded_tickers": design.exclude,
+            "decoded": {
+                "target": f"top {FACTORS} principal exposures of prior residual covariance",
+                "decoder": f"standardized ridge, {FOLDS}-fold out of fold across firms",
+            }
+            if design.decoded
+            else None,
             "calibration": [CALIBRATION[0], CALIBRATION[-1]],
             "evaluation": [EVALUATION[0], EVALUATION[-1]],
             "prior_return_years": 3,
@@ -127,6 +141,9 @@ def main() -> None:
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     four, broad = build()
+    price_audit(pd.read_parquet(SOURCE / "prices.parquet")).to_csv(
+        ROOT / "price-audit.csv", index=False
+    )
     models = None if args.models is None else tuple(args.models)
     for name in args.designs:
         run_design(DESIGNS[name], four, broad, models)

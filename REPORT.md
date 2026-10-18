@@ -203,7 +203,7 @@ The remainder of this report treats that chronological panel as the principal
 current comparison. Earlier files are retained as research history rather than
 overwritten or pooled with the new results. The first panel run (§7.1–7.3,
 files at the `research/panel/` root) is kept unchanged as the **v1 record**;
-the extended designs in §7.4 write to `research/panel/{four,four-h5,three}/`
+the extended designs in §7.4 write to `research/panel/{four,four-h5,four-xqxo,three}/`
 and reproduce the v1 rows exactly where the specification is unchanged.
 
 ### 3.6 R0: practical replication of Fernández on the 1,000-issuer universe
@@ -742,6 +742,65 @@ confirmatory model-ranking significance, or comparable R-squared statistics have
 been estimated. The best configurations in this report were identified after
 observing the development results.
 
+### 7.4 Panel extension: measurement variants and likelihood attribution
+
+The [panel extension](research/panel/README.md) re-runs the comparison in four
+declared designs with three kernels and three innovation arms. Designs differ in
+firms (`four` scores 87,351 firm-days, `three` 642,024) and are not ranked
+against each other. Unless stated, figures are held-out gains over the joint
+Fernández network with diagonal innovations; intervals are 95% stationary
+bootstrap intervals with 21-day blocks. These are development results: the years
+were inspected and the variants were added after earlier runs.
+
+**Support redraws.** Re-encoding the history rung on two differently salted
+256-row supports changes the measured gains by up to a third:
+
+| Design, exp kernel | Native | Redraw 1 | Redraw 2 | Native interval |
+| --- | ---: | ---: | ---: | ---: |
+| `four`, TabFM early concat | +37.8 | +26.5 | +24.9 | [−17.1, +115.3] |
+| `four`, TabPFN full late | +21.4 | +33.3 | +18.8 | [−32.3, +97.9] |
+| `four`, EXAONE late | +21.6 | +21.0 | +14.7 | — |
+| `three`, TabFM early concat | −1,035.2 | −1,052.3 | −952.6 | [−1,873.6, −440.3] |
+| `three`, TabPFN full late | −225.8 | −297.1 | −88.8 | [−784.6, +440.5] |
+
+In `four` no learned interval excludes zero. In `three` the direct history
+distance (+1,217.0, [+363.1, +2,412.5]) beats every foundation readout under the
+exp kernel. Changing only the support target on shared rows moves results as much
+as a redraw (`four` EXAONE late: +23.1 with cap/assets, −0.4 with income/assets).
+These shifts are why §9 grades every learned procedure as an exploratory
+comparator, not an economic dissimilarity measure.
+
+**Calibrated readouts.** Decoding five prior-covariance exposures out of fold
+works poorly in `four`: every representation has negative mean out-of-fold R²
+(best −0.005), with roughly 60 firms per year. In `three` the foundation states
+decode better than the classical compressions (R² 0.17–0.23 against at most 0.04
+for PCA and the autoencoders; decoded-distance Spearman 0.36–0.42 against
+0.18–0.23). Under the exp kernel every decoded network is effectively the uniform
+network (`four` −39.9 against −40.2; `three` −4,541 against −4,591; same mean
+Herfindahl index): decoded exposures are shrunk, so `exp(-d)` is flat. The
+rescaled kernels separate them. With the matched kernel in `three`, decoded
+TabPFN full (+3,390.8) and EXAONE late (+3,451.4) exceed their native readouts
+(+716.7, −149.1), and the `covariance_exposures` control reaches +7,347.1. In
+`four` decoding lowers the matched-kernel gains (TabFM +103.6 against +179.7
+native). One decoder is numerically unstable (`three`
+`exaone__item_first_concat`, mean R² −301.6) and is not interpreted.
+
+**Where the likelihood comes from.** The exact attribution (`Likelihood.spatial_loss`,
+[`four`](research/panel/four/RESULTS.md#where-the-residual-likelihood-comes-from))
+puts almost all of each network's residual gain over the uniform network in the
+alignment term, which is linear in λ. Under the exp kernel the joint network
+gains +411 (alignment +617) and TabFM early concat +211 (alignment +393). Mean
+row Herfindahl indices stay between 0.018 and 0.023, so the concentration
+charges are small (at most −104 for the joint network). Under the matched kernel
+the covariance-exposure control gains +2,058 from +4,080 alignment less −950
+concentration. That is the largest residual gain recorded, and it comes from a
+target the representations do not yet decode reliably.
+
+**QXO sensitivity.** Excluding QXO (`four-xqxo`), whose genuine −80% day falls on
+2024-07-30, moves no history-rung gain in `four` by more than 1.1 (TabFM early
+concat +37.8 → +37.4; TabPFN full late +21.4 → +20.5). The single extreme day
+does not drive the learned rows.
+
 ## 8. Leakage controls and remaining sources of bias
 
 | Issue | Implemented control | Remaining limitation |
@@ -778,54 +837,76 @@ split also provides limited evidence about stability across regimes.
 
 ## 9. Theoretical contribution: current status
 
-The [LaTeX working draft](src/latex/main.tex) separates predictive sufficiency,
-economic information, and geometric validity. An invertible transformation of
-an embedding can preserve predictions after a corresponding readout change
-while altering distances. Successful pretraining therefore does not, by itself,
-justify Euclidean or normalized embedding geometry as an economic metric.
+The theory is organised as four separate questions about a learned measurement.
+Each has machine-checked results in [`src/lean`](src/lean/README.md), proved
+*given their stated assumptions*; none shows that a particular checkpoint
+satisfies those assumptions.
 
-The draft contains a conditional covariance-stability proposition. For two
-networks on the same firms, the same coefficient and innovation covariance,
-write
+| Level | Question | Formal results | Status in the evidence |
+| --- | --- | --- | --- |
+| 1. Information | What does the objective make an optimal model keep? | `Score` (proper scores recover a conditional law or moment), `Recovery.excess_risk_condExp` (excess risk is distance to the Bayes predictor) | Not tested: no checkpoint is shown to be near-optimal for its own objective |
+| 2. Sufficiency | Is that enough for the economic state? | `Alignment` (deterministic core), `Sufficiency.sufficient_iff` (statistical form: every representation reproducing `E[X\|H]` reproduces `E[Y\|H]` iff `E[Y\|H] = g(E[X\|H])` a.s.), `Sufficiency.constant_target_iff` (label-null targets guarantee nothing) | Label pathways audited (§8); no support target is shown to determine the exposure state |
+| 3. Measurement and geometry | Can the state and its distances be read out stably, and are they identified? | `Recovery` (linear decoder, `1/κ` gain), `Measurement` (any `K`-Lipschitz readout: `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂`; merged histories force error ≥ half their distance), `Recovery.scalar_not_distinguishes` (one scalar target cannot distinguish ≥ 2-dimensional exposures), `Geometry.observationally_equivalent`, `distances_preserved_iff` (task means identify exposures only up to an invertible map; distances survive only isometries) | Native distances are not covered by `Recovery`; the calibrated-readout rows (§7.4) are the first empirical counterpart |
+| 4. Econometric use | What does the spatial model do with the distances? | `Kernel`, `Network`, `Value`, `Stability`, and `Likelihood.spatial_loss` (below) | Exact attribution of every residual likelihood (§7.4); generated-network inference remains on paper |
 
-\[
- A=(I-\lambda W)^{-1},\qquad A^*=(I-\lambda W^*)^{-1}.
-\]
-
-If both spectral norms are at most `M`, the resolvent identity implies
-
-\[
- \|ADA^\top-A^*D(A^*)^\top\|_2
- \le 2\|D\|_2|\lambda|M^3\|W-W^*\|_2.
-\]
-
-For exponential kernels with common bandwidth `h` and maximum distance error
-`epsilon`, the draft also bounds the maximum absolute row-sum norm:
+**What the likelihood sees of a network.** For the spatial-error forecast
+`Σ = A⁻¹DA⁻ᵀ`, `A = I − λW`, the expected Gaussian loss against a second moment
+`M` is exactly
 
 \[
- \|W-W^*\|_\infty
- \le\min\{2,\exp(2\epsilon/h)-1\}.
+\sum_i \log d_i \;-\; 2\log|\det(I-\lambda W)| \;+\; \sum_i m_i(\lambda)/d_i ,
 \]
 
-This links distance error to network error and, conditionally, to covariance
-error. It does not prove that pretraining recovers the true economic distance.
-The resolvent bound must be assumed or checked; row normalization and a
-coefficient below one do not supply the same simple spectral-norm bound for a
-nonsymmetric network. Converting between these norms can introduce dependence
-on the number of firms.
+with filtered second moments `mᵢ(λ) = [(I − λW)M(I − λW)ᵀ]ᵢᵢ`
+(`Likelihood.spatial_loss`). When `M` is a common part `⟪aⱼ, aₖ⟫` plus
+idiosyncratic variances `ηⱼ` and `W` has zero diagonal,
 
-The result is a standard perturbation argument supporting the research design,
-not an asserted new learning-theory theorem. It has not been established here
+\[
+m_i(\lambda) = (\|a_i\|^2+\eta_i) - 2\lambda\sum_j W_{ij}\langle a_i,a_j\rangle +
+ \lambda^2\Big(\big\|\sum_j W_{ij}a_j\big\|^2 + \sum_j W_{ij}^2\eta_j\Big)
+\]
+
+(`Likelihood.filtered_second_moment_expand`). The term linear in `λ` is the
+covariance inner product that `Value.decomposition` splits into hub and
+proximity parts; idiosyncratic variance never enters it. The quadratic term
+charges a concentration cost whose noise part is the row Herfindahl index
+times `η`, at least `1/m` for a row spread over `m` firms
+(`Likelihood.herfindahl_ge`). A diffuse row pays the least, which is one reason
+near-uniform learned networks can score well without proximity information.
+Matching mean effective neighbours (the `matched` kernel) does not equalise
+this cost, which depends on the mean Herfindahl index instead.
+
+**Native versus calibrated geometry.** The learned rows in §7 measure chord
+distance between raw hidden states. No decoder is fitted, so the recovery
+theorems certify none of them. A calibrated readout decodes a declared economic
+target from the states and measures distance between decoded values. Its error
+is bounded by `Measurement.rms_measurement_error` given an alignment error that
+must itself be estimated. Distances between posterior-mean exposures understate
+expected distances by the posterior variance of each pair's difference
+(`Measurement.mean_sq_distance`).
+
+**Claim grades.** Following the external review, every learned procedure is
+graded by the strongest claim its evidence supports:
+
+| Grade | Requires | Procedures here |
+| --- | --- | --- |
+| Exploratory comparator | A reproducible measurement procedure (checkpoint, context, extraction, readout, metric) | Every learned row |
+| Economic proxy | Independent validation against a declared economic target | Calibrated readouts, to the extent their decoders fit prior-covariance exposures out of fold (§7.4) |
+| Economic dissimilarity measure | Metric evidence: distances stable under declared nuisance changes and aligned with target distances | None. Support redraws move learned distance rankings materially (§7.4, §8) |
+| Structural or causal | Identification of responses under intervention | None |
+
+The covariance-stability proposition in the [working draft](src/latex/main.tex)
+(`Stability`, `Kernel`) links distance error to network error and,
+conditionally, to covariance error. It is a standard perturbation argument
+supporting the design, not a learning-theory theorem. Not established here:
 that pretraining loss bounds economic-distance distortion, that nearby firms
-must have higher covariance, or that the learned network identifies transmission.
-Those stronger claims require additional assumptions and evidence.
+must have higher covariance, or that a learned network identifies transmission.
 
-Finance Research Letters remains a provisional outlet. A defensible manuscript
-could focus on measurement validity and a tightly controlled empirical comparison.
-The present results do not support a headline claim that foundation models
-outperform conventional financial proximity. The working draft is a design
-and proof document; some acquisition passages describe earlier targets and
-should be updated before it is treated as an empirical manuscript.
+Finance Research Letters remains a provisional outlet. The defensible
+contribution is a task-relative account of when pretrained representations can
+serve as economic measurements, with the Fernández replication and extension as
+a controlled application. The present results do not support a headline claim
+that foundation models outperform conventional financial proximity.
 
 ## 10. Engineering, verification, and reproducibility
 

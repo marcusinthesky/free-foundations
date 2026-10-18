@@ -256,6 +256,10 @@ def test_every_scored_column_is_described() -> None:
     assert describe("h3__fernandez_joint")["history"] == "h3"
     assert describe("histories__tabfm__early_concat")["arm"] == "state"
     assert describe("fernandez_joint__placebo3")["arm"] == "fernandez"
+    assert describe("histories@decoded__exaone__late")["arm"] == "calibrated"
+    assert describe("histories@shared_both__tabfm__late")["arm"] == "task"
+    assert describe("histories@redraw1__tabpfn_full__late")["rung"] == "histories@redraw1"
+    assert describe("covariance_exposures")["arm"] == "control"
 
 
 def test_control_table_lists_each_covariance_control_once() -> None:
@@ -287,6 +291,63 @@ def test_price_breaks_are_missing_returns_not_outliers() -> None:
     assert returns["spliced"].iloc[3] == pytest.approx(19.0 / 18.84 - 1)
     # A +120% day and a -82% day are large but genuine moves.
     assert returns["rally"].iloc[1:3].tolist() == pytest.approx([1.2, 4 / 22 - 1])
+
+
+def test_every_masked_price_break_must_be_reviewed() -> None:
+    dates = pd.bdate_range("2020-11-18", periods=4)
+    reviewed = pd.DataFrame({"CHRD": [0.07, 0.073, 18.84, 19.0]}, index=dates)
+    audit = observations.price_audit(reviewed)
+    assert audit.loc[audit["masked"], "ticker"].tolist() == ["CHRD"]
+    assert audit["reviewed"].all()
+    with pytest.raises(ValueError, match="Unreviewed price breaks"):
+        observations.price_audit(reviewed.rename(columns={"CHRD": "NEW"}))
+    # Genuine large moves are listed, never masked.
+    genuine = pd.DataFrame(
+        {"QXO": [70.0, 60.5, 12.05]}, index=pd.bdate_range("2024-07-26", periods=3)
+    )
+    audit = observations.price_audit(genuine)
+    assert not audit["masked"].any()
+    assert audit["reviewed"].tolist() == [True]
+
+
+@pytest.mark.parametrize("innovations", ["spherical", "diagonal"])
+def test_attribution_splits_the_spatial_likelihood_exactly(innovations: str) -> None:
+    from free_foundations.panel.evaluation import attribute, own_variance  # noqa: PLC0415
+
+    rng = np.random.default_rng(3)
+    firms = 9
+    distance = np.abs(rng.normal(size=(firms, firms)))
+    weights = paper_weights((distance + distance.T) / 2)
+    residuals = rng.normal(size=(40, firms)) @ rng.normal(size=(firms, firms)) * 0.01
+    stats = block(residuals, weights)
+    variances = stats.variances(0.4, innovations)  # type: ignore[arg-type]
+    parts = attribute(stats, own_variance(weights, stats), 0.4, variances)
+    np.testing.assert_allclose(
+        sum(parts.values()), stats.score(0.4, variances=variances), rtol=1e-12
+    )
+    # The own part is the Herfindahl-weighted second moment of the neighbours.
+    np.testing.assert_allclose(
+        own_variance(weights, stats), (weights**2) @ np.mean(residuals**2, axis=0)
+    )
+
+
+def test_combined_distance_is_chord_of_concatenated_states() -> None:
+    from free_foundations.expanded.distance import pairwise_distance  # noqa: PLC0415
+    from free_foundations.panel.networks import combined  # noqa: PLC0415
+
+    rng = np.random.default_rng(5)
+    first, second = rng.normal(size=(6, 4)), rng.normal(size=(6, 3))
+    unit = np.column_stack(
+        [
+            first / np.linalg.norm(first, axis=1, keepdims=True),
+            second / np.linalg.norm(second, axis=1, keepdims=True),
+        ]
+    )
+    np.testing.assert_allclose(
+        combined(pairwise_distance(first), pairwise_distance(second)),
+        pairwise_distance(unit, metric="euclidean") / np.sqrt(2),
+        atol=1e-12,
+    )
 
 
 def test_contrasts_are_matched_and_controls_join_every_family() -> None:

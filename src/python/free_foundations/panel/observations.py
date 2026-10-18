@@ -18,9 +18,28 @@ if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
 
 FACTOR_NAMES = ["Mkt-RF", "SMB", "HML", "RMW", "CMA", "Mom"]
-# A close-to-close price ratio beyond tenfold is a broken series, not a return: CHRD's
-# 2020-11-20 "return" of +25,733% splices pre-bankruptcy shares to the new equity.
+# A close-to-close price ratio beyond tenfold flags a suspect series. Every flagged day must
+# be reviewed below; distress and repricing are kept unless shown to be a series error.
 PRICE_BREAK = 10.0
+LARGE_MOVE = 0.5
+# Reviewed extreme days. ``masked`` days are series errors; the rest are genuine and kept.
+EVENTS: dict[tuple[str, str], tuple[bool, str]] = {
+    ("CHRD", "2020-11-20"): (
+        True,
+        (
+            "Chapter 11 emergence: the series splices pre-bankruptcy Oasis shares ($0.073) "
+            "to the new equity ($18.84), a +25,733% non-return"
+        ),
+    ),
+    ("QXO", "2024-07-30"): (
+        False,
+        (
+            "genuine repricing: a 2024-07-29 registration made about $4.1bn of "
+            "private-placement shares tradable, raising the float from about 0.67m to "
+            "about 400m shares"
+        ),
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -50,6 +69,24 @@ def eligible(
     return values.index[valid]
 
 
+def _cells(frame: pd.DataFrame, selected: pd.DataFrame, name: str) -> pd.DataFrame:
+    """Selected cells of a date-by-ticker frame as (ticker, date, value) rows."""
+    rows, columns = np.nonzero(selected.to_numpy(dtype=bool))
+    return pd.DataFrame(
+        {
+            "ticker": frame.columns[columns].astype(str),
+            "date": pd.DatetimeIndex(frame.index[rows]).strftime("%Y-%m-%d"),
+            name: frame.to_numpy(dtype=float)[rows, columns],
+        }
+    )
+
+
+def price_breaks(prices: pd.DataFrame) -> pd.DataFrame:
+    """Firm-days the tenfold rule flags, as (ticker, date, ratio) rows."""
+    ratio = prices / prices.shift(1)
+    return _cells(ratio, (ratio > PRICE_BREAK) | (ratio < 1 / PRICE_BREAK), "ratio")
+
+
 def daily_returns(prices: pd.DataFrame) -> pd.DataFrame:
     """Simple daily returns, missing where the price ratio is outside [1/10, 10]."""
     ratio = prices / prices.shift(1)
@@ -57,13 +94,32 @@ def daily_returns(prices: pd.DataFrame) -> pd.DataFrame:
     return prices.pct_change(fill_method=None).mask(broken)
 
 
-def annual_data(
+def price_audit(prices: pd.DataFrame) -> pd.DataFrame:
+    """Every flagged or large daily move, with its review; unreviewed masks are an error."""
+    returns = prices.pct_change(fill_method=None)
+    rows = _cells(returns, returns.abs() > LARGE_MOVE, "return")
+    flagged = set(map(tuple, price_breaks(prices)[["ticker", "date"]].to_numpy()))
+    rows["masked"] = [(t, d) in flagged for t, d in zip(rows["ticker"], rows["date"], strict=True)]
+    rows["reviewed"] = [(t, d) in EVENTS for t, d in zip(rows["ticker"], rows["date"], strict=True)]
+    rows["note"] = [
+        EVENTS.get((t, d), (False, ""))[1]
+        for t, d in zip(rows["ticker"], rows["date"], strict=True)
+    ]
+    unreviewed = sorted(flagged - {key for key, (masked, _) in EVENTS.items() if masked})
+    if unreviewed:
+        message = f"Unreviewed price breaks would be masked: {unreviewed}"
+        raise ValueError(message)
+    return rows
+
+
+def annual_data(  # noqa: PLR0913 -- keyword-only design options.
     four: pd.DataFrame,
     year: int,
     *,
     characteristics: tuple[str, ...] = CHARACTERISTICS,
     histories: tuple[int, ...] = (3,),
     output: Path = ROOT,
+    exclude: tuple[str, ...] = (),
 ) -> Annual:
     """Select on preyear information; drop missing outcome dates identically for all models."""
     prices = pd.read_parquet(SOURCE / "prices.parquet")
@@ -79,6 +135,7 @@ def annual_data(
     candidates = set.intersection(
         *(set(eligible(four, year, characteristics, length)) for length in histories)
     )
+    candidates -= set(exclude)
     tickers = tuple(sorted(candidates & set(past.columns[past.notna().sum() >= 500])))
     if len(tickers) < 5:
         message = f"Only {len(tickers)} strict eligible firms in {year}."
@@ -103,6 +160,7 @@ def annual_data(
             "firms": len(tickers),
             "characteristics": characteristics,
             "history_years": histories,
+            "excluded_tickers": exclude,
             "past_complete_days": len(training),
             "evaluation_days": len(observed),
             "excluded_outcome_dates": [

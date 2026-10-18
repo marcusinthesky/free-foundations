@@ -95,12 +95,32 @@ def ablated_distances(data: Prepared) -> dict[str, FloatArray]:
     return distances
 
 
+def representation_states(
+    data: Prepared,
+    *,
+    cache: Path,
+    source: Path,
+    models: tuple[str, ...] = MODELS,
+) -> dict[str, FloatArray]:
+    """Query-row states of every vector representation; ``direct`` is the prepared input."""
+    states = {"direct": data.query, **compression_states(data)}
+    states["supervised_mlp16"] = supervised_states(data)
+    for model in models:
+        readouts = foundation_states(data, model, cache, source)
+        for readout, name, _ in READOUTS[model]:
+            states[name] = readouts[readout]
+        load_tabfm.cache_clear()
+        gc.collect()
+    return states
+
+
 def representation_distances(
     data: Prepared,
     *,
     cache: Path,
     source: Path,
     models: tuple[str, ...] = MODELS,
+    states: dict[str, FloatArray] | None = None,
 ) -> dict[str, FloatArray]:
     """Classical, control and frozen-model distances; learned rows use chord distance."""
     distances = {
@@ -108,13 +128,9 @@ def representation_distances(
         "mahalanobis_lw": mahalanobis_distance(data),
         **ablated_distances(data),
     }
-    for name, states in compression_states(data).items():
-        distances[name] = pairwise_distance(states)
-    distances["supervised_mlp16"] = pairwise_distance(supervised_states(data))
-    for model in models:
-        states = foundation_states(data, model, cache, source)
-        for readout, name, _ in READOUTS[model]:
-            distances[name] = pairwise_distance(states[readout])
-        load_tabfm.cache_clear()
-        gc.collect()
+    if states is None:
+        states = representation_states(data, cache=cache, source=source, models=models)
+    for name, values in states.items():
+        if name != "direct":
+            distances[name] = pairwise_distance(values)
     return distances
