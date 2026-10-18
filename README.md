@@ -35,6 +35,38 @@ dependency-free Bun workspace; add packages under its `apps/` or `packages/`
 directories when needed. Run `just lean-build` and `just latex-build` to build
 the starter proof library and document.
 
+## Data and pipeline
+
+Every research run is a [DVC](https://dvc.org) stage in `dvc.yaml`, one per
+`free-foundations` command. [semflow](https://github.com/marcusinthesky/semflow)
+replaces each stage's Python dependency with a fingerprint of the code its command
+reaches (`.semflow/hashes/`), so comment, docstring and annotation edits rerun
+nothing. `dvc.lock` records the inputs, code and outputs of every result. Small CSV,
+JSON and Markdown summaries stay in Git. Matrices, embeddings, daily scores and
+large tables live in DVC's cache and in the private Hugging Face bucket
+`marcusinthesky/free-foundations`. Model weights are never pushed: they are
+refetched at pinned revisions.
+
+To read or write the bucket, generate S3 credentials from a Hugging Face access
+token (Settings, Access Tokens, "Generate S3 credentials"; use a write token to
+push), then store them outside Git:
+
+```sh
+dvc remote modify --local hf-bucket access_key_id HFAK...
+dvc remote modify --local hf-bucket secret_access_key ...
+just data-pull                 # or: dvc pull research/panel/four
+```
+
+`just python-panel four` and the other `python-*` recipes run `dvc repro`, which
+skips any stage whose code and inputs are unchanged. `just build` reruns every
+stale stage. After changing code, run `just semflow-refresh`. If a stage's
+command changed, run `uv run --project src/python semflow patch` first: it prints
+the change to `dvc.yaml`, and `--apply` writes it. Prek's `semflow check` blocks
+commits with stale fingerprints. `just data-push` uploads new results;
+`just data-snapshot` re-records the shared model-state cache after a run. Run
+DVC inside the devenv shell, which sets the checksum options the bucket's S3
+gateway needs.
+
 The [expanded experiment](research/expanded/README.md) compares accounting input
 views and four pretrained models, retaining ticker-labeled annual distance matrices.
 
@@ -45,7 +77,7 @@ full-return covariance forecasts.
 The [larger-universe coverage audit](research/universe/README.md) documents
 1,000 distinct SEC issuers, extended Yahoo and French histories, and annual
 filing availability. Run `just python-universe` with `EDGAR_IDENTITY` set to
-resume its cached acquisition. Its changing annual cohorts are distinct from
+resume its cached acquisition; the recipe reruns the frozen DVC stage and records it. Its changing annual cohorts are distinct from
 the six-firm complete-history demonstration.
 
 The [working paper](src/latex/main.tex) develops the measurement question,

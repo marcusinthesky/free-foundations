@@ -1136,19 +1136,22 @@ Earlier interrupted development logs are not the authoritative results.
 | Price review | [Price audit](research/panel/price-audit.csv) |
 | Encoder measurement audit | [Audit summary](research/panel/audit/summary.csv), [all checks](research/panel/audit/measurement-audit.csv) |
 
-Twelve extended-design tables exceed the repository's 500 KB file limit and are
-kept local rather than committed. They are the attribution and geometry tables of
-`four`, `three` and `three-support`, the annual-score and bootstrap tables of
-`four` and `three`, `four-h5`'s attribution table and `four`'s manifest. Each
-design's `RESULTS.md` summarizes them.
+Twelve extended-design tables exceed the repository's 500 KB file limit. They are
+the attribution and geometry tables of `four`, `three` and `three-support`, the
+annual-score and bootstrap tables of `four` and `three`, `four-h5`'s attribution
+table and `four`'s manifest. They are DVC outputs rather than Git files: `dvc.lock`
+records their hashes and `dvc pull` restores them from the project's private
+Hugging Face bucket. Each design's `RESULTS.md` summarizes them.
 
 Year-specific contexts live under `research/panel/contexts/`. Labeled pairwise
 distance and weight matrices live under `research/panel/distances/<year>/` and
-`research/panel/weights/<year>/`; they and the extended designs' per-distance
-sidecars are hashed in each `manifest.json` but not committed. Observations, prior residuals, and sample timing
-records live under `research/panel/observations/`. Downloaded inputs and expensive
-intermediate caches are ignored by Git; possession of the source alone is not
-the same as possession of every reproduction input.
+`research/panel/weights/<year>/`. They and the extended designs' per-distance
+sidecars are hashed in each `manifest.json` and held by DVC. So are the
+observations, prior residuals and sample-timing records under each design's
+`observations/`. Downloaded market and filing inputs are in the same private
+bucket, because their licences do not allow public redistribution. Model weights
+are refetched at pinned revisions. Possession of the source alone is not the same
+as possession of every reproduction input.
 
 ### 10.2 Reproduction commands
 
@@ -1158,14 +1161,16 @@ access configured:
 ```sh
 devenv shell just python-universe
 devenv shell just python-panel            # extended designs: four, four-h5, four-xqxo, three, three-support
-devenv shell just python-ladder-r0        # R0 replication and generated-beta bootstrap (needs R)
-devenv shell just python-ladder           # R1–R4 cross-sectional ladder
+devenv shell just python-ladder           # R0 replication, generated-beta bootstrap (needs R) and R1–R4 ladder
 devenv shell just python-encoder-audit    # context, query-cohort and label audits
 ```
 
-The MM first stage runs `src/python/free_foundations/fernandez/betas.R` with
+The MM first stage runs `src/python/src/free_foundations/fernandez/betas.R` with
 `robustbase`; manifests hash `.R` as well as `.py` sources. Embeddings,
-matrices, bootstrap draws and daily scores are parquet/npz files ignored by Git.
+matrices, bootstrap draws and daily scores are parquet/npz files ignored by Git and
+held by DVC: each recipe runs `dvc repro`, `dvc.lock` records every stage's code
+fingerprint, inputs and outputs, and `dvc pull` restores them from the private
+Hugging Face bucket (README, "Data and pipeline").
 
 Acquisition requires `EDGAR_IDENTITY` in the environment. The panel command uses
 the acquired universe and retained model runtimes, checkpoint files, and caches.
