@@ -532,7 +532,7 @@ def results(name: str) -> None:
     lines += ["| Family | Members | Included |", "| --- | ---: | --- |"]
     for family, group in mcs.groupby("family", sort=False):
         included = ", ".join(f"`{c.split('|')[0]}`" for c in group.loc[group["included"], "column"])
-        lines.append(f"| {family} | {len(group)} | {included} |")
+        lines.append(f"| {str(family).replace('|', '/')} | {len(group)} | {included} |")
     lines += [
         "",
         "## Label-permutation placebos (exp kernel, diagonal innovations)",
