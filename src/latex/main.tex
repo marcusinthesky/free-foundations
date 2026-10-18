@@ -75,9 +75,8 @@ outcome.
 
 For financial economists, a representation is a vector of constructed features,
 and its readout maps those features to a declared quantity, such as risk
-exposure. Our framework connects the information rewarded by a
-training task to an
-economic target, explaining when a representation supports its recovery.
+exposure. Our framework specifies conditions under which information rewarded by a
+learning task can support recovery of a declared economic target.
 Separating information, readout approximation, and estimation error
 then connects
 this measurement to financial distances and covariance forecasts.
@@ -142,9 +141,9 @@ as the appendix shows. It supplies an economic scale against which a learned
 representation can be assessed.
 
 To connect this target to pretraining, let an encoder $E$ map firm history $H$
-into features $z=E(H;C)$, conditional on examples $C$. The training loss and
-prediction task determine the statistic $F(H)$ that successful prediction must
-recover. Squared loss targets a conditional mean, whereas distributional
+into features $z=E(H;C)$, conditional on examples $C$. At a population optimum,
+the training loss and prediction task specify a statistic $F(H)$ recoverable
+through the representation's prediction head. Squared loss targets a conditional mean, whereas distributional
 prediction can preserve richer risk information. Masking determines which
 observations predict which others: reconstructing contemporaneous accounts and
 predicting future cash flows pose different tasks even under the same loss.

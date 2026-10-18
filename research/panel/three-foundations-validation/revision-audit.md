@@ -77,3 +77,10 @@ the native PGF figure and complete conclusion together on its final page; the
 supplement now occupies 23 pages. The moved proof preserves all formal
 declaration references. This editorial build does not change the pending
 canonical regeneration and archive-restoration status above.
+
+The final two wording edits state the framework's contribution as conditions
+for recovery and introduce the task statistic at a population optimum through
+the representation's prediction head. The updated source-based main-text count
+is 2,450 words including headings and captions; the abstract remains 193 words.
+The rebuilt PDF retains the complete conclusion on page 7 without layout
+warnings. Numerical results and formal statements are unchanged.
