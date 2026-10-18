@@ -11,7 +11,7 @@ import pandas as pd
 
 from free_foundations.panel.characteristics import ROOT, audit_disclosures
 from free_foundations.panel.decoding import FACTORS
-from free_foundations.panel.design import DESIGNS, FOCUSED
+from free_foundations.panel.design import DESIGNS
 from free_foundations.pilot.data import write_json
 
 # v1 names of unchanged approaches in the original `research/panel` run.
@@ -24,22 +24,8 @@ V1_MODELS = {
 
 
 def audit_checkpoints() -> dict[str, dict[str, object]]:
-    """Verify pinned local weights and record the fast checkpoint's observed hash."""
-    records: dict[str, dict[str, object]] = {}
-    for path in sorted(Path("research/expanded/cache/models").glob("*/provenance.json")):
-        metadata = json.loads(path.read_text())
-        for name, expected in metadata["sha256"].items():
-            with (path.parent / name).open("rb") as stream:
-                observed = hashlib.file_digest(stream, "sha256").hexdigest()
-            if observed != expected:
-                message = f"Checkpoint hash differs from pinned provenance: {path.parent / name}"
-                raise ValueError(message)
-        records[path.parent.name] = metadata
-    metadata = json.loads(Path("research/pilot/cache/checkpoint.json").read_text())
-    with Path(metadata["path"]).open("rb") as stream:
-        metadata["observed_sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
-    records["tabpfn_fast"] = metadata
-    return records
+    """Read the acquisition stage's verified catalogue, without requiring local weights."""
+    return json.loads(Path("research/model-checkpoints.json").read_text())
 
 
 def v1_name(name: str) -> str | None:
@@ -335,7 +321,7 @@ def support_table(
     """Native and decoded gains, and decoder quality, at each nested support size."""
     gains = comparison.set_index(["approach", "kernel", "innovation"])["gain_vs_joint_exp"]
     rungs = {rows: f"histories@support{rows}" for rows in sizes} | {256: "histories"}
-    names = [name for name in FOCUSED if name != "direct"]
+    names = [name for name in quality["representation"].unique() if name != "direct"]
     r2_ceiling, rho_ceiling = ceiling(audit)
     primary = quality.loc[quality["rank"].eq(FACTORS)]
     lines = [
@@ -367,8 +353,8 @@ def support_table(
         "### Decoder quality",
         "",
         f"Mean out-of-fold R^2 (median in brackets) against the rank-{FACTORS} reference",
-        f"target. The target's own reliability bounds R^2 near {r2_ceiling:.2f} and distance",
-        f"Spearman near {rho_ceiling:.2f}.",
+        f"target. Reliability diagnostics are {r2_ceiling:.2f} for exposure agreement and",
+        f"{rho_ceiling:.2f} for distance agreement. A ceiling interpretation needs a noise model.",
         "",
         "| Representation | " + " | ".join(f"{rows} rows" for rows in sorted(rungs)) + " |",
         "| --- |" + " ---: |" * len(rungs),
@@ -427,8 +413,8 @@ def measurement_table(
         lines += [
             f"Decoders: out-of-fold R^2 of the rank-{FACTORS} reference exposures (mean over",
             "years, median in brackets), and the Spearman correlation between decoded and",
-            f"target distances. The target's reliability bounds R^2 near {r2_ceiling:.2f}",
-            f"and distance Spearman near {rho_ceiling:.2f}; see Calibration targets.",
+            f"target distances. Exposure and distance reliability diagnostics are {r2_ceiling:.2f}",
+            f"and {rho_ceiling:.2f}; a ceiling interpretation needs a noise model.",
             "",
             "| Representation | Out-of-fold R^2 | Distance Spearman |",
             "| --- | ---: | ---: |",
@@ -439,6 +425,25 @@ def measurement_table(
             ],
         ]
     return lines
+
+
+def calibration_table(quality: pd.DataFrame) -> list[str]:
+    """Independent financial-training-size sequence at fixed encoder support."""
+    calibration = quality.loc[
+        quality["rung"].str.startswith("histories@calibration") & quality["rank"].eq(FACTORS)
+    ]
+    summary = calibration.pivot_table(
+        index="representation", columns="calibration_rows", values="decoder_r2"
+    )
+    return [
+        "",
+        "## Financial calibration sample size",
+        "",
+        "Encoder support stays at 256 examples. Each fold uses a nested subset of",
+        "training firms; its held-out firms remain fixed. Annual decoder R^2 means:",
+        "",
+        summary.to_markdown(floatfmt=".3f"),
+    ]
 
 
 def results(name: str) -> None:
@@ -519,6 +524,8 @@ def results(name: str) -> None:
         lines += target_table(audit, quality)
         if design.support_sizes:
             lines += support_table(comparison, quality, audit, design.support_sizes)
+        if design.calibration_sizes:
+            lines += calibration_table(quality)
     lines += [
         "",
         "## Model confidence sets (size 0.10)",

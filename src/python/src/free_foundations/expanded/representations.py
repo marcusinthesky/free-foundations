@@ -19,9 +19,17 @@ if TYPE_CHECKING:
     from free_foundations.expanded.encoding import Prepared
 
 type Arm = Literal["classical", "control", "state", "task"]
+CONTROL: Arm = "control"
 MODELS = ("tabpfn_fast", "tabpfn_full", "tabfm", "tabfm_labelnull", "exaone")
 # Readouts per model run, with the published name and interpretive arm of each.
 READOUTS: dict[str, tuple[tuple[str, str, Arm], ...]] = {
+    "kumo": (("late", "kumo__late", "task"), ("early_concat", "kumo__early_concat", "state")),
+    "limix": (("late", "limix__late", "task"),),
+    **{
+        f"{model}_random{suffix}": (("late", f"{model}_random{suffix}__late", CONTROL),)
+        for model in ("kumo", "tabpfn_full")
+        for suffix in ("", "43", "44")
+    },
     "tabpfn_fast": (("late", "tabpfn_fast__late", "task"),),
     "tabpfn_full": (("late", "tabpfn_full__late", "task"),),
     # The same architecture and preprocessing with untrained weights; not in MODELS.

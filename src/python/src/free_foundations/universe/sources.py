@@ -52,12 +52,15 @@ def screen(cache: Path, limit: int) -> list[dict[str, Any]]:
     return quotes[:limit]
 
 
-def company_facts(cache: Path, cik: int) -> dict[str, Any]:
+def company_facts(cache: Path, cik: int, *, cached_only: bool = False) -> dict[str, Any]:
     """Reuse the pilot cache; download at most three concurrently with per-call pacing."""
     path = cache / "facts" / f"{cik:010}.json.gz"
     if path.exists():
         with gzip.open(path, "rt") as stream:
             return json.load(stream)
+    if cached_only:
+        message = f"Missing frozen SEC snapshot: {path}. Restore the universe data with DVC."
+        raise FileNotFoundError(message)
     if shutil.disk_usage(cache).free < 500_000_000:
         message = "Less than 500 MB disk space remains; cached progress is preserved."
         raise OSError(message)

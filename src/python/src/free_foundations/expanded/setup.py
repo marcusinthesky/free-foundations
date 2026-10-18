@@ -1,20 +1,27 @@
-"""Pinned public checkpoints and explicitly current SIC metadata for reproducible runs."""
+"""Pinned public checkpoints and frozen SIC metadata for reproducible runs."""
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
-import time
 from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from free_foundations.pilot.data import write_json
 
 CHECKPOINTS = {
+    "kumo": (
+        "nvidia/Kumo-Tabular",
+        "c5893d418e162b9f841ae179dc767afefff73831",
+        ("large/regressor.pt",),
+    ),
+    "limix": (
+        "stable-ai/LimiX-2",
+        "de07b679e74a41b50b9de18251a8fa245e537440",
+        ("LimiX-2.ckpt",),
+    ),
     "tabpfn_full": (
         "Prior-Labs/tabpfn_3_5",
         "06bf2ba35c80a92a3b9abb436b99cf49e7a0365e",
@@ -33,66 +40,64 @@ CHECKPOINTS = {
 }
 
 
-def ensure_checkpoints(output: Path) -> None:
+def ensure_checkpoints(
+    output: Path,
+    models: tuple[str, ...] = ("tabpfn_full", "tabfm", "exaone"),
+    *,
+    write_catalogue: bool = True,
+) -> dict[str, dict[str, object]]:
     """Download immutable revisions anonymously; reuse and hash existing files."""
-    from huggingface_hub import hf_hub_download  # noqa: PLC0415
-
-    metadata = {}
+    metadata: dict[str, dict[str, object]] = {}
     for name, (repository, revision, files) in CHECKPOINTS.items():
+        if name not in models:
+            continue
         root = output / "cache" / "models" / name
         hashes = {}
         for filename in files:
             destination = root / filename
             if not destination.exists():
+                from huggingface_hub import hf_hub_download  # noqa: PLC0415
+
                 hf_hub_download(
                     repository, filename, revision=revision, token=False, local_dir=root
                 )
             with destination.open("rb") as stream:
                 hashes[filename] = hashlib.file_digest(stream, "sha256").hexdigest()
-        record = {"repository": repository, "revision": revision, "files": files, "sha256": hashes}
+        record: dict[str, object] = {
+            "repository": repository,
+            "revision": revision,
+            "files": files,
+            "sha256": hashes,
+        }
         write_json(root / "provenance.json", record)
         metadata[name] = record
-    write_json(output / "checkpoints.json", metadata)
+    if write_catalogue:
+        manifest = output / "checkpoints.json"
+        previous = json.loads(manifest.read_text()) if manifest.exists() else {}
+        write_json(manifest, previous | metadata)
+    return metadata
 
 
-def ensure_industry(source: Path, output: Path) -> None:
-    """Use SEC submissions SIC as a current-vintage control, never label it historical."""
-    if (output / "industry.csv").exists():
-        return
-    from edgar import set_identity  # noqa: PLC0415
-    from edgar.httprequests import download_json  # noqa: PLC0415
-
-    identity = os.environ.get("EDGAR_IDENTITY")
-    if not identity:
-        message = "Set EDGAR_IDENTITY before fetching the SIC control."
-        raise RuntimeError(message)
-    set_identity(identity)
-    rows = []
-    universe = pd.read_csv(source.parent / "universe.csv")
-    for issuer in universe.to_dict("records"):
-        time.sleep(0.25)
-        data = download_json(f"https://data.sec.gov/submissions/CIK{issuer['cik']:010}.json")
-        rows.append(
-            {
-                "ticker": issuer["ticker"],
-                "sic": data.get("sic", ""),
-                "description": data.get("sicDescription", ""),
-                "classification_vintage": datetime.now(UTC).date().isoformat(),
-            }
+def ensure_industry(output: Path) -> None:
+    """Require the frozen SIC snapshot; numerical reproduction never queries SEC."""
+    if not (output / "industry.csv").is_file():
+        message = (
+            "Missing frozen industry snapshot. Restore research/expanded/industry.csv "
+            "from version control before reproduction; SEC acquisition is disabled here."
         )
-    pd.DataFrame(rows).to_csv(output / "industry.csv", index=False)
+        raise FileNotFoundError(message)
 
 
 def write_manifest(source: Path, output: Path) -> None:
     """Record fixed design choices, package versions, and original input provenance."""
     original = json.loads((source.parent / "manifest.json").read_text())
-    project = Path(__file__).resolve().parents[2]
+    project = Path(__file__).resolve().parents[3]
     source_hashes = {
         str(path.relative_to(project)): hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted((project / "free_foundations").rglob("*.py"))
+        for path in sorted((project / "src" / "free_foundations").rglob("*.py"))
     }
     fast = json.loads((source / "checkpoint.json").read_text())
-    with (source / fast["filename"]).open("rb") as stream:
+    with fast_checkpoint(source).open("rb") as stream:
         fast_hash = hashlib.file_digest(stream, "sha256").hexdigest()
     write_json(
         output / "manifest.json",
@@ -144,3 +149,46 @@ def write_manifest(source: Path, output: Path) -> None:
             "industry": "current 2-digit SIC; not point-in-time",
         },
     )
+
+
+def checkpoint_catalogue() -> None:
+    """Acquire pinned model weights separately from financial estimation and reporting."""
+    output = Path("research/expanded")
+    records = ensure_checkpoints(output, tuple(CHECKPOINTS), write_catalogue=False)
+    source = Path("research/pilot/cache")
+    fast = json.loads((source / "checkpoint.json").read_text())
+    path = fast_checkpoint(source)
+    with path.open("rb") as stream:
+        fast["observed_sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
+    fast["path"] = str(path)
+    records["tabpfn_fast"] = fast
+    write_json(Path("research/model-checkpoints.json"), records)
+
+
+def fast_checkpoint(source: Path) -> Path:
+    """Resolve the frozen Fast revision locally without changing its source metadata."""
+    metadata = json.loads((source / "checkpoint.json").read_text())
+    candidates = (source / metadata["filename"], source / "checkpoint" / metadata["filename"])
+    for path in candidates:
+        if path.is_file():
+            return path
+    from huggingface_hub import hf_hub_download  # noqa: PLC0415
+
+    return Path(
+        hf_hub_download(
+            metadata["repository"],
+            metadata["filename"],
+            revision=metadata["revision"],
+            token=False,
+            local_dir=source / "checkpoint",
+        )
+    )
+
+
+def local_checkpoint(cache: Path, name: str) -> dict[str, Any]:
+    """Restore missing immutable model files without changing any pipeline outputs."""
+    root = cache / "models" / name
+    _, _, files = CHECKPOINTS[name]
+    if not (root / "provenance.json").exists() or any(not (root / f).exists() for f in files):
+        ensure_checkpoints(cache.parent, (name,), write_catalogue=False)
+    return json.loads((root / "provenance.json").read_text())

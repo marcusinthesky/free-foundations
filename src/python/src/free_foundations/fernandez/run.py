@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import gc
-import hashlib
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -218,24 +217,3 @@ def main(output: Path, years: list[int]) -> None:
     )
     paper_cross_section(panel, prices, factors, output)
     annual_ladder(panel, source, expanded, output, years)
-    paths = [
-        *Path(__file__).parent.glob("*.*"),
-        source / "prices.parquet",
-        source / "factors.parquet",
-        output / "cache" / "characteristics.parquet",
-    ]
-    write_json(
-        output / "manifest.json",
-        {
-            "sha256": {
-                str(path): hashlib.sha256(path.read_bytes()).hexdigest()
-                for path in paths
-                if path.is_file()
-            },
-            "paper_sha256": "7391cb6ed0b986ff3dffd3f0870b7a3a5f94a2291f773d0ebed0a91149bfbabe",
-            "classification": (
-                "US methodological replication and retrospective forecasts; "
-                "not original Economatica sample replication"
-            ),
-        },
-    )

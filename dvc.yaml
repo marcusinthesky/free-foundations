@@ -1,4 +1,4 @@
-# Research pipeline. One stage per `free-foundations` command; semflow replaces each
+# Research pipeline. Computational stages follow `free-foundations` commands; semflow replaces each
 # stage's Python source dependency with a fingerprint of the code its command reaches.
 #
 # Resume caches written by several stages (foundation-model states in
@@ -10,18 +10,97 @@ vars:
 - ff: uv run --project src/python --frozen free-foundations
 - pilot: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn
     free-foundations
-- heavy: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run
-    --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone free-foundations
+- heavy: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project
+    src/python --frozen --extra tabpfn --extra tabfm --extra exaone free-foundations
 
 stages:
+  model_checkpoints:
+    desc: Acquire pinned model revisions and record verified hashes; financial snapshots are
+      unchanged.
+    cmd: ${pilot} expanded checkpoints
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/expanded/checkpoints.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/pilot/cache/checkpoint.json
+    outs:
+    - research/model-checkpoints.json
+  panel_run_three_foundations:
+    desc: Representative frozen-model measurement experiment, including Kumo Large and LimiX-2.
+    cmd: >-
+      OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1
+      uv run --project src/python --frozen --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations panel run --design three-foundations
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/panel/run.json
+    - src/python/uv.lock
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache
+    - research/panel/three-foundations/README.md
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
+    outs:
+    - research/panel/three-foundations/daily-scores.parquet
+    - research/panel/three-foundations/annual-scores.csv
+    - research/panel/three-foundations/comparison.csv
+    - research/panel/three-foundations/decoding.csv
+    - research/panel/three-foundations/target-audit.csv
+    - research/panel/three-foundations/attribution.csv
+    - research/panel/three-foundations/geometry.csv
+    - research/panel/three-foundations/bootstrap.csv
+    - research/panel/three-foundations/contrasts.csv
+    - research/panel/three-foundations/mcs.csv
+    - research/panel/three-foundations/placebo.csv
+    - research/panel/three-foundations/configuration.json
+    - research/panel/three-foundations/observations
+    - research/panel/three-foundations/distances
+    - research/panel/three-foundations/contexts
+  panel_report_three_foundations:
+    desc: Report and provenance for the representative foundation-model experiment.
+    cmd: ${ff} panel report --design three-foundations
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/panel/report.json
+    - src/python/uv.lock
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/panel/three-foundations/comparison.csv
+    - research/panel/three-foundations/configuration.json
+    - research/panel/three-foundations/decoding.csv
+    - research/panel/three-foundations/target-audit.csv
+    - research/panel/three-foundations/bootstrap.csv
+    - research/panel/three-foundations/contrasts.csv
+    - research/panel/three-foundations/mcs.csv
+    - research/panel/three-foundations/placebo.csv
+    - research/panel/three-foundations/geometry.csv
+    - research/panel/three-foundations/attribution.csv
+    - research/panel/three-foundations/annual-scores.csv
+    - research/panel/three-foundations/daily-scores.parquet
+    - research/panel/three-foundations/contexts
+    - research/panel/three-foundations/distances
+    - research/panel/three-foundations/observations
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
+    outs:
+    - research/panel/three-foundations/manifest.json
+    - research/panel/three-foundations/RESULTS.md:
+        cache: false
+    - research/panel/three-foundations/checkpoints.json
+    - research/panel/three-foundations/disclosure-audit.json
   universe:
     desc: >-
-      Acquire the larger public-data universe from SEC EDGAR and Yahoo. Network inputs cannot be rebuilt bit for bit, so the stage is frozen; needs EDGAR_IDENTITY.
+      Acquire the larger public-data universe from SEC EDGAR and Yahoo. Network inputs cannot be rebuilt
+      bit for bit, so the stage is frozen; needs EDGAR_IDENTITY.
     cmd: ${ff} universe run
     frozen: true
     deps:
     - .semflow/hashes/entrypoints/free-foundations/universe/run.json
     - src/python/uv.lock
+    - src/python/pyproject.toml
     outs:
     - research/universe/cache:
         persist: true
@@ -46,12 +125,14 @@ stages:
 
   pilot:
     desc: >-
-      Cache the pilot's market and SEC inputs and run the original experiment. Network inputs, so frozen; the TabPFN checkpoint is refetched, not tracked.
+      Cache the pilot's market and SEC inputs and run the original experiment. Network inputs, so frozen;
+      the TabPFN checkpoint is refetched, not tracked.
     cmd: ${pilot} pilot run --stage all --pretrained
     frozen: true
     deps:
     - .semflow/hashes/entrypoints/free-foundations/pilot/run.json
     - src/python/uv.lock
+    - src/python/pyproject.toml
     outs:
     - research/pilot/cache:
         persist: true
@@ -80,6 +161,18 @@ stages:
     - research/pilot/universe-exclusions.json:
         cache: false
 
+  market_metadata:
+    cmd: "false"  # Recorded source snapshot: no acquisition command in reproduction.
+    desc: Frozen SEC industry classification and Yahoo corporate-action snapshots; restore rather
+      than refetch.
+    frozen: true
+    outs:
+    - research/expanded/industry.csv:
+        cache: false
+    - research/expanded/cache/submissions
+    - research/fernandez/cache/markets
+    - research/panel/cache/market-tail.parquet
+
   expanded_run:
     desc: >-
       Expanded representation and metric grid on the pilot's cached inputs.
@@ -89,6 +182,10 @@ stages:
     - src/python/uv.lock
     - research/pilot/cache
     - research/pilot/universe.csv
+    - research/expanded/industry.csv
+    - src/python/pyproject.toml
+    - research/pilot/manifest.json
+    - research/model-checkpoints.json
     outs:
     - research/expanded/distances
     - research/expanded/cache/ages.parquet
@@ -104,45 +201,23 @@ stages:
     - research/expanded/cache/scores-2023.parquet
     - research/expanded/cache/scores-2024.parquet
     - research/expanded/cache/scores-2025.parquet
-    - research/expanded/cache/submissions:
-        persist: true
-    - research/expanded/schemas:
-        cache: false
-    - research/expanded/annual-2016.csv:
-        cache: false
-    - research/expanded/annual-2017.csv:
-        cache: false
-    - research/expanded/annual-2018.csv:
-        cache: false
-    - research/expanded/annual-2019.csv:
-        cache: false
-    - research/expanded/annual-2020.csv:
-        cache: false
-    - research/expanded/annual-2021.csv:
-        cache: false
-    - research/expanded/annual-2022.csv:
-        cache: false
-    - research/expanded/annual-2023.csv:
-        cache: false
-    - research/expanded/annual-2024.csv:
-        cache: false
-    - research/expanded/annual-2025.csv:
-        cache: false
-    - research/expanded/annual.csv:
-        cache: false
-    - research/expanded/checkpoints.json:
-        cache: false
-    - research/expanded/disclosure-audit.json:
-        cache: false
-    - research/expanded/distance-inventory.csv:
-        cache: false
-    - research/expanded/execution-status.json:
-        cache: false
-    - research/expanded/industry.csv:
-        cache: false
-    - research/expanded/manifest.json:
-        cache: false
-
+    - research/expanded/schemas
+    - research/expanded/annual-2016.csv
+    - research/expanded/annual-2017.csv
+    - research/expanded/annual-2018.csv
+    - research/expanded/annual-2019.csv
+    - research/expanded/annual-2020.csv
+    - research/expanded/annual-2021.csv
+    - research/expanded/annual-2022.csv
+    - research/expanded/annual-2023.csv
+    - research/expanded/annual-2024.csv
+    - research/expanded/annual-2025.csv
+    - research/expanded/annual.csv
+    - research/expanded/checkpoints.json
+    - research/expanded/disclosure-audit.json
+    - research/expanded/distance-inventory.csv
+    - research/expanded/execution-status.json
+    - research/expanded/manifest.json
   expanded_report:
     desc: >-
       Audit the expanded run and regenerate its tables, figure and report.
@@ -163,6 +238,8 @@ stages:
     - research/expanded/cache/scores-2023.parquet
     - research/expanded/cache/scores-2024.parquet
     - research/expanded/cache/scores-2025.parquet
+    - src/python/uv.lock
+    - src/python/pyproject.toml
     outs:
     - research/expanded/summary.csv:
         cache: false
@@ -190,106 +267,69 @@ stages:
     - research/pilot/cache
     - research/expanded/cache/broad.parquet
     - research/expanded/cache/ages.parquet
+    - research/fernandez/cache/markets
+    - src/python/pyproject.toml
+    - research/pilot/universe.csv
+    - research/expanded/cache/broad-audit.parquet
+    - research/model-checkpoints.json
+    - devenv.nix
+    - devenv.lock
     outs:
     - research/fernandez/distances
     - research/fernandez/cross-sectional-distances
     - research/fernandez/cross-sectional-weights
     - research/fernandez/cache/characteristics.parquet
-    - research/fernandez/cache/markets:
-        persist: true
-    - research/fernandez/annual-2016.csv:
-        cache: false
-    - research/fernandez/annual-2017.csv:
-        cache: false
-    - research/fernandez/annual-2018.csv:
-        cache: false
-    - research/fernandez/annual-2019.csv:
-        cache: false
-    - research/fernandez/annual-2020.csv:
-        cache: false
-    - research/fernandez/annual-2021.csv:
-        cache: false
-    - research/fernandez/annual-2022.csv:
-        cache: false
-    - research/fernandez/annual-2023.csv:
-        cache: false
-    - research/fernandez/annual-2024.csv:
-        cache: false
-    - research/fernandez/annual-2025.csv:
-        cache: false
-    - research/fernandez/annual.csv:
-        cache: false
-    - research/fernandez/characteristic-audit.csv:
-        cache: false
-    - research/fernandez/cohorts.json:
-        cache: false
-    - research/fernandez/context-2016-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2016-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2017-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2017-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2018-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2018-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2019-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2019-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2020-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2020-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2021-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2021-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2022-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2022-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2023-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2023-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2024-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2024-same_four_histories.json:
-        cache: false
-    - research/fernandez/context-2025-four_plus_broad.json:
-        cache: false
-    - research/fernandez/context-2025-same_four_histories.json:
-        cache: false
-    - research/fernandez/coverage.csv:
-        cache: false
-    - research/fernandez/cross-section.csv:
-        cache: false
-    - research/fernandez/distance-inventory.csv:
-        cache: false
-    - research/fernandez/excluded-issuers.csv:
-        cache: false
-    - research/fernandez/execution-status.json:
-        cache: false
-    - research/fernandez/mm-betas.csv:
-        cache: false
-    - research/fernandez/quarterly-returns.csv:
-        cache: false
-    - research/fernandez/summary.csv:
-        cache: false
-
+    - research/fernandez/annual-2016.csv
+    - research/fernandez/annual-2017.csv
+    - research/fernandez/annual-2018.csv
+    - research/fernandez/annual-2019.csv
+    - research/fernandez/annual-2020.csv
+    - research/fernandez/annual-2021.csv
+    - research/fernandez/annual-2022.csv
+    - research/fernandez/annual-2023.csv
+    - research/fernandez/annual-2024.csv
+    - research/fernandez/annual-2025.csv
+    - research/fernandez/annual.csv
+    - research/fernandez/characteristic-audit.csv
+    - research/fernandez/cohorts.json
+    - research/fernandez/context-2016-four_plus_broad.json
+    - research/fernandez/context-2016-same_four_histories.json
+    - research/fernandez/context-2017-four_plus_broad.json
+    - research/fernandez/context-2017-same_four_histories.json
+    - research/fernandez/context-2018-four_plus_broad.json
+    - research/fernandez/context-2018-same_four_histories.json
+    - research/fernandez/context-2019-four_plus_broad.json
+    - research/fernandez/context-2019-same_four_histories.json
+    - research/fernandez/context-2020-four_plus_broad.json
+    - research/fernandez/context-2020-same_four_histories.json
+    - research/fernandez/context-2021-four_plus_broad.json
+    - research/fernandez/context-2021-same_four_histories.json
+    - research/fernandez/context-2022-four_plus_broad.json
+    - research/fernandez/context-2022-same_four_histories.json
+    - research/fernandez/context-2023-four_plus_broad.json
+    - research/fernandez/context-2023-same_four_histories.json
+    - research/fernandez/context-2024-four_plus_broad.json
+    - research/fernandez/context-2024-same_four_histories.json
+    - research/fernandez/context-2025-four_plus_broad.json
+    - research/fernandez/context-2025-same_four_histories.json
+    - research/fernandez/coverage.csv
+    - research/fernandez/cross-section.csv
+    - research/fernandez/distance-inventory.csv
+    - research/fernandez/excluded-issuers.csv
+    - research/fernandez/execution-status.json
+    - research/fernandez/mm-betas.csv
+    - research/fernandez/quarterly-returns.csv
+    - research/fernandez/summary.csv
   fernandez_simulate:
     desc: >-
       Portfolio risk under the paper's spatial weights.
     cmd: ${ff} fernandez simulate
     deps:
     - .semflow/hashes/entrypoints/free-foundations/fernandez/simulate.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
     outs:
-    - research/fernandez/simulation.csv:
-        cache: false
-
+    - research/fernandez/simulation.csv
   fernandez_report:
     desc: >-
       Comparison tables, distance audit and report for the replication.
@@ -304,6 +344,51 @@ stages:
     - research/fernandez/simulation.csv
     - research/pilot/manifest.json
     - research/expanded/checkpoints.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/fernandez/cross-sectional-distances
+    - research/fernandez/cross-sectional-weights
+    - research/fernandez/cache/characteristics.parquet
+    - research/fernandez/annual-2016.csv
+    - research/fernandez/annual-2017.csv
+    - research/fernandez/annual-2018.csv
+    - research/fernandez/annual-2019.csv
+    - research/fernandez/annual-2020.csv
+    - research/fernandez/annual-2021.csv
+    - research/fernandez/annual-2022.csv
+    - research/fernandez/annual-2023.csv
+    - research/fernandez/annual-2024.csv
+    - research/fernandez/annual-2025.csv
+    - research/fernandez/characteristic-audit.csv
+    - research/fernandez/cohorts.json
+    - research/fernandez/context-2016-four_plus_broad.json
+    - research/fernandez/context-2016-same_four_histories.json
+    - research/fernandez/context-2017-four_plus_broad.json
+    - research/fernandez/context-2017-same_four_histories.json
+    - research/fernandez/context-2018-four_plus_broad.json
+    - research/fernandez/context-2018-same_four_histories.json
+    - research/fernandez/context-2019-four_plus_broad.json
+    - research/fernandez/context-2019-same_four_histories.json
+    - research/fernandez/context-2020-four_plus_broad.json
+    - research/fernandez/context-2020-same_four_histories.json
+    - research/fernandez/context-2021-four_plus_broad.json
+    - research/fernandez/context-2021-same_four_histories.json
+    - research/fernandez/context-2022-four_plus_broad.json
+    - research/fernandez/context-2022-same_four_histories.json
+    - research/fernandez/context-2023-four_plus_broad.json
+    - research/fernandez/context-2023-same_four_histories.json
+    - research/fernandez/context-2024-four_plus_broad.json
+    - research/fernandez/context-2024-same_four_histories.json
+    - research/fernandez/context-2025-four_plus_broad.json
+    - research/fernandez/context-2025-same_four_histories.json
+    - research/fernandez/coverage.csv
+    - research/fernandez/excluded-issuers.csv
+    - research/fernandez/execution-status.json
+    - research/fernandez/mm-betas.csv
+    - research/fernandez/quarterly-returns.csv
+    - research/fernandez/cache/markets
+    - devenv.nix
+    - devenv.lock
     outs:
     - research/fernandez/paired-comparisons.csv:
         cache: false
@@ -311,9 +396,7 @@ stages:
         cache: false
     - research/fernandez/RESULTS.md:
         cache: false
-    - research/fernandez/manifest.json:
-        cache: false
-
+    - research/fernandez/manifest.json
   fernandez_combined:
     desc: >-
       One spatial-error likelihood per combined network on a fixed common cohort.
@@ -324,22 +407,20 @@ stages:
     - research/fernandez/cross-sectional-weights
     - research/pilot/cache
     - research/expanded/cache/broad.parquet
+    - src/python/pyproject.toml
+    - research/fernandez/cache/characteristics.parquet
+    - research/fernandez/quarterly-returns.csv
+    - research/fernandez/mm-betas.csv
+    - research/model-checkpoints.json
     outs:
     - research/fernandez/combined/distances
     - research/fernandez/combined/weights
-    - research/fernandez/combined/context-four_histories.json:
-        cache: false
-    - research/fernandez/combined/context-four_plus_broad.json:
-        cache: false
-    - research/fernandez/combined/likelihood.csv:
-        cache: false
-    - research/fernandez/combined/sample.csv:
-        cache: false
-    - research/fernandez/combined/RESULTS.md:
-        cache: false
-    - research/fernandez/combined/manifest.json:
-        cache: false
-
+    - research/fernandez/combined/context-four_histories.json
+    - research/fernandez/combined/context-four_plus_broad.json
+    - research/fernandez/combined/likelihood.csv
+    - research/fernandez/combined/sample.csv
+    - research/fernandez/combined/RESULTS.md
+    - research/fernandez/combined/manifest.json
   panel_prepare:
     desc: >-
       Shared point-in-time characteristics for every panel design, and the price audit.
@@ -348,21 +429,20 @@ stages:
     - .semflow/hashes/entrypoints/free-foundations/panel/prepare.json
     - src/python/uv.lock
     - research/universe/cache
+    - research/panel/cache/market-tail.parquet
+    - src/python/pyproject.toml
+    - research/universe/universe.csv
     outs:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/panel/cache/characteristic-audit.parquet
     - research/panel/cache/characteristics
-    - research/panel/cache/market-tail.parquet:
-        persist: true
-    - research/panel/characteristic-coverage.csv:
-        cache: false
-    - research/panel/price-audit.csv:
-        cache: false
-
+    - research/panel/characteristic-coverage.csv
+    - research/panel/price-audit.csv
   panel_run_four:
     desc: >-
-      Panel design four: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held out.
+      Panel design four: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held
+      out.
     cmd: ${heavy} panel run --design four
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/run.json
@@ -370,6 +450,9 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/four/daily-scores.parquet
     - research/panel/four/distances
@@ -378,23 +461,14 @@ stages:
     - research/panel/four/attribution.csv
     - research/panel/four/bootstrap.csv
     - research/panel/four/geometry.csv
-    - research/panel/four/contexts:
-        cache: false
-    - research/panel/four/comparison.csv:
-        cache: false
-    - research/panel/four/configuration.json:
-        cache: false
-    - research/panel/four/contrasts.csv:
-        cache: false
-    - research/panel/four/mcs.csv:
-        cache: false
-    - research/panel/four/placebo.csv:
-        cache: false
-    - research/panel/four/decoding.csv:
-        cache: false
-    - research/panel/four/target-audit.csv:
-        cache: false
-
+    - research/panel/four/contexts
+    - research/panel/four/comparison.csv
+    - research/panel/four/configuration.json
+    - research/panel/four/contrasts.csv
+    - research/panel/four/mcs.csv
+    - research/panel/four/placebo.csv
+    - research/panel/four/decoding.csv
+    - research/panel/four/target-audit.csv
   panel_report_four:
     desc: >-
       Report and provenance for panel design four.
@@ -411,24 +485,31 @@ stages:
     - research/panel/four/contrasts.csv
     - research/panel/four/mcs.csv
     - research/panel/four/placebo.csv
-    - research/pilot/cache/checkpoint.json
     - research/panel/four/decoding.csv
     - research/panel/four/target-audit.csv
     - research/panel/comparison.csv
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/panel/four/observations
+    - research/panel/four/contexts
+    - research/panel/four/configuration.json
+    - research/model-checkpoints.json
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
     outs:
     - research/panel/four/manifest.json
     - research/panel/four/RESULTS.md:
         cache: false
-    - research/panel/four/checkpoints.json:
-        cache: false
-    - research/panel/four/disclosure-audit.json:
-        cache: false
-    - research/panel/four/regression-check.csv:
-        cache: false
-
+    - research/panel/four/checkpoints.json
+    - research/panel/four/disclosure-audit.json
+    - research/panel/four/regression-check.csv
   panel_run_four_h5:
     desc: >-
-      Panel design four-h5: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held out.
+      Panel design four-h5: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      held out.
     cmd: ${heavy} panel run --design four-h5
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/run.json
@@ -436,30 +517,23 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/four-h5/daily-scores.parquet
     - research/panel/four-h5/distances
     - research/panel/four-h5/observations
-    - research/panel/four-h5/annual-scores.csv:
-        cache: false
+    - research/panel/four-h5/annual-scores.csv
     - research/panel/four-h5/attribution.csv
-    - research/panel/four-h5/bootstrap.csv:
-        cache: false
-    - research/panel/four-h5/geometry.csv:
-        cache: false
-    - research/panel/four-h5/contexts:
-        cache: false
-    - research/panel/four-h5/comparison.csv:
-        cache: false
-    - research/panel/four-h5/configuration.json:
-        cache: false
-    - research/panel/four-h5/contrasts.csv:
-        cache: false
-    - research/panel/four-h5/mcs.csv:
-        cache: false
-    - research/panel/four-h5/placebo.csv:
-        cache: false
-
+    - research/panel/four-h5/bootstrap.csv
+    - research/panel/four-h5/geometry.csv
+    - research/panel/four-h5/contexts
+    - research/panel/four-h5/comparison.csv
+    - research/panel/four-h5/configuration.json
+    - research/panel/four-h5/contrasts.csv
+    - research/panel/four-h5/mcs.csv
+    - research/panel/four-h5/placebo.csv
   panel_report_four_h5:
     desc: >-
       Report and provenance for panel design four-h5.
@@ -476,20 +550,27 @@ stages:
     - research/panel/four-h5/contrasts.csv
     - research/panel/four-h5/mcs.csv
     - research/panel/four-h5/placebo.csv
-    - research/pilot/cache/checkpoint.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/panel/four-h5/observations
+    - research/panel/four-h5/contexts
+    - research/panel/four-h5/configuration.json
+    - research/model-checkpoints.json
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
     outs:
-    - research/panel/four-h5/manifest.json:
-        cache: false
+    - research/panel/four-h5/manifest.json
     - research/panel/four-h5/RESULTS.md:
         cache: false
-    - research/panel/four-h5/checkpoints.json:
-        cache: false
-    - research/panel/four-h5/disclosure-audit.json:
-        cache: false
-
+    - research/panel/four-h5/checkpoints.json
+    - research/panel/four-h5/disclosure-audit.json
   panel_run_four_xqxo:
     desc: >-
-      Panel design four-xqxo: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held out.
+      Panel design four-xqxo: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      held out.
     cmd: ${heavy} panel run --design four-xqxo
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/run.json
@@ -497,31 +578,23 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/four-xqxo/daily-scores.parquet
     - research/panel/four-xqxo/distances
     - research/panel/four-xqxo/observations
-    - research/panel/four-xqxo/annual-scores.csv:
-        cache: false
-    - research/panel/four-xqxo/attribution.csv:
-        cache: false
-    - research/panel/four-xqxo/bootstrap.csv:
-        cache: false
-    - research/panel/four-xqxo/geometry.csv:
-        cache: false
-    - research/panel/four-xqxo/contexts:
-        cache: false
-    - research/panel/four-xqxo/comparison.csv:
-        cache: false
-    - research/panel/four-xqxo/configuration.json:
-        cache: false
-    - research/panel/four-xqxo/contrasts.csv:
-        cache: false
-    - research/panel/four-xqxo/mcs.csv:
-        cache: false
-    - research/panel/four-xqxo/placebo.csv:
-        cache: false
-
+    - research/panel/four-xqxo/annual-scores.csv
+    - research/panel/four-xqxo/attribution.csv
+    - research/panel/four-xqxo/bootstrap.csv
+    - research/panel/four-xqxo/geometry.csv
+    - research/panel/four-xqxo/contexts
+    - research/panel/four-xqxo/comparison.csv
+    - research/panel/four-xqxo/configuration.json
+    - research/panel/four-xqxo/contrasts.csv
+    - research/panel/four-xqxo/mcs.csv
+    - research/panel/four-xqxo/placebo.csv
   panel_report_four_xqxo:
     desc: >-
       Report and provenance for panel design four-xqxo.
@@ -538,20 +611,27 @@ stages:
     - research/panel/four-xqxo/contrasts.csv
     - research/panel/four-xqxo/mcs.csv
     - research/panel/four-xqxo/placebo.csv
-    - research/pilot/cache/checkpoint.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/panel/four-xqxo/observations
+    - research/panel/four-xqxo/contexts
+    - research/panel/four-xqxo/configuration.json
+    - research/model-checkpoints.json
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
     outs:
-    - research/panel/four-xqxo/manifest.json:
-        cache: false
+    - research/panel/four-xqxo/manifest.json
     - research/panel/four-xqxo/RESULTS.md:
         cache: false
-    - research/panel/four-xqxo/checkpoints.json:
-        cache: false
-    - research/panel/four-xqxo/disclosure-audit.json:
-        cache: false
-
+    - research/panel/four-xqxo/checkpoints.json
+    - research/panel/four-xqxo/disclosure-audit.json
   panel_run_three:
     desc: >-
-      Panel design three: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held out.
+      Panel design three: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held
+      out.
     cmd: ${heavy} panel run --design three
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/run.json
@@ -559,6 +639,9 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/three/daily-scores.parquet
     - research/panel/three/distances
@@ -567,23 +650,14 @@ stages:
     - research/panel/three/attribution.csv
     - research/panel/three/bootstrap.csv
     - research/panel/three/geometry.csv
-    - research/panel/three/contexts:
-        cache: false
-    - research/panel/three/comparison.csv:
-        cache: false
-    - research/panel/three/configuration.json:
-        cache: false
-    - research/panel/three/contrasts.csv:
-        cache: false
-    - research/panel/three/mcs.csv:
-        cache: false
-    - research/panel/three/placebo.csv:
-        cache: false
-    - research/panel/three/decoding.csv:
-        cache: false
-    - research/panel/three/target-audit.csv:
-        cache: false
-
+    - research/panel/three/contexts
+    - research/panel/three/comparison.csv
+    - research/panel/three/configuration.json
+    - research/panel/three/contrasts.csv
+    - research/panel/three/mcs.csv
+    - research/panel/three/placebo.csv
+    - research/panel/three/decoding.csv
+    - research/panel/three/target-audit.csv
   panel_report_three:
     desc: >-
       Report and provenance for panel design three.
@@ -600,22 +674,29 @@ stages:
     - research/panel/three/contrasts.csv
     - research/panel/three/mcs.csv
     - research/panel/three/placebo.csv
-    - research/pilot/cache/checkpoint.json
     - research/panel/three/decoding.csv
     - research/panel/three/target-audit.csv
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/panel/three/observations
+    - research/panel/three/contexts
+    - research/panel/three/configuration.json
+    - research/model-checkpoints.json
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
     outs:
-    - research/panel/three/manifest.json:
-        cache: false
+    - research/panel/three/manifest.json
     - research/panel/three/RESULTS.md:
         cache: false
-    - research/panel/three/checkpoints.json:
-        cache: false
-    - research/panel/three/disclosure-audit.json:
-        cache: false
-
+    - research/panel/three/checkpoints.json
+    - research/panel/three/disclosure-audit.json
   panel_run_three_support:
     desc: >-
-      Panel design three-support: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held out.
+      Panel design three-support: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      held out.
     cmd: ${heavy} panel run --design three-support
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/run.json
@@ -623,33 +704,25 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/three-support/daily-scores.parquet
     - research/panel/three-support/distances
     - research/panel/three-support/observations
-    - research/panel/three-support/annual-scores.csv:
-        cache: false
+    - research/panel/three-support/annual-scores.csv
     - research/panel/three-support/attribution.csv
-    - research/panel/three-support/bootstrap.csv:
-        cache: false
+    - research/panel/three-support/bootstrap.csv
     - research/panel/three-support/geometry.csv
-    - research/panel/three-support/contexts:
-        cache: false
-    - research/panel/three-support/comparison.csv:
-        cache: false
-    - research/panel/three-support/configuration.json:
-        cache: false
-    - research/panel/three-support/contrasts.csv:
-        cache: false
-    - research/panel/three-support/mcs.csv:
-        cache: false
-    - research/panel/three-support/placebo.csv:
-        cache: false
-    - research/panel/three-support/decoding.csv:
-        cache: false
-    - research/panel/three-support/target-audit.csv:
-        cache: false
-
+    - research/panel/three-support/contexts
+    - research/panel/three-support/comparison.csv
+    - research/panel/three-support/configuration.json
+    - research/panel/three-support/contrasts.csv
+    - research/panel/three-support/mcs.csv
+    - research/panel/three-support/placebo.csv
+    - research/panel/three-support/decoding.csv
+    - research/panel/three-support/target-audit.csv
   panel_report_three_support:
     desc: >-
       Report and provenance for panel design three-support.
@@ -666,19 +739,25 @@ stages:
     - research/panel/three-support/contrasts.csv
     - research/panel/three-support/mcs.csv
     - research/panel/three-support/placebo.csv
-    - research/pilot/cache/checkpoint.json
     - research/panel/three-support/decoding.csv
     - research/panel/three-support/target-audit.csv
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/panel/three-support/observations
+    - research/panel/three-support/contexts
+    - research/panel/three-support/configuration.json
+    - research/model-checkpoints.json
+    - research/panel/cache/characteristics
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
     outs:
-    - research/panel/three-support/manifest.json:
-        cache: false
+    - research/panel/three-support/manifest.json
     - research/panel/three-support/RESULTS.md:
         cache: false
-    - research/panel/three-support/checkpoints.json:
-        cache: false
-    - research/panel/three-support/disclosure-audit.json:
-        cache: false
-
+    - research/panel/three-support/checkpoints.json
+    - research/panel/three-support/disclosure-audit.json
   panel_audit:
     desc: >-
       Query-cohort, support-draw, support-label and target sensitivity of model geometry.
@@ -689,16 +768,15 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
     outs:
     - research/panel/audit/four
     - research/panel/audit/three
-    - research/panel/audit/measurement-audit.csv:
-        cache: false
-    - research/panel/audit/contexts.csv:
-        cache: false
-    - research/panel/audit/summary.csv:
-        cache: false
-
+    - research/panel/audit/measurement-audit.csv
+    - research/panel/audit/contexts.csv
+    - research/panel/audit/summary.csv
   ladder_run:
     desc: >-
       R0 replication through Rscript plus the R1-R4 matched cross-sectional ladder.
@@ -710,6 +788,11 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/universe/cache
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
+    - devenv.nix
+    - devenv.lock
     outs:
     - research/ladder/cache
     - research/ladder/bootstrap-capm-bootstrap.parquet
@@ -718,35 +801,20 @@ stages:
     - research/ladder/three/distances
     - research/ladder/four/estimates.csv
     - research/ladder/three/estimates.csv
-    - research/ladder/manifest.json:
-        cache: false
-    - research/ladder/mm-betas.csv:
-        cache: false
-    - research/ladder/mm-runtime.json:
-        cache: false
-    - research/ladder/r0/bootstrap.csv:
-        cache: false
-    - research/ladder/r0/cohorts.json:
-        cache: false
-    - research/ladder/r0/estimates.csv:
-        cache: false
-    - research/ladder/four/bootstrap.csv:
-        cache: false
-    - research/ladder/four/geometry.csv:
-        cache: false
-    - research/ladder/four/placebo.csv:
-        cache: false
-    - research/ladder/four/contexts:
-        cache: false
-    - research/ladder/three/bootstrap.csv:
-        cache: false
-    - research/ladder/three/geometry.csv:
-        cache: false
-    - research/ladder/three/placebo.csv:
-        cache: false
-    - research/ladder/three/contexts:
-        cache: false
-
+    - research/ladder/manifest.json
+    - research/ladder/mm-betas.csv
+    - research/ladder/mm-runtime.json
+    - research/ladder/r0/bootstrap.csv
+    - research/ladder/r0/cohorts.json
+    - research/ladder/r0/estimates.csv
+    - research/ladder/four/bootstrap.csv
+    - research/ladder/four/geometry.csv
+    - research/ladder/four/placebo.csv
+    - research/ladder/four/contexts
+    - research/ladder/three/bootstrap.csv
+    - research/ladder/three/geometry.csv
+    - research/ladder/three/placebo.csv
+    - research/ladder/three/contexts
   ladder_report:
     desc: >-
       Every available ladder report.
@@ -764,6 +832,8 @@ stages:
     - research/ladder/three/bootstrap.csv
     - research/ladder/three/geometry.csv
     - research/ladder/three/placebo.csv
+    - src/python/uv.lock
+    - src/python/pyproject.toml
     outs:
     - research/ladder/r0/RESULTS.md:
         cache: false

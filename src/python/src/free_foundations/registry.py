@@ -22,6 +22,7 @@ class ModelSpec:
 
 
 _SPECS = (
+    ModelSpec("kumo", "nvidia/Kumo-Tabular", "kumo", "custom", "structured-data-models"),
     ModelSpec("exaone", "LG-AI-Research/EXAONE-Tabular", "exaone", "custom", "exaonetabular"),
     ModelSpec("tabpfn", "Prior-Labs/tabpfn_3_5", "tabpfn", "native", "tabpfn"),
     ModelSpec("limix", "stable-ai/LimiX-2", "limix", "custom", "LimiX"),

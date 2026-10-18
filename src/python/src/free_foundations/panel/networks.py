@@ -46,10 +46,11 @@ QUERY_ONLY = ("direct", "euclidean")
 # Readouts that see support labels, so the two shared targets can differ.
 LABELLED = frozenset(
     {name for name, arm in ARMS.items() if arm == "task"}
-    | {"tabfm__early_concat", "tabfm__early_mean"}
+    | {"tabfm__early_concat", "tabfm__early_mean", "kumo__early_concat"}
 )
 CODE = (
     "expanded/encoding.py",
+    "expanded/foundations.py",
     "expanded/baselines.py",
     "expanded/distance.py",
     "expanded/representations.py",
@@ -281,6 +282,8 @@ def distances(  # noqa: C901, PLR0912, PLR0913, PLR0915 -- design inputs, model 
                     "metric": "spearman_chord",
                 },
             )
+        if history != design.history and not design.encode_extra_histories:
+            continue
         views = rung_views(four, broad, year, design.characteristics, history)
         passes = [(rung, "market_cap_assets", rung, "") for rung in design.rungs]
         shared: dict[str, Prepared] = {}
@@ -365,6 +368,51 @@ def distances(  # noqa: C901, PLR0912, PLR0913, PLR0915 -- design inputs, model 
                             }
                             | fit,
                         )
+                    # Vary financial calibration independently of encoder support.
+                    if label == "histories" and representation in {
+                        "direct",
+                        "pca16",
+                        "supervised_mlp16",
+                        "tabpfn_full__late",
+                        "tabfm__late",
+                        "kumo__late",
+                        "limix__late",
+                    }:
+                        for size in design.calibration_sizes:
+                            decoded, fit = decode(
+                                values,
+                                targets.reference[FACTORS],
+                                tickers,
+                                training_size=size,
+                            )
+                            calibration_label = f"histories@calibration{size}"
+                            if quality is not None:
+                                quality.append(
+                                    {
+                                        "year": year,
+                                        "rung": calibration_label,
+                                        "support_rows": len(data.support),
+                                        "calibration_rows": size,
+                                        "representation": representation,
+                                        "rank": FACTORS,
+                                    }
+                                    | fit
+                                )
+                            keep(
+                                f"{calibration_label}@decoded__{representation}",
+                                pairwise_distance(decoded, metric="euclidean"),
+                                {
+                                    "history": history,
+                                    "rung": rung,
+                                    "representation": representation,
+                                    "arm": "calibrated",
+                                    "context_digest": data.digest,
+                                    "support_rows": len(data.support),
+                                    "calibration_rows": size,
+                                    "metric": "euclidean",
+                                }
+                                | fit,
+                            )
             encoded = representation_distances(
                 data, cache=MODEL_CACHE, source=MODEL_SOURCE, states=states, models=selected
             )

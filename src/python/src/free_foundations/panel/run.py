@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
+from free_foundations.expanded.setup import ensure_checkpoints
 from free_foundations.panel.characteristics import ROOT, SOURCE, build
 from free_foundations.panel.decoding import FACTORS, FOLDS, RANKS, reliability, targets
 from free_foundations.panel.design import DESIGNS
@@ -28,7 +29,7 @@ from free_foundations.panel.inference import (
     contrasts,
     paired,
 )
-from free_foundations.panel.networks import distances
+from free_foundations.panel.networks import MODEL_CACHE, distances
 from free_foundations.panel.observations import annual_data, price_audit
 from free_foundations.pilot.data import write_json
 
@@ -105,6 +106,7 @@ def run_design(
             "characteristics": design.characteristics,
             "history_years": design.history,
             "extra_history_years": design.extra_histories,
+            "encode_extra_histories": design.encode_extra_histories,
             "cohort_history_years": design.cohort_histories,
             "rungs": design.rungs,
             "alternate_target": ALTERNATE if design.alternate_target else None,
@@ -125,6 +127,7 @@ def run_design(
             if design.decoded
             else None,
             "support_sizes": design.support_sizes,
+            "calibration_sizes": design.calibration_sizes,
             "representations": design.representations,
             "models": design.models,
             "calibration": [CALIBRATION[0], CALIBRATION[-1]],
@@ -171,6 +174,12 @@ def prepare() -> None:
 
 def main(designs: list[str], models: list[str] | None) -> None:
     """Run the requested designs; foundation-model readouts are cached by context."""
+    if "three-foundations" in designs:
+        ensure_checkpoints(
+            MODEL_CACHE.parent,
+            ("tabpfn_full", "tabfm", "kumo", "limix"),
+            write_catalogue=False,
+        )
     four, broad = build()
     selected = None if models is None else tuple(models)
     for name in designs:

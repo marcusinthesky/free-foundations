@@ -18,13 +18,25 @@ import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "src/latex/build"
-PANEL = "research/panel/three-support"
+PANEL = "research/panel/three-foundations"
 MODELS = {
     "direct": "Direct",
     "pca16": "PCA",
-    "tabpfn_full__late": "Pretrained TabPFN",
-    "tabpfn_full_random__late": "Random-weight TabPFN",
+    "supervised_mlp16": "Supervised network",
+    "tabpfn_full__late": "TabPFN 3.5",
+    "tabfm__late": "TabFM 1.1",
+    "kumo__late": "Kumo Large",
+    "limix__late": "LimiX-2",
+}
+SUPPLEMENTARY = {
+    "tabpfn_full_random__late": "Random TabPFN (42)",
+    "tabpfn_full_random43__late": "Random TabPFN (43)",
+    "tabpfn_full_random44__late": "Random TabPFN (44)",
+    "kumo_random__late": "Random Kumo (42)",
+    "kumo_random43__late": "Random Kumo (43)",
+    "kumo_random44__late": "Random Kumo (44)",
     "tabfm__early_concat": "TabFM early",
+    "kumo__early_concat": "Kumo early",
 }
 VARIANCE_LABELS = {
     "spherical": "Common innovation variance",
@@ -86,6 +98,9 @@ def main():
     targets = read(f"{PANEL}/target-audit.csv")
     config = read(f"{PANEL}/configuration.json")
     read(f"{PANEL}/checkpoints.json")
+    read(f"{PANEL}/manifest.json")
+    protocol = f"{PANEL}/README.md"
+    SOURCES[protocol] = hashlib.sha256((ROOT / protocol).read_bytes()).hexdigest()
     estimates = read("research/ladder/four/estimates.csv")
     r0 = read("research/ladder/r0/estimates.csv")
     bootstrap = read("research/ladder/r0/bootstrap.csv")
@@ -95,6 +110,20 @@ def main():
     samples = [
         read(f"{PANEL}/observations/{year}-sample.json") for year in range(2016, 2026)
     ]
+    for year, sample in zip(range(2016, 2026), samples, strict=True):
+        previous = read(f"research/panel/three-support/observations/{year}-sample.json")
+        if sample != previous:
+            raise ValueError(
+                f"Cohort or timing changed relative to legacy experiment: {year}"
+            )
+        current_context = read(f"{PANEL}/contexts/{year}-histories.json")
+        previous_context = read(
+            f"research/panel/three-support/contexts/{year}-histories.json"
+        )
+        if current_context != previous_context:
+            raise ValueError(
+                f"Model information changed relative to legacy experiment: {year}"
+            )
     firms = [s["firms"] for s in samples[4:]]
     close(min(firms), 406, "minimum evaluation firms")
     close(max(firms), 459, "maximum evaluation firms")
@@ -156,21 +185,46 @@ def main():
             for y in range(start, 2026)
         )
 
-    expected = [
-        (2187.1, 295.9, 0.092),
-        (2208.5, -236.6, 0.059),
-        (716.7, 3331.0, 0.282),
-        (-32.1, 1859.7, 0.189),
-        (2293.6, 2877.2, 0.224),
-    ]
-    main_rows, decoder_rows = [], []
-    for (model, label), values in zip(MODELS.items(), expected, strict=True):
+    # Every shared legacy procedure must reproduce its recorded score.
+    legacy = read("research/panel/three-support/comparison.csv")
+    current = {(r["approach"], r["kernel"], r["innovation"]): r for r in comparison}
+    overlap = 0
+    for row in legacy:
+        key = tuple(row[k] for k in ("approach", "kernel", "innovation"))
+        if key in current:
+            for field in ("heldout_log_likelihood", "lambda"):
+                if not row[field] and not current[key][field]:
+                    continue
+                close(
+                    float(current[key][field]),
+                    float(row[field]),
+                    f"legacy {key} {field}",
+                    1e-5,
+                )
+            overlap += 1
+    if overlap < 200:
+        raise ValueError(f"Insufficient legacy overlap: {overlap}")
+    CLAIMS["legacy_reproduced_rows"] = overlap
+    legacy_quality = read("research/panel/three-support/decoding.csv")
+    quality_keys = ("year", "rung", "representation", "rank")
+    measured = {tuple(row[k] for k in quality_keys): row for row in decoding}
+    checked_quality = 0
+    for row in legacy_quality:
+        key = tuple(row[k] for k in quality_keys)
+        if key in measured:
+            close(
+                float(measured[key]["decoder_r2"]),
+                float(row["decoder_r2"]),
+                f"legacy decoder {key}",
+            )
+            checked_quality += 1
+    CLAIMS["legacy_reproduced_decoder_rows"] = checked_quality
+    main_rows, decoder_rows, supplementary_rows = [], [], []
+    for model, label in (MODELS | SUPPLEMENTARY).items():
         native, calibrated, r2 = gain(model), gain(model, decoded=True), quality(model)
-        for actual, wanted, tolerance in zip(
-            (native, calibrated, r2), values, (0.051, 0.051, 0.00051), strict=True
-        ):
-            close(actual, wanted, label, tolerance)
-        main_rows.append([label, f"{native:+,.1f}", f"{calibrated:+,.1f}", f"{r2:.3f}"])
+        (main_rows if model in MODELS else supplementary_rows).append(
+            [label, f"{native:+,.1f}", f"{calibrated:+,.1f}", f"{r2:.3f}"]
+        )
         decoder_rows.append([label, f"{r2:.3f}", f"{quality(model, start=2020):.3f}"])
         CLAIMS[model] = {
             "native_gain": native,
@@ -189,6 +243,70 @@ def main():
         "lrr",
         ["Representation", "2016--2025", "2020--2025"],
         decoder_rows,
+    )
+
+    tabular(
+        "supplementary-measurement.tex",
+        "lrrr",
+        ["Representation", "Native gain", "Calibrated gain", r"Decoder $R^2$"],
+        supplementary_rows,
+    )
+
+    # Preserve EXAONE evidence on its original four-characteristic cohort.
+    four = read("research/panel/four/comparison.csv")
+    four_annual = read("research/panel/four/annual-scores.csv")
+    four_quality = read("research/panel/four/decoding.csv")
+    four_rows = []
+    for model, label in {
+        "direct": "Direct",
+        "tabpfn_full__late": "TabPFN 3.5",
+        "tabfm__late": "TabFM 1.1",
+        "exaone__late": "EXAONE",
+    }.items():
+        values = []
+        for suffix in ("", "@decoded"):
+            approach = f"histories{suffix}__{model}"
+            row = select(
+                four, approach=approach, kernel="matched", innovation="diagonal"
+            )
+            total = sum(
+                float(
+                    select(four_annual, column=f"{approach}|matched|diagonal", year=y)[
+                        "score"
+                    ]
+                )
+                for y in range(2020, 2026)
+            )
+            close(total, float(row["heldout_log_likelihood"]), f"four {approach}")
+            reference = float(
+                select(
+                    four,
+                    approach="fernandez_joint",
+                    kernel="exp",
+                    innovation="diagonal",
+                )["heldout_log_likelihood"]
+            )
+            close(
+                total - reference,
+                float(row["gain_vs_joint_exp"]),
+                f"four gain {approach}",
+            )
+            close(float(row["firm_days"]), 87351, "four-characteristic firm-days")
+            values.append(f"{float(row['gain_vs_joint_exp']):+,.1f}")
+        r2 = mean(
+            float(
+                select(
+                    four_quality, rung="histories", representation=model, rank=5, year=y
+                )["decoder_r2"]
+            )
+            for y in range(2016, 2026)
+        )
+        four_rows.append([label, *values, f"{r2:.3f}"])
+    tabular(
+        "earlier-four.tex",
+        "lrrr",
+        ["Representation", "Native gain", "Calibrated gain", r"Decoder $R^2$"],
+        four_rows,
     )
 
     networks = {
@@ -295,53 +413,104 @@ def main():
     )
 
     contrast_rows = []
-    for arm, wanted in [("diagonal", 1471.3), ("correlation", -448.7)]:
-        left = f"histories@decoded__tabpfn_full__late|matched|{arm}"
-        right = f"histories@decoded__tabpfn_full_random__late|matched|{arm}"
-        r = select(contrasts, left=left, right=right)
-        diffs = []
-        for y in range(2020, 2026):
-            d = float(select(annual, column=left, year=y)["score"]) - float(
-                select(annual, column=right, year=y)["score"]
-            )
-            close(d, float(r[f"year_{y}"]), f"annual contrast {y}")
-            diffs.append(d)
-        close(sum(diffs), float(r["difference"]), "contrast sum")
-        close(sum(diffs), wanted, "headline contrast", 0.051)
-        if arm == "diagonal" and not all(d > 0 for d in diffs):
-            raise ValueError(
-                "Diagonal contrast is not positive in every evaluation year"
-            )
-        CLAIMS[f"contrast_{arm}"] = r
-        contrast_rows.append(
-            [
-                VARIANCE_LABELS[arm],
-                f"{sum(diffs):+,.1f}",
-                f"[{float(r['lower_21']):+,.1f}, {float(r['upper_21']):+,.1f}]",
-                f"[{float(r['lower_63']):+,.1f}, {float(r['upper_63']):+,.1f}]",
-            ]
-        )
-    close(
-        float(CLAIMS["contrast_diagonal"]["lower_21"]), 1127.3, "interval lower", 0.051
-    )
-    close(
-        float(CLAIMS["contrast_diagonal"]["upper_21"]), 1860.8, "interval upper", 0.051
-    )
+    for model, label in (("tabpfn_full", "TabPFN"), ("kumo", "Kumo")):
+        for seed in (42, 43, 44):
+            random = f"{model}_random{'' if seed == 42 else seed}"
+            for arm in ("diagonal", "correlation"):
+                left = f"histories@decoded__{model}__late|matched|{arm}"
+                right = f"histories@decoded__{random}__late|matched|{arm}"
+                r = select(contrasts, left=left, right=right)
+                diffs = []
+                for y in range(2020, 2026):
+                    d = float(select(annual, column=left, year=y)["score"]) - float(
+                        select(annual, column=right, year=y)["score"]
+                    )
+                    close(d, float(r[f"year_{y}"]), f"annual contrast {y}")
+                    diffs.append(d)
+                close(sum(diffs), float(r["difference"]), "contrast sum")
+                CLAIMS[f"contrast_{model}_{seed}_{arm}"] = r
+                if model == "tabpfn_full" and seed == 42:
+                    CLAIMS[f"contrast_{arm}"] = r
+                contrast_rows.append(
+                    [
+                        label,
+                        str(seed),
+                        "Innovation" if arm == "diagonal" else "Marginal",
+                        f"{sum(diffs):+,.1f}",
+                        f"[{float(r['lower_21']):+,.1f}, {float(r['upper_21']):+,.1f}]",
+                        f"[{float(r['lower_63']):+,.1f}, {float(r['upper_63']):+,.1f}]",
+                    ]
+                )
     tabular(
         "weight-contrasts.tex",
-        "lrrr",
-        ["Variance specification", "Difference", "21-day interval", "63-day interval"],
+        "lllrll",
+        [
+            "Model",
+            "Seed",
+            "Variances",
+            "Difference",
+            "21-day interval",
+            "63-day interval",
+        ],
         contrast_rows,
     )
+    for model in ("tabpfn_full", "kumo"):
+        differences = [
+            float(CLAIMS[f"contrast_{model}_{seed}_diagonal"]["difference"])
+            for seed in (42, 43, 44)
+        ]
+        CLAIMS[f"weights_{model}"] = {
+            "minimum": min(differences),
+            "maximum": max(differences),
+        }
     included = [
         r["column"]
         for r in mcs
         if r["family"] == "diagonal|matched" and r["included"] == "True"
     ]
-    if set(included) != {
-        f"{n}|matched|diagonal" for n in ("covariance_exposures", "reference_exposures")
-    }:
-        raise ValueError("Unexpected matched/diagonal model confidence set")
+    CLAIMS["matched_diagonal_confidence_set"] = included
+    names = {
+        "reference_exposures": "Reference exposures",
+        "covariance_exposures": "In-panel exposures",
+    }
+
+    def forecast_label(column):
+        if column.startswith("h3__"):
+            return "Three-year " + forecast_label(column.removeprefix("h3__"))
+        approach = column.split("|")[0]
+        if approach in names:
+            return names[approach]
+        if approach.startswith("histories"):
+            rung, model = approach.split("__", 1)
+            label = (MODELS | SUPPLEMENTARY)[model]
+            kind = "Calibrated" if "@decoded" in rung else "Native"
+            suffix = ""
+            if "@support" in rung:
+                suffix = " (support " + rung.split("@support")[1].split("@")[0] + ")"
+            if "@calibration" in rung:
+                suffix = (
+                    " (training firms "
+                    + rung.split("@calibration")[1].split("@")[0]
+                    + ")"
+                )
+            return f"{kind} {label}{suffix}"
+        if approach in networks:
+            return networks[approach]
+        controls = {
+            "uniform_network": "Uniform network",
+            "zero_network": "Zero network",
+            "raw_sample_covariance": "Sample covariance",
+            "ff5_mom_diagonal": "Diagonal factor model",
+            "ff5_mom_sample_residual_covariance": "Factor model with sample residual covariance",
+        }
+        return controls[approach]
+
+    tabular(
+        "confidence-set.tex",
+        "l",
+        ["Retained forecast"],
+        [[forecast_label(c)] for c in included],
+    )
 
     sizes = [32, 64, 128, 256]
     plt.rcParams.update(
@@ -353,43 +522,72 @@ def main():
             "font.size": 9,
         }
     )
-    fig, axes = plt.subplots(3, 1, figsize=(6.5, 5.2), layout="constrained")
-    colors = ["#555555", "#0072B2", "#009E73", "#D55E00", "#CC79A7"]
+    fig, axes = plt.subplots(
+        2, 2, figsize=(6.5, 4.8), sharey="row", layout="constrained"
+    )
+    plotted = {k: v for k, v in MODELS.items() if k != "supervised_mlp16"}
+    colors = ["#555555", "#0072B2", "#009E73", "#D55E00", "#CC79A7", "#AA7700"]
     for (model, label), color, marker in zip(
-        MODELS.items(), colors, ["o", "s", "^", "D", "v"], strict=True
+        plotted.items(), colors, ["o", "s", "^", "D", "v", "P"], strict=True
     ):
-        series = [
-            [gain(model, size) for size in sizes],
+        encoder = [
             [gain(model, size, True) for size in sizes],
             [quality(model, size) for size in sizes],
         ]
-        CLAIMS[f"support_{model}"] = dict(
-            zip(["native", "calibrated", "decoder"], series, strict=True)
-        )
-        for ax, values in zip(axes, series, strict=True):
-            ax.plot(
-                sizes,
-                values,
-                label=label,
-                color=color,
-                marker=marker,
-                linestyle="--" if model == "direct" else "-",
-                linewidth=1.4,
-                markersize=4,
+        calibration = [[], []]
+        for size in sizes:
+            rung = f"histories@calibration{size}"
+            calibration[0].append(
+                float(
+                    select(
+                        comparison,
+                        approach=f"{rung}@decoded__{model}",
+                        kernel="matched",
+                        innovation="diagonal",
+                    )["gain_vs_joint_exp"]
+                )
             )
-    for ax, title in zip(
-        axes, ["Native geometry", "Calibrated geometry", "Decoder fit"], strict=True
-    ):
-        ax.set_xscale("log", base=2)
-        ax.set_xticks(sizes, labels=[str(s) for s in sizes])
-        ax.set_xlabel("Support rows")
-        ax.set_title(title)
-        ax.spines[["top", "right"]].set_visible(False)
-        ax.grid(axis="y", alpha=0.2)
-    axes[0].set_ylabel("Log-score gain")
-    axes[1].set_ylabel("Log-score gain")
-    axes[2].set_ylabel("Mean decoder $R^2$")
-    handles, labels = axes[0].get_legend_handles_labels()
+            calibration[1].append(
+                mean(
+                    float(
+                        select(
+                            decoding, rung=rung, representation=model, rank=5, year=y
+                        )["decoder_r2"]
+                    )
+                    for y in range(2016, 2026)
+                )
+            )
+        CLAIMS[f"support_{model}"] = {"calibrated": encoder[0], "decoder": encoder[1]}
+        CLAIMS[f"calibration_{model}"] = {
+            "calibrated": calibration[0],
+            "decoder": calibration[1],
+        }
+        for column, series in enumerate((encoder, calibration)):
+            for row, values in enumerate(series):
+                axes[row, column].plot(
+                    sizes,
+                    values,
+                    label=label,
+                    color=color,
+                    marker=marker,
+                    linewidth=1.3,
+                    markersize=3.5,
+                )
+    for column, title in enumerate(("Encoder context", "Financial calibration")):
+        axes[0, column].set_title(title)
+        for row in range(2):
+            ax = axes[row, column]
+            ax.set_xscale("log", base=2)
+            ax.set_xticks(sizes, labels=[str(s) for s in sizes])
+            ax.spines[["top", "right"]].set_visible(False)
+            ax.grid(axis="y", alpha=0.2)
+            ax.axhline(0, color="0.65", linewidth=0.6, linestyle="--", zorder=0)
+        axes[1, column].set_xlabel(
+            "Support examples" if column == 0 else "Training firms per fold"
+        )
+    axes[0, 0].set_ylabel("Calibrated log-score gain")
+    axes[1, 0].set_ylabel("Mean decoder $R^2$")
+    handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="outside lower center", ncol=3, frameon=False)
     fig.savefig(OUT / "support.pgf")
     plt.close(fig)
@@ -431,6 +629,7 @@ def main():
     grid_rows = []
     short_names = {
         **MODELS,
+        **SUPPLEMENTARY,
         "supervised_mlp16": "Supervised network",
         "tabfm__early_concat_labelnull": "TabFM constant",
         "tabpfn_full__late": "TabPFN",
@@ -447,6 +646,8 @@ def main():
             support = (
                 rung.split("@support")[1].split("@")[0] if "@support" in rung else "256"
             )
+            if "@calibration" in rung:
+                support += "/fit" + rung.split("@calibration")[1].split("@")[0]
             distance = "calibrated" if "@decoded" in rung else "native"
             label = f"{history} / {support} / {distance} / {short_names[model]}"
         else:
@@ -476,7 +677,7 @@ def main():
         "All kernels are exponential; Unit, Median, and Matched denote unit, median-distance, and matched-neighbor bandwidths. "
         "S: spherical; D: diagonal; C: fixed marginal variances. "
         "Model rows identify history length in years, support examples, distance, and representation. "
-        "TabFM constant replaces supplied outcomes with a constant. A dash denotes an unreported cell.",
+        "Fit indicates training firms per financial calibration fold at 256 encoder examples. A dash denotes an unreported cell.",
         label="tab:full-grid",
     )
     rows = []
@@ -545,8 +746,17 @@ def main():
         env.get_template("numbers.tex.j2").render(**values)
     )
     audit = {
-        "reviewed_commit": "162a7fd6f32fa1a02f8caa6262968687a285b417",
+        "design": "three-foundations",
+        "legacy_reviewed_commit": "162a7fd6f32fa1a02f8caa6262968687a285b417",
         "source_sha256": SOURCES,
+        "rendering_source_sha256": {
+            str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in (
+                Path(__file__),
+                Path(__file__).with_name("numbers.tex.j2"),
+                Path(__file__).with_name("main.tex"),
+            )
+        },
         "selectors": {
             "main_table": "histories, support=256, rank=5, matched/diagonal; reference=joint/exp/diagonal",
             "decoder": "unweighted annual mean, 2016-2025; supplement also 2020-2025",

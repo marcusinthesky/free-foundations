@@ -9,7 +9,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
-import yfinance as yf
 
 from free_foundations.expanded.disclosures import broad_facts
 from free_foundations.fernandez.characteristics import CHARACTERISTICS, snapshot
@@ -27,21 +26,8 @@ def markets() -> pd.DataFrame:
     raw = pd.concat([pd.read_parquet(path) for path in cached], axis=1)
     tail = ROOT / "cache/market-tail.parquet"
     if not tail.exists():
-        parts = []
-        tickers = list(raw["Close"].columns)
-        for start in range(0, len(tickers), 50):
-            part = yf.download(
-                tickers[start : start + 50],
-                start="2026-01-01",
-                end="2026-10-18",
-                auto_adjust=False,
-                actions=True,
-                progress=False,
-                threads=3,
-                timeout=30,
-            )
-            parts.append(part)
-        pd.concat(parts, axis=1).to_parquet(tail)
+        message = f"Missing frozen Yahoo snapshot: {tail}. Restore market_metadata with DVC."
+        raise FileNotFoundError(message)
     return pd.concat([raw, pd.read_parquet(tail)]).sort_index()
 
 
@@ -60,8 +46,8 @@ def build() -> tuple[pd.DataFrame, pd.DataFrame]:
         path = pieces / f"{ticker}.parquet"
         if path.exists():
             continue
-        facts = broad_facts(company_facts(SOURCE, issuer["cik"]))
-        payload = company_facts(SOURCE, issuer["cik"])
+        facts = broad_facts(company_facts(SOURCE, issuer["cik"], cached_only=True))
+        payload = company_facts(SOURCE, issuer["cik"], cached_only=True)
         shares = payload["facts"].get("dei", {}).get("EntityCommonStockSharesOutstanding", {})
         shares = pd.DataFrame(shares.get("units", {}).get("shares", []))
         if not shares.empty:

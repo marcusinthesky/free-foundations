@@ -137,7 +137,7 @@ def test_native_ensemble_conversion_never_interleaves_rows(values: FloatArray) -
 
 
 def test_registry_is_complete_and_unsupported_extraction_is_explicit() -> None:
-    assert set(MODELS) == {"exaone", "tabpfn", "limix", "causilo", "tabfm", "sap"}
+    assert set(MODELS) == {"exaone", "tabpfn", "limix", "causilo", "tabfm", "sap", "kumo"}
     assert model_spec("tabfm").url.endswith("google/tabfm-1.1.0-pytorch")
     with pytest.raises(ValueError, match="Unknown model"):
         model_spec("typo")

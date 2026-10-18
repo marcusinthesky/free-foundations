@@ -149,6 +149,12 @@ filing-date discipline does not resolve that issue. Context, metric and
 pooling sensitivity must be reported; selecting the best configuration after
 seeing these results would require a new evaluation period.
 
-Nori and Xiaomi TabLDM retain their installation blockers; SAP's weights are
-gated. LimiX and Causilo remain dependency/catalogue entries awaiting separately
-reviewed readouts. No untested model is represented by a fabricated embedding.
+The subsequent representative-model experiment is documented in
+[the four-model protocol](../panel/three-foundations/README.md). It adds pinned
+Kumo-Tabular Large and LimiX-2 prediction-head readouts to TabPFN and TabFM.
+The [model landscape](../panel/three-foundations/model-landscape.md) records all
+ten candidates and distinguishes empirical inclusion from catalogue coverage.
+Nori now has a dedicated public runtime, and Xiaomi TabLDM provides inference
+code; the earlier installation notes are historical, not current availability
+claims. SAP checkpoint access remains gated. Existing EXAONE results retain
+their original cohorts and specifications.

@@ -218,6 +218,28 @@ $\Omega$. In whitened coordinates $a_i=\Omega^{1/2}b_i$.
   Chain the three inequalities.
 \end{proof}
 
+For financial calibration, the population risk decomposes into information
+error and readout approximation error. The preceding lemma then controls
+estimation without requiring a particular pretrained architecture.
+\begin{theorem}[Calibrated measurement risk]\label{thm:score-calibrated}
+  \lean{FreeFoundations.Score.calibrated_measurement_bound}\leanok
+  Let the nonempty class $\mathcal G$ have risks $R(g)=I+A(g)$ and suppose
+  $|\widehat R(g)-R(g)|\le\Delta$ uniformly. If the fitted readout
+  $\widehat g$ minimizes empirical risk within $\varepsilon$, then
+  \[
+    R(\widehat g)\le I+\inf_{g\in\mathcal G}A(g)+2\Delta+\varepsilon.
+  \]
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:score-erm}
+  Apply Lemma~\ref{thm:score-erm} to each comparator and substitute the risk
+  decomposition. The resulting lower bound on every $A(g)$ supplies the lower
+  bound on its infimum, yielding the displayed inequality.
+\end{proof}
+For squared economic-target error, conditional expectation supplies the
+information term and orthogonality supplies the decomposition. A probability
+bound for $\Delta$ additionally requires assumptions on the financial sample.
+
 % ---------------------------------------------------------------------------
 \section{Alignment and sufficiency}\label{sec:bp-alignment}
 

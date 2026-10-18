@@ -167,7 +167,11 @@ def folds(tickers: tuple[str, ...], count: int = FOLDS) -> FloatArray:
 
 
 def decode(
-    states: FloatArray, exposures: FloatArray, tickers: tuple[str, ...]
+    states: FloatArray,
+    exposures: FloatArray,
+    tickers: tuple[str, ...],
+    *,
+    training_size: int | None = None,
 ) -> tuple[FloatArray, dict[str, float]]:
     """Out-of-fold ridge predictions of exposures, with fit and distance agreement.
 
@@ -180,12 +184,25 @@ def decode(
     labels = folds(tickers)
     for fold in np.unique(labels):
         test = labels == fold
-        scaler = StandardScaler().fit(states[~test])
-        train = scaler.transform(states[~test])
+        available = np.flatnonzero(~test)
+        if training_size is not None:
+            if training_size < 2 or training_size > len(available):
+                message = "Calibration size must be between two and the available training firms."
+                raise ValueError(message)
+            available = np.asarray(
+                sorted(
+                    available,
+                    key=lambda i: hashlib.sha256(
+                        ("calibration-size:" + tickers[i]).encode()
+                    ).hexdigest(),
+                )[:training_size]
+            )
+        scaler = StandardScaler().fit(states[available])
+        train = scaler.transform(states[available])
         held = np.clip(scaler.transform(states[test]), train.min(axis=0), train.max(axis=0))
-        model = RidgeCV(alphas=ALPHAS).fit(train, exposures[~test])
+        model = RidgeCV(alphas=ALPHAS).fit(train, exposures[available])
         predictions[test] = np.clip(
-            model.predict(held), exposures[~test].min(axis=0), exposures[~test].max(axis=0)
+            model.predict(held), exposures[available].min(axis=0), exposures[available].max(axis=0)
         )
     total = float(np.sum((exposures - exposures.mean(axis=0)) ** 2))
     return predictions, {

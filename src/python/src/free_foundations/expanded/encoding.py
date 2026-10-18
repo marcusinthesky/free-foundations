@@ -22,6 +22,7 @@ from free_foundations import (
     Tokens,
     from_fitted,
 )
+from free_foundations.expanded.setup import fast_checkpoint, local_checkpoint
 from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
@@ -166,7 +167,7 @@ def wrap_readout(
     return result.values  # noqa: PD011 -- our Embeddings contract.
 
 
-def randomize(network: Any) -> None:  # noqa: ANN401 -- upstream architecture module.
+def randomize(network: Any, seed: int = 42) -> None:  # noqa: ANN401 -- upstream module.
     """Replace pretrained weights in place, keeping the architecture.
 
     Every module with ``reset_parameters`` takes its default initializer (99.98% of
@@ -176,7 +177,7 @@ def randomize(network: Any) -> None:  # noqa: ANN401 -- upstream architecture mo
     """
     import torch  # noqa: PLC0415
 
-    torch.manual_seed(42)
+    torch.manual_seed(seed)
     reset: set[str] = set()
     for name, module in network.named_modules():
         if callable(getattr(module, "reset_parameters", None)):
@@ -192,8 +193,14 @@ def randomize(network: Any) -> None:  # noqa: ANN401 -- upstream architecture mo
                 parameter.copy_(mean + scale * torch.randn_like(parameter))
 
 
-def tabpfn_states(
-    data: Prepared, path: str, checkpoint: str, *, fast: bool, random: bool = False
+def tabpfn_states(  # noqa: PLR0913 -- fixed model identity and initialization control.
+    data: Prepared,
+    path: str,
+    checkpoint: str,
+    *,
+    fast: bool,
+    random: bool = False,
+    seed: int = 42,
 ) -> dict[str, FloatArray]:
     """Use the supported native query-embedding API, one ensemble member.
 
@@ -211,7 +218,7 @@ def tabpfn_states(
     )
     model.fit(data.support, data.targets)
     if random:
-        randomize(model.models_[0])
+        randomize(model.models_[0], seed)
     encoder = from_fitted(
         "tabpfn",
         model,
@@ -393,13 +400,15 @@ def foundation_states(
     import torch  # noqa: PLC0415
 
     torch.set_num_threads(2)
+    base, random_marker, seed_text = model.partition("_random")
+    seed = int(seed_text) if seed_text else 42
     if model == "tabpfn_fast":
         metadata = json.loads((source / "checkpoint.json").read_text())
-        path = metadata["path"]
+        path = str(fast_checkpoint(source))
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['filename']}"
     else:
-        root = cache / "models" / model.removesuffix("_labelnull").removesuffix("_random")
-        metadata = json.loads((root / "provenance.json").read_text())
+        root = cache / "models" / base.removesuffix("_labelnull")
+        metadata = local_checkpoint(cache, base.removesuffix("_labelnull"))
         path = str(root / ("regression" if model.startswith("tabfm") else metadata["files"][0]))
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files']}"
     destination = embedding_path(data, model, checkpoint, cache)
@@ -410,8 +419,17 @@ def foundation_states(
             }
     if model.startswith("tabpfn"):
         result = tabpfn_states(
-            data, path, checkpoint, fast=model == "tabpfn_fast", random=model.endswith("_random")
+            data,
+            path,
+            checkpoint,
+            fast=model == "tabpfn_fast",
+            random=bool(random_marker),
+            seed=seed,
         )
+    elif base in {"kumo", "limix"}:
+        from free_foundations.expanded.foundations import states  # noqa: PLC0415
+
+        result = states(data, path, checkpoint, base, seed=seed if random_marker else None)
     elif model in {"tabfm", "tabfm_labelnull"}:
         result = tabfm_states(data, path, checkpoint, null_labels=model == "tabfm_labelnull")
     elif model == "exaone":
@@ -444,7 +462,7 @@ def foundation_states(
             "features": data.features,
             "tickers": data.tickers,
             "readout_shapes": {name: list(values.shape) for name, values in result.items()},
-            "seed": 42,
+            "seed": seed,
             "preprocessing": "support median, indicators, standardize, clip [-8,8]",
         },
     )

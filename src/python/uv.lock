@@ -439,8 +439,12 @@ causilo = [
 exaone = [
   { name = "exaonetabular" },
 ]
+kumo = [
+  { name = "structured-data-models" },
+]
 limix = [
   { name = "limix" },
+  { name = "triton", marker = "sys_platform == 'linux'" },
 ]
 sap = [
   { name = "sap-rpt-oss" },
@@ -468,6 +472,7 @@ data = [
   { name = "pandas-datareader" },
   { name = "pyarrow" },
   { name = "spreg" },
+  { name = "tabulate" },
   { name = "yfinance" },
 ]
 dev = [
@@ -493,14 +498,16 @@ requires-dist = [
   { name = "sap-rpt-oss", marker = "extra == 'sap'", git = "https://github.com/SAP-samples/sap-rpt-1-oss.git?rev=a0067b3c9db56bc35a6dcab09a9223a3ff0821e0" },
   { name = "scikit-learn", specifier = ">=1.7.2,<2" },
   { name = "scipy", specifier = ">=1.15,<2" },
+  { name = "structured-data-models", marker = "extra == 'kumo'", git = "https://github.com/NVIDIA/structured-data-models.git?rev=4d7397f6d7b23b1ca75a90ba965fa113671c458d" },
   { name = "tabfm", extras = ["pytorch"], marker = "extra == 'tabfm'", git = "https://github.com/google-research/tabfm.git?rev=fbb665569425fd2f490c6576b3af967876fe11ff" },
   { name = "tabpfn", marker = "extra == 'tabpfn'", specifier = "==9.2.0" },
   { name = "torch", marker = "sys_platform == 'linux' and extra == 'tabpfn'", specifier = ">=2.9,<3", index = "https://download.pytorch.org/whl/cpu" },
   { name = "torch", marker = "sys_platform != 'linux' and extra == 'tabpfn'", specifier = ">=2.9,<3" },
   { name = "transformers", marker = "extra == 'sap'", specifier = "<5" },
+  { name = "triton", marker = "sys_platform == 'linux' and extra == 'limix'", specifier = ">=3.5,<4" },
   { name = "typer", specifier = ">=0.16,<1" },
 ]
-provides-extras = ["exaone", "tabpfn", "limix", "causilo", "tabfm", "sap"]
+provides-extras = ["exaone", "tabpfn", "limix", "causilo", "tabfm", "kumo", "sap"]
 
 [package.metadata.requires-dev]
 data = [
@@ -515,6 +522,7 @@ data = [
   { name = "pandas-datareader", specifier = ">=0.11.1,<0.12" },
   { name = "pyarrow", specifier = ">=20" },
   { name = "spreg", specifier = ">=1.9.1,<2" },
+  { name = "tabulate", specifier = ">=0.10,<1" },
   { name = "yfinance", specifier = ">=1.7,<2" },
 ]
 dev = [
@@ -2136,6 +2144,20 @@ wheels = [
 ]
 
 [[package]]
+name = "structured-data-models"
+version = "0.2.0rc2.dev77+g4d7397f6d"
+source = { git = "https://github.com/NVIDIA/structured-data-models.git?rev=4d7397f6d7b23b1ca75a90ba965fa113671c458d#4d7397f6d7b23b1ca75a90ba965fa113671c458d" }
+dependencies = [
+  { name = "huggingface-hub" },
+  { name = "numpy" },
+  { name = "pyarrow" },
+  { name = "safetensors" },
+  { name = "torch", version = "2.14.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'linux'" },
+  { name = "torch", version = "2.14.1+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'linux'" },
+  { name = "typing-extensions" },
+]
+
+[[package]]
 name = "sympy"
 version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2397,6 +2419,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c4/35/67252acc1b929dc88b6602e8c4a982e64f31e733b804c14bc24b47da35e6/transformers-4.57.6.tar.gz", hash = "sha256:55e44126ece9dc0a291521b7e5492b572e6ef2766338a610b9ab5afbb70689d3", size = 10134912, upload-time = "2026-01-16T10:38:39.284Z" }
 wheels = [
   { url = "https://files.pythonhosted.org/packages/03/b8/e484ef633af3887baeeb4b6ad12743363af7cce68ae51e938e00aaa0529d/transformers-4.57.6-py3-none-any.whl", hash = "sha256:4c9e9de11333ddfe5114bc872c9f370509198acf0b87a832a0ab9458e2bd0550", size = 11993498, upload-time = "2026-01-16T10:38:31.289Z" },
+]
+
+[[package]]
+name = "triton"
+version = "3.8.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+  { url = "https://files.pythonhosted.org/packages/87/4d/4c564374bcdadb166fccbf3e45aee0d4a473f88d341761bd2fefe3b8e8c1/triton-3.8.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b7004666652f500ed854a86988e4b3d69d247188b5d2092b5df1e44f4a954099", size = 226476793, upload-time = "2026-08-28T16:08:30.956Z" },
+  { url = "https://files.pythonhosted.org/packages/b0/b6/3394d5548404c1cabd1dadadd28d0b3f9478db1dff8180da53bb3f0a1e19/triton-3.8.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1f0497218e26b7d79773ad9c2a3fa3b539ee69f587a13fac2e552b1d322a8015", size = 247975122, upload-time = "2026-08-28T15:56:04.112Z" },
 ]
 
 [[package]]

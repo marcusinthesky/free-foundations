@@ -29,8 +29,8 @@ src/latex/build/
 research/**/cache/*
 !research/**/cache/*.dvc
 !research/**/cache/.gitignore
-# Labeled matrices, observations and embeddings are DVC outputs; small CSV, JSON and
-# Markdown summaries remain in Git.
+# Generated numerical results, contexts and detailed manifests are DVC outputs.
+# Protocols and inexpensive human-readable reports remain in Git.
 research/**/*.parquet
 research/**/*.npz
 research/**/embeddings/

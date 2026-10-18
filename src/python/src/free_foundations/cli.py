@@ -14,6 +14,7 @@ import typer
 
 from free_foundations.expanded import report as expanded_report
 from free_foundations.expanded import run as expanded_run
+from free_foundations.expanded.setup import checkpoint_catalogue
 from free_foundations.fernandez import combined as fernandez_combined
 from free_foundations.fernandez import report as fernandez_report
 from free_foundations.fernandez import run as fernandez_run
@@ -104,6 +105,12 @@ def pilot_stage(
 ) -> None:
     """Cache inputs, run the experiment and write compact reviewable artifacts."""
     pilot_run.main(stage, output, pretrained=pretrained)
+
+
+@expanded.command("checkpoints")
+def expanded_checkpoints() -> None:
+    """Restore pinned model weights and record their content hashes."""
+    checkpoint_catalogue()
 
 
 @expanded.command("run")

@@ -61,16 +61,18 @@ artifacts.
 periods, headline values, and support-series values. The renderer checks:
 
 - Unique selected rows, complete annual records, and common firm-day counts.
-- All 615 saved score totals against the saved annual scores, and reported
+- All saved score totals against the saved annual scores, and reported
   gains against the appropriate joint reference.
-- Rounded headline values, decoder periods, paired contrasts, annual signs,
-  confidence intervals, replication AIC arithmetic, and the principal model
-  confidence set.
+- Decoder periods, paired contrasts, confidence intervals, replication AIC
+  arithmetic, and the actual principal model confidence set.
+- Every unchanged overlapping forecast against the earlier three-support
+  experiment, with an absolute score tolerance of 0.00001.
 
 Missing inputs, ambiguous selections, or inconsistent claims fail the build.
 This checks agreement among recorded artifacts, not independent correctness of
-the empirical pipeline or original data. The audit anchors the reviewed results
-at `162a7fd6f32fa1a02f8caa6262968687a285b417` and hashes the actual inputs used.
+the empirical pipeline or original data. The audit identifies the four-model protocol and hashes its run manifest and
+actual inputs. It retains `162a7fd6f32fa1a02f8caa6262968687a285b417` as the
+reviewed legacy reference, distinct from the new experiment.
 
 ## Counts and formal checks
 
@@ -107,7 +109,7 @@ than the typeset manuscript. Stage-one robust MM estimation uses
 `research/ladder/r0/estimates.csv`. Additional ladder comparisons are described
 in `research/ladder/four/RESULTS.md` and `research/ladder/three/RESULTS.md`.
 
-For the principal panel, `research/panel/three-support/checkpoints.json` records
+For the principal panel, `research/panel/three-foundations/checkpoints.json` records
 model versions and weight hashes; `target-audit.csv` and `decoding.csv` in the
 same directory report target diagnostics and decoder results. Context records
 identify support observations, query firms, features, labels, and cutoffs.
@@ -117,7 +119,9 @@ Companion designs under `research/panel/` are `four` (three-year histories),
 (broader inputs and measurement variants).
 
 Nested encoder supports use hash-ordered prefixes of a common support table,
-with preprocessing held fixed across sizes. The decoder's five folds are
+with shared feature preprocessing held fixed across sizes. Outcome normalization
+and model-internal preprocessing follow each prediction interface at its supplied
+context size. The decoder's five folds are
 assigned from ticker hashes. The replication records repeated MM fitting
 attempts when convergence fails; the checkpoint record retains model versions
 and weight fingerprints. These implementation details accompany the statistical
@@ -125,4 +129,18 @@ descriptions in the supplement.
 
 The publication renderer checks the saved results without rerunning estimation.
 For empirical reproduction, use `just python-ladder` and
-`just python-panel three-support`; `dvc.yaml` and `dvc.lock` specify the workflow.
+`just python-panel three-foundations`; `dvc.yaml` and `dvc.lock` specify the workflow.
+
+## Representative model comparison
+
+The main table uses prediction-head features from TabPFN 3.5, Google TabFM 1.1,
+Kumo-Tabular Large and LimiX-2 alongside direct, PCA and supervised controls.
+Earlier TabFM/Kumo features and three random initializations of TabPFN/Kumo
+appear in supplementary tables. The PGF figure separates encoder support size
+from financial calibration sample size; neither axis substitutes for the other.
+The declared model landscape and execution protocol are in
+`research/panel/three-foundations/`.
+
+Raw SEC, Yahoo and corporate-action inputs are frozen DVC sources. Numerical
+stages fail with a restoration instruction if a required snapshot is missing;
+they do not fetch replacements. See the root README for restoration commands.

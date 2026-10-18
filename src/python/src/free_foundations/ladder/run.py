@@ -238,7 +238,13 @@ def main(stages: list[str], arms_run: list[str], models_run: list[str] | None) -
     paths = [
         *sorted(Path(__file__).parent.parent.rglob("*.py")),
         *sorted(Path(__file__).parent.parent.rglob("*.R")),
-        *sorted(path for path in ROOT.rglob("*") if path.is_file() and "cache" not in path.parts),
+        *sorted(
+            path
+            for path in ROOT.rglob("*")
+            if path.is_file()
+            and "cache" not in path.parts
+            and path.suffix in {".csv", ".json", ".parquet"}
+        ),
     ]
     write_json(
         ROOT / "manifest.json",

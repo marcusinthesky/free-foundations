@@ -43,12 +43,13 @@ are in `uv.lock`. Checkpoint identity is a separate, required encoding argument.
 
 | Key / extra | Checkpoint | Readout available here |
 | --- | --- | --- |
+| `kumo` | [Kumo-Tabular Large](https://huggingface.co/nvidia/Kumo-Tabular) | Reviewed regression-head and earlier row features |
 | `exaone` | [EXAONE-Tabular](https://huggingface.co/LG-AI-Research/EXAONE-Tabular) | Explicit custom extractor |
 | `tabpfn` | [TabPFN 3.5](https://huggingface.co/Prior-Labs/tabpfn_3_5) | Native `get_embeddings` adapter |
-| `limix` | [LimiX-2](https://huggingface.co/stable-ai/LimiX-2) | Explicit custom extractor |
-| `causilo` | [Causilo](https://huggingface.co/nums-ai/causilo) | Explicit custom extractor |
+| `limix` | [LimiX-2](https://huggingface.co/stable-ai/LimiX-2) | Reviewed regression-head features |
+| `causilo` | [Causilo](https://huggingface.co/nums-ai/causilo) | Requires a supplied extractor |
 | `tabfm` | [Google TabFM](https://huggingface.co/google/tabfm-1.1.0-pytorch) | Explicit custom extractor |
-| `sap` | [SAP RPT](https://huggingface.co/SAP/sap-rpt-1-oss) | Explicit custom extractor; gated weights |
+| `sap` | [SAP RPT](https://huggingface.co/SAP/sap-rpt-1-oss) | Requires a supplied extractor; gated weights |
 
 The custom entries do not expose automatic native embedding integrations.
 The [expanded experiment](../../research/expanded/README.md) includes reviewed
@@ -66,16 +67,24 @@ Moran, conditional information criteria) and `fernandez.kernels`. Paired bootstr
 model confidence sets use `arch`. Stage-one MM betas call `fernandez/betas.R` through
 the `Rscript` and `robustbase` supplied by `devenv`.
 
-### Deferred models
+### Representative comparison and remaining landscape
 
-- **Nori:** its current `synthefy` dependency requires HTTPX below 0.28, conflicting
-  with EdgarTools' HTTPX 0.28.1 requirement. Its Hub 1.x requirement also conflicts
-  with SAP's Transformers 4.x stack. It is excluded from extras and the registry.
-- **Xiaomi-TabLDM:** the linked repository contains checkpoints but no installable
-  runtime source. Its prerequisites-only extra and registry entry are removed.
+The [four-model protocol](../../research/panel/three-foundations/README.md)
+uses TabPFN, TabFM, Kumo Large and LimiX-2 with the same numerical inputs and
+prediction-head extraction. The latter two adapters use pinned upstream
+architectures on CPU; integration tests check prediction-head fidelity, frozen
+parameters, and query-batch consistency. LimiX uses its Torch normalization
+implementation, with the upstream CPU metadata alias supplied by the adapter.
+Its runtime imports Triton even for this CPU path, so the Linux extra declares it.
 
-Revisit these models when upstream releases remove the blockers. Their omission
-is an installation decision, not evidence about predictive or economic quality.
+The [ten-model landscape](../../research/panel/three-foundations/model-landscape.md)
+also covers EXAONE, Nori, Causilo, Xiaomi TabLDM, SAP RPT-1, and Stanford RT-J.
+Nori now provides the dedicated `synthefy-nori` runtime, and Xiaomi TabLDM now
+publishes inference code; the older installation-blocker descriptions no longer
+represent current availability. These two runtimes remain outside the declared
+experiment and are not installed by its extras. SAP's semantic inputs and
+RT-J's relational database interface also differ from the matched numerical
+table used here. Existing EXAONE evidence remains on its original cohorts.
 
 ## Encode against a fixed context
 

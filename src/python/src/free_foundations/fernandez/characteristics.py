@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -18,30 +17,12 @@ CHARACTERISTICS = ("market_cap_assets", "market_to_book", "dividend_yield", "deb
 
 
 def market_history(ticker: str, cache: Path) -> pd.DataFrame:
-    """Cache split-adjusted closes/actions, including subsequent splits for reversal."""
+    """Read the frozen split-adjusted market history and corporate actions."""
     path = cache / f"{ticker}.parquet"
-    if path.exists():
-        return pd.read_parquet(path)
-    data = yf.Ticker(ticker).history(
-        start="2011-01-01",
-        end="2026-10-16",
-        auto_adjust=False,
-        actions=True,
-        raise_errors=True,
-        timeout=30,
-    )
-    if data.empty:
-        message = f"No market history for {ticker}."
-        raise ValueError(message)
-    data.index = data.index.tz_localize(None).normalize()
-    data = data[["Close", "Dividends", "Stock Splits"]]
-    splits = data["Stock Splits"].replace(0, 1)
-    data["historical_close"] = data["Close"] * splits.iloc[::-1].cumprod().iloc[::-1] / splits
-    # Yahoo dividends and Close share the current split basis; their ratio cancels it.
-    data["trailing_dividends"] = data["Dividends"].rolling("365D").sum()
-    cache.mkdir(parents=True, exist_ok=True)
-    data.to_parquet(path)
-    return data
+    if not path.exists():
+        message = f"Missing frozen Yahoo snapshot: {path}. Restore market_metadata with DVC."
+        raise FileNotFoundError(message)
+    return pd.read_parquet(path)
 
 
 def at_period(facts: pd.DataFrame, tags: tuple[str, ...], period: pd.Timestamp) -> float:

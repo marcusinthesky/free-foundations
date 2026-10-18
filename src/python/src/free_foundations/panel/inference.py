@@ -86,7 +86,15 @@ INPUT_CONTRASTS = ("direct", "tabfm__early_concat")
 # Measurement contrasts on the history rung, for one readout per model family and the
 # supervised control: support redraw, two shared targets against one, decoded exposures
 # against native distance, and decoded states against decoded inputs.
-MEASURED = ("tabfm__early_concat", "tabpfn_full__late", "exaone__late", "supervised_mlp16")
+MEASURED = (
+    "tabfm__early_concat",
+    "tabfm__late",
+    "tabpfn_full__late",
+    "exaone__late",
+    "kumo__late",
+    "limix__late",
+    "supervised_mlp16",
+)
 MEASUREMENT_CONTRASTS = (
     ("support redraw", "histories@redraw1__{}", "histories__{}"),
     ("support redraw", "histories@redraw2__{}", "histories__{}"),
@@ -97,6 +105,17 @@ MEASUREMENT_CONTRASTS = (
 # Support-size contrasts: each pretrained readout against controls without pretraining,
 # labels or trained weights, at every nested support size, native and decoded.
 SUPPORT_CONTRASTS = (
+    *(
+        (name, control)
+        for name in ("kumo__late", "limix__late", "tabfm__late")
+        for control in ("direct", "pca16", "supervised_mlp16")
+    ),
+    *(
+        (f"{model}__late", f"{model}_random{suffix}__late")
+        for model in ("kumo", "tabpfn_full")
+        for suffix in ("", "43", "44")
+        if (model, suffix) != ("tabpfn_full", "")
+    ),
     ("tabfm__early_concat", "direct"),
     ("tabfm__early_concat", "pca16"),
     ("tabfm__early_concat", "supervised_mlp16"),

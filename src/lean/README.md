@@ -67,6 +67,13 @@ Left on paper:
 | `Recovery.pairwise_distance_error` | `Σᵢ≠ⱼ (d̂ᵢⱼ − dᵢⱼ)² ≤ 4(N − 1) Σᵢ ‖âᵢ − aᵢ‖²`, with no independence across pairs. |
 | `Recovery.readout_invariant` | Distances between read-out exposures are invariant under any reparametrisation of the states, with the matching readout. |
 
+The calibrated measurement bound (`Score.calibrated_measurement_bound`) combines
+this projection identity with empirical risk minimization. For a fixed encoder
+and context, financial prediction risk is bounded by information error,
+readout approximation error, twice a uniform sample-to-population discrepancy,
+and fitting slack. The theorem proves the deterministic implication; a
+probabilistic rate requires a sampling model and a bound on the discrepancy.
+
 ## 3. Information is not geometry (`Geometry`)
 
 | Theorem | Statement |

@@ -165,10 +165,6 @@ def run(output: Path, source: Path, years: list[int]) -> None:
         pd.DataFrame(inventory).to_csv(output / "distance-inventory.csv", index=False)
         pd.DataFrame(summaries).to_csv(output / "annual.csv", index=False)
         LOGGER.info("Completed expanded %s: %s networks", year, len(networks))
-    results = pd.DataFrame(summaries)
-    results.groupby("model")[["gaussian_loss", "gmv_volatility", "moran_i"]].mean().sort_values(
-        "gaussian_loss"
-    ).to_csv(output / "summary.csv")
     write_json(
         output / "execution-status.json",
         {
@@ -189,6 +185,6 @@ def main(output: Path, source: Path, years: list[int]) -> None:
     os.environ.setdefault("TABPFN_DISABLE_TELEMETRY", "1")
     os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
     ensure_checkpoints(output)
-    ensure_industry(source, output)
+    ensure_industry(output)
     write_manifest(source, output)
     run(output, source, years)

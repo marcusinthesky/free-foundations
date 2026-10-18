@@ -18,9 +18,10 @@ free-foundations = "free_foundations.cli:app"
 [project.optional-dependencies]
 exaone = ["exaonetabular"]
 tabpfn = ["tabpfn==9.2.0", "torch>=2.9,<3"]
-limix = ["LimiX"]
+limix = ["LimiX", "triton>=3.5,<4; sys_platform == 'linux'"]
 causilo = ["causilo==1.0.3"]
 tabfm = ["tabfm[pytorch]"]
+kumo = ["structured-data-models"]
 sap = ["sap-rpt-oss", "transformers<5"]
 
 [dependency-groups]
@@ -36,6 +37,7 @@ data = [
   "pyarrow>=20",
   "matplotlib>=3.10,<4",
   "jinja2>=3.1,<4",  # pandas LaTeX tables and manuscript scalar bindings
+  "tabulate>=0.10,<1",  # pandas Markdown tables in saved-result reports
   "arch>=7.2,<8",
 ]
 dev = [
@@ -68,6 +70,7 @@ torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
 exaonetabular = { git = "https://github.com/LGAI-Research/EXAONE-Tabular.git", rev = "841927fc4f2c573db5c88325f64ecc4fe5affd12" }
 LimiX = { git = "https://github.com/limix-ldm-ai/LimiX.git", rev = "516bf396333feb3198cf7aff8a6c10421f218e24" }
 tabfm = { git = "https://github.com/google-research/tabfm.git", rev = "fbb665569425fd2f490c6576b3af967876fe11ff" }
+structured-data-models = { git = "https://github.com/NVIDIA/structured-data-models.git", rev = "4d7397f6d7b23b1ca75a90ba965fa113671c458d" }
 sap-rpt-oss = { git = "https://github.com/SAP-samples/sap-rpt-1-oss.git", rev = "a0067b3c9db56bc35a6dcab09a9223a3ff0821e0" }
 
 # CPU wheels keep the small research pilot usable without a CUDA installation.

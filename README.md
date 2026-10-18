@@ -94,3 +94,45 @@ The [chronological panel comparison](research/panel/RESULTS.md) constructs full
 point-in-time characteristics, calibrates one spatial coefficient per approach
 on 2016-2019, and scores 2020-2025 on matched annual cohorts. Run
 `just python-panel` to reproduce its cached input ladder and annual distance matrices.
+
+## Frozen financial inputs
+
+Ordinary `dvc repro` reuses the recorded SEC and Yahoo Finance snapshots.
+The `universe`, `pilot`, and `market_metadata` stages are frozen. The last stage
+owns the supplemental Yahoo histories, post-sample corporate actions, and the
+recorded SEC industry classification, so recomputing representations cannot
+delete or refresh them. Numerical stages reject missing snapshots rather than
+silently downloading current data.
+
+Restore large cached inputs with `dvc checkout universe pilot market_metadata`
+(or `dvc pull` for the same targets when the local cache is unavailable).
+The small industry CSV remains versioned in Git. Data acquisition is an
+explicit maintenance operation through the acquisition recipes, separate from
+reproducing estimates. Replacing a vintage requires deliberately recording the
+new snapshot and regenerating its dependent results.
+
+The representative foundation-model extension is available through
+`just python-panel three-foundations`; its protocol and ten-model landscape
+are recorded in `research/panel/three-foundations/`. Publication assets use
+pandas, Jinja2 and Matplotlib PGF; `just latex-build` reads the saved results.
+
+## Pipeline ownership and artifact storage
+
+Each numerical stage owns its generated tables, contexts, configuration records,
+and detailed provenance. These outputs use the DVC cache regardless of file size,
+so a completed run can be restored without estimation. Git stores the source,
+protocols, pipeline definitions and pointers, plus inexpensive reporting-stage
+summaries. Moving an existing output into the cache preserves its recorded
+numerical contents and does not certify it against newer source code.
+
+The `model_checkpoints` stage resolves pinned model revisions and records their
+verified hashes in `research/model-checkpoints.json`. Model weights remain a
+local, reproducible download cache and are not uploaded to the data remote.
+Reports consume the recorded catalogue and financial artifacts, so reporting
+requires no local model weights. Missing local weights can be restored through
+`free-foundations expanded checkpoints` with the TabPFN extra installed.
+
+Shared embedding caches remain explicit DVC snapshots because several numerical
+stages reuse them. Temporary robust-regression exchange files are implementation
+scratch space; the ladder retains its runtime records and bootstrap artifacts.
+Use `dvc pull` to restore cached results before building the manuscript.

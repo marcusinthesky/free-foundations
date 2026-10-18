@@ -100,7 +100,7 @@ python-fernandez:
 python-fernandez-combined:
     dvc repro fernandez_combined
 
-# Declared designs (four, four-h5, four-xqxo, three, three-support); one 2016-2019
+# Declared designs (four, four-h5, four-xqxo, three, three-support, three-foundations); one 2016-2019
 # intensity per network, kernel and innovation arm; 2020-2025 held out. The original
 # v1 output at the panel root is a recorded snapshot, not a stage.
 python-panel *designs:

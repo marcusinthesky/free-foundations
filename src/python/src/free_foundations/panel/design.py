@@ -43,6 +43,8 @@ class Design:
     support_sizes: tuple[int, ...] = ()
     representations: tuple[str, ...] | None = None
     models: tuple[str, ...] | None = None
+    calibration_sizes: tuple[int, ...] = ()
+    encode_extra_histories: bool = True
 
     @property
     def cohort_histories(self) -> tuple[int, ...]:
@@ -67,7 +69,50 @@ FOCUSED = (
     "tabpfn_full__late",
     "tabpfn_full_random__late",
 )
+FOUNDATION_MODELS = (
+    "tabpfn_full",
+    "tabpfn_full_random",
+    "tabpfn_full_random43",
+    "tabpfn_full_random44",
+    "tabfm",
+    "kumo",
+    "kumo_random",
+    "kumo_random43",
+    "kumo_random44",
+    "limix",
+)
+FOUNDATION_READOUTS = (
+    "direct",
+    "pca16",
+    "supervised_mlp16",
+    "tabpfn_full__late",
+    "tabpfn_full_random__late",
+    "tabpfn_full_random43__late",
+    "tabpfn_full_random44__late",
+    "tabfm__late",
+    "tabfm__early_concat",
+    "kumo__late",
+    "kumo__early_concat",
+    "kumo_random__late",
+    "kumo_random43__late",
+    "kumo_random44__late",
+    "limix__late",
+)
 DESIGNS = {
+    "three-foundations": Design(
+        "three-foundations",
+        CHARACTERISTICS[:3],
+        5,
+        ("histories",),
+        extra_histories=(3,),
+        save_matrices=False,
+        decoded=True,
+        support_sizes=SUPPORT_SIZES,
+        representations=FOUNDATION_READOUTS,
+        models=FOUNDATION_MODELS,
+        calibration_sizes=(32, 64, 128, 256),
+        encode_extra_histories=False,
+    ),
     "four": Design(
         "four", CHARACTERISTICS, 3, alternate_target=True, support_draws=DRAWS, decoded=True
     ),

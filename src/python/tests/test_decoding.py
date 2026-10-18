@@ -1,6 +1,7 @@
 """Calibrated readouts decode held-out reference-factor exposures out of fold."""
 
 import numpy as np
+import pytest
 
 from free_foundations.expanded.distance import pairwise_distance
 from free_foundations.panel.decoding import (
@@ -131,3 +132,23 @@ def test_readout_never_extrapolates_beyond_its_training_fold() -> None:
     assert quality["decoder_r2"] > -1
     assert np.all(predictions <= exposures.max(axis=0))
     assert np.all(predictions >= exposures.min(axis=0))
+
+
+def test_calibration_subsampling_keeps_test_firms_out_and_row_order_irrelevant() -> None:
+    rng = np.random.default_rng(11)
+    tickers = tuple(f"T{i}" for i in range(80))
+    exposures = rng.normal(size=(80, 3))
+    states = exposures @ rng.normal(size=(3, 8))
+    before, _ = decode(states, exposures, tickers, training_size=32)
+    modified = exposures.copy()
+    held = folds(tickers) == folds(tickers)[0]
+    modified[held] += 100
+    after, _ = decode(states, modified, tickers, training_size=32)
+    np.testing.assert_allclose(before[held], after[held])
+    order = rng.permutation(len(tickers))
+    reordered, _ = decode(
+        states[order], exposures[order], tuple(tickers[i] for i in order), training_size=32
+    )
+    np.testing.assert_allclose(reordered, before[order], atol=1e-10)
+    with pytest.raises(ValueError, match="available training firms"):
+        decode(states, exposures, tickers, training_size=80)

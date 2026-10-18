@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:panel_prepare",
-  "digest": "sha256:2dc59bc2588c45fc093e71cb4b0e69fa98dcb89118f4165e5ceedfe206fa4a90",
+  "digest": "sha256:97969ca9eac7c1f3937ec67f74854bf9419382a0b4f92642437bbe127aa4faed",
   "entrypoint": "free-foundations panel prepare",
   "fallbacks": [
   ],
@@ -33,14 +33,13 @@
     {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:<binding:pd=pandas>"},
     {"digest":"sha256:8ce944318e4ea1d88a9de02d36ccd10090ae7df3da1a580492359050ca7401e5","kind":"binding","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:<binding:pq=pyarrow.parquet>"},
     {"digest":"sha256:e8b21538b402cc14adc5fb27783458e5fdb57ebc3daffe638c1999feaab9efe7","kind":"binding","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:<binding:snapshot=free_foundations.fernandez.characteristics:snapshot>"},
-    {"digest":"sha256:19efb8168404344dcee88838fd1def6f91b3a512ab0a8a5c388656b7c4884dd4","kind":"binding","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:<binding:yf=yfinance>"},
     {"digest":"sha256:c668974e329e8251dda1f7a403cdff452889c652b52b708363640e3efe50a401","kind":"global","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:LOGGER"},
     {"digest":"sha256:674d5fc96ab19b755bff3e6b094e813f8a7481f285e740700d3d3b3e893cc70a","kind":"global","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:MULTICLASS"},
     {"digest":"sha256:a27e2c1fa135d369f5695f105152ecc049b74b17fc7d3aaa2b6ac8414bc56209","kind":"global","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:ROOT"},
     {"digest":"sha256:f6abaf54e7f0dbcc7b6b00c1a0319d9dcb1cb454cc97fed5622f90cc6abbad14","kind":"global","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:SOURCE"},
     {"digest":"sha256:d943ce8a789b15e85288aebb0c0ad2b7663a770e737205df2fb6d1fe80bb33c6","kind":"function","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:assemble"},
-    {"digest":"sha256:d8a8e99eb1a1d1d59e35f11ad892adbfa7a66c2243b2bf31d82b0ad76fae9914","kind":"function","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:build"},
-    {"digest":"sha256:2c5d55e41abec73abca8f780dafacca1875dbac6f2315dbf2d5649e5b7d6646e","kind":"function","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:markets"},
+    {"digest":"sha256:5c8cd469d9d0f28c34a451c42a851072629984fb94d645fba6c13aee125bab19","kind":"function","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:build"},
+    {"digest":"sha256:2ff8d3948762d6e4c9c1e4a955f6cb9a5427db1fee4641d8c4bca5dad02b7749","kind":"function","path":"src/python/src/free_foundations/panel/characteristics.py","symbol":"free_foundations.panel.characteristics:markets"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/panel/observations.py","symbol":"free_foundations.panel.observations:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:271fc31378e1108a9784c29c3c4768de571ce080301b4ad9721ba767fcf5842b","kind":"binding","path":"src/python/src/free_foundations/panel/observations.py","symbol":"free_foundations.panel.observations:<binding:np=numpy>"},
     {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/src/free_foundations/panel/observations.py","symbol":"free_foundations.panel.observations:<binding:pd=pandas>"},
@@ -66,7 +65,7 @@
     {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:<binding:json=json>"},
     {"digest":"sha256:b461ae95c16c1e73a466fdd306ad6da693ead3a324e5d33627958cc4a2f47e36","kind":"binding","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:<binding:shutil=shutil>"},
     {"digest":"sha256:ff05bad0fd9a7212d3cd85fd2726055168be21bc8f6e0d93b29965794b0675d4","kind":"binding","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:<binding:time=time>"},
-    {"digest":"sha256:843cef20179cccce6a4d80cfa7684eee9051b2d48ae79ed8669c548441be0ef8","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:company_facts"}
+    {"digest":"sha256:af3b5ff9c79c1ec7009104ee2d31d8111e43f7e0eb48767036dfcdd0fce86b39","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:company_facts"}
   ],
   "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
   "schema_version": 2

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:universe_acquire",
-  "digest": "sha256:448fa0acc582069c3c14bb4e26e2037ec019e11510a6e9f33ea5b9ed94fe9fc6",
+  "digest": "sha256:a272d65f076649fb97fa5059f0ad4c3964ae56c21494d7b531981b8d0a248fb3",
   "entrypoint": "free-foundations universe run",
   "fallbacks": [
   ],
@@ -77,7 +77,7 @@
     {"digest":"sha256:779becf7514ec88c38225fb2dfb550fa2d30a216aeeea32bd75a6f3e7a8f4c7a","kind":"binding","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:<binding:write_json=free_foundations.pilot.data:write_json>"},
     {"digest":"sha256:19efb8168404344dcee88838fd1def6f91b3a512ab0a8a5c388656b7c4884dd4","kind":"binding","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:<binding:yf=yfinance>"},
     {"digest":"sha256:c668974e329e8251dda1f7a403cdff452889c652b52b708363640e3efe50a401","kind":"global","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:LOGGER"},
-    {"digest":"sha256:843cef20179cccce6a4d80cfa7684eee9051b2d48ae79ed8669c548441be0ef8","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:company_facts"},
+    {"digest":"sha256:af3b5ff9c79c1ec7009104ee2d31d8111e43f7e0eb48767036dfcdd0fce86b39","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:company_facts"},
     {"digest":"sha256:469bb9744cd2857be4dc7ca65e0b537ba002ae33ef7024419e5333354dd4ce04","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:factors"},
     {"digest":"sha256:318ca3f1cca4fce9247f6a55c3fed7de9815c209eb1e2e7b476d39fa24c99e8b","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:issuers"},
     {"digest":"sha256:673414624c40fc024880d6600df30b122c8420b6294b137a07ecebddf4a88094","kind":"function","path":"src/python/src/free_foundations/universe/sources.py","symbol":"free_foundations.universe.sources:prices"},

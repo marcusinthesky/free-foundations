@@ -61,3 +61,23 @@
 \newcommand{\SupportRMin}{((* '{:.3f}'.format(claims.support_tabpfn_full__late.decoder | min) *))}
 %TC:macrocount \SupportRMax 1
 \newcommand{\SupportRMax}{((* '{:.3f}'.format(claims.support_tabpfn_full__late.decoder | max) *))}
+{% for prefix, key in [('Kumo', 'kumo__late'), ('Limix', 'limix__late'), ('TabfmHead', 'tabfm__late'), ('Supervised', 'supervised_mlp16')] %}
+%TC:macrocount \((* prefix *))Native 1
+\newcommand{\((* prefix *))Native}{((* '{:,.1f}'.format(claims[key].native_gain) *))}
+%TC:macrocount \((* prefix *))Calibrated 1
+\newcommand{\((* prefix *))Calibrated}{((* '{:,.1f}'.format(claims[key].calibrated_gain) *))}
+%TC:macrocount \((* prefix *))Decoder 1
+\newcommand{\((* prefix *))Decoder}{((* '{:.3f}'.format(claims[key].decoder_mean_2016_2025) *))}
+{% endfor %}
+{% for prefix, model in [('Pfn', 'tabpfn_full'), ('Kumo', 'kumo')] %}
+%TC:macrocount \((* prefix *))WeightMin 1
+\newcommand{\((* prefix *))WeightMin}{((* '{:+,.1f}'.format(claims['weights_' + model].minimum) *))}
+%TC:macrocount \((* prefix *))WeightMax 1
+\newcommand{\((* prefix *))WeightMax}{((* '{:+,.1f}'.format(claims['weights_' + model].maximum) *))}
+{% endfor %}
+%TC:macrocount \KumoWeightGain 1
+\newcommand{\KumoWeightGain}{((* '{:+,.1f}'.format(claims.contrast_kumo_42_diagonal.difference | float).replace(',', '{,}') *))}
+%TC:macrocount \KumoWeightLower 1
+\newcommand{\KumoWeightLower}{((* '{:+,.1f}'.format(claims.contrast_kumo_42_diagonal.lower_21 | float).replace(',', '{,}') *))}
+%TC:macrocount \KumoWeightUpper 1
+\newcommand{\KumoWeightUpper}{((* '{:+,.1f}'.format(claims.contrast_kumo_42_diagonal.upper_21 | float).replace(',', '{,}') *))}

@@ -54,8 +54,12 @@ def test_every_stage_runs_a_registered_command() -> None:
     pipeline = yaml.safe_load(PIPELINE.read_text())
     variables = {name: value for item in pipeline["vars"] for name, value in item.items()}
     registered = {f"free-foundations {group} {name}" for group, name in commands()}
-    for stage in pipeline["stages"].values():
+    for stage_name, stage in pipeline["stages"].items():
         command = stage["cmd"]
+        if stage_name == "market_metadata":
+            assert stage["frozen"] is True
+            assert command == "false"
+            continue
         for name, value in variables.items():
             command = command.replace(f"${{{name}}}", value)
         words = command.split()

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:pilot_stage",
-  "digest": "sha256:59644218744afe6b3c6d276a1f512ebae02efc038b168115622d705f3c989f30",
+  "digest": "sha256:09e440dc040f9bc16c72ce59e0c9ba2c6d98488bd86e6ec7275cae0ea9fd52af",
   "entrypoint": "free-foundations pilot run",
   "fallbacks": [
     {"module":"free_foundations.contracts","path":"src/python/src/free_foundations/contracts.py","reason":"imported reference FloatArray could not resolve 'FloatArray'"}
@@ -155,7 +155,7 @@
     {"digest":"sha256:321ed2ed3afceb74be547c9905ed4c676e453b1a68fe7cb2d3e214caeac2624d","kind":"binding","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:<binding:dataclass=dataclasses:dataclass>"},
     {"digest":"sha256:9ea2342a4eba649467287bfacdecf41be2e94055c6710194e9d32575dbc5df52","kind":"global","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:MODELS"},
     {"digest":"sha256:69054bf5fad934c9f77defdba347d17e245512ba3b0cad696acc2fe910abbaad","kind":"class","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:ModelSpec"},
-    {"digest":"sha256:77c18591e05776556a67c3a43739c9bc8121881f3461614a0de094cd5a831f4a","kind":"global","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:_SPECS"},
+    {"digest":"sha256:68c35661db71728c798240b78aae564a459b16a5e226eea9319116595d5014d0","kind":"global","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:_SPECS"},
     {"digest":"sha256:ec0a27ace53c8d53908edad61d30612f77d8e694015346a45ce3705cd242fea7","kind":"function","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:model_spec"},
     {"digest":"sha256:9ea2342a4eba649467287bfacdecf41be2e94055c6710194e9d32575dbc5df52","kind":"global","path":"src/python/src/free_foundations/registry.py","symbol":"free_foundations.registry:spec"}
   ],
