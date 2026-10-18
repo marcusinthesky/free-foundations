@@ -59,7 +59,7 @@ Left on paper:
 | `Recovery.exposure_error_mismatch`, `_sq` | With mismatch `τ = Ca + v`: `κ‖â − a‖ ≤ ‖τ̂ − τ‖ + ‖v‖` and `κ²‖â − a‖² ≤ 2(‖τ̂ − τ‖² + ‖v‖²)`. Accuracy cannot remove `v`. |
 | `Recovery.mean_exposure_error` | The same bound in mean square under any measure. |
 | `Recovery.excess_risk`, `excess_risk_condExp` | Excess squared task risk over `E[Y \| X]` equals `‖f − E[Y \| X]‖²` in `L²`. This is the `ε` the exposure bounds take. |
-| `Measurement.measurement_error`, `rms_measurement_error` | Any `K`-Lipschitz readout `g`: `d(g(F̂), s) ≤ K d(F̂, F) + ξ`, and in root mean square `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂` (Minkowski), with alignment error `ξ = d(g(F), s)`. |
+| `Measurement.measurement_error`, `rms_measurement_error` | Any `K`-Lipschitz readout `g`: `d(g(F̂), s) ≤ K d(F̂, F) + ξ`, and in root mean square `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂` (Minkowski), with alignment error `ξ = d(g(F), s)`. `ξ` belongs to the pair `(F, g)`: it adds information `F` lacks, `E‖s − E[s | F]‖²`, to readout error `E‖E[s | F] − g(F)‖²` (the L² projection identity; for a real state this is `Recovery.excess_risk_condExp`). |
 | `Measurement.decoder_lipschitz` | The linear decoder is `1/κ`-Lipschitz, so `Recovery` is the special case `K = 1/κ`. |
 | `Measurement.readout_error_ge`, `aggregate_readout_error` | Lower bound: if a representation merges two histories, every readout misses one state by at least half their distance. Reading `(1, 0)` and `(0, 1)` from their aggregate misses one by at least `√2/2`. |
 | `Measurement.mean_sq_distance`, `sq_norm_mean_le` | `E‖D‖² = ‖E D‖² + E‖D − E D‖²` for `D = Aᵢ − Aⱼ`: distances between posterior-mean exposures understate expected distances by the posterior variance of the difference. |
@@ -116,6 +116,26 @@ Left on paper:
 | `Score.crossEntropy_eq`, `kl_nonneg`, `crossEntropy_le` | Cross-entropy = entropy + KL ≥ entropy: the log score is proper. |
 | `Score.pretraining_excess` | PFN pretraining loss minus Bayes loss under the task prior is the expected KL to the posterior predictive. |
 | `Score.erm_bound` | An `ε`-minimiser of a risk estimate within `g` of the population risk is within `2g + ε` of every candidate. |
+
+## Blueprint
+
+[`blueprint/src/content.tex`](blueprint/src/content.tex) restates every declaration in
+ordinary notation, in the [leanblueprint](https://github.com/PatrickMassot/leanblueprint)
+format: each statement carries `\lean{...}` with the declaration it is checked against,
+`\leanok` once the proof has no `sorry`, and `\uses{...}` for the results it builds on.
+The same file is the [manuscript](../latex/main.tex)'s appendix, and the manuscript's own
+propositions carry `\lean{...}` tags, so its equations are bound to the code.
+
+| Command | Output |
+| --- | --- |
+| `just blueprint-web` | HTML blueprint with the dependency graph in `blueprint/web/` (open `dep_graph_document.html`) |
+| `just blueprint-pdf` | Printable blueprint in `blueprint/print/print.pdf` |
+| `just blueprint-check` | Fails if any `\lean{...}` name in the blueprint or the manuscript is not a compiled declaration |
+| `just blueprint-serve` | Serves `blueprint/web/` on port 8000 |
+
+The Lean project is `src/lean`, not the repository root, so these recipes run the
+`leanblueprint` CLI's steps (`plastex`, `lake exe checkdecls`) directly. They need the
+devenv shell, which provides graphviz for the graph.
 
 Run `just lean-build` from the repository root. A fresh checkout first needs the prebuilt
 Mathlib files: `cd src/lean && lake exe cache get` (about 6–7 GB).

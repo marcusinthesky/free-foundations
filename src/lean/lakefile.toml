@@ -7,6 +7,11 @@ name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4"
 rev = "v4.31.0"
 
+# `lake exe checkdecls blueprint/lean_decls`: every \lean{...} in the blueprint exists.
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
 [[lean_lib]]
 name = "FreeFoundations"
 leanOptions = { autoImplicit = false }

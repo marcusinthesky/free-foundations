@@ -1,0 +1,897 @@
+% Formal results of the Lean library, one statement per declaration.
+% Shared by the web blueprint, the printed blueprint and the manuscript appendix.
+% Every \lean{...} name is checked against the compiled library by
+% `just blueprint-check`; \leanok marks a statement or proof with no `sorry`.
+
+\section{Reading this blueprint}\label{sec:bp-reading}
+
+Each statement below restates one declaration of the \texttt{FreeFoundations}
+library in ordinary notation. Each proof is a short account of the formal
+argument. The results follow the library's four questions: what the economic
+target is (\S\ref{sec:bp-target}), what a training objective makes an optimal
+model keep (\S\ref{sec:bp-score}, \S\ref{sec:bp-alignment}), whether the state
+and its distances can be read out (\S\ref{sec:bp-recovery},
+\S\ref{sec:bp-geometry}), and what the spatial model does with the distances
+(\S\ref{sec:bp-network}, \S\ref{sec:bp-likelihood}, \S\ref{sec:bp-stability}).
+Each result holds under its stated hypotheses only. None of them shows that a
+particular checkpoint satisfies those hypotheses.
+
+% ---------------------------------------------------------------------------
+\section{The economic target}\label{sec:bp-target}
+
+Residual returns contain common components $b_i'q$ with shock second moment
+$\Omega$. In whitened coordinates $a_i=\Omega^{1/2}b_i$.
+
+\begin{definition}[Quadratic form]\label{def:exposure-form}
+  \lean{FreeFoundations.Exposure.form}\leanok
+  $\operatorname{form}_\Omega(x,y)=x'\Omega y$.
+\end{definition}
+
+\begin{lemma}[Second moment]\label{thm:exposure-covariance}
+  \lean{FreeFoundations.Exposure.covariance_eq}\leanok
+  \uses{def:exposure-form}
+  For symmetric $\Omega$,
+  \[
+    b_i'\Omega b_j=\tfrac12\bigl(b_i'\Omega b_i+b_j'\Omega b_j
+    -(b_i-b_j)'\Omega(b_i-b_j)\bigr).
+  \]
+\end{lemma}
+\begin{proof}\leanok
+  Expand the quadratic form of $b_i-b_j$ and use $\Omega'=\Omega$.
+\end{proof}
+
+\begin{lemma}[Whitened second moment]\label{thm:exposure-inner}
+  \lean{FreeFoundations.Exposure.inner_eq_half}\leanok
+  In any real inner product space,
+  $\ip{a_i}{a_j}=\tfrac12(\norm{a_i}^2+\norm{a_j}^2-\norm{a_i-a_j}^2)$.
+  Distance alone does not order covariance: the common variances matter too.
+\end{lemma}
+\begin{proof}\leanok
+  The polarization identity.
+\end{proof}
+
+\begin{lemma}[Pricing errors are Lipschitz in exposure]\label{thm:exposure-pricing}
+  \lean{FreeFoundations.Exposure.pricing_error_lipschitz}\leanok
+  $\abs{\ip{a_i}{g}-\ip{a_j}{g}}\le\norm{a_i-a_j}\,\norm{g}$.
+  If the omitted factors are traded and firms earn no other expected return,
+  close exposures imply close factor-implied expected returns, with
+  $\norm{g}=(\gamma'\Omega^{-1}\gamma)^{1/2}$ the maximum Sharpe ratio of the
+  factor prices $\gamma$.
+\end{lemma}
+\begin{proof}\leanok
+  Cauchy--Schwarz applied to $\ip{a_i-a_j}{g}$.
+\end{proof}
+
+\begin{lemma}[Exposure distance is a response variance]\label{thm:score-response}
+  \lean{FreeFoundations.Score.response_sq}\leanok
+  \uses{def:exposure-form, def:score-second-moment}
+  For shocks $q$ with finite second moment $\Omega=\E[qq']$ and any $c$,
+  $\E[(c'q)^2]=c'\Omega c$. With $c=b_i-b_j$, the squared exposure distance is
+  the second moment of the two firms' response difference.
+\end{lemma}
+\begin{proof}\leanok
+  Expand $(c'q)^2$ as a double sum and integrate term by term.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{What scores measure}\label{sec:bp-score}
+
+\begin{lemma}[Quadratic forms are traces]\label{thm:score-trace}
+  \lean{FreeFoundations.Score.quadratic_eq_trace}\leanok
+  $u'Au=\tr(A\,uu')$.
+\end{lemma}
+\begin{proof}\leanok
+  Expand both sides entrywise.
+\end{proof}
+
+\begin{lemma}[Realized score]\label{thm:score-realized}
+  \lean{FreeFoundations.Score.realized_quadratic}\leanok
+  \uses{thm:score-trace}
+  $\sum_t u_t'Au_t=\tr\bigl(A\sum_t u_tu_t'\bigr)$: the summed quadratic terms
+  depend on the observations only through their summed outer products.
+\end{lemma}
+\begin{proof}\leanok
+  Sum Lemma~\ref{thm:score-trace} and use linearity of the trace.
+\end{proof}
+
+\begin{definition}[Second-moment matrix]\label{def:score-second-moment}
+  \lean{FreeFoundations.Score.secondMoment}\leanok
+  $\E[uu']$, entrywise $\int u_iu_j\,d\mu$.
+\end{definition}
+
+\begin{lemma}[Expected quadratic form]\label{thm:score-integral}
+  \lean{FreeFoundations.Score.integral_quadratic}\leanok
+  \uses{def:score-second-moment}
+  With finite second moments, $\E[u'Au]=\tr(A\,\E[uu'])$.
+\end{lemma}
+\begin{proof}\leanok
+  Integrate the finite double sum term by term.
+\end{proof}
+
+\begin{definition}[Gaussian and Stein losses]\label{def:score-loss}
+  \lean{FreeFoundations.Score.loss, FreeFoundations.Score.stein}\leanok
+  $L(C,S)=\log\det C+\tr(C^{-1}S)$ and
+  $\operatorname{Stein}(C,S)=\tr(C^{-1}S)-\log\det S+\log\det C-N$.
+\end{definition}
+
+\begin{lemma}[Expected Gaussian loss]\label{thm:score-expected-loss}
+  \lean{FreeFoundations.Score.expected_loss}\leanok
+  \uses{def:score-loss, def:score-second-moment}
+  With finite second moments $M$, a covariance forecast $C$ has expected loss
+  \[\log\det C+\E[u'C^{-1}u]=L(C,M).\]
+  The law of $u$ enters only through $M$;
+  no normality is assumed.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:score-integral}
+  Lemma~\ref{thm:score-integral} with $A=C^{-1}$.
+\end{proof}
+
+\begin{lemma}[Stein's loss is nonnegative]\label{thm:score-stein}
+  \lean{FreeFoundations.Score.stein_nonneg}\leanok
+  \uses{def:score-loss}
+  For positive definite $C$ and $S$, $\operatorname{Stein}(C,S)\ge0$.
+\end{lemma}
+\begin{proof}\leanok
+  Factor $C=B'B$. Then $M=B'^{-1}SB^{-1}$ is positive definite with
+  $\tr M=\tr(C^{-1}S)$ and $\det M=\det S/\det C$, so Stein's loss is
+  $\sum_k(\mu_k-\log\mu_k-1)\ge0$ over the eigenvalues $\mu_k>0$ of $M$.
+\end{proof}
+
+\begin{lemma}[Loss gap]\label{thm:score-loss-sub}
+  \lean{FreeFoundations.Score.loss_sub}\leanok
+  \uses{def:score-loss}
+  $L(C,S)-L(S,S)=\operatorname{Stein}(C,S)$ for positive definite $S$.
+\end{lemma}
+\begin{proof}\leanok
+  $\tr(S^{-1}S)=N$ and $\log\det C-\log\det S=-\log\det(C^{-1}S)$.
+\end{proof}
+
+\begin{theorem}[The Gaussian score is proper for the second moment]\label{thm:score-proper}
+  \lean{FreeFoundations.Score.loss_le}\leanok
+  \uses{def:score-loss}
+  $L(S,S)\le L(C,S)$ for positive definite $C$ and $S$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:score-stein, thm:score-loss-sub}
+  The gap is Stein's loss, which is nonnegative.
+\end{proof}
+
+\begin{definition}[Cross-entropy and KL divergence]\label{def:score-entropy}
+  \lean{FreeFoundations.Score.crossEntropy, FreeFoundations.Score.kl}\leanok
+  On a finite outcome space, $H(p,q)=-\sum_y p_y\log q_y$ and
+  $\KL(p\Vert q)=\sum_y p_y\log(p_y/q_y)$.
+\end{definition}
+
+\begin{lemma}[Cross-entropy is entropy plus KL]\label{thm:score-ce-eq}
+  \lean{FreeFoundations.Score.crossEntropy_eq}\leanok
+  \uses{def:score-entropy}
+  For $q>0$, $H(p,q)=H(p,p)+\KL(p\Vert q)$.
+\end{lemma}
+\begin{proof}\leanok
+  Split $\log q_y=\log p_y-\log(p_y/q_y)$ where $p_y>0$; terms with $p_y=0$
+  vanish on both sides.
+\end{proof}
+
+\begin{lemma}[Gibbs' inequality]\label{thm:score-kl}
+  \lean{FreeFoundations.Score.kl_nonneg}\leanok
+  \uses{def:score-entropy}
+  $\KL(p\Vert q)\ge0$ for $p\ge0$, $q>0$ with equal total mass.
+\end{lemma}
+\begin{proof}\leanok
+  $\log x\le x-1$ applied to $q_y/p_y$.
+\end{proof}
+
+\begin{theorem}[The log score is proper]\label{thm:score-log-proper}
+  \lean{FreeFoundations.Score.crossEntropy_le}\leanok
+  \uses{def:score-entropy}
+  $H(p,p)\le H(p,q)$: the true law has the smallest expected log loss.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:score-ce-eq, thm:score-kl}
+  Lemmas~\ref{thm:score-ce-eq} and~\ref{thm:score-kl}.
+\end{proof}
+
+\begin{theorem}[Pretraining excess loss]\label{thm:score-pretraining}
+  \lean{FreeFoundations.Score.pretraining_excess}\leanok
+  \uses{def:score-entropy}
+  Averaged over contexts $c$ with weights $\pi_c$, the log loss of a predictor
+  $q$ exceeds the Bayes loss of the posterior predictive $p$ by the expected KL:
+  \[
+    \sum_c\pi_cH(p_c,q_c)-\sum_c\pi_cH(p_c,p_c)=\sum_c\pi_c\KL(p_c\Vert q_c).
+  \]
+  For a prior-data fitted network, $\pi$ is the synthetic task prior and $p_c$
+  the posterior predictive given support set $c$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:score-ce-eq}
+  Apply Lemma~\ref{thm:score-ce-eq} in each context and sum.
+\end{proof}
+
+\begin{lemma}[Empirical risk minimisation]\label{thm:score-erm}
+  \lean{FreeFoundations.Score.erm_bound}\leanok
+  If $\abs{\widehat R(\psi)-R(\psi)}\le g$ for every $\psi$ and $\widehat\psi$
+  minimises $\widehat R$ to within $\varepsilon$, then
+  $R(\widehat\psi)\le R(\psi)+2g+\varepsilon$ for every $\psi$.
+\end{lemma}
+\begin{proof}\leanok
+  Chain the three inequalities.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Alignment and sufficiency}\label{sec:bp-alignment}
+
+\begin{definition}[Optimal and sufficient representations]\label{def:alignment}
+  \lean{FreeFoundations.Alignment.Optimal, FreeFoundations.Alignment.Sufficient}\leanok
+  A representation $Z$ of histories $H$ is \emph{optimal} for a target
+  prediction $F$ if $F$ factors through $Z$, and \emph{sufficient} for the
+  economic state if the state factors through $Z$.
+\end{definition}
+
+\begin{theorem}[Deterministic alignment]\label{thm:alignment-iff}
+  \lean{FreeFoundations.Alignment.optimal_imp_sufficient_iff}\leanok
+  \uses{def:alignment}
+  Every target-optimal representation is sufficient if and only if
+  $F(h)=F(h')$ implies $\mathrm{state}(h)=\mathrm{state}(h')$: the target
+  separates every pair of histories the economic state separates.
+\end{theorem}
+\begin{proof}\leanok
+  For the forward direction take $Z=F$, which is optimal. Conversely an optimal
+  $Z$ determines $F$, which determines the state.
+\end{proof}
+
+\begin{lemma}[When the state itself is optimal]\label{thm:alignment-state}
+  \lean{FreeFoundations.Alignment.state_optimal_iff}\leanok
+  \uses{def:alignment}
+  $F=d\circ\mathrm{state}$ for some $d$ if and only if the target needs no
+  distinction the state ignores.
+\end{lemma}
+\begin{proof}\leanok
+  Choose $d$ on the range of the state; it is well defined by the hypothesis.
+\end{proof}
+
+\begin{lemma}[Label-null targets lose the state]\label{thm:alignment-null}
+  \lean{FreeFoundations.Alignment.constant_target_loses_state}\leanok
+  \uses{def:alignment}
+  With a constant target, the representation that keeps nothing is optimal,
+  and it is not sufficient whenever the state varies.
+\end{lemma}
+\begin{proof}\leanok
+  A constant factors through the trivial representation; two histories with
+  different states are then merged.
+\end{proof}
+
+\begin{lemma}[Marginals need not carry the joint law]\label{thm:alignment-marginals}
+  \lean{FreeFoundations.Alignment.pair, FreeFoundations.Alignment.marginals_free_of_state, FreeFoundations.Alignment.joint_depends_on_state}\leanok
+  Let $Y_1=R$ and $Y_2=R\oplus S$ for a fair coin $R$ and an observed bit $S$.
+  Both marginals are fair coins whatever $S$, yet
+  $P(Y_1=Y_2=1)$ is $1/2$ when $S=0$ and $0$ when $S=1$.
+  Exact marginal forecasts can discard the state that fixes dependence.
+\end{lemma}
+\begin{proof}\leanok
+  Direct computation on the four outcomes.
+\end{proof}
+
+\begin{lemma}[Attaining the Bayes predictor]\label{thm:sufficiency-condexp}
+  \lean{FreeFoundations.Sufficiency.condExp_eq_iff}\leanok
+  For $\sigma$-algebras $\mathcal Z\subseteq\mathcal H$,
+  $\E[X\mid\mathcal Z]=\E[X\mid\mathcal H]$ almost surely if and only if
+  $\E[X\mid\mathcal H]$ is almost surely $\mathcal Z$-measurable.
+\end{lemma}
+\begin{proof}\leanok
+  The tower property in one direction; in the other, a $\mathcal Z$-measurable
+  function is its own conditional expectation given $\mathcal Z$.
+\end{proof}
+
+\begin{theorem}[Statistical alignment]\label{thm:sufficiency-iff}
+  \lean{FreeFoundations.Sufficiency.sufficient_iff}\leanok
+  Every representation that reproduces the pretraining Bayes predictor
+  $\E[X\mid H]$ also reproduces the economic one $\E[Y\mid H]$ if and only if
+  $\E[Y\mid H]=g(\E[X\mid H])$ almost surely for a measurable $g$. Conditional
+  laws follow from indicator targets.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:sufficiency-condexp}
+  Take $\mathcal Z=\sigma(\E[X\mid H])$ and apply
+  Lemma~\ref{thm:sufficiency-condexp}; measurability with respect to
+  $\sigma(\E[X\mid H])$ is the Doob--Dynkin factorization.
+\end{proof}
+
+\begin{corollary}[Label-null, statistically]\label{thm:sufficiency-constant}
+  \lean{FreeFoundations.Sufficiency.constant_target_iff}\leanok
+  If the pretraining prediction is almost surely constant, the objective
+  guarantees economic sufficiency only for an almost surely constant economic
+  prediction.
+\end{corollary}
+\begin{proof}\leanok
+  \uses{thm:sufficiency-iff}
+  A function of a constant is constant.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Recovery and measurement}\label{sec:bp-recovery}
+
+Tasks are a linear map $C$ from exposures to task means; a decoder $L$ reads
+exposures back.
+
+\begin{definition}[Distinguishing tasks and decoders]\label{def:recovery}
+  \lean{FreeFoundations.Recovery.Distinguishes, FreeFoundations.Recovery.Decoder}\leanok
+  $C$ distinguishes exposures with margin $\kappa$ if
+  $\norm{Ca}\ge\kappa\norm{a}$ for every $a$. A decoder is a left inverse $L$
+  of $C$ with $\kappa\norm{Lt}\le\norm{t}$ for every $t$.
+\end{definition}
+
+\begin{lemma}[Distinguishing tasks are injective]\label{thm:recovery-injective}
+  \lean{FreeFoundations.Recovery.Distinguishes.injective}\leanok
+  \uses{def:recovery}
+  If $\kappa>0$, a distinguishing $C$ is injective.
+\end{lemma}
+\begin{proof}\leanok
+  $Ca=0$ forces $\kappa\norm a\le0$.
+\end{proof}
+
+\begin{lemma}[Dimension]\label{thm:recovery-finrank}
+  \lean{FreeFoundations.Recovery.finrank_le_of_distinguishes}\leanok
+  \uses{def:recovery}
+  Distinguishing tasks need at least as many dimensions as the exposures.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:recovery-injective}
+  An injective linear map does not lower dimension.
+\end{proof}
+
+\begin{theorem}[One target is not enough]\label{thm:recovery-scalar}
+  \lean{FreeFoundations.Recovery.scalar_not_distinguishes}\leanok
+  \uses{def:recovery}
+  A single scalar task cannot distinguish exposures of dimension two or more,
+  however accurately it is predicted.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:recovery-finrank}
+  The target space has dimension one.
+\end{proof}
+
+\begin{lemma}[An aggregate target merges firms]\label{thm:recovery-aggregate}
+  \lean{FreeFoundations.Recovery.Plane, FreeFoundations.Recovery.aggregate_merges}\leanok
+  The target $a_f+a_o$ takes the same value on $(1,0)$ and $(0,1)$, which are
+  $\sqrt2$ apart.
+\end{lemma}
+\begin{proof}\leanok
+  Direct computation.
+\end{proof}
+
+\begin{lemma}[Diverse targets distinguish]\label{thm:recovery-diverse}
+  \lean{FreeFoundations.Recovery.diverse_distinguishes}\leanok
+  $(a_0+a_1)^2+(a_0-a_1)^2=2\norm a^2$, so the two targets $a_f\pm a_o$
+  distinguish exposures with margin $\sqrt2$.
+\end{lemma}
+\begin{proof}\leanok
+  Expand the squares.
+\end{proof}
+
+\begin{theorem}[A decoder exists]\label{thm:recovery-decoder}
+  \lean{FreeFoundations.Recovery.exists_decoder}\leanok
+  \uses{def:recovery}
+  In finite dimension, tasks that distinguish exposures with margin
+  $\kappa>0$ admit a decoder with gain at most $1/\kappa$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:recovery-injective}
+  Project orthogonally onto the range of $C$, then invert $C$ there.
+\end{proof}
+
+\begin{lemma}[Exposure error]\label{thm:recovery-exposure}
+  \lean{FreeFoundations.Recovery.exposure_error}\leanok
+  \uses{def:recovery}
+  $\kappa\norm{L\hat\tau-a}\le\norm{\hat\tau-Ca}$.
+\end{lemma}
+\begin{proof}\leanok
+  $L\hat\tau-a=L(\hat\tau-Ca)$ and $L$ has gain $1/\kappa$.
+\end{proof}
+
+\begin{lemma}[Exposure error with mismatch]\label{thm:recovery-mismatch}
+  \lean{FreeFoundations.Recovery.exposure_error_mismatch, FreeFoundations.Recovery.exposure_error_mismatch_sq}\leanok
+  \uses{def:recovery}
+  If the conditional task mean is $\tau=Ca+v$, then
+  $\kappa\norm{L\hat\tau-a}\le\norm{\hat\tau-\tau}+\norm v$ and
+  $\kappa^2\norm{L\hat\tau-a}^2\le2(\norm{\hat\tau-\tau}^2+\norm v^2)$.
+  Forecast accuracy cannot remove $v$.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:recovery-exposure}
+  The triangle inequality, then $(x+y)^2\le2x^2+2y^2$.
+\end{proof}
+
+\begin{lemma}[In mean square]\label{thm:recovery-mean}
+  \lean{FreeFoundations.Recovery.mean_exposure_error}\leanok
+  \uses{def:recovery}
+  For any measure over firms or information sets,
+  $\kappa^2\E\norm{L\hat\tau-a}^2\le\E\norm{\hat\tau-Ca}^2$. A finite sample is
+  the counting measure.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:recovery-exposure}
+  Square Lemma~\ref{thm:recovery-exposure} and integrate.
+\end{proof}
+
+\begin{lemma}[Distance error]\label{thm:recovery-distance}
+  \lean{FreeFoundations.Recovery.distance_error}\leanok
+  $\bigl\lvert\norm{\hat a_i-\hat a_j}-\norm{a_i-a_j}\bigr\rvert
+  \le\norm{\hat a_i-a_i}+\norm{\hat a_j-a_j}$.
+\end{lemma}
+\begin{proof}\leanok
+  The reverse triangle inequality.
+\end{proof}
+
+\begin{theorem}[Distance error over all pairs]\label{thm:recovery-pairwise}
+  \lean{FreeFoundations.Recovery.pairwise_distance_error}\leanok
+  Summed over ordered pairs of distinct firms,
+  \[
+    \sum_i\sum_{j\ne i}(\hat d_{ij}-d_{ij})^2\le4(N-1)\sum_i\norm{\hat a_i-a_i}^2.
+  \]
+  The inequality is deterministic, so dependence across pairs is irrelevant.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:recovery-distance}
+  Square Lemma~\ref{thm:recovery-distance}, bound $(x+y)^2\le2x^2+2y^2$, and
+  count how often each firm appears.
+\end{proof}
+
+\begin{lemma}[Excess risk is a projection distance]\label{thm:recovery-excess}
+  \lean{FreeFoundations.Recovery.excess_risk}\leanok
+  If $\tau$ is the orthogonal projection of $Y$ onto a closed subspace $K$ and
+  $f\in K$, then $\norm{f-Y}^2-\norm{\tau-Y}^2=\norm{f-\tau}^2$.
+\end{lemma}
+\begin{proof}\leanok
+  Pythagoras: $f-\tau\in K$ is orthogonal to $Y-\tau$.
+\end{proof}
+
+\begin{theorem}[Information and readout split]\label{thm:recovery-excess-condexp}
+  \lean{FreeFoundations.Recovery.excess_risk_condExp}\leanok
+  For a square-integrable real $Y$ and any $\mathcal F$-measurable predictor $f$
+  in $L^2$,
+  \[
+    \E(Y-f)^2=\E\bigl(Y-\E[Y\mid\mathcal F]\bigr)^2
+    +\E\bigl(\E[Y\mid\mathcal F]-f\bigr)^2 .
+  \]
+  With $Y=s$ the target state, $\mathcal F=\sigma(F)$ the representation and
+  $f=g(F)$ a readout, the first term is information that $F$ does not carry and
+  the second is readout misspecification or estimation error. A Euclidean state
+  splits coordinate by coordinate.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:recovery-excess}
+  Lemma~\ref{thm:recovery-excess} with $K$ the $\mathcal F$-measurable
+  subspace of $L^2$, onto which conditional expectation is the orthogonal
+  projection.
+\end{proof}
+
+\begin{lemma}[Readouts are reparametrization invariant]\label{thm:recovery-invariant}
+  \lean{FreeFoundations.Recovery.readout_invariant}\leanok
+  If a linear readout $G$ gives exposures from states $z$, the reparametrized
+  states $ez$ with readout $Ge^{-1}$ give the same exposures and distances.
+  Native distances between states have no such invariance
+  (\S\ref{sec:bp-geometry}).
+\end{lemma}
+\begin{proof}\leanok
+  $Ge^{-1}(ez)=Gz$.
+\end{proof}
+
+\begin{theorem}[Measurement error]\label{thm:measurement-error}
+  \lean{FreeFoundations.Measurement.measurement_error}\leanok
+  For a $K$-Lipschitz readout $g$ from predictive statistics to states,
+  \[
+    d\bigl(g(\hat F),s\bigr)\le K\,d(\hat F,F)+\xi,\qquad\xi=d\bigl(g(F),s\bigr).
+  \]
+  The alignment error $\xi$ belongs to the pair $(F,g)$; Theorem
+  \ref{thm:recovery-excess-condexp} splits its mean square.
+\end{theorem}
+\begin{proof}\leanok
+  The triangle inequality through $g(F)$, then the Lipschitz bound.
+\end{proof}
+
+\begin{corollary}[In root mean square]\label{thm:measurement-rms}
+  \lean{FreeFoundations.Measurement.rms_measurement_error}\leanok
+  Under any measure,
+  $\norm{d(g(\hat F),s)}_2\le K\norm{d(\hat F,F)}_2+\norm{\xi}_2$.
+\end{corollary}
+\begin{proof}\leanok
+  \uses{thm:measurement-error}
+  Theorem~\ref{thm:measurement-error} pointwise, then Minkowski's inequality in
+  $L^2$.
+\end{proof}
+
+\begin{lemma}[Linear decoders are Lipschitz]\label{thm:measurement-decoder}
+  \lean{FreeFoundations.Measurement.decoder_lipschitz}\leanok
+  \uses{def:recovery}
+  A decoder with margin $\kappa>0$ is $\kappa^{-1}$-Lipschitz, so the
+  recovery bounds are Theorem~\ref{thm:measurement-error} with $K=1/\kappa$.
+\end{lemma}
+\begin{proof}\leanok
+  Linearity and the gain bound.
+\end{proof}
+
+\begin{lemma}[Merged states]\label{thm:measurement-merged}
+  \lean{FreeFoundations.Measurement.merged_error}\leanok
+  Any single estimate $r$ satisfies $d(s,s')\le2\max(d(r,s),d(r,s'))$.
+\end{lemma}
+\begin{proof}\leanok
+  The triangle inequality through $r$.
+\end{proof}
+
+\begin{theorem}[Lower bound]\label{thm:measurement-lower}
+  \lean{FreeFoundations.Measurement.readout_error_ge}\leanok
+  If a representation gives two histories the same value, every readout
+  misses one of their states by at least half the distance between them,
+  however accurate the prediction.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:measurement-merged}
+  Both readouts are the same point; apply Lemma~\ref{thm:measurement-merged}.
+\end{proof}
+
+\begin{corollary}[Reading two exposures from their aggregate]\label{thm:measurement-aggregate}
+  \lean{FreeFoundations.Measurement.aggregate_readout_error}\leanok
+  Any readout of the aggregate $a_f+a_o=1$ misses $(1,0)$ or $(0,1)$ by at
+  least $\sqrt2/2$.
+\end{corollary}
+\begin{proof}\leanok
+  \uses{thm:measurement-merged, thm:recovery-aggregate}
+  The two exposures are $\sqrt2$ apart.
+\end{proof}
+
+\begin{theorem}[Posterior means understate distances]\label{thm:measurement-mean-sq}
+  \lean{FreeFoundations.Measurement.mean_sq_distance, FreeFoundations.Measurement.sq_norm_mean_le}\leanok
+  For a random difference $D=A_i-A_j$ with finite second moment,
+  $\E\norm D^2=\norm{\E D}^2+\E\norm{D-\E D}^2$, so
+  $\norm{\E D}^2\le\E\norm D^2$. Under the conditional law, distances between
+  posterior-mean exposures understate expected distances by
+  $\tr\operatorname{Var}(A_i-A_j\mid H)$, which differs across pairs.
+\end{theorem}
+\begin{proof}\leanok
+  Expand $\norm{D}^2=\norm{\E D}^2+2\ip{\E D}{D-\E D}+\norm{D-\E D}^2$; the
+  cross term integrates to zero.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Information is not geometry}\label{sec:bp-geometry}
+
+\begin{lemma}[Reparametrization keeps optimality and sufficiency]\label{thm:geometry-equiv}
+  \lean{FreeFoundations.Geometry.optimal_equiv, FreeFoundations.Geometry.sufficient_equiv}\leanok
+  \uses{def:alignment}
+  Any bijection $e$ of the representation space preserves both properties.
+\end{lemma}
+\begin{proof}\leanok
+  Factor through $e^{-1}$.
+\end{proof}
+
+\begin{theorem}[Same information, different distances]\label{thm:geometry-rescale}
+  \lean{FreeFoundations.Geometry.rescale}\leanok
+  \uses{def:alignment}
+  Scaling a representation by $c\ne0$ keeps it sufficient and multiplies every
+  distance by $\abs c$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:geometry-equiv}
+  Scaling is a bijection; $\norm{cz-cz'}=\abs c\norm{z-z'}$.
+\end{proof}
+
+\begin{theorem}[Observational equivalence]\label{thm:geometry-equivalence}
+  \lean{FreeFoundations.Geometry.observationally_equivalent}\leanok
+  Task means identify exposures only up to an invertible map:
+  $(CG^{-1})(Ga)=Ca$.
+\end{theorem}
+\begin{proof}\leanok
+  Cancel $G^{-1}G$.
+\end{proof}
+
+\begin{theorem}[Which maps preserve distances]\label{thm:geometry-distances}
+  \lean{FreeFoundations.Geometry.distances_preserved_iff}\leanok
+  A linear $G$ preserves every distance if and only if it preserves norms. The
+  common covariance fixes the Gram matrix (Lemma~\ref{thm:exposure-inner}),
+  which pins distances down up to rotation.
+\end{theorem}
+\begin{proof}\leanok
+  Take $y=0$ in one direction; use $Gx-Gy=G(x-y)$ in the other.
+\end{proof}
+
+\begin{definition}[Chord baseline]\label{def:geometry-chord}
+  \lean{FreeFoundations.Geometry.chord}\leanok
+  $v(x)=[x,1]/\norm{[x,1]}$, the direct-distance baseline.
+\end{definition}
+
+\begin{lemma}[The chord map is injective]\label{thm:geometry-chord-injective}
+  \lean{FreeFoundations.Geometry.chord_left_inverse, FreeFoundations.Geometry.chord_injective, FreeFoundations.Geometry.one_add_sq_pos, FreeFoundations.Geometry.chord_scale_pos}\leanok
+  \uses{def:geometry-chord}
+  $x$ is recovered as $v_{1:p}/v_{p+1}$, since $1+\sum_ix_i^2>0$.
+\end{lemma}
+\begin{proof}\leanok
+  The common normalizing factor cancels in the ratio.
+\end{proof}
+
+\begin{lemma}[The chord map is bounded]\label{thm:geometry-chord-bounded}
+  \lean{FreeFoundations.Geometry.chord_sq_sum, FreeFoundations.Geometry.chord_dist_sq_le}\leanok
+  \uses{def:geometry-chord}
+  $v(x)$ lies on the unit sphere, so every squared chord distance is at most 4.
+  Injective yet bounded: the baseline keeps the information but compresses the
+  geometry.
+\end{lemma}
+\begin{proof}\leanok
+  $\norm{v-w}^2\le(\norm v+\norm w)^2=4$.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Kernels, networks and value}\label{sec:bp-network}
+
+\begin{lemma}[Normalized ratios]\label{thm:kernel-normalized}
+  \lean{FreeFoundations.Kernel.normalized_l1_le, FreeFoundations.Kernel.normalized_l1_le_two}\leanok
+  Positive weights whose ratios lie in $[1/r,r]$ normalize to probability
+  vectors within $\ell_1$ distance $r^2-1$. Any two normalizations are within
+  $\ell_1$ distance 2.
+\end{lemma}
+\begin{proof}\leanok
+  Each normalized ratio lies in $[r^{-2},r^2]$; sum the deviations against a
+  probability vector. The second bound is the triangle inequality.
+\end{proof}
+
+\begin{definition}[Exponential kernel]\label{def:kernel-exp}
+  \lean{FreeFoundations.Kernel.expRow, FreeFoundations.Kernel.expKernel}\leanok
+  $W_{ij}=\exp(-d_{ij}/h)/\sum_{k\ne i}\exp(-d_{ik}/h)$ for $i\ne j$, and
+  $W_{ii}=0$.
+\end{definition}
+
+\begin{lemma}[Scale]\label{thm:kernel-scale}
+  \lean{FreeFoundations.Kernel.expRow_scale}\leanok
+  \uses{def:kernel-exp}
+  $(d,h)$ and $(cd,ch)$ give the same network for $c\ne0$.
+\end{lemma}
+\begin{proof}\leanok
+  $cd/(ch)=d/h$.
+\end{proof}
+
+\begin{theorem}[Kernel sensitivity]\label{thm:kernel-sensitivity}
+  \lean{FreeFoundations.Kernel.expRow_l1_le, FreeFoundations.Kernel.expKernel_linfty_le}\leanok
+  \uses{def:kernel-exp}
+  With at least two firms, if every off-diagonal distance moves by at most
+  $\delta$ then $\norm{\widehat W-W}_\infty\le\min\{2,e^{2\delta/h}-1\}$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:kernel-normalized}
+  Kernel ratios lie in $[e^{-\delta/h},e^{\delta/h}]$; apply
+  Lemma~\ref{thm:kernel-normalized} to each row with $r=e^{\delta/h}$.
+\end{proof}
+
+\begin{lemma}[Exact expansion]\label{thm:network-expansion}
+  \lean{FreeFoundations.Network.inverse_expansion}\leanok
+  $(I-\lambda W)^{-1}=I+\lambda W+\lambda^2W^2(I-\lambda W)^{-1}$.
+\end{lemma}
+\begin{proof}\leanok
+  Multiply through by $I-\lambda W$.
+\end{proof}
+
+\begin{lemma}[Inverse on an eigenvector]\label{thm:network-eigen}
+  \lean{FreeFoundations.Network.inverse_on_eigenvector}\leanok
+  If $(I-\lambda W)v=\mu v$ with $\mu\ne0$, then $(I-\lambda W)^{-1}v=\mu^{-1}v$.
+\end{lemma}
+\begin{proof}\leanok
+  Apply the inverse to both sides.
+\end{proof}
+
+\begin{lemma}[Row-stochastic networks carry a common component]\label{thm:network-const}
+  \lean{FreeFoundations.Network.rowStochastic_const, FreeFoundations.Network.rowStochastic_inverse_const}\leanok
+  If $W\mathbf1=\mathbf1$ then $(I-\lambda W)^{-1}\mathbf1=\mathbf1/(1-\lambda)$
+  for $\lambda\ne1$: the spatial covariance always contains a common component
+  whose scale grows without bound as $\lambda\to1$.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:network-eigen}
+  $\mathbf1$ is an eigenvector of $I-\lambda W$ with eigenvalue $1-\lambda$.
+\end{proof}
+
+\begin{lemma}[The uniform network]\label{thm:network-uniform}
+  \lean{FreeFoundations.Network.uniform, FreeFoundations.Network.uniform_const, FreeFoundations.Network.uniform_sum_zero}\leanok
+  The uniform network $U$ with weight $1/(N-1)$ on every other firm fixes
+  $\mathbf1$ and maps every vector summing to zero to $-1/(N-1)$ times itself:
+  it is one equicorrelated factor.
+\end{lemma}
+\begin{proof}\leanok
+  $Uv=(\mathbf1'v\,\mathbf1-v)/(N-1)$.
+\end{proof}
+
+\begin{lemma}[Placebos keep the spectrum and group mass]\label{thm:network-placebo}
+  \lean{FreeFoundations.Network.placebo_det, FreeFoundations.Network.placebo_group_mass}\leanok
+  Relabelling firms by a permutation leaves $\det(I-\lambda W)$, and so every
+  likelihood's Jacobian term, unchanged. A within-group permutation preserves
+  the total weight linking any two groups.
+\end{lemma}
+\begin{proof}\leanok
+  Conjugation by a permutation matrix preserves the determinant; reindex the
+  sums.
+\end{proof}
+
+\begin{theorem}[Hub plus proximity]\label{thm:value-decomposition}
+  \lean{FreeFoundations.Value.decomposition}\leanok
+  \uses{thm:exposure-inner}
+  For row-stochastic $W$, doubly stochastic $U$ and common covariance
+  $C_{ij}=\tfrac12(k_i+k_j-\rho_{ij}^2)$,
+  \[
+    \ip{W-U}{C}=\tfrac12\sum_j(c_j-1)k_j-\tfrac12\sum_{ij}(W_{ij}-U_{ij})\rho_{ij}^2,
+  \]
+  with $c_j=\sum_iW_{ij}$: a hub term in the communalities $k_j$ plus a
+  proximity term in the exposure distances $\rho_{ij}$.
+\end{theorem}
+\begin{proof}\leanok
+  Row sums of $W$ and $U$ are one and column sums of $U$ are one; collect terms.
+\end{proof}
+
+\begin{lemma}[Placebos keep the hub term]\label{thm:value-placebo}
+  \lean{FreeFoundations.Value.placebo_hub}\leanok
+  \uses{thm:value-decomposition}
+  When communality is constant within the groups a permutation respects, the
+  hub term is unchanged.
+\end{lemma}
+\begin{proof}\leanok
+  Reindex the sum by the permutation.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{The spatial likelihood}\label{sec:bp-likelihood}
+
+Write $\Sigma=A^{-1}DA^{-\top}$ with $A=I-\lambda W$ and $D=\diag(d)$, and let
+$M$ be the second moment of the residuals.
+
+\begin{lemma}[Precision]\label{thm:likelihood-precision}
+  \lean{FreeFoundations.Likelihood.precision_eq, FreeFoundations.Likelihood.trace_precision}\leanok
+  $\Sigma^{-1}=A^\top D^{-1}A$, and
+  $\tr(A^\top\diag(e)AM)=\sum_ie_i(AMA^\top)_{ii}$.
+\end{lemma}
+\begin{proof}\leanok
+  Invert the product; cycle the trace.
+\end{proof}
+
+\begin{lemma}[Quadratic and log-determinant terms]\label{thm:likelihood-terms}
+  \lean{FreeFoundations.Likelihood.quadratic_term, FreeFoundations.Likelihood.logdet_eq}\leanok
+  $\tr(\Sigma^{-1}M)=\sum_im_i(\lambda)/d_i$ with filtered second moments
+  $m_i(\lambda)=(AMA^\top)_{ii}$, and
+  $\log\det\Sigma=\sum_i\log d_i-2\log\abs{\det A}$.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:likelihood-precision}
+  Lemma~\ref{thm:likelihood-precision}, and multiplicativity of the
+  determinant.
+\end{proof}
+
+\begin{theorem}[Expected loss of the spatial-error forecast]\label{thm:likelihood-loss}
+  \lean{FreeFoundations.Likelihood.spatial_loss}\leanok
+  \uses{def:score-loss}
+  \[
+    L(\Sigma,M)=\sum_i\log d_i-2\log\abs{\det A}+\sum_i\frac{m_i(\lambda)}{d_i}:
+  \]
+  variance, spectrum and the $D^{-1}$-weighted filtered second moments.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:likelihood-terms}
+  Add the two terms of Lemma~\ref{thm:likelihood-terms}.
+\end{proof}
+
+\begin{definition}[Common-plus-idiosyncratic second moment]\label{def:likelihood-moment}
+  \lean{FreeFoundations.Likelihood.moment}\leanok
+  $M=\bigl(\ip{a_i}{a_j}\bigr)_{ij}+\diag(\eta)$: exposures $a_i$ to orthonormal
+  common shocks plus idiosyncratic variances $\eta_i$.
+\end{definition}
+
+\begin{lemma}[Quadratic forms of the two parts]\label{thm:likelihood-parts}
+  \lean{FreeFoundations.Likelihood.gram_quadratic, FreeFoundations.Likelihood.diagonal_quadratic}\leanok
+  $\sum_{jk}x_j\ip{a_j}{a_k}x_k=\norm{\sum_jx_ja_j}^2$ and
+  $\sum_{jk}x_j\eta_j\mathbb 1_{j=k}x_k=\sum_jx_j^2\eta_j$.
+\end{lemma}
+\begin{proof}\leanok
+  Bilinearity of the inner product; the diagonal sum collapses.
+\end{proof}
+
+\begin{theorem}[Filtered second moment]\label{thm:likelihood-filtered}
+  \lean{FreeFoundations.Likelihood.filtered_second_moment}\leanok
+  \uses{def:likelihood-moment}
+  For a zero-diagonal network,
+  \[
+    m_i(\lambda)=\Bigl\lVert a_i-\lambda\sum_jW_{ij}a_j\Bigr\rVert^2+\eta_i
+    +\lambda^2\sum_jW_{ij}^2\eta_j :
+  \]
+  the neighbours' reconstruction error of firm $i$'s exposure, plus its own
+  noise, plus the noise its neighbours bring in.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:likelihood-parts}
+  Row $i$ of $I-\lambda W$ is $e_i-\lambda W_{i\cdot}$; apply
+  Lemma~\ref{thm:likelihood-parts} to it, using $W_{ii}=0$.
+\end{proof}
+
+\begin{corollary}[In powers of $\lambda$]\label{thm:likelihood-expand}
+  \lean{FreeFoundations.Likelihood.filtered_second_moment_expand}\leanok
+  \uses{def:likelihood-moment}
+  \[
+    m_i(\lambda)=(\norm{a_i}^2+\eta_i)-2\lambda\sum_jW_{ij}\ip{a_i}{a_j}
+    +\lambda^2\Bigl(\Bigl\lVert\sum_jW_{ij}a_j\Bigr\rVert^2+\sum_jW_{ij}^2\eta_j\Bigr).
+  \]
+  Only common covariance enters the linear term; with equal $d_i$ it sums to
+  $-2\ip{W}{C}/d$, the inner product of Theorem~\ref{thm:value-decomposition}.
+\end{corollary}
+\begin{proof}\leanok
+  \uses{thm:likelihood-filtered}
+  Expand the square in Theorem~\ref{thm:likelihood-filtered}.
+\end{proof}
+
+\begin{lemma}[Concentrated rows bring in more noise]\label{thm:likelihood-herfindahl}
+  \lean{FreeFoundations.Likelihood.herfindahl_ge, FreeFoundations.Likelihood.herfindahl_uniform}\leanok
+  A weight vector summing to one over $m$ firms has Herfindahl index
+  $\sum_jw_j^2\ge1/m$, with equality for equal weights. The noise cost
+  $\sum_jW_{ij}^2\eta_j$ is $\eta$ times this index when noise is equal.
+\end{lemma}
+\begin{proof}\leanok
+  Cauchy--Schwarz: $1=(\sum_jw_j)^2\le m\sum_jw_j^2$.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Financial consequences}\label{sec:bp-stability}
+
+\begin{lemma}[Inverse difference]\label{thm:stability-inverse}
+  \lean{FreeFoundations.Stability.inverse_sub, FreeFoundations.Stability.norm_inverse_sub_le}\leanok
+  For a left inverse $P$ of $X$ and a right inverse $P'$ of $X'$ in a normed
+  ring, $P-P'=P(X'-X)P'$, so $\norm{P-P'}\le\norm P\norm{X'-X}\norm{P'}$.
+\end{lemma}
+\begin{proof}\leanok
+  $P-P'=PX'P'-PXP'$.
+\end{proof}
+
+\begin{lemma}[Resolvent]\label{thm:stability-resolvent}
+  \lean{FreeFoundations.Stability.resolvent_sub_le}\leanok
+  If both resolvents have norm at most $M$,
+  $\norm{(I-\lambda W)^{-1}-(I-\lambda W')^{-1}}\le\abs\lambda M^2\norm{W-W'}$.
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:stability-inverse}
+  Lemma~\ref{thm:stability-inverse} with $X'-X=\lambda(W-W')$.
+\end{proof}
+
+\begin{theorem}[Covariance stability]\label{thm:stability-covariance}
+  \lean{FreeFoundations.Stability.covariance_sub_le, FreeFoundations.Stability.matrix_covariance_sub_le}\leanok
+  With common $\lambda$ and innovation covariance $V$, and resolvents of norm
+  at most $M$,
+  \[
+    \norm{PVP^\top-P'VP'^\top}_2\le2\norm V_2\,\abs\lambda M^3\norm{W-W'}_2 ,
+  \]
+  for $P=(I-\lambda W)^{-1}$, $P'=(I-\lambda W')^{-1}$; in the spectral norm for
+  real matrices.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:stability-resolvent}
+  Write the difference as $(P-P')VP^\top+P'V(P-P')^\top$ and apply
+  Lemma~\ref{thm:stability-resolvent}.
+\end{proof}
+
+\begin{lemma}[Loss, quadratic term]\label{thm:stability-quadratic}
+  \lean{FreeFoundations.Stability.abs_quadratic_le, FreeFoundations.Stability.quadratic_inverse_sub_le}\leanok
+  $\abs{\ip{Tv}{v}}\le\norm T\norm v^2$, and for inverses $Q=\Sigma^{-1}$,
+  $\tilde Q=\tilde\Sigma^{-1}$,
+  \[
+    \abs{u'Qu-u'\tilde Qu}\le\norm Q\norm{\tilde Q}\norm{\Sigma-\tilde\Sigma}\norm u^2 .
+  \]
+\end{lemma}
+\begin{proof}\leanok
+  \uses{thm:stability-inverse}
+  Cauchy--Schwarz, then Lemma~\ref{thm:stability-inverse}.
+\end{proof}
+
+\begin{theorem}[Portfolio regret]\label{thm:stability-portfolio}
+  \lean{FreeFoundations.Stability.portfolio_regret, FreeFoundations.Stability.long_only_sq_le}\leanok
+  If $\hat w$ minimizes estimated variance over a feasible set whose portfolios
+  have $\norm w\le B$, its true variance exceeds that of any feasible portfolio
+  by at most $2B^2\norm{\hat\Sigma-\Sigma}$. Long-only, fully invested
+  portfolios have $B=1$.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:stability-quadratic}
+  Add and subtract the estimated variances and bound each gap by
+  Lemma~\ref{thm:stability-quadratic}; $\sum_iw_i^2\le(\sum_iw_i)^2=1$ for
+  $w\ge0$.
+\end{proof}

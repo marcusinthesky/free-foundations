@@ -2,10 +2,13 @@
 name = "free-foundations-tools"
 version = "0.1.0"
 requires-python = "~=3.13.0"
-dependencies = ["insitu"]
+dependencies = ["insitu", "leanblueprint"]
 
 [tool.uv]
 package = false
+# The pygraphviz wheel bundles a graphviz that needs system X11 and glib libraries;
+# build it against devenv's graphviz instead.
+no-binary-package = ["pygraphviz"]
 
 [tool.uv.sources]
 insitu = { git = "https://github.com/marcusinthesky/insitu.git", rev = "7f3a1b8327a3e14ac9ac2d8a4b25b19fcdab8daa" }

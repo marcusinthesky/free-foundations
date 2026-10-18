@@ -30,3 +30,11 @@ research/**/cache/
 research/**/*.parquet
 research/**/*.npz
 research/**/embeddings/
+# Per-distance fingerprints: thousands of sidecars, hashed in each design's manifest.
+research/panel/**/distances/
+# Generated blueprint outputs; the sources are src/lean/blueprint/src.
+src/lean/blueprint/web/
+src/lean/blueprint/print/
+src/lean/blueprint/lean_decls
+src/lean/blueprint/manuscript_decls
+src/lean/blueprint/src/*.paux

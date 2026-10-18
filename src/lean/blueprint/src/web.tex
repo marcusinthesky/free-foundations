@@ -1,0 +1,21 @@
+% Web blueprint: `just blueprint-web` runs plasTeX here and writes ../web/ and
+% ../lean_decls, the declaration list `just blueprint-check` verifies.
+\documentclass{article}
+
+\usepackage{amssymb, amsthm, amsmath}
+\usepackage{hyperref}
+\usepackage[dep_graph]{blueprint}
+
+\input{macros/common}
+\input{macros/web}
+
+\github{https://github.com/marcusinthesky/free-foundations}
+% No \dochome: declaration links need a doc-gen4 site, which is not built here.
+
+\title{Free Foundations: formal results}
+\author{Marcus Gawronsky}
+
+\begin{document}
+\maketitle
+\input{content}
+\end{document}

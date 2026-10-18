@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsthm,booktabs,hyperref}
-\newtheorem{proposition}{Proposition}
-\newtheorem{assumption}{Assumption}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\usepackage{amsmath,amssymb,amsthm,array,booktabs,expl3,hyperref}
+% Theorem environments, notation and the \lean, \leanok and \uses
+% tags are shared
+% with the Lean blueprint (src/lean/blueprint), whose content is the appendix.
+% `just blueprint-check` verifies every \lean{...} name here against
+% the library.
+\input{../lean/blueprint/src/macros/common}
+\input{../lean/blueprint/src/macros/print}
 \title{Measuring Financial Proximity with Pretrained Tabular Representations}
 \author{Marcus Gawronsky\\\small\texttt{gwrmar002@myuct.ac.za}}
 \date{Working research design --- October 2026}
@@ -17,8 +20,12 @@
   constructed from pretrained representations of regulatory disclosures.
   The design separates the information supplied to an encoder from the geometry
   it induces, uses disclosures available before the evaluation period, and holds
-  the spatial specification fixed across networks. A conditional perturbation
-  result connects network measurement error to covariance error. The empirical
+  the spatial specification fixed across networks. Four separate questions
+  organize the argument: which economic state matters, what a training
+  objective preserves, whether the state can be recovered from a representation
+  under held-out validation, and what the resulting network changes in
+  covariance. A conditional perturbation result connects network measurement
+  error to covariance error. The empirical
   hypothesis is that learned proximity organizes subsequent return dependence
   beyond conventional factors and characteristic distances. This working draft
   specifies the study; it does not report confirmatory empirical findings.
@@ -84,7 +91,7 @@ The source-faithful comparison uses $h=1$, as in Fern\'andez. Because distance
 scales differ across representations, two predeclared alternatives apply the
 same rule to classical and learned distances: $h$ equal to the median positive
 distance, and $h$ chosen so that the mean effective neighbor count
-$N^{-1}\sum_i(\sum_j W_{ij}^2)^{-1}$ equals that of the joint characteristic
+$N^{-1}\sum_i{(\sum_j W_{ij}^2)}^{-1}$ equals that of the joint characteristic
 network in the same year. The latter separates neighbor ranking from the amount
 of smoothing. No bandwidth is chosen using returns.
 
@@ -95,7 +102,10 @@ $(1,0)$ and $(1,1)$ by $T=\operatorname{diag}(c,1)$ makes their normalized
 chord distance approach zero as $c$ grows. Orthogonal invariance of chord
 distance does not resolve general invertible transformations.
 
-\begin{proposition}[Conditional measurement stability]
+\begin{proposition}[Conditional measurement stability]\label{prop:stability}
+  \lean{FreeFoundations.Stability.matrix_covariance_sub_le,
+  FreeFoundations.Kernel.expKernel_linfty_le}\leanok%
+  \uses{thm:stability-covariance, thm:kernel-sensitivity}
   Consider the same firms and diagonal innovation covariance $D$ for two spatial
   networks $W$ and $W^\star$. Put
   $A={(I-\lambda W)}^{-1}$ and $A^\star={(I-\lambda W^\star)}^{-1}$.
@@ -120,6 +130,151 @@ nonsymmetric network. Converting the row-norm bound to a spectral-norm bound
 can introduce a factor $\sqrt{N}$, so no dimension-free conclusion is claimed.
 The stronger learning-to-economic-distance link remains an empirical question
 or requires additional identifiable economic supervision.
+
+\section{What a learned measurement must establish}
+A pretrained representation enters the spatial model only through distances.
+Whether those distances measure economic proximity splits into four questions,
+each with its own object and its own evidence; a positive answer to one does
+not carry over to the next (Table~\ref{tab:framework}). The machine-checked
+counterparts are in the accompanying Lean library; Appendix~\ref{sec:bp-reading}
+restates each of its results, and every statement tagged ``Lean'' names the
+declaration it is checked against.
+
+\begin{table}[ht]
+  \centering\small
+  \begin{tabular}{*{4}{>{\raggedright\arraybackslash}p{0.22\linewidth}}}
+    \toprule
+    Question & Object & Formal link & Evidence required \\
+    \midrule
+    Which economic distinction matters? & $s_{\mathcal C}(H)$ & exposure
+    geometry (\texttt{Exposure}) & a declared target and its reliability \\
+    What does the objective preserve? & $F_m(H)$ & proper scores,
+    sufficiency (\texttt{Score}, \texttt{Sufficiency}) & an objective-specific
+    argument per model family \\
+    Can the state be recovered? & $g_m(F_m(H))$ & readout bounds
+    (\texttt{Measurement}, \texttt{Recovery}) & held-out calibration against
+    the target's own reliability \\
+    What changes financially? & $W$, $\Sigma$, scores & stability and
+    likelihood (\texttt{Stability}, \texttt{Likelihood}) & matched
+    econometric comparisons \\
+    \bottomrule
+  \end{tabular}
+  \caption{Four questions a learned proximity measure must answer separately.}%
+  \label{tab:framework}
+\end{table}
+
+\paragraph{Target.} Here $s_{\mathcal C}(H)$ is the state on which a declared
+class $\mathcal C$ of economic responses depends,
+for example the exposures $b(S_i)$ in the residual model above. The current
+empirical stand-in is statistical: each firm's loadings on the leading principal
+components of prior factor residuals of firms \emph{outside} the evaluated
+cohort. It is a common-risk coordinate, not an identified economic exposure.
+Its split-half reliability is reported with every decoder, because a noisy
+target caps the attainable fit whatever the representation contains.
+
+\paragraph{Recovery.} For a $K$-Lipschitz readout $g$, the measured state misses
+$s$ by at most $K\,d(\widehat F,F)$ plus the alignment error
+$\xi=d(g(F),s)$ (Theorem~\ref{thm:measurement-error}). That error belongs to
+the pair $(F,g)$, not to $F$ alone.
+
+\begin{proposition}[Information and readout split]\label{prop:readout-split}
+  \lean{FreeFoundations.Recovery.excess_risk_condExp}\leanok%
+  \uses{thm:recovery-excess-condexp}
+  For a square-integrable state $s$ and a square-integrable readout $g(F)$,
+  \begin{equation}\label{eq:readout-split}
+    \E\norm{s-g(F)}^2
+    =\underbrace{\E\norm{s-\E[s\mid
+    F]}^2}_{\text{information absent from }F}
+    +\underbrace{\E\norm{\E[s\mid
+    F]-g(F)}^2}_{\text{readout misspecification or estimation}}.
+  \end{equation}
+\end{proposition}
+
+The Lean statement is for a real state; a Euclidean state splits coordinate by
+coordinate. A restricted decoder can therefore fail even when $F$
+carries the state, and a
+failed recovery experiment does not by itself show that the representation
+lacks the information. The validation protocol fixes the target's coordinate
+system before any fold is drawn, so a held-out firm's returns reach neither the
+training targets nor the fitted readout. Fitting a readout to historical
+returns for forecasting is legitimate, but it is a deployment procedure, not
+this validation.
+
+\paragraph{Financial use.} The expected Gaussian loss of the spatial-error
+forecast is a variance term, a spectrum term and the filtered second moments
+$m_i(\lambda)$ (Theorem~\ref{thm:likelihood-loss}).
+
+\begin{proposition}[Neighbour reconstruction against imported
+  noise]\label{prop:filtered}
+  \lean{FreeFoundations.Likelihood.filtered_second_moment}\leanok%
+  \uses{thm:likelihood-filtered}
+  Under a common-plus-idiosyncratic residual model $u_i=a_i'q+e_i$, with
+  $\operatorname{Var}(q)=I$ and independent $e_i$ of variance $\eta_i$, and a
+  zero-diagonal network, the spatial filter's expected squared residual for
+  firm $i$ is
+  \begin{equation}
+    m_i(\lambda)=\Big\lVert a_i-\lambda\sum_j W_{ij}a_j\Big\rVert^2+\eta_i
+    +\lambda^2\sum_j W_{ij}^2\eta_j .
+  \end{equation}
+\end{proposition}
+
+The network helps when a firm's neighbours reconstruct its common exposure, and
+costs through the idiosyncratic noise it imports, weighted by the row's
+concentration $\sum_j {W_{ij}}^2$. Neither a diffuse nor a
+concentrated network is
+favoured in general. The empirical split of the realized likelihood is exact
+algebra, but it uses total residual second moments, which mix the common and
+idiosyncratic parts, and it conditions on realized factors. A larger linear
+(alignment) term therefore shows stronger weighted residual cross-products
+under the fitted specification, not recovered exposures.
+
+\subsection{One complete argument: TabPFN's late readout}
+Each link is marked as published theory, a result formalized here, a
+maintained assumption, or an empirical test.
+\begin{enumerate}
+  \item \emph{Objective to predictive statistic (published; formalized).}
+    Prior-data fitted networks minimize the expected negative log-likelihood of
+    held-out labels over datasets drawn from a synthetic prior. The excess over
+    the Bayes loss is the expected Kullback-Leibler divergence to the posterior
+    predictive under that prior~\cite{pfn}
+    (Theorem~\ref{thm:score-pretraining}).
+    The late query state feeds the output head, so the predictive distribution
+    of the support label is a function of that state.
+  \item \emph{Prior to firm data (assumed; probed).} The synthetic
+    prior is not a
+    model of disclosures. Read frequentistically, a PFN's variance vanishes as
+    the in-context sample grows when its sensitivity to single support rows
+    does, while its bias vanishes only if the predictor localizes around the
+    query~\cite{nagler}. No mismatch rate is claimed. The support-size
+    experiment varies the in-context sample on fixed query firms, which bears on
+    the variance channel only.
+  \item \emph{Predictive statistic to economic state (assumed; partly
+    refuted).} Sufficiency requires the target state to be a function of the
+    support label's conditional law (Theorem~\ref{thm:sufficiency-iff}). One
+    scalar label cannot distinguish every multidimensional exposure
+    (Theorem~\ref{thm:recovery-scalar}), so a nonzero information term
+    in~\eqref{eq:readout-split} is expected.
+  \item \emph{State to measured distance (formalized; tested).} The ridge
+    readout is linear and Lipschitz, and its bound is
+    Theorem~\ref{thm:measurement-error}. The test is held-out decoder fit
+    against the target's reliability.
+  \item \emph{Distance to covariance (formalized; conditional).}
+    Proposition~\ref{prop:stability}, under its resolvent assumption.
+\end{enumerate}
+An architecture-matched control re-initializes the same checkpoint's weights
+before encoding. Only for TabPFN does the comparison then isolate trained
+weights; elsewhere it compares pretrained-model procedures.
+
+\paragraph{Admissibility of other readouts.} TabFM and EXAONE enter as
+comparators, not as instances of the argument above. Their training objectives
+are taken from provider documentation and are not verified here. EXAONE's
+task readout precedes a quantile output head: if that head is trained with a
+pinball loss, the state determines predicted quantiles, a consistent target
+for that loss~\cite{gneiting}, rather than the full conditional law. State
+readouts taken before in-context prediction have no objective-specific
+argument at all. No contrastive or predictive-latent objective is treated as a
+proper scoring rule for an observed conditional law without a separate
+argument.
 
 \section{Data expansion and chronological design}
 The acquisition target is 1,000 distinct current US exchange-listed SEC issuers,
@@ -204,6 +359,19 @@ The second should report the matched likelihood comparison and uncertainty.
 One figure can show the time pattern of paired log-score differences and
 network concentration. Industry, size, leverage, reporting-pattern controls,
 and fixed-reference measurement checks should address alternative explanations.
+
+The measurement claim needs three further pieces of evidence, in this order.
+First, held-out recovery: decoder fit against a target whose coordinates no
+validation firm helped estimate, reported beside that target's split-half
+reliability. Second, a reduced comparison on one input set. It should include
+a direct-distance baseline, PCA, a supervised network trained on the same
+label, a label-null version of the pretrained readout, and an untrained copy of
+the same architecture where one can be built. Third, the same comparison at
+several nested support sizes on fixed query firms, which tests whether any
+pretrained advantage is a small-sample effect. Without an architecture-matched
+control, the result is a comparison of pretrained-model procedures, not an
+effect of pretraining. Economic validation against identified shock exposures
+remains a separate step.
 All already inspected pilot years are development evidence. Any subsequently
 reserved evaluation block must be described honestly; this is not a claim of
 preregistration or a previously untouched holdout.
@@ -237,6 +405,8 @@ $e^{-2\epsilon/h}$ and $e^{2\epsilon/h}$. Summing absolute entry differences
 against a probability row bounds the row sum by $e^{2\epsilon/h}-1$;
 the distance between any two probability rows is also at most two.
 
+\input{../lean/blueprint/src/content}
+
 \begin{thebibliography}{9}
   \bibitem{fernandez}
   Fern\'andez, V. (2011).
@@ -258,6 +428,18 @@ the distance between any two probability rows is also at most two.
   spatial weight matrix.
   \emph{Journal of Econometrics}, 184(2), 209--232.
   \url{https://doi.org/10.1016/j.jeconom.2014.08.008}.
+  \bibitem{pfn}
+  M\"uller, S., Hollmann, N., Pineda Arango, S., Grabocka, J., and Hutter, F.
+  (2022). Transformers can do Bayesian inference.\ \emph{International
+  Conference on Learning Representations}.
+  \bibitem{nagler}
+  Nagler, T. (2023). Statistical foundations of prior-data fitted networks.
+  \emph{Proceedings of the 40th International Conference on Machine Learning},
+  PMLR 202.
+  \bibitem{gneiting}
+  Gneiting, T. (2011). Making and evaluating point forecasts.
+  \emph{Journal of the American Statistical Association}, 106(494), 746--762.
+  \url{https://doi.org/10.1198/jasa.2011.r10138}.
   \bibitem{secapi}
   US Securities and Exchange Commission.
   EDGAR Application Programming Interfaces.

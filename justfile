@@ -32,6 +32,23 @@ latex-build:
     mkdir -p src/latex/build
     tectonic -o src/latex/build src/latex/main.tex
 
+# Lean blueprint (leanblueprint/plasTeX). The Lean project is src/lean, not the git root,
+# so these recipes run the leanblueprint CLI's steps directly.
+blueprint-web:
+    cd src/lean/blueprint/src && uv run --frozen plastex -c plastex.cfg web.tex
+
+blueprint-pdf:
+    mkdir -p src/lean/blueprint/print
+    tectonic -o src/lean/blueprint/print src/lean/blueprint/src/print.tex
+
+# Every \lean{...} name in the blueprint and the manuscript must be a compiled declaration.
+blueprint-check: blueprint-web lean-build
+    python3 src/lean/blueprint/manuscript_decls.py src/latex/main.tex > src/lean/blueprint/manuscript_decls
+    cd src/lean && lake exe checkdecls blueprint/lean_decls && lake exe checkdecls blueprint/manuscript_decls
+
+blueprint-serve:
+    cd src/lean/blueprint/web && python -m http.server 8000
+
 # Full verification; testmon is an explicit fast development loop below.
 python-check:
     cd src/python && env -u PYTHONPATH uv run --frozen pyrefly check

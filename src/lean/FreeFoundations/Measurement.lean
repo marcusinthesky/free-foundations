@@ -9,8 +9,13 @@ import FreeFoundations.Recovery
 `Recovery` decodes exposures with a linear left inverse. The argument works for any readout.
 A learning objective supplies a statistic `F(h)`: a conditional mean, a conditional law, a
 posterior predictive. The economic state `s(h)` lives in its own metric space, and a readout
-`g` maps the first to the second. The alignment error `ξ = d(g(F), s)` is the part of the
-state that the objective's statistic does not carry.
+`g` maps the first to the second. The alignment error `ξ = d(g(F), s)` belongs to the pair
+`(F, g)`, not to `F` alone: a poor readout creates it even when `F` carries the whole state.
+For a square-integrable state the L² projection identity splits it
+(`Recovery.excess_risk_condExp` for a real state; a Euclidean one splits by coordinate),
+`E‖s − g(F)‖² = E‖s − E[s | F]‖² + E‖E[s | F] − g(F)‖²`: information `F` does not carry,
+plus misspecification or estimation error of `g`. A fitted decoder that fails can fail
+through either term.
 
 * **Upper bound.** If `g` is `K`-Lipschitz, the measured state `g(F̂)` misses `s` by at most
   `K d(F̂, F) + ξ` (`measurement_error`). In root mean square the same holds by Minkowski

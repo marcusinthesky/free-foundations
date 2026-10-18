@@ -153,6 +153,12 @@ repos:
         entry: chktex -q -I0
         language: system
         files: ^src/latex/.*\.tex$
+      - id: blueprint
+        name: Lean blueprint declarations
+        entry: just blueprint-check
+        language: system
+        pass_filenames: false
+        files: ^(src/lean/.*\.(lean|tex|toml)|src/latex/main\.tex)$
 
       - id: python-quality
         name: Python types, boundaries, unused code, and tests
