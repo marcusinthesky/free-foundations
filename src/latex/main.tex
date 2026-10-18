@@ -180,11 +180,15 @@ under its uniform-risk and empirical-fitting assumptions:
   R_Q(\widehat g;E)\leq I_Q(E)+A_Q(E,\mathcal G)
   +2\Delta_{n,Q}+\varepsilon_{\rm fit}.
 \end{equation}
-Conditional on its weights and context, a frozen representation transforms the
-supplied history. Its potential advantage over direct inputs therefore lies in
-accessibility to a restricted readout and finite-sample estimation. Decoder
-performance evaluates these components jointly; varying encoder context and
-calibration size assesses the procedure's sensitivity to its two samples.
+Conditional on its pretrained weights and supplied context, freezing the encoder
+restricts the class of exposure mappings fitted from scarce financial labels.
+A flexible supervised procedure learns features and their exposure mapping from
+those labels; calibration estimates a restricted readout of the frozen features.
+Pretraining can improve finite-sample risk when reduced estimation difficulty
+offsets information or approximation loss. The bound organizes these terms for
+the calibrated readout, which our decoder evaluates as a complete procedure.
+The support experiments distinguish sensitivity to encoder context from
+financial calibration size.
 
 For the financial comparison, native distances measure chord length between
 unit-normalized feature vectors, emphasizing their direction. Calibrated

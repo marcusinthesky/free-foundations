@@ -84,3 +84,22 @@ the representation's prediction head. The updated source-based main-text count
 is 2,450 words including headings and captions; the abstract remains 193 words.
 The rebuilt PDF retains the complete conclusion on page 7 without layout
 warnings. Numerical results and formal statements are unchanged.
+
+The subsequent frozen-representation comparison now explains in the main
+methodology how external learning narrows the financial estimation task and how
+that choice trades estimation difficulty against information and approximation
+loss. It interprets the existing bound without asserting an unproved ranking
+against joint supervised estimation. No new formal claim was introduced:
+the cited Lean declaration list is unchanged, its checker passed, and the
+bound's existing Lean proof remains applicable. The renderer again validated
+1,380 saved score rows and 642,024 firm-days. The current TeXcount is 2,476
+main-text words including headings and captions, plus 193 abstract words.
+The refreshed PDF has a complete seven-page main paper and no layout warnings.
+
+The final clarification specifies the function class fitted from financial
+exposure labels, conditional on pretrained weights and supplied context. It
+retains the interpretation of lower estimation difficulty as a conditional
+possibility rather than a comparative theorem. The manuscript's Lean declaration
+inventory remains identical. The renderer and PDF build passed again; current
+TeXcount is 2,484 main-text words including headings and captions, with a
+193-word abstract.
