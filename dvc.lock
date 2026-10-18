@@ -9,8 +9,8 @@ stages:
       size: 18675
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/universe/README.md
       hash: md5
@@ -63,8 +63,8 @@ stages:
       size: 36627
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/pilot/annual.csv
       hash: md5
@@ -139,8 +139,8 @@ stages:
       size: 4673
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/expanded/annual-2016.csv
       hash: md5
@@ -398,8 +398,8 @@ stages:
       size: 3090
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/fernandez/annual-2016.csv
       hash: md5
@@ -684,8 +684,8 @@ stages:
       nfiles: 163
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/fernandez/combined/RESULTS.md
       hash: md5
@@ -735,8 +735,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/cache/broad.parquet
       hash: md5
@@ -791,8 +791,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/four/annual-scores.csv
       hash: md5
@@ -967,8 +967,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/four-h5/annual-scores.csv
       hash: md5
@@ -1119,8 +1119,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/four-xqxo/annual-scores.csv
       hash: md5
@@ -1271,8 +1271,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/three/annual-scores.csv
       hash: md5
@@ -1439,8 +1439,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/three-support/annual-scores.csv
       hash: md5
@@ -1607,8 +1607,8 @@ stages:
       nfiles: 2309
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/panel/audit/contexts.csv
       hash: md5
@@ -1660,8 +1660,8 @@ stages:
       size: 3090
     - path: src/python/uv.lock
       hash: md5
-      md5: 2a5edd7448c497ef104984bac1ff70f5
-      size: 302510
+      md5: 5ff447ac2e5ad01034cc8e022297ab8a
+      size: 300306
     outs:
     - path: research/ladder/bootstrap-capm-bootstrap.parquet
       hash: md5
