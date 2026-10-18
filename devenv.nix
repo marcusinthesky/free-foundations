@@ -31,6 +31,10 @@
     (rWrapper.override { packages = with rPackages; [ robustbase ]; })
   ];
   env = {
+    # The Hugging Face S3 gateway (DVC remote) does not parse the trailing checksums
+    # recent botocore sends by default.
+    AWS_REQUEST_CHECKSUM_CALCULATION = "when_required";
+    AWS_RESPONSE_CHECKSUM_VALIDATION = "when_required";
     CFLAGS = "-I${pkgs.graphviz}/include";
     LDFLAGS = "-L${pkgs.graphviz}/lib -L${pkgs.graphviz}/lib/graphviz -Wl,-rpath,${pkgs.graphviz}/lib:${pkgs.graphviz}/lib/graphviz";
   };

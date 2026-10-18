@@ -1,0 +1,29 @@
+{
+  "algorithm": "sha256",
+  "callback": "free_foundations.cli:fernandez_simulate",
+  "digest": "sha256:f86eceaa9a4c3e49bd66707b9e4b5ef9f44abac962c569e4669fa3d302545dad",
+  "entrypoint": "free-foundations fernandez simulate",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:457ecf59f00b122d5a487d9a997cc79e3d0e0136f3674a129bf5fee10e1a89a5","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:fernandez_simulation=free_foundations.fernandez.simulation>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:typer=typer>"},
+    {"digest":"sha256:d0b72b0406104f8a72d35d80fba8b9e0f3fcc986df2179172dedebe30cc29b0a","kind":"global","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:FERNANDEZ"},
+    {"digest":"sha256:dc1cc4b338783e271a0df3f0b074768008c46f096be685e40bf8fbd7e5a3d6dc","kind":"global","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:fernandez"},
+    {"digest":"sha256:3a6b0cbceb06caa3b907cec20959f821248068eba474b4f3f2b92442b95d1c22","kind":"function","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:fernandez_simulate"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/fernandez/models.py","symbol":"free_foundations.fernandez.models:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:271fc31378e1108a9784c29c3c4768de571ce080301b4ad9721ba767fcf5842b","kind":"binding","path":"src/python/src/free_foundations/fernandez/models.py","symbol":"free_foundations.fernandez.models:<binding:np=numpy>"},
+    {"digest":"sha256:d605f4b7fe807d033db502b8be51035cd151774e373d5a03034a46f49afd1c4b","kind":"function","path":"src/python/src/free_foundations/fernandez/models.py","symbol":"free_foundations.fernandez.models:paper_weights"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:e9f3324df7b40210c92a11aa4470884a5db12fc12824b57c79323a3da8888f56","kind":"binding","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:<binding:norm=scipy.stats:norm>"},
+    {"digest":"sha256:271fc31378e1108a9784c29c3c4768de571ce080301b4ad9721ba767fcf5842b","kind":"binding","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:<binding:np=numpy>"},
+    {"digest":"sha256:7a76d3c80f81d47472d6f68e097f57cdbc157aa18fc80005d2c94d9e03b9b3a0","kind":"binding","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:<binding:paper_weights=free_foundations.fernandez.models:paper_weights>"},
+    {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:<binding:pd=pandas>"},
+    {"digest":"sha256:718e3578d4821b01506cb4ac4d063b2e9c79164a58a744fba9904230abee4cc2","kind":"function","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:portfolio_var"},
+    {"digest":"sha256:d19e0fc9263ca2b679e42a08d451fbd6c5509e843b6a049c71201e6da191a8ad","kind":"function","path":"src/python/src/free_foundations/fernandez/simulation.py","symbol":"free_foundations.fernandez.simulation:simulate"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

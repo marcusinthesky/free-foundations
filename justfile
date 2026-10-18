@@ -63,45 +63,66 @@ python-testmon:
 python-model model:
     uv sync --project src/python --frozen --extra {{ model }}
 
-# EDGAR_IDENTITY must contain your name and email. All large inputs stay in cache/.
+# Research runs are DVC stages (dvc.yaml): each reruns only when the code its command
+# reaches (semflow fingerprint) or its inputs change, and is otherwise skipped.
+# The network-acquisition stages are frozen so routine repros never refetch them. These
+# recipes resume one deliberately: unprotect its linked cache, run the stage's command,
+# then record the result. EDGAR_IDENTITY must contain your name and email.
+python-universe:
+    dvc unprotect research/universe/cache
+    uv run --project src/python --frozen free-foundations universe run
+    dvc commit -f universe
+
 python-pilot:
-    uv run --project src/python --frozen --extra tabpfn python -m free_foundations.pilot all --pretrained
+    dvc unprotect research/pilot/cache
+    TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn free-foundations pilot run --stage all --pretrained
+    dvc commit -f pilot
 
 # Reuse the original pilot data and run the expanded representation/metric grid.
 python-expanded:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.expanded.run
-    uv run --project src/python --frozen python -m free_foundations.expanded.report
+    dvc repro expanded_report
 
 # Paper-aligned MM/IV/ML replication plus the matched-characteristic ladder.
 python-fernandez:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.fernandez.run
-    OPENBLAS_NUM_THREADS=2 uv run --project src/python --frozen python -m free_foundations.fernandez.simulation
-    uv run --project src/python --frozen python -m free_foundations.fernandez.report
+    dvc repro fernandez_report
 
 # One spatial-error likelihood per combined network on a fixed common cohort.
 python-fernandez-combined:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.fernandez.combined
+    dvc repro fernandez_combined
 
-# Larger public-data universe, extended history, and an annual PIT coverage audit.
-python-universe:
-    uv run --project src/python --frozen python -m free_foundations.universe.run
-
-# Declared designs (four, four-h5, three); one 2016-2019 intensity per network,
-# kernel and innovation arm; 2020-2025 held out. The original v1 output stays at the root.
+# Declared designs (four, four-h5, four-xqxo, three, three-support); one 2016-2019
+# intensity per network, kernel and innovation arm; 2020-2025 held out. The original
+# v1 output at the panel root is a recorded snapshot, not a stage.
 python-panel *designs:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.panel.run {{ if designs == "" { "" } else { "--designs " + designs } }}
-    uv run --project src/python --frozen python -m free_foundations.panel.report {{ if designs == "" { "" } else { "--designs " + designs } }}
+    dvc repro {{ if designs == "" { "--glob 'panel_report_*'" } else { replace(prepend("panel_report_", designs), "-", "_") } }}
 
 # Query-cohort, support-draw, support-label and target sensitivity of model geometry.
 python-encoder-audit:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.panel.audit
-
-# R0 replication only: MM betas through Rscript, no foundation models.
-python-ladder-r0:
-    uv run --project src/python --frozen python -m free_foundations.ladder.run --stages r0 bootstrap
-    uv run --project src/python --frozen python -m free_foundations.ladder.report
+    dvc repro panel_audit
 
 # R0 plus the R1-R4 matched cross-sectional ladder on both characteristic arms.
 python-ladder:
-    OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra exaone python -m free_foundations.ladder.run
-    uv run --project src/python --frozen python -m free_foundations.ladder.report
+    dvc repro ladder_report
+
+# Recheck code fingerprints, then rebuild every stale stage.
+build:
+    uv run --project src/python --frozen semflow check
+    dvc repro
+
+# Refresh fingerprints after a code change; patch first if dvc.yaml's commands changed.
+semflow-refresh:
+    uv run --project src/python --frozen semflow refresh --apply
+
+pipeline-graph:
+    dvc dag --mermaid
+
+# Re-snapshot the shared resume caches and recorded v1 artifacts after a run.
+data-snapshot:
+    dvc add research/expanded/cache/embeddings research/expanded/cache/initial-diagnostic-summary.csv research/panel/distances research/panel/weights research/panel/observations research/fernandez/cache/superseded-lease-mapping
+
+# The bucket is private: set S3 credentials in .dvc/config.local first (README).
+data-pull *targets:
+    dvc pull {{ targets }}
+
+data-push:
+    dvc push

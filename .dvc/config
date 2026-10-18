@@ -1,0 +1,8 @@
+[cache]
+    type = "hardlink,symlink"
+[core]
+    remote = hf-bucket
+['remote "hf-bucket"']
+    url = s3://free-foundations/dvc-store
+    endpointurl = https://s3.hf.co/marcusinthesky
+    region = us-east-1

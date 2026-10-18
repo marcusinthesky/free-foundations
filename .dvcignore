@@ -1,0 +1,16 @@
+# DVC ignore patterns: paths DVC never hashes, even inside a tracked directory.
+# See https://dvc.org/doc/user-guide/project-structure/dvcignore-files
+#
+# Never give a `!` negation a trailing slash: DVC decides directory-ness by stat-ing the
+# working tree, so the negation would match only where the data has been pulled.
+
+__pycache__/
+*.pyc
+
+# Model weights are refetched at pinned revisions, never redistributed from the bucket.
+research/pilot/cache/*.safetensors
+research/pilot/cache/checkpoint/
+research/expanded/cache/models/
+
+# Run logs.
+*.log

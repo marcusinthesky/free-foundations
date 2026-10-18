@@ -3,7 +3,16 @@ name = "free-foundations"
 version = "0.1.0"
 description = "Typed measurements of firm proximity from tabular foundation models."
 requires-python = "~=3.13.0"
-dependencies = ["numpy>=2.3.5,<3", "pandas>=2.2,<3", "scipy>=1.15,<2", "scikit-learn>=1.7.2,<2"]
+dependencies = [
+  "numpy>=2.3.5,<3",
+  "pandas>=2.2,<3",
+  "scipy>=1.15,<2",
+  "scikit-learn>=1.7.2,<2",
+  "typer>=0.16,<1",
+]
+
+[project.scripts]
+free-foundations = "free_foundations.cli:app"
 
 # Opt in to model runtimes; importing the interface never downloads weights.
 [project.optional-dependencies]
@@ -38,6 +47,8 @@ dev = [
   "hypothesis[numpy]>=6.170,<7",
   "pandas-stubs>=2.2,<3",
   "scipy-stubs>=1.15,<2",
+  # Semantic code fingerprints for the DVC stages; it imports the Typer app.
+  "semflow",
 ]
 
 [build-system]
@@ -45,12 +56,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["free_foundations"]
+packages = ["src/free_foundations"]
 
 [tool.uv]
 default-groups = ["dev", "data"]
 
 [tool.uv.sources]
+semflow = { git = "https://github.com/marcusinthesky/semflow.git", rev = "480f5932ff868783fe06a9c42cca6a37c37e086f" }
 torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
 exaonetabular = { git = "https://github.com/LGAI-Research/EXAONE-Tabular.git", rev = "841927fc4f2c573db5c88325f64ecc4fe5affd12" }
 LimiX = { git = "https://github.com/limix-ldm-ai/LimiX.git", rev = "516bf396333feb3198cf7aff8a6c10421f218e24" }
@@ -81,11 +93,12 @@ convention = "google"
 [tool.pyrefly]
 preset = "strict"
 python-version = "3.13"
-project-includes = ["free_foundations/**/*.py", "tests/**/*.py"]
+project-includes = ["src/**/*.py", "tests/**/*.py"]
 project-excludes = [".venv/**"]
+search-path = ["src", "."]
 
 [tool.vulture]
-paths = ["free_foundations", "tests"]
+paths = ["src", "tests"]
 min_confidence = 80
 
 [tool.pytest.ini_options]

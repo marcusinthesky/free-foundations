@@ -2,7 +2,7 @@
 name = "free-foundations-tools"
 version = "0.1.0"
 requires-python = "~=3.13.0"
-dependencies = ["insitu", "leanblueprint"]
+dependencies = ["dvc[s3]>=3.60,<4", "insitu", "leanblueprint"]
 
 [tool.uv]
 package = false

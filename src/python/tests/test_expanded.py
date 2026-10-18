@@ -42,6 +42,16 @@ def test_chord_is_a_metric_and_ignores_individual_vector_length(values: FloatArr
     assert_allclose(distance, pairwise_distance(-rows[:, ::-1]), atol=1e-12)
     for index in range(len(rows)):
         assert np.all(distance <= distance[:, index, None] + distance[index, None, :] + 1e-12)
+    squared = distance**2
+    positive = squared[squared > 0]
+    bandwidth = float(np.median(positive)) if positive.size else 1.0
+    nearest = np.where(np.eye(len(rows), dtype=bool), np.inf, squared).min(axis=1)
+    if (np.exp(-nearest / bandwidth) == 0).any():
+        # An outlier far beyond the median bandwidth underflows to no neighbours at all,
+        # which the weights reject rather than renormalize.
+        with pytest.raises(ValueError, match="neighbor in every row"):
+            distance_weights(distance)
+        return
     weights, bandwidth = distance_weights(distance)
     assert bandwidth > 0
     assert_allclose(weights.sum(axis=1), 1)

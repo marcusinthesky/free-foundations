@@ -1,4 +1,4 @@
-source_roots = ["."]
+source_roots = ["src"]
 exclude = ["tests/**", ".venv/**"]
 exact = true
 
@@ -45,3 +45,7 @@ depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_found
 [[modules]]
 path = "free_foundations.ladder"
 depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.panel"]
+
+[[modules]]
+path = "free_foundations.cli"
+depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel", "free_foundations.ladder"]

@@ -6,6 +6,9 @@ repos:
     hooks:
       # Formatting
       - id: trailing-whitespace
+        # dvc.lock belongs to DVC: its YAML writer leaves a trailing space on wrapped
+        # `cmd:` scalars, re-emitted by every `dvc repro`.
+        exclude: ^dvc\.lock$
       - id: end-of-file-fixer
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -159,6 +162,32 @@ repos:
         language: system
         pass_filenames: false
         files: ^(src/lean/.*\.(lean|tex|toml)|src/latex/main\.tex)$
+
+      # ── Data pipeline ──────────────────────────────────────────────────
+      # language: system runs the devenv's dvc rather than a separate hook venv.
+      - id: dvc-pre-commit
+        name: DVC (workspace matches dvc.lock)
+        entry: dvc git-hook pre-commit
+        language: system
+        files: \.dvc$|^dvc\.(lock|yaml)$
+        pass_filenames: false
+      # The fingerprint JSON is each stage's code dependency, so a stale one would
+      # suppress a genuine rerun; this read-only check keeps it current.
+      - id: semflow-check
+        name: "semflow: fingerprints current"
+        entry: uv run --project src/python --frozen semflow check
+        language: system
+        files: ^dvc\.yaml$|^semflow\.toml$|^src/python/.*\.py$|^\.semflow/hashes/.*\.json$
+        pass_filenames: false
+      # Opt in to upload tracked data on every `git push`: uncomment once the bucket
+      # credentials are in .dvc/config.local. The first push sends about 3.6 GB.
+      # - id: dvc-pre-push
+      #   name: DVC push
+      #   entry: dvc git-hook pre-push
+      #   language: system
+      #   stages: [pre-push]
+      #   pass_filenames: false
+      #   always_run: true
 
       - id: python-quality
         name: Python types, boundaries, unused code, and tests

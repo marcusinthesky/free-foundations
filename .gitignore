@@ -23,14 +23,18 @@ src/latex/build/
 .testmondata*
 .tach/
 *.egg-info/
-# Downloads, model weights and expensive intermediates are rebuilt from cached inputs.
-research/**/cache/
-# Labeled matrices, observations and embeddings are hashed in each manifest; small
-# CSV, JSON and Markdown summaries remain trackable.
+# Downloads, model weights and expensive intermediates live in DVC's cache and the
+# Hugging Face bucket (dvc.yaml, *.dvc); Git keeps their pointers and DVC's own
+# .gitignore files.
+research/**/cache/*
+!research/**/cache/*.dvc
+!research/**/cache/.gitignore
+# Labeled matrices, observations and embeddings are DVC outputs; small CSV, JSON and
+# Markdown summaries remain in Git.
 research/**/*.parquet
 research/**/*.npz
 research/**/embeddings/
-# Per-distance fingerprints: thousands of sidecars, hashed in each design's manifest.
+# Per-distance fingerprints: thousands of sidecars, cached by DVC with their matrices.
 research/panel/**/distances/
 # Generated blueprint outputs; the sources are src/lean/blueprint/src.
 src/lean/blueprint/web/

@@ -1,0 +1,32 @@
+{
+  "algorithm": "sha256",
+  "callback": "free_foundations.cli:ladder_results",
+  "digest": "sha256:4c3e35ae859135ee0788cbdf8d11d33d098e25a3346b685605f1fb2f4781f5ff",
+  "entrypoint": "free-foundations ladder report",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:76074f15b765db1518c59cc729402a50c83ab15200f7625df19524b0e3bc6507","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:ladder_report=free_foundations.ladder.report>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:<binding:typer=typer>"},
+    {"digest":"sha256:4f3b53eb5fbd77134220e4d8f94ef485c8fb0e307b3c9294335656f9cc7e677d","kind":"global","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:ladder"},
+    {"digest":"sha256:312533110d64492df22b2edafd19dd97d8f76cbff6748ada41528702a7ccd1fc","kind":"function","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:ladder_results"},
+    {"digest":"sha256:1091f9c37fd0224028cc0029d2e72221f76ef8f875aaf08a0f4610bbc22062ea","kind":"global","path":"src/python/src/free_foundations/fernandez/characteristics.py","symbol":"free_foundations.fernandez.characteristics:CHARACTERISTICS"},
+    {"digest":"sha256:cea535d67ae345a0c385456c66b104c15db35048cd592c7ea1afd0ec3ab0201d","kind":"binding","path":"src/python/src/free_foundations/ladder/data.py","symbol":"free_foundations.ladder.data:<binding:CHARACTERISTICS=free_foundations.fernandez.characteristics:CHARACTERISTICS>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/src/free_foundations/ladder/data.py","symbol":"free_foundations.ladder.data:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:99e2c7607d6c15de435ffe468ae4f60aee4bb2ddf6fbe624882d90e822e068a2","kind":"global","path":"src/python/src/free_foundations/ladder/data.py","symbol":"free_foundations.ladder.data:ARMS"},
+    {"digest":"sha256:7fdae17067b49f615a846d8ccd3b0434da94a89af3ea8a9e792d90e7084c7410","kind":"global","path":"src/python/src/free_foundations/ladder/data.py","symbol":"free_foundations.ladder.data:ROOT"},
+    {"digest":"sha256:58011ebb340dbf93ea63a4abe25d2602f23caf20fa85df7e71cb9a2072b069fa","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:ARMS=free_foundations.ladder.data:ARMS>"},
+    {"digest":"sha256:58011ebb340dbf93ea63a4abe25d2602f23caf20fa85df7e71cb9a2072b069fa","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:ROOT=free_foundations.ladder.data:ROOT>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:json=json>"},
+    {"digest":"sha256:271fc31378e1108a9784c29c3c4768de571ce080301b4ad9721ba767fcf5842b","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:np=numpy>"},
+    {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:<binding:pd=pandas>"},
+    {"digest":"sha256:5e6786c59932a19a3e8155908c2c7f0cda6a5cf12af93b68a0d0640e78c7d651","kind":"function","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:arm"},
+    {"digest":"sha256:8b6019f51e56a1c1c270844bb19abe4cf68ecf4f2765b032109bae1faa93041d","kind":"function","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:main"},
+    {"digest":"sha256:62bf1409fc2d4ff928ef08d8bcf3b69de6e9239077eb0d66bcdc9b8f8ee236fd","kind":"function","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:r0"},
+    {"digest":"sha256:c5b3ded8591fc06ac9469b3daaf5bde1a2cc724e97549185f8bd1a1c726e7408","kind":"function","path":"src/python/src/free_foundations/ladder/report.py","symbol":"free_foundations.ladder.report:stars"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}
