@@ -24,7 +24,16 @@
     biome
     elan
     tex-fmt
-    (texliveInfraOnly.withPackages (ps: [ ps.chktex ]))
+    (texliveInfraOnly.withPackages (ps: [
+      ps.chktex
+      ps.texcount
+      # Matplotlib PGF text metrics; Tectonic typesets the final manuscript.
+      ps.latex-bin
+      ps.graphics
+      ps.epstopdf-pkg
+      ps.underscore
+      ps.lm
+    ]))
     tectonic
     # Blueprint dependency graphs: pygraphviz builds against this graphviz.
     graphviz

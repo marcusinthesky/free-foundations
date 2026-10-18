@@ -28,9 +28,19 @@ insitu-sync:
 lean-build:
     cd src/lean && lake build
 
-latex-build:
+# Saved-artifact rendering only; no empirical estimation.
+latex-assets:
     mkdir -p src/latex/build
-    tectonic -o src/latex/build src/latex/main.tex
+    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" uv run --project src/python --frozen python src/latex/render_results.py
+
+latex-build: latex-assets
+    mkdir -p src/latex/build
+    tectonic --keep-logs -o src/latex/build src/latex/main.tex
+
+# Main text, abstract and captions; TeXcount directives exclude the supplement.
+latex-count: latex-assets
+    cd src/latex && texcount -merge -sub=section main.tex > build/word-count.txt
+    cat src/latex/build/word-count.txt
 
 # Lean blueprint (leanblueprint/plasTeX). The Lean project is src/lean, not the git root,
 # so these recipes run the leanblueprint CLI's steps directly.

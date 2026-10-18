@@ -80,10 +80,15 @@ filing availability. Run `just python-universe` with `EDGAR_IDENTITY` set to
 resume its cached acquisition; the recipe reruns the frozen DVC stage and records it. Its changing annual cohorts are distinct from
 the six-firm complete-history demonstration.
 
-The [working paper](src/latex/main.tex) develops the measurement question,
-chronological panel design, and conditional network-to-covariance stability
-argument, with Finance Research Letters as a provisional outlet.
-Build the PDF with `just latex-build`; empirical conclusions remain open.
+The [paper](src/latex/main.tex), *Do Pretrained Tabular Models Measure Financial
+Proximity?*, distinguishes pretrained information from native distance geometry
+through a practical replication and a controlled retrospective experiment.
+Run `just latex-build` for the combined paper and supplement, with tables,
+native PGF figures, and numerical bindings generated from recorded results.
+The supplement develops the economic motivation, assumptions, and proofs for
+the measurement argument; the complete Lean blueprint remains available separately.
+`just latex-count` reports word counts; the
+[publication workflow](src/latex/README.md) describes the source audit and tools.
 
 The [chronological panel comparison](research/panel/RESULTS.md) constructs full
 point-in-time characteristics, calibrates one spatial coefficient per approach
