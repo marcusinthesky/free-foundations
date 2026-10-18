@@ -41,11 +41,11 @@ Every research run is a [DVC](https://dvc.org) stage in `dvc.yaml`, one per
 `free-foundations` command. [semflow](https://github.com/marcusinthesky/semflow)
 replaces each stage's Python dependency with a fingerprint of the code its command
 reaches (`.semflow/hashes/`), so comment, docstring and annotation edits rerun
-nothing. `dvc.lock` records the inputs, code and outputs of every result. Small CSV,
-JSON and Markdown summaries stay in Git. Matrices, embeddings, daily scores and
-large tables live in DVC's cache and in the private Hugging Face bucket
-`marcusinthesky/free-foundations`. Model weights are never pushed: they are
-refetched at pinned revisions.
+nothing. `dvc.lock` records the inputs, code and outputs of every result. Generated numerical CSV/JSON outputs, matrices, embeddings and daily scores
+live in DVC's cache and in the private Hugging Face bucket
+`marcusinthesky/free-foundations`. Git retains protocols, expected checkpoint
+identities, pipeline metadata and human-readable reports. Model weights are
+never pushed: verified snapshots can be restored at pinned revisions.
 
 To read or write the bucket, generate S3 credentials from a Hugging Face access
 token (Settings, Access Tokens, "Generate S3 credentials"; use a write token to
@@ -136,3 +136,38 @@ Shared embedding caches remain explicit DVC snapshots because several numerical
 stages reuse them. Temporary robust-regression exchange files are implementation
 scratch space; the ladder retains its runtime records and bootstrap artifacts.
 Use `dvc pull` to restore cached results before building the manuscript.
+
+## Measurement-construction revision
+
+The supplementary `panel validate` command crosses native and calibrated
+coordinates with Euclidean and chord distance, checks the intercept-only
+identity of Kumo's reset controls, and repeats calibration under five fixed
+fold assignments. Its protocol and separately owned DVC outputs reside under
+`research/panel/three-foundations-validation`. The original specification stays
+identifiable; the additional assignments are development diagnostics rather
+than independent test samples.
+
+Run `dvc repro panel_validate_measurement panel_report_three_foundations` to
+reproduce the principal experiment, diagnostics and report together, then
+`just latex-build` to render the revised publication from those artifacts.
+
+Checkpoint identity comes from `src/python/src/free_foundations/checkpoints.json`,
+whose expected hashes were independently checked against public metadata at the
+declared immutable revisions. Acquisition and loading verify those expectations;
+observing new local bytes cannot update them. Revision-specific directories
+reuse verified immutable files by hard link where supported. Restoring missing
+models uses the Hugging Face snapshot downloader. This model acquisition is
+separate from the frozen SEC and Yahoo snapshots.
+
+Embedding cache contracts include the extraction source, locked and installed
+runtimes, verified checkpoint bytes, context, ordered cohorts and readouts. Reuse
+checks the sidecar, payload checksum, shapes and finite values. Older cache
+entries remain archival and do not satisfy the new contract. A changed adapter
+or runtime therefore requires fresh extraction even when an outer pipeline
+stage is otherwise reproducible.
+
+Publication artifacts in the private archive are available to reviewers on
+request. A publication restoration check uses a separate checkout and empty
+DVC cache; source restoration, numerical regeneration and LaTeX compilation
+are recorded separately. A clean local DVC status alone does not establish
+remote availability.

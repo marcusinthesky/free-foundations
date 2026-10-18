@@ -129,7 +129,9 @@ descriptions in the supplement.
 
 The publication renderer checks the saved results without rerunning estimation.
 For empirical reproduction, use `just python-ladder` and
-`just python-panel three-foundations`; `dvc.yaml` and `dvc.lock` specify the workflow.
+`dvc repro panel_validate_measurement panel_report_three_foundations`.
+The latter command includes the principal experiment and its measurement
+diagnostics; `dvc.yaml` and `dvc.lock` specify the workflow.
 
 ## Representative model comparison
 
@@ -144,3 +146,16 @@ The declared model landscape and execution protocol are in
 Raw SEC, Yahoo and corporate-action inputs are frozen DVC sources. Numerical
 stages fail with a restoration instruction if a required snapshot is missing;
 they do not fetch replacements. See the root README for restoration commands.
+
+## Measurement construction and headline uncertainty
+
+The renderer additionally reads `three-foundations-validation`: paired principal
+contrasts, normalization comparisons, fold sensitivity, and null-control checks.
+It binds the date count, target commonality and normalized joint-score example
+from recorded results. The headline calibration contrasts retain both 21- and
+63-day intervals, including the common-marginal reversals and the block-length
+sensitivity of TabPFN versus native direct distance.
+
+The new tables use the existing pandas LaTeX interface, and the support figure
+remains native PGF. Numerical evaluation belongs to the DVC diagnostic stage;
+the publication renderer only verifies and formats its saved artifacts.

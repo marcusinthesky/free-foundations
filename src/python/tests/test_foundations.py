@@ -1,6 +1,5 @@
 """Optional checkpoint integration checks, run explicitly before the financial experiment."""
 
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -10,6 +9,7 @@ import pytest
 
 from free_foundations.expanded import foundations
 from free_foundations.expanded.encoding import Prepared
+from free_foundations.expanded.setup import local_checkpoint
 
 pytestmark = pytest.mark.skipif(
     os.environ.get("RUN_FOUNDATION_INTEGRATION") != "1",
@@ -25,9 +25,9 @@ def test_native_head_fidelity_frozen_weights_and_batch_consistency(
     import torch  # noqa: PLC0415 -- optional model extra.
 
     torch.set_num_threads(2)
-    root = Path(__file__).resolve().parents[3] / "research/expanded/cache/models" / name
-    metadata = json.loads((root / "provenance.json").read_text())
-    path = str(root / metadata["files"][0])
+    cache = Path(__file__).resolve().parents[3] / "research/expanded/cache"
+    metadata = local_checkpoint(cache, name)
+    path = str(Path(metadata["root"]) / metadata["files"][0])
     model = foundations.load_kumo(path) if name == "kumo" else foundations.load_limix(path)
     assert not model.training
     assert all(not p.requires_grad for p in model.parameters())

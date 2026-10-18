@@ -89,7 +89,7 @@
     },
     {
       "id": "factor_compounding",
-      "text": "Quarterly long-short factors compounded as prod(1+f)-1",
+      "text": "Compounded daily-factor proxies: quarterly long-short factors as prod(1+f)-1, not French quarterly portfolio legs (prod(1+L)-prod(1+S) differs)",
       "reason": "R4 extension"
     },
     {

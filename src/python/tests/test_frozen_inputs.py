@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from free_foundations.expanded import setup
+from free_foundations.expanded import checkpoints, setup
 from free_foundations.fernandez.characteristics import market_history
 from free_foundations.panel import characteristics
 from free_foundations.universe.sources import company_facts
@@ -56,6 +56,7 @@ def test_expanded_manifest_uses_actual_project_lock(
         return "test-version"
 
     monkeypatch.setattr(setup, "version", version)
+    monkeypatch.setattr(setup, "fast_checkpoint", lambda _source=source: source / "weights.bin")
     setup.write_manifest(source, output)
     manifest = json.loads((output / "manifest.json").read_text())
     lock = Path(__file__).resolve().parents[1] / "uv.lock"
@@ -74,7 +75,22 @@ def test_shared_checkpoint_reuse_preserves_legacy_catalogue(
     weights = b"pinned checkpoint"
     (root / "weights.bin").write_bytes(weights)
     monkeypatch.setattr(setup, "CHECKPOINTS", {"test": ("test/model", "pinned", ("weights.bin",))})
-    setup.ensure_checkpoints(tmp_path, ("test",), write_catalogue=False)
+    inventory = tmp_path / "expected.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "test": {
+                    "repository": "test/model",
+                    "revision": "pinned",
+                    "files": ["weights.bin"],
+                    "sha256": {"weights.bin": hashlib.sha256(weights).hexdigest()},
+                }
+            }
+        )
+    )
+    monkeypatch.setattr(checkpoints, "INVENTORY", inventory)
+    records = setup.ensure_checkpoints(tmp_path, ("test",), write_catalogue=False)
     assert catalogue.read_bytes() == original
-    provenance = json.loads((root / "provenance.json").read_text())
-    assert provenance["sha256"]["weights.bin"] == hashlib.sha256(weights).hexdigest()
+    provenance = records["test"]
+    assert not (root / "provenance.json").exists()
+    assert provenance["sha256"] == {"weights.bin": hashlib.sha256(weights).hexdigest()}

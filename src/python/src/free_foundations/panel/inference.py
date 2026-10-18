@@ -100,6 +100,7 @@ MEASUREMENT_CONTRASTS = (
     ("support redraw", "histories@redraw2__{}", "histories__{}"),
     ("both targets vs one", "histories@shared_both__{}", "histories@shared_market_cap_assets__{}"),
     ("decoded vs native", "histories@decoded__{}", "histories__{}"),
+    ("decoded vs native inputs", "histories@decoded__{}", "histories__direct"),
     ("decoded vs decoded inputs", "histories@decoded__{}", "histories@decoded__direct"),
 )
 # Support-size contrasts: each pretrained readout against controls without pretraining,
@@ -177,7 +178,7 @@ def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
     return [pair for pair in pairs if pair[1] in columns and pair[2] in columns]
 
 
-def contrasts(daily: pd.DataFrame) -> pd.DataFrame:
+def contrasts(daily: pd.DataFrame, pairs: list[tuple[str, str, str]] | None = None) -> pd.DataFrame:
     """Direct paired differences for the declared contrasts, with yearly totals.
 
     Intervals resample realized daily score differences in time blocks. They hold the
@@ -186,7 +187,8 @@ def contrasts(daily: pd.DataFrame) -> pd.DataFrame:
     years = pd.to_datetime(daily.index).year
     counts = {block: resample_counts(len(daily), block) for block in BLOCKS}
     rows = []
-    for label, left, right in declared_contrasts(set(map(str, daily.columns))):
+    selected = declared_contrasts(set(map(str, daily.columns))) if pairs is None else pairs
+    for label, left, right in selected:
         difference = (daily[left] - daily[right]).to_numpy(dtype=float)
         row: dict[str, str | float] = {
             "contrast": label,

@@ -39,7 +39,7 @@ Both quantities are averaged across years; no best-variant selection is applied.
 | `metrics__income__tabfm__late__chord` | 0.01254 | 4.10% | 10 |
 | `metrics__income__exaone__late__chord` | 0.01330 | 4.09% | 10 |
 
-0 of 72 foundation-model configurations have lower mean
+0 of 108 foundation-model configurations have lower mean
 covariance loss than Ledoit-Wolf. This is a descriptive comparison across the
 entire development grid, not a significance test or evidence of a causal effect.
 
@@ -52,8 +52,8 @@ Ranges describe configurations and years; firm pairs are not independent samples
 
 | Change | Minimum | Median | Maximum |
 | --- | --- | --- | --- |
-| context | 0.396 | 0.734 | 0.968 |
-| metric | 0.346 | 0.999 | 1.000 |
+| context | 0.396 | 0.760 | 1.000 |
+| metric | 0.346 | 1.000 | 1.000 |
 
 See `summary.csv` for every configuration and `permutation-comparisons.csv` for
 unrestricted, industry-group and size-group shuffles of late-readout chord networks.

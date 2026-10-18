@@ -81,3 +81,12 @@
 \newcommand{\KumoWeightLower}{((* '{:+,.1f}'.format(claims.contrast_kumo_42_diagonal.lower_21 | float).replace(',', '{,}') *))}
 %TC:macrocount \KumoWeightUpper 1
 \newcommand{\KumoWeightUpper}{((* '{:+,.1f}'.format(claims.contrast_kumo_42_diagonal.upper_21 | float).replace(',', '{,}') *))}
+
+%TC:macrocount \ScoredDates 1
+\newcommand{\ScoredDates}{((* '{:,}'.format(claims.scored_dates) *))}
+%TC:macrocount \TargetCommonality 1
+\newcommand{\TargetCommonality}{((* '{:.1f}'.format(claims.target_commonality) *))}
+%TC:macrocount \PfnDirectNormalized 1
+\newcommand{\PfnDirectNormalized}{((* '{:.5f}'.format(claims.pfn_direct_normalized) *))}
+\newcommand{\DirectUnitInnovation}{((* '{:+,.1f}'.format(claims.direct_unit_diagonal) *))}
+\newcommand{\DirectUnitMarginal}{((* '{:+,.1f}'.format(claims.direct_unit_correlation) *))}

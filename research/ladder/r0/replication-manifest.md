@@ -26,7 +26,7 @@
 | bounds | lambda and rho searched on (-0.99, 0.99): 201-point grid, bounded refinement | Grid search |
 | moran_moments | Exact Cliff-Ord residual moments; printed E(M) sign corrected | Eq. (5) prints +1/(N-1) |
 | standard_errors | ML information-matrix SEs (spreg-equivalent); S2SLS eq. (2) | OPG not reproducible |
-| factor_compounding | Quarterly long-short factors compounded as prod(1+f)-1 | R4 extension |
+| factor_compounding | Compounded daily-factor proxies: quarterly long-short factors as prod(1+f)-1, not French quarterly portfolio legs (prod(1+L)-prod(1+S) differs) | R4 extension |
 | timing | Snapshots 2015-2024 available by each year end; returns 2016Q1-2025Q4 | Paper uses 1997-2006 for both |
 | mm_seed | robustbase lmrob MM, seed 42 before each firm fit | S-Plus tuning unknown |
 | mm_retry | Non-converged fits refitted once with larger iteration limits (recorded) | Default k.max=200 fails for a few firms |
@@ -45,4 +45,4 @@
 | currency | Local returns converted to USD | USD |
 | inflation | Inflation-adjusted ratios | No inflation adjustment |
 | estimator_software | S-Plus 7.0 | R robustbase and Python (NumPy/SciPy) |
-| standard_errors | Outer product of first derivatives | Information matrix: log |
+| standard_errors | Outer product of first derivatives | Information matrix: log|I - lambda W| has no per-observation split |

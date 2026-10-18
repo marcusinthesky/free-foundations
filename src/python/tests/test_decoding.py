@@ -8,6 +8,7 @@ from free_foundations.panel.decoding import (
     covariance_exposures,
     decode,
     folds,
+    intercept_only,
     reference_exposures,
     reference_factors,
     reliability,
@@ -152,3 +153,23 @@ def test_calibration_subsampling_keeps_test_firms_out_and_row_order_irrelevant()
     np.testing.assert_allclose(reordered, before[order], atol=1e-10)
     with pytest.raises(ValueError, match="available training firms"):
         decode(states, exposures, tickers, training_size=80)
+
+
+def test_constant_features_equal_the_cross_fitted_intercept_control() -> None:
+    rng = np.random.default_rng(30)
+    tickers = tuple(f"T{i}" for i in range(60))
+    targets = rng.normal(size=(60, 5))
+    for salt in ("", "fold-audit-1", "fold-audit-4"):
+        predicted, _ = decode(np.ones((60, 9)), targets, tickers, fold_salt=salt)
+        np.testing.assert_allclose(
+            predicted, intercept_only(targets, tickers, fold_salt=salt), atol=1e-12
+        )
+        assert len(np.unique(predicted, axis=0)) == 5
+        labels = folds(tickers, salt=salt)
+        assert np.bincount(labels.astype(int)).tolist() == [12] * 5
+        changed = targets.copy()
+        held = labels == labels[0]
+        changed[held] += 100
+        again, _ = decode(np.ones((60, 9)), changed, tickers, fold_salt=salt)
+        np.testing.assert_allclose(predicted[held], again[held])
+    assert not np.array_equal(folds(tickers), folds(tickers, salt="fold-audit-1"))

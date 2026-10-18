@@ -34,6 +34,15 @@ Nonspatial OLS: log-likelihood 68.264, AIC -132.53, BIC -129.54, HQIC -131.52.
 | `r2_histories__mahalanobis_lw` | r1_joint | exp | 0.562 (0.005) | 0.0198 (0.007) | +0.396 | -1.049 | -126.83 | 0.215 | 0.520 | False |
 | `r2_histories__mahalanobis_lw` | r1_joint | median | 0.806 (0.000) | 0.0103 (0.243) | +1.439 | -0.007 | -128.92 | 0.927 | 0.320 | False |
 | `r2_histories__mahalanobis_lw` | r1_joint | matched | 0.808 (0.000) | 0.0104 (0.238) | +1.390 | -0.055 | -128.82 | 0.968 | 0.330 | False |
+| `r2_histories__euclidean` | r2_histories | exp | 0.696 (0.000) | 0.0140 (0.093) | +0.945 | -0.500 | -127.93 | 0.297 | 0.250 | False |
+| `r2_histories__euclidean` | r2_histories | median | 0.803 (0.000) | 0.0098 (0.266) | +1.497 | +0.051 | -129.03 | 0.912 | 0.130 | False |
+| `r2_histories__euclidean` | r2_histories | matched | 0.806 (0.000) | 0.0101 (0.251) | +1.432 | -0.014 | -128.90 | 0.968 | 0.120 | False |
+| `r2_histories__direct_no_indicators` | r2_histories | exp | 0.806 (0.000) | 0.0106 (0.229) | +1.142 | -0.303 | -128.32 | 0.928 | 0.700 | False |
+| `r2_histories__direct_no_indicators` | r2_histories | median | 0.807 (0.000) | 0.0106 (0.229) | +1.198 | -0.247 | -128.44 | 0.959 | 0.680 | False |
+| `r2_histories__direct_no_indicators` | r2_histories | matched | 0.808 (0.000) | 0.0106 (0.229) | +1.216 | -0.229 | -128.47 | 0.968 | 0.680 | False |
+| `r2_histories__euclidean_no_indicators` | r2_histories | exp | 0.696 (0.000) | 0.0140 (0.093) | +0.945 | -0.500 | -127.93 | 0.297 | 0.250 | False |
+| `r2_histories__euclidean_no_indicators` | r2_histories | median | 0.803 (0.000) | 0.0098 (0.266) | +1.497 | +0.051 | -129.03 | 0.912 | 0.130 | False |
+| `r2_histories__euclidean_no_indicators` | r2_histories | matched | 0.806 (0.000) | 0.0101 (0.251) | +1.432 | -0.014 | -128.90 | 0.968 | 0.120 | False |
 | `r2_histories__pca16` | r2_histories | exp | 0.810 (0.000) | 0.0100 (0.264) | +1.194 | -0.251 | -128.43 | 0.955 | 0.500 | False |
 | `r2_histories__pca16` | r2_histories | median | 0.810 (0.000) | 0.0096 (0.286) | +1.093 | -0.352 | -128.22 | 0.891 | 0.520 | False |
 | `r2_histories__pca16` | r2_histories | matched | 0.810 (0.000) | 0.0101 (0.257) | +1.220 | -0.225 | -128.48 | 0.968 | 0.500 | False |
@@ -82,6 +91,21 @@ Nonspatial OLS: log-likelihood 68.264, AIC -132.53, BIC -129.54, HQIC -131.52.
 | `r3_broad__mahalanobis_lw` | r3_broad | exp | 0.757 (0.000) | 0.0098 (0.258) | +1.311 | -0.135 | -128.66 | 0.133 | 0.420 | False |
 | `r3_broad__mahalanobis_lw` | r3_broad | median | 0.806 (0.000) | 0.0105 (0.229) | +1.404 | -0.042 | -128.85 | 0.993 | 0.210 | False |
 | `r3_broad__mahalanobis_lw` | r3_broad | matched | 0.802 (0.000) | 0.0104 (0.234) | +1.481 | +0.036 | -129.00 | 0.968 | 0.220 | False |
+| `r3_broad__euclidean` | r3_broad | exp | -0.383 (0.229) | 0.0322 (0.000) | +0.297 | -1.148 | -126.63 | 0.194 | 0.550 | False |
+| `r3_broad__euclidean` | r3_broad | median | 0.809 (0.000) | 0.0103 (0.237) | +1.434 | -0.011 | -128.91 | 0.993 | 0.060 | False |
+| `r3_broad__euclidean` | r3_broad | matched | 0.808 (0.000) | 0.0100 (0.254) | +1.545 | +0.099 | -129.13 | 0.968 | 0.060 | False |
+| `r3_broad__direct_no_indicators` | r3_broad | exp | 0.806 (0.000) | 0.0108 (0.214) | +1.399 | -0.046 | -128.84 | 0.986 | 0.110 | False |
+| `r3_broad__direct_no_indicators` | r3_broad | median | 0.806 (0.000) | 0.0108 (0.216) | +1.383 | -0.062 | -128.80 | 0.992 | 0.100 | False |
+| `r3_broad__direct_no_indicators` | r3_broad | matched | 0.803 (0.000) | 0.0109 (0.208) | +1.432 | -0.014 | -128.90 | 0.968 | 0.120 | False |
+| `r3_broad__euclidean_no_indicators` | r3_broad | exp | 0.635 (0.000) | 0.0169 (0.026) | +0.520 | -0.925 | -127.08 | 0.203 | 0.490 | False |
+| `r3_broad__euclidean_no_indicators` | r3_broad | median | 0.804 (0.000) | 0.0104 (0.232) | +1.448 | +0.003 | -128.94 | 0.984 | 0.080 | False |
+| `r3_broad__euclidean_no_indicators` | r3_broad | matched | 0.801 (0.000) | 0.0104 (0.233) | +1.493 | +0.047 | -129.02 | 0.968 | 0.080 | False |
+| `r3_broad__direct_no_size` | r3_broad | exp | 0.811 (0.000) | 0.0104 (0.234) | +1.415 | -0.031 | -128.87 | 0.994 | 0.070 | False |
+| `r3_broad__direct_no_size` | r3_broad | median | 0.810 (0.000) | 0.0104 (0.232) | +1.399 | -0.046 | -128.84 | 0.996 | 0.070 | False |
+| `r3_broad__direct_no_size` | r3_broad | matched | 0.812 (0.000) | 0.0101 (0.248) | +1.507 | +0.061 | -129.05 | 0.968 | 0.090 | False |
+| `r3_broad__euclidean_no_size` | r3_broad | exp | 0.822 (0.000) | 0.0043 (0.646) | +0.570 | -0.876 | -127.18 | 0.198 | 0.410 | False |
+| `r3_broad__euclidean_no_size` | r3_broad | median | 0.808 (0.000) | 0.0103 (0.239) | +1.455 | +0.010 | -128.95 | 0.993 | 0.020 | False |
+| `r3_broad__euclidean_no_size` | r3_broad | matched | 0.808 (0.000) | 0.0099 (0.258) | +1.588 | +0.143 | -129.21 | 0.968 | 0.040 | False |
 | `r3_broad__pca16` | r3_broad | exp | 0.811 (0.000) | 0.0102 (0.235) | +1.614 | +0.169 | -129.27 | 0.962 | 0.030 | False |
 | `r3_broad__pca16` | r3_broad | median | 0.811 (0.000) | 0.0102 (0.236) | +1.634 | +0.188 | -129.31 | 0.956 | 0.030 | False |
 | `r3_broad__pca16` | r3_broad | matched | 0.811 (0.000) | 0.0103 (0.234) | +1.591 | +0.146 | -129.22 | 0.968 | 0.030 | False |
@@ -130,6 +154,15 @@ Nonspatial OLS: log-likelihood 68.264, AIC -132.53, BIC -129.54, HQIC -131.52.
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | exp | 0.526 (0.011) | 0.0211 (0.003) | +0.409 | -1.036 | -126.86 | 0.202 | 0.460 | False |
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | median | 0.807 (0.000) | 0.0102 (0.246) | +1.455 | +0.010 | -128.95 | 0.925 | 0.310 | False |
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | matched | 0.809 (0.000) | 0.0103 (0.239) | +1.399 | -0.046 | -128.84 | 0.968 | 0.320 | False |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | exp | 0.711 (0.000) | 0.0131 (0.121) | +1.068 | -0.377 | -128.18 | 0.310 | 0.230 | False |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | median | 0.802 (0.000) | 0.0098 (0.266) | +1.518 | +0.073 | -129.07 | 0.913 | 0.130 | False |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | matched | 0.806 (0.000) | 0.0101 (0.250) | +1.445 | -0.000 | -128.93 | 0.968 | 0.120 | False |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | exp | 0.806 (0.000) | 0.0106 (0.233) | +1.132 | -0.313 | -128.30 | 0.927 | 0.700 | False |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | median | 0.808 (0.000) | 0.0106 (0.232) | +1.193 | -0.252 | -128.42 | 0.959 | 0.700 | False |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | matched | 0.808 (0.000) | 0.0106 (0.231) | +1.211 | -0.234 | -128.46 | 0.968 | 0.690 | False |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | exp | 0.711 (0.000) | 0.0131 (0.121) | +1.068 | -0.377 | -128.18 | 0.310 | 0.230 | False |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | median | 0.802 (0.000) | 0.0098 (0.266) | +1.518 | +0.073 | -129.07 | 0.913 | 0.130 | False |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | matched | 0.806 (0.000) | 0.0101 (0.250) | +1.445 | -0.000 | -128.93 | 0.968 | 0.120 | False |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | exp | 0.807 (0.000) | 0.0101 (0.257) | +1.296 | -0.149 | -128.63 | 0.957 | 0.300 | False |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | median | 0.805 (0.000) | 0.0098 (0.275) | +1.257 | -0.189 | -128.55 | 0.890 | 0.310 | False |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | matched | 0.807 (0.000) | 0.0101 (0.252) | +1.303 | -0.143 | -128.64 | 0.968 | 0.300 | False |
@@ -201,6 +234,15 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | `r2_histories__mahalanobis_lw` | r1_joint | exp | -0.887 (0.003) | 0.0475 (0.000) | +1.949 | +1.107 | -135.64 | 0.215 | — | False |
 | `r2_histories__mahalanobis_lw` | r1_joint | median | -0.990 (0.437) | 0.0486 (0.000) | +0.834 | -0.008 | -133.41 | 0.927 | — | True |
 | `r2_histories__mahalanobis_lw` | r1_joint | matched | -0.990 (0.451) | 0.0486 (0.000) | +0.778 | -0.064 | -133.30 | 0.968 | — | True |
+| `r2_histories__euclidean` | r2_histories | exp | -0.875 (0.022) | 0.0488 (0.000) | +1.173 | +0.331 | -134.09 | 0.297 | — | False |
+| `r2_histories__euclidean` | r2_histories | median | -0.990 (0.423) | 0.0489 (0.000) | +0.897 | +0.055 | -133.54 | 0.912 | — | True |
+| `r2_histories__euclidean` | r2_histories | matched | -0.990 (0.447) | 0.0489 (0.000) | +0.807 | -0.035 | -133.36 | 0.968 | — | True |
+| `r2_histories__direct_no_indicators` | r2_histories | exp | -0.990 (0.409) | 0.0487 (0.000) | +1.039 | +0.197 | -133.82 | 0.928 | — | True |
+| `r2_histories__direct_no_indicators` | r2_histories | median | -0.990 (0.430) | 0.0487 (0.000) | +0.944 | +0.102 | -133.63 | 0.959 | — | True |
+| `r2_histories__direct_no_indicators` | r2_histories | matched | -0.990 (0.437) | 0.0487 (0.000) | +0.911 | +0.069 | -133.56 | 0.968 | — | True |
+| `r2_histories__euclidean_no_indicators` | r2_histories | exp | -0.875 (0.022) | 0.0488 (0.000) | +1.173 | +0.331 | -134.09 | 0.297 | — | False |
+| `r2_histories__euclidean_no_indicators` | r2_histories | median | -0.990 (0.423) | 0.0489 (0.000) | +0.897 | +0.055 | -133.54 | 0.912 | — | True |
+| `r2_histories__euclidean_no_indicators` | r2_histories | matched | -0.990 (0.447) | 0.0489 (0.000) | +0.807 | -0.035 | -133.36 | 0.968 | — | True |
 | `r2_histories__pca16` | r2_histories | exp | -0.990 (0.432) | 0.0489 (0.000) | +0.980 | +0.138 | -133.70 | 0.955 | — | True |
 | `r2_histories__pca16` | r2_histories | median | -0.990 (0.396) | 0.0489 (0.000) | +1.153 | +0.312 | -134.05 | 0.891 | — | True |
 | `r2_histories__pca16` | r2_histories | matched | -0.990 (0.441) | 0.0489 (0.000) | +0.929 | +0.087 | -133.60 | 0.968 | — | True |
@@ -249,6 +291,21 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | `r3_broad__mahalanobis_lw` | r3_broad | exp | -0.707 (0.008) | 0.0476 (0.000) | +0.978 | +0.136 | -133.70 | 0.133 | — | False |
 | `r3_broad__mahalanobis_lw` | r3_broad | median | -0.990 (0.459) | 0.0488 (0.000) | +0.700 | -0.142 | -133.14 | 0.993 | — | True |
 | `r3_broad__mahalanobis_lw` | r3_broad | matched | -0.990 (0.452) | 0.0488 (0.000) | +0.718 | -0.124 | -133.18 | 0.968 | — | True |
+| `r3_broad__euclidean` | r3_broad | exp | -0.990 (0.000) | 0.0425 (0.000) | +3.478 | +2.637 | -138.70 | 0.194 | — | True |
+| `r3_broad__euclidean` | r3_broad | median | -0.990 (0.458) | 0.0489 (0.000) | +0.686 | -0.156 | -133.11 | 0.993 | — | True |
+| `r3_broad__euclidean` | r3_broad | matched | -0.990 (0.445) | 0.0489 (0.000) | +0.705 | -0.137 | -133.15 | 0.968 | — | True |
+| `r3_broad__direct_no_indicators` | r3_broad | exp | -0.990 (0.452) | 0.0487 (0.000) | +0.679 | -0.163 | -133.10 | 0.986 | — | True |
+| `r3_broad__direct_no_indicators` | r3_broad | median | -0.990 (0.456) | 0.0487 (0.000) | +0.681 | -0.161 | -133.10 | 0.992 | — | True |
+| `r3_broad__direct_no_indicators` | r3_broad | matched | -0.990 (0.441) | 0.0486 (0.000) | +0.672 | -0.170 | -133.09 | 0.968 | — | True |
+| `r3_broad__euclidean_no_indicators` | r3_broad | exp | -0.314 (0.342) | 0.0485 (0.000) | +0.291 | -0.551 | -132.32 | 0.203 | — | False |
+| `r3_broad__euclidean_no_indicators` | r3_broad | median | -0.990 (0.454) | 0.0490 (0.000) | +0.673 | -0.169 | -133.09 | 0.984 | — | True |
+| `r3_broad__euclidean_no_indicators` | r3_broad | matched | -0.990 (0.447) | 0.0491 (0.000) | +0.672 | -0.170 | -133.09 | 0.968 | — | True |
+| `r3_broad__direct_no_size` | r3_broad | exp | -0.990 (0.457) | 0.0487 (0.000) | +0.713 | -0.129 | -133.17 | 0.994 | — | True |
+| `r3_broad__direct_no_size` | r3_broad | median | -0.990 (0.458) | 0.0487 (0.000) | +0.707 | -0.135 | -133.16 | 0.996 | — | True |
+| `r3_broad__direct_no_size` | r3_broad | matched | -0.990 (0.439) | 0.0485 (0.000) | +0.758 | -0.084 | -133.26 | 0.968 | — | True |
+| `r3_broad__euclidean_no_size` | r3_broad | exp | -0.990 (0.000) | 0.0431 (0.000) | +3.287 | +2.445 | -138.31 | 0.198 | — | True |
+| `r3_broad__euclidean_no_size` | r3_broad | median | -0.990 (0.458) | 0.0489 (0.000) | +0.699 | -0.142 | -133.14 | 0.993 | — | True |
+| `r3_broad__euclidean_no_size` | r3_broad | matched | -0.990 (0.445) | 0.0489 (0.000) | +0.733 | -0.109 | -133.21 | 0.968 | — | True |
 | `r3_broad__pca16` | r3_broad | exp | -0.990 (0.438) | 0.0488 (0.000) | +0.680 | -0.162 | -133.10 | 0.962 | — | True |
 | `r3_broad__pca16` | r3_broad | median | -0.990 (0.435) | 0.0488 (0.000) | +0.683 | -0.159 | -133.11 | 0.956 | — | True |
 | `r3_broad__pca16` | r3_broad | matched | -0.990 (0.442) | 0.0488 (0.000) | +0.677 | -0.165 | -133.10 | 0.968 | — | True |
@@ -297,6 +354,15 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | exp | -0.864 (0.002) | 0.0473 (0.000) | +2.127 | +1.285 | -136.00 | 0.202 | — | False |
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | median | -0.990 (0.436) | 0.0486 (0.000) | +0.827 | -0.015 | -133.40 | 0.925 | — | True |
 | `r2_histories@income_assets__mahalanobis_lw` | r2_histories@income_assets | matched | -0.990 (0.451) | 0.0486 (0.000) | +0.771 | -0.071 | -133.28 | 0.968 | — | True |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | exp | -0.990 (0.014) | 0.0488 (0.000) | +1.291 | +0.449 | -134.32 | 0.310 | — | True |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | median | -0.990 (0.424) | 0.0490 (0.000) | +0.888 | +0.047 | -133.52 | 0.913 | — | True |
+| `r2_histories@income_assets__euclidean` | r2_histories@income_assets | matched | -0.990 (0.447) | 0.0489 (0.000) | +0.803 | -0.039 | -133.35 | 0.968 | — | True |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | exp | -0.990 (0.408) | 0.0488 (0.000) | +1.048 | +0.206 | -133.84 | 0.927 | — | True |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | median | -0.990 (0.430) | 0.0488 (0.000) | +0.947 | +0.105 | -133.64 | 0.959 | — | True |
+| `r2_histories@income_assets__direct_no_indicators` | r2_histories@income_assets | matched | -0.990 (0.436) | 0.0488 (0.000) | +0.914 | +0.072 | -133.57 | 0.968 | — | True |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | exp | -0.990 (0.014) | 0.0488 (0.000) | +1.291 | +0.449 | -134.32 | 0.310 | — | True |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | median | -0.990 (0.424) | 0.0490 (0.000) | +0.888 | +0.047 | -133.52 | 0.913 | — | True |
+| `r2_histories@income_assets__euclidean_no_indicators` | r2_histories@income_assets | matched | -0.990 (0.447) | 0.0489 (0.000) | +0.803 | -0.039 | -133.35 | 0.968 | — | True |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | exp | -0.990 (0.434) | 0.0490 (0.000) | +0.972 | +0.131 | -133.69 | 0.957 | — | True |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | median | -0.990 (0.396) | 0.0491 (0.000) | +1.159 | +0.317 | -134.06 | 0.890 | — | True |
 | `r2_histories@income_assets__pca16` | r2_histories@income_assets | matched | -0.990 (0.441) | 0.0489 (0.000) | +0.930 | +0.089 | -133.60 | 0.968 | — | True |
@@ -359,6 +425,12 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | capm | `r2_histories__direct` | sem_premium | 0.0199 | [-0.0151, 0.0557] |
 | capm | `r2_histories__mahalanobis_lw` | sem_intensity | 0.4231 | [-0.5508, 0.8361] |
 | capm | `r2_histories__mahalanobis_lw` | sem_premium | 0.0162 | [-0.0058, 0.0551] |
+| capm | `r2_histories__euclidean` | sem_intensity | 0.4180 | [-0.5740, 0.8491] |
+| capm | `r2_histories__euclidean` | sem_premium | 0.0176 | [-0.0111, 0.0532] |
+| capm | `r2_histories__direct_no_indicators` | sem_intensity | 0.8677 | [-0.9900, 0.8811] |
+| capm | `r2_histories__direct_no_indicators` | sem_premium | 0.0195 | [-0.0147, 0.0578] |
+| capm | `r2_histories__euclidean_no_indicators` | sem_intensity | 0.4180 | [-0.5740, 0.8491] |
+| capm | `r2_histories__euclidean_no_indicators` | sem_premium | 0.0176 | [-0.0111, 0.0532] |
 | capm | `r2_histories__pca16` | sem_intensity | 0.8921 | [-0.9900, 0.8761] |
 | capm | `r2_histories__pca16` | sem_premium | 0.0200 | [-0.0153, 0.0572] |
 | capm | `r2_histories__autoencoder` | sem_intensity | 0.8898 | [-0.9900, 0.8758] |
@@ -391,6 +463,16 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | capm | `r3_broad__direct` | sem_premium | 0.0199 | [-0.0143, 0.0560] |
 | capm | `r3_broad__mahalanobis_lw` | sem_intensity | 0.4851 | [-0.8598, 0.8793] |
 | capm | `r3_broad__mahalanobis_lw` | sem_premium | 0.0181 | [-0.0136, 0.0516] |
+| capm | `r3_broad__euclidean` | sem_intensity | 0.5590 | [-0.7988, 0.8808] |
+| capm | `r3_broad__euclidean` | sem_premium | 0.0193 | [-0.0158, 0.0556] |
+| capm | `r3_broad__direct_no_indicators` | sem_intensity | 0.8593 | [-0.9900, 0.8744] |
+| capm | `r3_broad__direct_no_indicators` | sem_premium | 0.0197 | [-0.0141, 0.0561] |
+| capm | `r3_broad__euclidean_no_indicators` | sem_intensity | 0.4229 | [-0.4507, 0.8511] |
+| capm | `r3_broad__euclidean_no_indicators` | sem_premium | 0.0178 | [-0.0114, 0.0558] |
+| capm | `r3_broad__direct_no_size` | sem_intensity | 0.8739 | [-0.9900, 0.8759] |
+| capm | `r3_broad__direct_no_size` | sem_premium | 0.0199 | [-0.0143, 0.0560] |
+| capm | `r3_broad__euclidean_no_size` | sem_intensity | 0.5529 | [-0.7955, 0.8880] |
+| capm | `r3_broad__euclidean_no_size` | sem_premium | 0.0196 | [-0.0172, 0.0556] |
 | capm | `r3_broad__pca16` | sem_intensity | 0.8339 | [-0.9900, 0.8770] |
 | capm | `r3_broad__pca16` | sem_premium | 0.0193 | [-0.0142, 0.0558] |
 | capm | `r3_broad__autoencoder` | sem_intensity | 0.8565 | [-0.9900, 0.8721] |
@@ -423,6 +505,12 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | capm | `r2_histories@income_assets__direct` | sem_premium | 0.0199 | [-0.0151, 0.0557] |
 | capm | `r2_histories@income_assets__mahalanobis_lw` | sem_intensity | 0.3992 | [-0.4621, 0.8344] |
 | capm | `r2_histories@income_assets__mahalanobis_lw` | sem_premium | 0.0159 | [-0.0052, 0.0538] |
+| capm | `r2_histories@income_assets__euclidean` | sem_intensity | 0.4286 | [-0.6093, 0.8538] |
+| capm | `r2_histories@income_assets__euclidean` | sem_premium | 0.0178 | [-0.0114, 0.0532] |
+| capm | `r2_histories@income_assets__direct_no_indicators` | sem_intensity | 0.8687 | [-0.9900, 0.8817] |
+| capm | `r2_histories@income_assets__direct_no_indicators` | sem_premium | 0.0195 | [-0.0148, 0.0577] |
+| capm | `r2_histories@income_assets__euclidean_no_indicators` | sem_intensity | 0.4286 | [-0.6093, 0.8538] |
+| capm | `r2_histories@income_assets__euclidean_no_indicators` | sem_premium | 0.0178 | [-0.0114, 0.0532] |
 | capm | `r2_histories@income_assets__pca16` | sem_intensity | 0.8862 | [-0.9900, 0.8732] |
 | capm | `r2_histories@income_assets__pca16` | sem_premium | 0.0199 | [-0.0152, 0.0557] |
 | capm | `r2_histories@income_assets__autoencoder` | sem_intensity | 0.8910 | [-0.9900, 0.8754] |
@@ -467,6 +555,12 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | ff6 | `r2_histories__direct` | sem_premium | 0.0170 | [-0.0115, 0.0489] |
 | ff6 | `r2_histories__mahalanobis_lw` | sem_intensity | 0.5422 | [-0.8450, 0.9028] |
 | ff6 | `r2_histories__mahalanobis_lw` | sem_premium | 0.0174 | [-0.0114, 0.0483] |
+| ff6 | `r2_histories__euclidean` | sem_intensity | 0.5809 | [-0.9900, 0.8956] |
+| ff6 | `r2_histories__euclidean` | sem_premium | 0.0175 | [-0.0126, 0.0500] |
+| ff6 | `r2_histories__direct_no_indicators` | sem_intensity | 0.7904 | [-0.9900, 0.9051] |
+| ff6 | `r2_histories__direct_no_indicators` | sem_premium | 0.0171 | [-0.0118, 0.0486] |
+| ff6 | `r2_histories__euclidean_no_indicators` | sem_intensity | 0.5809 | [-0.9900, 0.8956] |
+| ff6 | `r2_histories__euclidean_no_indicators` | sem_premium | 0.0175 | [-0.0126, 0.0500] |
 | ff6 | `r2_histories__pca16` | sem_intensity | 0.7952 | [-0.9900, 0.9044] |
 | ff6 | `r2_histories__pca16` | sem_premium | 0.0172 | [-0.0121, 0.0486] |
 | ff6 | `r2_histories__autoencoder` | sem_intensity | 0.7838 | [-0.9900, 0.9024] |
@@ -499,6 +593,16 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | ff6 | `r3_broad__direct` | sem_premium | 0.0167 | [-0.0112, 0.0474] |
 | ff6 | `r3_broad__mahalanobis_lw` | sem_intensity | 0.5587 | [-0.9517, 0.8988] |
 | ff6 | `r3_broad__mahalanobis_lw` | sem_premium | 0.0170 | [-0.0116, 0.0471] |
+| ff6 | `r3_broad__euclidean` | sem_intensity | 0.7406 | [-0.9900, 0.9141] |
+| ff6 | `r3_broad__euclidean` | sem_premium | 0.0188 | [-0.0160, 0.0481] |
+| ff6 | `r3_broad__direct_no_indicators` | sem_intensity | 0.7731 | [-0.9900, 0.9026] |
+| ff6 | `r3_broad__direct_no_indicators` | sem_premium | 0.0167 | [-0.0112, 0.0477] |
+| ff6 | `r3_broad__euclidean_no_indicators` | sem_intensity | 0.6133 | [-0.9436, 0.8996] |
+| ff6 | `r3_broad__euclidean_no_indicators` | sem_premium | 0.0178 | [-0.0127, 0.0491] |
+| ff6 | `r3_broad__direct_no_size` | sem_intensity | 0.7739 | [-0.9900, 0.9041] |
+| ff6 | `r3_broad__direct_no_size` | sem_premium | 0.0167 | [-0.0112, 0.0475] |
+| ff6 | `r3_broad__euclidean_no_size` | sem_intensity | 0.7183 | [-0.9900, 0.9210] |
+| ff6 | `r3_broad__euclidean_no_size` | sem_premium | 0.0184 | [-0.0157, 0.0481] |
 | ff6 | `r3_broad__pca16` | sem_intensity | 0.7682 | [-0.9900, 0.9044] |
 | ff6 | `r3_broad__pca16` | sem_premium | 0.0166 | [-0.0114, 0.0478] |
 | ff6 | `r3_broad__autoencoder` | sem_intensity | 0.7735 | [-0.9900, 0.9029] |
@@ -531,6 +635,12 @@ Nonspatial OLS: log-likelihood 79.857, AIC -145.71, BIC -135.24, HQIC -142.19.
 | ff6 | `r2_histories@income_assets__direct` | sem_premium | 0.0170 | [-0.0116, 0.0489] |
 | ff6 | `r2_histories@income_assets__mahalanobis_lw` | sem_intensity | 0.5130 | [-0.7738, 0.9037] |
 | ff6 | `r2_histories@income_assets__mahalanobis_lw` | sem_premium | 0.0174 | [-0.0121, 0.0490] |
+| ff6 | `r2_histories@income_assets__euclidean` | sem_intensity | 0.6049 | [-0.9900, 0.8966] |
+| ff6 | `r2_histories@income_assets__euclidean` | sem_premium | 0.0176 | [-0.0158, 0.0504] |
+| ff6 | `r2_histories@income_assets__direct_no_indicators` | sem_intensity | 0.7961 | [-0.9900, 0.9060] |
+| ff6 | `r2_histories@income_assets__direct_no_indicators` | sem_premium | 0.0172 | [-0.0121, 0.0487] |
+| ff6 | `r2_histories@income_assets__euclidean_no_indicators` | sem_intensity | 0.6049 | [-0.9900, 0.8966] |
+| ff6 | `r2_histories@income_assets__euclidean_no_indicators` | sem_premium | 0.0176 | [-0.0158, 0.0504] |
 | ff6 | `r2_histories@income_assets__pca16` | sem_intensity | 0.7893 | [-0.9900, 0.9028] |
 | ff6 | `r2_histories@income_assets__pca16` | sem_premium | 0.0171 | [-0.0119, 0.0488] |
 | ff6 | `r2_histories@income_assets__autoencoder` | sem_intensity | 0.7841 | [-0.9900, 0.9032] |

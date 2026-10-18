@@ -8,25 +8,28 @@
 
 vars:
 - ff: uv run --project src/python --frozen free-foundations
-- pilot: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn
-    free-foundations
-- heavy: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv run --project
-    src/python --frozen --extra tabpfn --extra tabfm --extra exaone free-foundations
+- pilot: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra
+    tabpfn free-foundations
+- heavy: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv
+    run --project src/python --frozen --extra tabpfn --extra tabfm --extra
+    exaone free-foundations
 
 stages:
   model_checkpoints:
-    desc: Acquire pinned model revisions and record verified hashes; financial snapshots are
-      unchanged.
+    desc: Acquire pinned model revisions and record verified hashes; financial
+      snapshots are unchanged.
     cmd: ${pilot} expanded checkpoints
     deps:
     - .semflow/hashes/entrypoints/free-foundations/expanded/checkpoints.json
     - src/python/uv.lock
     - src/python/pyproject.toml
     - research/pilot/cache/checkpoint.json
+    - src/python/src/free_foundations/checkpoints.json
     outs:
     - research/model-checkpoints.json
   panel_run_three_foundations:
-    desc: Representative frozen-model measurement experiment, including Kumo Large and LimiX-2.
+    desc: Representative frozen-model measurement experiment, including Kumo
+      Large and LimiX-2.
     cmd: >-
       OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1
       uv run --project src/python --frozen --extra tabpfn --extra tabfm
@@ -58,7 +61,8 @@ stages:
     - research/panel/three-foundations/distances
     - research/panel/three-foundations/contexts
   panel_report_three_foundations:
-    desc: Report and provenance for the representative foundation-model experiment.
+    desc: Report and provenance for the representative foundation-model
+      experiment.
     cmd: ${ff} panel report --design three-foundations
     deps:
     - .semflow/hashes/entrypoints/free-foundations/panel/report.json
@@ -91,9 +95,39 @@ stages:
         cache: false
     - research/panel/three-foundations/checkpoints.json
     - research/panel/three-foundations/disclosure-audit.json
+  panel_validate_measurement:
+    desc: Declared normalization, cross-fitting and intercept-only measurement
+      diagnostics.
+    cmd: OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 TABPFN_DISABLE_TELEMETRY=1 uv
+      run --project src/python --frozen --extra tabpfn --extra tabfm --extra
+      kumo --extra limix free-foundations panel validate
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/panel/validate.json
+    - src/python/uv.lock
+    - src/python/pyproject.toml
+    - research/model-checkpoints.json
+    - research/pilot/cache/checkpoint.json
+    - research/panel/cache/four.parquet
+    - research/panel/cache/broad.parquet
+    - research/universe/cache/prices.parquet
+    - research/universe/cache/factors.parquet
+    - research/panel/three-foundations/daily-scores.parquet
+    - research/panel/three-foundations-validation/README.md
+    outs:
+    - research/panel/three-foundations-validation/daily-scores.parquet
+    - research/panel/three-foundations-validation/annual-scores.csv
+    - research/panel/three-foundations-validation/scores.csv
+    - research/panel/three-foundations-validation/decoding.csv
+    - research/panel/three-foundations-validation/null-checks.csv
+    - research/panel/three-foundations-validation/contrasts.csv
+    - research/panel/three-foundations-validation/principal-contrasts.csv
+    - research/panel/three-foundations-validation/configuration.json
+    - research/panel/three-foundations-validation/validation.json
+    - research/panel/three-foundations-validation/observations
   universe:
     desc: >-
-      Acquire the larger public-data universe from SEC EDGAR and Yahoo. Network inputs cannot be rebuilt
+      Acquire the larger public-data universe from SEC EDGAR and Yahoo. Network inputs
+      cannot be rebuilt
       bit for bit, so the stage is frozen; needs EDGAR_IDENTITY.
     cmd: ${ff} universe run
     frozen: true
@@ -125,7 +159,8 @@ stages:
 
   pilot:
     desc: >-
-      Cache the pilot's market and SEC inputs and run the original experiment. Network inputs, so frozen;
+      Cache the pilot's market and SEC inputs and run the original experiment. Network
+      inputs, so frozen;
       the TabPFN checkpoint is refetched, not tracked.
     cmd: ${pilot} pilot run --stage all --pretrained
     frozen: true
@@ -162,9 +197,9 @@ stages:
         cache: false
 
   market_metadata:
-    cmd: "false"  # Recorded source snapshot: no acquisition command in reproduction.
-    desc: Frozen SEC industry classification and Yahoo corporate-action snapshots; restore rather
-      than refetch.
+    cmd: 'false'  # Recorded source snapshot: no acquisition command in reproduction.
+    desc: Frozen SEC industry classification and Yahoo corporate-action
+      snapshots; restore rather than refetch.
     frozen: true
     outs:
     - research/expanded/industry.csv:
@@ -441,7 +476,8 @@ stages:
     - research/panel/price-audit.csv
   panel_run_four:
     desc: >-
-      Panel design four: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held
+      Panel design four: one 2016-2019 intensity per network, kernel and innovation
+      arm; 2020-2025 held
       out.
     cmd: ${heavy} panel run --design four
     deps:
@@ -508,7 +544,8 @@ stages:
     - research/panel/four/regression-check.csv
   panel_run_four_h5:
     desc: >-
-      Panel design four-h5: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      Panel design four-h5: one 2016-2019 intensity per network, kernel and innovation
+      arm; 2020-2025
       held out.
     cmd: ${heavy} panel run --design four-h5
     deps:
@@ -569,7 +606,8 @@ stages:
     - research/panel/four-h5/disclosure-audit.json
   panel_run_four_xqxo:
     desc: >-
-      Panel design four-xqxo: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      Panel design four-xqxo: one 2016-2019 intensity per network, kernel and innovation
+      arm; 2020-2025
       held out.
     cmd: ${heavy} panel run --design four-xqxo
     deps:
@@ -630,7 +668,8 @@ stages:
     - research/panel/four-xqxo/disclosure-audit.json
   panel_run_three:
     desc: >-
-      Panel design three: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025 held
+      Panel design three: one 2016-2019 intensity per network, kernel and innovation
+      arm; 2020-2025 held
       out.
     cmd: ${heavy} panel run --design three
     deps:
@@ -695,7 +734,8 @@ stages:
     - research/panel/three/disclosure-audit.json
   panel_run_three_support:
     desc: >-
-      Panel design three-support: one 2016-2019 intensity per network, kernel and innovation arm; 2020-2025
+      Panel design three-support: one 2016-2019 intensity per network, kernel and
+      innovation arm; 2020-2025
       held out.
     cmd: ${heavy} panel run --design three-support
     deps:

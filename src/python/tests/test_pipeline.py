@@ -35,6 +35,7 @@ def test_numerical_stages_can_use_the_run_cache() -> None:
         "panel_audit",
         "ladder_run",
         "model_checkpoints",
+        "panel_validate_measurement",
     } | {name for name in PIPELINE if name.startswith("panel_run_")}
     for name in names:
         for output in PIPELINE[name]["outs"]:
@@ -74,3 +75,13 @@ def test_checkpoint_report_works_without_local_model_weights(
 def test_financial_sources_remain_frozen() -> None:
     for name in ("universe", "pilot", "market_metadata"):
         assert PIPELINE[name]["frozen"] is True
+
+
+def test_measurement_validation_declares_its_inputs_and_cached_results() -> None:
+    stage = PIPELINE["panel_validate_measurement"]
+    assert "research/panel/three-foundations/daily-scores.parquet" in stage["deps"]
+    assert "research/panel/three-foundations-validation/README.md" in stage["deps"]
+    assert (
+        "src/python/src/free_foundations/checkpoints.json" in PIPELINE["model_checkpoints"]["deps"]
+    )
+    assert all(isinstance(output, str) for output in stage["outs"])

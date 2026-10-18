@@ -7,6 +7,7 @@ import json
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import lru_cache
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -22,12 +23,11 @@ from free_foundations import (
     Tokens,
     from_fitted,
 )
+from free_foundations.expanded import cache as state_cache
+from free_foundations.expanded.checkpoints import expected
 from free_foundations.expanded.setup import fast_checkpoint, local_checkpoint
-from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from torch import Tensor
     from torch.nn import Module
 
@@ -378,18 +378,6 @@ def exaone_states(data: Prepared, path: str, checkpoint: str) -> dict[str, Float
     }
 
 
-READOUT_VERSION = {"exaone": "readout-v2"}
-
-
-def embedding_path(
-    data: Prepared, model: str, checkpoint: str, cache: Path, version: str | None = None
-) -> Path:
-    """Cache key: context digest, checkpoint, model and that model's readout version."""
-    readout = version or READOUT_VERSION.get(model, "readout-v1")
-    key = hashlib.sha256(f"{data.digest}:{checkpoint}:{model}:{readout}".encode()).hexdigest()
-    return cache / "embeddings" / f"{model}-{key}.npz"
-
-
 def foundation_states(
     data: Prepared, model: str, cache: Path, source: Path, *, store: bool = True
 ) -> dict[str, FloatArray]:
@@ -403,20 +391,18 @@ def foundation_states(
     base, random_marker, seed_text = model.partition("_random")
     seed = int(seed_text) if seed_text else 42
     if model == "tabpfn_fast":
-        metadata = json.loads((source / "checkpoint.json").read_text())
+        metadata = expected("tabpfn_fast")
         path = str(fast_checkpoint(source))
-        checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['filename']}"
+        checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files'][0]}"
     else:
-        root = cache / "models" / base.removesuffix("_labelnull")
         metadata = local_checkpoint(cache, base.removesuffix("_labelnull"))
+        root = Path(metadata["root"])
         path = str(root / ("regression" if model.startswith("tabfm") else metadata["files"][0]))
         checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files']}"
-    destination = embedding_path(data, model, checkpoint, cache)
+    contract = state_cache.identity(data, model, metadata)
+    destination = state_cache.location(cache, contract)
     if destination.exists():
-        with np.load(destination) as arrays:
-            return {
-                name: arrays[name].astype(np.float64) for name in arrays.files if arrays[name].size
-            }
+        return state_cache.load(destination, contract)
     if model.startswith("tabpfn"):
         result = tabpfn_states(
             data,
@@ -434,12 +420,6 @@ def foundation_states(
         result = tabfm_states(data, path, checkpoint, null_labels=model == "tabfm_labelnull")
     elif model == "exaone":
         result = exaone_states(data, path, checkpoint)
-        previous = embedding_path(data, model, checkpoint, cache, version="readout-v1")
-        if previous.exists():
-            with np.load(previous) as arrays:
-                if not np.allclose(arrays["late"], result["late"], atol=1e-6):
-                    message = "EXAONE v2 label-token readout differs from the cached v1 readout."
-                    raise ValueError(message)
     else:
         message = f"Unsupported experiment model: {model}"
         raise ValueError(message)
@@ -448,22 +428,5 @@ def foundation_states(
     result = {name: values.astype(np.float32).astype(np.float64) for name, values in result.items()}
     if not store:
         return result
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    payload: dict[str, Any] = {name: values.astype(np.float32) for name, values in result.items()}
-    np.savez_compressed(destination, **payload)
-    write_json(
-        destination.with_suffix(".json"),
-        {
-            "checkpoint": checkpoint,
-            "context_digest": data.digest,
-            "year": data.year,
-            "support_rows": len(data.support),
-            "support_ids": data.support_ids,
-            "features": data.features,
-            "tickers": data.tickers,
-            "readout_shapes": {name: list(values.shape) for name, values in result.items()},
-            "seed": seed,
-            "preprocessing": "support median, indicators, standardize, clip [-8,8]",
-        },
-    )
+    state_cache.save(destination, contract, result)
     return result

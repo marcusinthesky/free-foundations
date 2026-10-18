@@ -9,6 +9,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
+from free_foundations.expanded.checkpoints import expected, resolve
 from free_foundations.pilot.data import write_json
 
 CHECKPOINTS = {
@@ -46,31 +47,19 @@ def ensure_checkpoints(
     *,
     write_catalogue: bool = True,
 ) -> dict[str, dict[str, object]]:
-    """Download immutable revisions anonymously; reuse and hash existing files."""
+    """Verify pinned bytes before reuse; acquire missing revision-specific snapshots."""
     metadata: dict[str, dict[str, object]] = {}
-    for name, (repository, revision, files) in CHECKPOINTS.items():
-        if name not in models:
-            continue
-        root = output / "cache" / "models" / name
-        hashes = {}
-        for filename in files:
-            destination = root / filename
-            if not destination.exists():
-                from huggingface_hub import hf_hub_download  # noqa: PLC0415
-
-                hf_hub_download(
-                    repository, filename, revision=revision, token=False, local_dir=root
-                )
-            with destination.open("rb") as stream:
-                hashes[filename] = hashlib.file_digest(stream, "sha256").hexdigest()
-        record: dict[str, object] = {
-            "repository": repository,
-            "revision": revision,
-            "files": files,
-            "sha256": hashes,
-        }
-        write_json(root / "provenance.json", record)
-        metadata[name] = record
+    for name in models:
+        repository, revision, files = CHECKPOINTS[name]
+        record = expected(name)
+        if (repository, revision, list(files)) != (
+            record["repository"],
+            record["revision"],
+            record["files"],
+        ):
+            message = f"Checkpoint declaration differs from approved inventory: {name}"
+            raise ValueError(message)
+        metadata[name] = resolve(name, output / "cache")
     if write_catalogue:
         manifest = output / "checkpoints.json"
         previous = json.loads(manifest.read_text()) if manifest.exists() else {}
@@ -161,34 +150,30 @@ def checkpoint_catalogue() -> None:
     with path.open("rb") as stream:
         fast["observed_sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
     fast["path"] = str(path)
-    records["tabpfn_fast"] = fast
+    records["tabpfn_fast"] = expected("tabpfn_fast") | {
+        "path": str(path),
+        "observed_sha256": fast["observed_sha256"],
+    }
     write_json(Path("research/model-checkpoints.json"), records)
 
 
 def fast_checkpoint(source: Path) -> Path:
-    """Resolve the frozen Fast revision locally without changing its source metadata."""
+    """Verify Fast weights without modifying the frozen acquisition directory."""
     metadata = json.loads((source / "checkpoint.json").read_text())
-    candidates = (source / metadata["filename"], source / "checkpoint" / metadata["filename"])
-    for path in candidates:
-        if path.is_file():
-            return path
-    from huggingface_hub import hf_hub_download  # noqa: PLC0415
-
-    return Path(
-        hf_hub_download(
-            metadata["repository"],
-            metadata["filename"],
-            revision=metadata["revision"],
-            token=False,
-            local_dir=source / "checkpoint",
-        )
-    )
+    record = expected("tabpfn_fast")
+    if (metadata["repository"], metadata["revision"], [metadata["filename"]]) != (
+        record["repository"],
+        record["revision"],
+        record["files"],
+    ):
+        message = "Frozen Fast descriptor differs from the approved checkpoint inventory."
+        raise ValueError(message)
+    legacy = source if (source / metadata["filename"]).exists() else source / "checkpoint"
+    found = resolve("tabpfn_fast", Path("research/expanded/cache"), legacy)
+    return Path(found["root"]) / metadata["filename"]
 
 
 def local_checkpoint(cache: Path, name: str) -> dict[str, Any]:
-    """Restore missing immutable model files without changing any pipeline outputs."""
-    root = cache / "models" / name
-    _, _, files = CHECKPOINTS[name]
-    if not (root / "provenance.json").exists() or any(not (root / f).exists() for f in files):
-        ensure_checkpoints(cache.parent, (name,), write_catalogue=False)
-    return json.loads((root / "provenance.json").read_text())
+    """Verify immutable identity and file contents before every reuse."""
+    records = ensure_checkpoints(cache.parent, (name,), write_catalogue=False)
+    return records[name]

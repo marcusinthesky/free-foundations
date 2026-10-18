@@ -113,9 +113,9 @@ def reliability(
 
     Each half of the prior window gives its own estimate. For the reference target both
     halves share the full-window factor series, so their coordinates are comparable; the
-    Spearman-Brown value is the reliability of the full-window target and bounds the R^2 any
-    decoder can reach against it. The in-panel coordinates rotate between halves, so only
-    their distances are compared.
+    Spearman-Brown value summarizes split-half agreement. An attainable-fit ceiling
+    additionally requires a measurement-error model. The in-panel coordinates rotate
+    between halves, so only their distances are compared.
     """
     half = len(prior) // 2
     factors = reference_factors(reference, rank)
@@ -158,9 +158,11 @@ def reliability(
     ]
 
 
-def folds(tickers: tuple[str, ...], count: int = FOLDS) -> FloatArray:
+def folds(tickers: tuple[str, ...], count: int = FOLDS, *, salt: str = "") -> FloatArray:
     """Deterministic, outcome-independent fold labels from ticker hashes."""
-    order = sorted(range(len(tickers)), key=lambda i: hashlib.sha256(tickers[i].encode()).digest())
+    order = sorted(
+        range(len(tickers)), key=lambda i: hashlib.sha256((salt + tickers[i]).encode()).digest()
+    )
     labels = np.empty(len(tickers), dtype=float)
     labels[order] = np.arange(len(tickers)) % count
     return labels
@@ -172,6 +174,7 @@ def decode(
     tickers: tuple[str, ...],
     *,
     training_size: int | None = None,
+    fold_salt: str = "",
 ) -> tuple[FloatArray, dict[str, float]]:
     """Out-of-fold ridge predictions of exposures, with fit and distance agreement.
 
@@ -181,7 +184,7 @@ def decode(
     EXAONE states in 2017, up to 190 training standard deviations out) decided the fit.
     """
     predictions = np.zeros_like(exposures)
-    labels = folds(tickers)
+    labels = folds(tickers, salt=fold_salt)
     for fold in np.unique(labels):
         test = labels == fold
         available = np.flatnonzero(~test)
@@ -209,3 +212,14 @@ def decode(
         "decoder_r2": 1 - float(np.sum((exposures - predictions) ** 2)) / total,
         "exposure_distance_spearman": _distance_agreement(exposures, predictions),
     }
+
+
+def intercept_only(
+    exposures: FloatArray, tickers: tuple[str, ...], *, fold_salt: str = ""
+) -> FloatArray:
+    """Cross-fitted target means: the null geometry induced by fold-specific intercepts."""
+    labels = folds(tickers, salt=fold_salt)
+    predictions = np.empty_like(exposures)
+    for fold in np.unique(labels):
+        predictions[labels == fold] = exposures[labels != fold].mean(axis=0)
+    return predictions

@@ -13,6 +13,7 @@ import pandas as pd
 from free_foundations.expanded.representations import ARMS
 from free_foundations.fernandez.kernels import (
     KERNELS,
+    Kernel,
     effective_neighbours,
     geometry,
     kernel_weights,
@@ -73,6 +74,9 @@ def describe(name: str) -> dict[str, str]:
 class Panel:
     """Accumulated calibration statistics and held-out daily densities for one design."""
 
+    kernels: tuple[Kernel, ...] = KERNELS
+    include_placebos: bool = True
+    diagonal_only: bool = False
     calibration: dict[Key, list[Block]] = field(default_factory=dict)
     intensities: dict[tuple[str, str, str], tuple[float, float]] = field(default_factory=dict)
     daily: dict[str, list[FloatArray]] = field(default_factory=dict)
@@ -116,21 +120,27 @@ def own_variance(weights: FloatArray, item: Block) -> FloatArray:
 
 
 def networks(
-    distances: dict[str, FloatArray], groups: FloatArray, year: int
+    distances: dict[str, FloatArray],
+    groups: FloatArray,
+    year: int,
+    *,
+    kernels: tuple[Kernel, ...] = KERNELS,
+    include_placebos: bool = True,
 ) -> dict[Key, tuple[FloatArray, float]]:
     """Every distance under each kernel; matched kernels copy the joint benchmark's spread."""
     target = effective_neighbours(paper_weights(distances[JOINT]))
     result: dict[Key, tuple[FloatArray, float]] = {}
     for name, distance in distances.items():
-        for kernel in KERNELS:
+        for kernel in kernels:
             result[name, kernel] = kernel_weights(distance, kernel, target=target)
+    result[JOINT, "exp"] = (paper_weights(distances[JOINT]), 1.0)
     firms = len(groups)
     result["uniform_network", "none"] = (
         (np.ones((firms, firms)) - np.eye(firms)) / (firms - 1),
         0.0,
     )
     result["zero_network", "none"] = (np.zeros((firms, firms)), 0.0)
-    for name in PLACEBO_ROWS:
+    for name in PLACEBO_ROWS if include_placebos else ():
         if name in distances:
             weights = result[name, "exp"][0]
             for draw in range(PLACEBO_DRAWS):
@@ -156,7 +166,9 @@ def update(
     """Add one year's calibration blocks or held-out daily log densities."""
     assets = broad[ASSETS].reindex(pd.MultiIndex.from_product([[year - 1], annual.tickers]))
     groups = size_groups(np.log(assets.where(assets > 0).to_numpy(dtype=float)))
-    built = networks(distances, groups, year)
+    built = networks(
+        distances, groups, year, kernels=panel.kernels, include_placebos=panel.include_placebos
+    )
     for (name, kernel), (weights, bandwidth) in built.items():
         if "__placebo" not in name:
             panel.geometry.append(
@@ -183,7 +195,7 @@ def evaluate(
     for (name, kernel), (weights, _) in built.items():
         previous = block(annual.prior, weights, symmetric_spectrum(weights))
         realized = block(annual.realized, weights, previous.eigenvalues)
-        for innovation in innovations_for(name):
+        for innovation in ("diagonal",) if panel.diagonal_only else innovations_for(name):
             intensity = panel.intensities[name, kernel, innovation][0]
             if "__placebo" not in name:
                 panel.attribution.append(
@@ -237,7 +249,7 @@ def record(panel: Panel, column: str, year: int, scores: FloatArray) -> None:
 def calibrate(panel: Panel) -> None:
     """One coefficient per network, kernel and innovation arm, from 2016-2019 only."""
     for (name, kernel), blocks in panel.calibration.items():
-        for innovation in innovations_for(name):
+        for innovation in ("diagonal",) if panel.diagonal_only else innovations_for(name):
             if name == "zero_network":
                 value = sum(item.score(0.0, innovation) for item in blocks)
                 panel.intensities[name, kernel, innovation] = (0.0, value)

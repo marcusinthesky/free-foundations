@@ -26,6 +26,7 @@ from free_foundations.panel import audit as panel_audit
 from free_foundations.panel import inference as panel_inference
 from free_foundations.panel import report as panel_report
 from free_foundations.panel import run as panel_run
+from free_foundations.panel import validation as panel_validation
 from free_foundations.panel.design import DESIGNS
 from free_foundations.pilot import __main__ as pilot_run
 from free_foundations.universe import run as universe_run
@@ -207,3 +208,9 @@ def panel_intervals(
 ) -> None:
     """Recompute paired intervals, contrasts and confidence sets from saved daily scores."""
     panel_inference.main(designs)
+
+
+@panel.command("validate")
+def panel_validate() -> None:
+    """Run the declared normalization, fold and intercept-only measurement diagnostics."""
+    panel_validation.main()
