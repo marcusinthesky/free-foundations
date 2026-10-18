@@ -1,0 +1,73 @@
+{
+  "tickers": [
+    "AEP",
+    "AON",
+    "ATI",
+    "BA",
+    "CAH",
+    "CCI",
+    "CMI",
+    "CMS",
+    "COP",
+    "CSL",
+    "CTA-PB",
+    "CVX",
+    "DG",
+    "DGX",
+    "DUK",
+    "ECL",
+    "EME",
+    "FLS",
+    "GD",
+    "HD",
+    "HRB",
+    "JBL",
+    "JKHY",
+    "LECO",
+    "LHX",
+    "LII",
+    "M",
+    "MMM",
+    "OMC",
+    "PH",
+    "PPG",
+    "R",
+    "RHP",
+    "SYY",
+    "TEX",
+    "TMO",
+    "TTEK",
+    "UNM",
+    "VLO",
+    "WM",
+    "WMB",
+    "WMT"
+  ],
+  "firms": 42,
+  "characteristics": [
+    "market_cap_assets",
+    "market_to_book",
+    "dividend_yield",
+    "debt_maturity"
+  ],
+  "history_years": [
+    3,
+    5
+  ],
+  "excluded_tickers": [],
+  "past_complete_days": 756,
+  "evaluation_days": 250,
+  "excluded_outcome_dates": [
+    "2017-01-03"
+  ],
+  "first_return_excluded_for_filing_time": "2017-01-03",
+  "factor_names": [
+    "intercept",
+    "Mkt-RF",
+    "SMB",
+    "HML",
+    "RMW",
+    "CMA",
+    "Mom"
+  ]
+}

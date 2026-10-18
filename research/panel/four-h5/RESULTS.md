@@ -9,18 +9,18 @@ sample variances on every row so only implied correlations differ.
 
 ## Cohorts
 
-| Return year | Firms | Prior complete days | Scored days |
-| --- | ---: | ---: | ---: |
-| 2016 | 32 | 756 | 251 |
-| 2017 | 42 | 756 | 250 |
-| 2018 | 48 | 755 | 250 |
-| 2019 | 50 | 754 | 251 |
-| 2020 | 47 | 754 | 252 |
-| 2021 | 42 | 756 | 251 |
-| 2022 | 41 | 757 | 250 |
-| 2023 | 38 | 756 | 249 |
-| 2024 | 43 | 753 | 251 |
-| 2025 | 54 | 753 | 249 |
+| Return year | Firms | Prior complete days | Scored days | Reference firms |
+| --- | ---: | ---: | ---: | ---: |
+| 2016 | 32 | 756 | 251 | — |
+| 2017 | 42 | 756 | 250 | — |
+| 2018 | 48 | 755 | 250 | — |
+| 2019 | 50 | 754 | 251 | — |
+| 2020 | 47 | 754 | 252 | — |
+| 2021 | 42 | 756 | 251 | — |
+| 2022 | 41 | 757 | 250 | — |
+| 2023 | 38 | 756 | 249 | — |
+| 2024 | 43 | 753 | 251 | — |
+| 2025 | 54 | 753 | 249 | — |
 
 ## Held-out gains over the joint Fernández network
 
@@ -173,14 +173,17 @@ the fitted coefficients, networks and searched specifications fixed.
 
 ## Where the residual likelihood comes from
 
-Exact split of the held-out spatial-error log-likelihood of factor residuals at the
-frozen coefficient and prior-window variances (Lean `Likelihood.spatial_loss`),
-summed over 2020-2025, minus the uniform network's parts. `alignment` is the term
-linear in lambda (covariance between a firm and its neighbours); the two
-`concentration` terms are quadratic, split into the neighbours' own variances
-weighted by squared weights (the Herfindahl noise cost) and their cross products.
-This is the residual model only; the reported held-out scores add the factor
-covariance. `H` is the mean row Herfindahl index.
+Exact split of the held-out spatial-error log-likelihood of factor residuals,
+conditional on realized factors, at the frozen coefficient and prior-window
+variances (Lean `Likelihood.spatial_loss`), summed over 2020-2025, minus the uniform
+network's parts. `alignment` is the term linear in lambda (weighted cross products
+of a firm's and its neighbours' residuals); the two `concentration` terms are
+quadratic, split into the neighbours' own second moments weighted by squared
+weights and their cross products. Those second moments hold common and
+idiosyncratic variance together, so `concentration_own` is not a pure noise cost,
+and a larger `alignment` is not by itself evidence of recovered exposures. This
+split does not decompose the headline unconditional scores, which add factor
+uncertainty around the prior mean. `H` is the mean row Herfindahl index.
 
 ### exp kernel, diagonal innovations
 
@@ -218,15 +221,15 @@ its family only; choosing a family after seeing the results is not accounted for
 
 | Family | Members | Included |
 | --- | ---: | --- |
-| spherical|exp | 50 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct_no_indicators`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_market_to_book`, `h3__fernandez_dividend_yield`, `h3__fernandez_joint`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `zero_network` |
-| diagonal|exp | 53 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_dividend_yield`, `h3__fernandez_debt_maturity`, `h3__histories__direct`, `h3__histories__direct_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `uniform_network`, `zero_network`, `raw_sample_covariance`, `ff5_mom_diagonal`, `ff5_mom_sample_residual_covariance` |
-| correlation|exp | 53 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct`, `histories__direct_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_dividend_yield`, `h3__fernandez_debt_maturity`, `h3__histories__direct`, `h3__histories__mahalanobis_lw`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `uniform_network`, `zero_network`, `raw_sample_covariance`, `ff5_mom_diagonal`, `ff5_mom_sample_residual_covariance` |
-| spherical|median | 50 | `fernandez_market_cap_assets`, `fernandez_dividend_yield`, `histories__tabpfn_fast__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
-| diagonal|median | 53 | `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
-| correlation|median | 53 | `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
-| spherical|matched | 50 | `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean` |
-| diagonal|matched | 53 | `fernandez_dividend_yield`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
-| correlation|matched | 53 | `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__histories__direct_no_indicators`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
+| spherical/exp | 50 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct_no_indicators`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_market_to_book`, `h3__fernandez_dividend_yield`, `h3__fernandez_joint`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `zero_network` |
+| diagonal/exp | 53 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_dividend_yield`, `h3__fernandez_debt_maturity`, `h3__histories__direct`, `h3__histories__direct_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `uniform_network`, `zero_network`, `raw_sample_covariance`, `ff5_mom_diagonal`, `ff5_mom_sample_residual_covariance` |
+| correlation/exp | 53 | `fernandez_market_cap_assets`, `fernandez_market_to_book`, `fernandez_dividend_yield`, `fernandez_joint`, `histories__direct`, `histories__direct_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__fernandez_market_cap_assets`, `h3__fernandez_dividend_yield`, `h3__fernandez_debt_maturity`, `h3__histories__direct`, `h3__histories__mahalanobis_lw`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `uniform_network`, `zero_network`, `raw_sample_covariance`, `ff5_mom_diagonal`, `ff5_mom_sample_residual_covariance` |
+| spherical/median | 50 | `fernandez_market_cap_assets`, `fernandez_dividend_yield`, `histories__tabpfn_fast__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
+| diagonal/median | 53 | `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
+| correlation/median | 53 | `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
+| spherical/matched | 50 | `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean` |
+| diagonal/matched | 53 | `fernandez_dividend_yield`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
+| correlation/matched | 53 | `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `h3__histories__direct_no_indicators`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat`, `raw_sample_covariance`, `ff5_mom_sample_residual_covariance` |
 
 ## Label-permutation placebos (exp kernel, diagonal innovations)
 
@@ -245,60 +248,61 @@ within prior-year log-assets terciles; the spectrum, and so the Jacobian, is unc
 
 Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform. The matched
 kernel targets the joint network's mean effective neighbours under exp each year;
-the last column is the largest achieved miss, in neighbours, over all years. Matching
-the mean leaves row-wise concentration and spectral structure free to differ.
+`Matched miss` is the largest achieved miss, in neighbours, over all years. Matching
+the mean of 1/H_i does not match the mean row Herfindahl H, which the last two
+columns compare (held-out years), nor spectral structure.
 
-| Approach | exp | median | matched | Matched miss |
-| --- | ---: | ---: | ---: | ---: |
-| `fernandez_debt_maturity` | 0.819 | 0.910 | 0.938 | 1.4e-10 |
-| `fernandez_dividend_yield` | 0.803 | 0.888 | 0.938 | 7.2e-11 |
-| `fernandez_joint` | 0.938 | 0.966 | 0.938 | 8.3e-11 |
-| `fernandez_market_cap_assets` | 0.804 | 0.878 | 0.938 | 9e-11 |
-| `fernandez_market_to_book` | 0.808 | 0.880 | 0.938 | 7.4e-11 |
-| `h3__fernandez_debt_maturity` | 0.626 | 0.799 | 0.938 | 1.4e-10 |
-| `h3__fernandez_dividend_yield` | 0.656 | 0.739 | 0.938 | 1.1e-11 |
-| `h3__fernandez_joint` | 0.868 | 0.926 | 0.938 | 1.1e-10 |
-| `h3__fernandez_market_cap_assets` | 0.650 | 0.694 | 0.938 | 1e-10 |
-| `h3__fernandez_market_to_book` | 0.644 | 0.733 | 0.938 | 7.8e-11 |
-| `h3__histories__autoencoder` | 0.951 | 0.837 | 0.938 | 1.9e-11 |
-| `h3__histories__direct` | 0.942 | 0.886 | 0.938 | 1e-10 |
-| `h3__histories__direct_no_indicators` | 0.865 | 0.909 | 0.938 | 7.6e-11 |
-| `h3__histories__euclidean` | 0.433 | 0.835 | 0.938 | 4.3e-14 |
-| `h3__histories__euclidean_no_indicators` | 0.433 | 0.835 | 0.938 | 4.3e-14 |
-| `h3__histories__exaone__item_first_concat` | 1.000 | 0.819 | 0.938 | 7.7e-13 |
-| `h3__histories__exaone__item_first_mean` | 1.000 | 0.797 | 0.938 | 1.3e-12 |
-| `h3__histories__exaone__item_last_concat` | 0.990 | 0.884 | 0.938 | 9.1e-11 |
-| `h3__histories__exaone__late` | 0.972 | 0.771 | 0.938 | 9.9e-14 |
-| `h3__histories__mahalanobis_lw` | 0.335 | 0.841 | 0.938 | 2e-11 |
-| `h3__histories__pca16` | 0.940 | 0.885 | 0.938 | 8.5e-11 |
-| `h3__histories__random_autoencoder` | 0.967 | 0.869 | 0.938 | 7.6e-11 |
-| `h3__histories__supervised_mlp16` | 0.895 | 0.767 | 0.938 | 5e-11 |
-| `h3__histories__tabfm__early_concat` | 0.980 | 0.919 | 0.938 | 1.9e-12 |
-| `h3__histories__tabfm__early_concat_labelnull` | 0.995 | 0.894 | 0.938 | 1e-11 |
-| `h3__histories__tabfm__early_mean` | 0.980 | 0.918 | 0.938 | 1.8e-12 |
-| `h3__histories__tabfm__late` | 0.994 | 0.865 | 0.938 | 1.2e-10 |
-| `h3__histories__tabpfn_fast__late` | 0.977 | 0.839 | 0.938 | 3.5e-11 |
-| `h3__histories__tabpfn_full__late` | 0.959 | 0.836 | 0.938 | 1.4e-14 |
-| `histories__autoencoder` | 0.953 | 0.845 | 0.938 | 3.8e-11 |
-| `histories__direct` | 0.949 | 0.907 | 0.938 | 1.3e-10 |
-| `histories__direct_no_indicators` | 0.883 | 0.929 | 0.938 | 2.2e-11 |
-| `histories__euclidean` | 0.345 | 0.867 | 0.938 | 9.8e-11 |
-| `histories__euclidean_no_indicators` | 0.345 | 0.867 | 0.938 | 9.8e-11 |
-| `histories__exaone__item_first_concat` | 1.000 | 0.812 | 0.938 | 1.2e-12 |
-| `histories__exaone__item_first_mean` | 1.000 | 0.790 | 0.938 | 1.8e-12 |
-| `histories__exaone__item_last_concat` | 0.990 | 0.894 | 0.938 | 8.9e-11 |
-| `histories__exaone__late` | 0.971 | 0.774 | 0.938 | 1.3e-12 |
-| `histories__mahalanobis_lw` | 0.237 | 0.877 | 0.938 | 6.7e-11 |
-| `histories__pca16` | 0.948 | 0.880 | 0.938 | 1e-10 |
-| `histories__random_autoencoder` | 0.959 | 0.890 | 0.938 | 7.9e-11 |
-| `histories__supervised_mlp16` | 0.893 | 0.809 | 0.938 | 5.2e-11 |
-| `histories__tabfm__early_concat` | 0.982 | 0.923 | 0.938 | 6.3e-12 |
-| `histories__tabfm__early_concat_labelnull` | 0.995 | 0.899 | 0.938 | 4.1e-11 |
-| `histories__tabfm__early_mean` | 0.982 | 0.921 | 0.938 | 6.6e-12 |
-| `histories__tabfm__late` | 0.994 | 0.869 | 0.938 | 3.6e-11 |
-| `histories__tabpfn_fast__late` | 0.977 | 0.841 | 0.938 | 1.4e-10 |
-| `histories__tabpfn_full__late` | 0.957 | 0.834 | 0.938 | 5e-12 |
-| `uniform_network` | nan | nan | nan | nan |
+| Approach | exp | median | matched | Matched miss | Matched H | Joint exp H |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `fernandez_debt_maturity` | 0.819 | 0.910 | 0.938 | 1.4e-10 | 0.0251 | 0.0251 |
+| `fernandez_dividend_yield` | 0.803 | 0.888 | 0.938 | 7.2e-11 | 0.0251 | 0.0251 |
+| `fernandez_joint` | 0.938 | 0.966 | 0.938 | 8.3e-11 | 0.0251 | 0.0251 |
+| `fernandez_market_cap_assets` | 0.804 | 0.878 | 0.938 | 9e-11 | 0.0251 | 0.0251 |
+| `fernandez_market_to_book` | 0.808 | 0.880 | 0.938 | 7.4e-11 | 0.0251 | 0.0251 |
+| `h3__fernandez_debt_maturity` | 0.626 | 0.799 | 0.938 | 1.4e-10 | 0.0251 | 0.0251 |
+| `h3__fernandez_dividend_yield` | 0.656 | 0.739 | 0.938 | 1.1e-11 | 0.0251 | 0.0251 |
+| `h3__fernandez_joint` | 0.868 | 0.926 | 0.938 | 1.1e-10 | 0.0251 | 0.0251 |
+| `h3__fernandez_market_cap_assets` | 0.650 | 0.694 | 0.938 | 1e-10 | 0.0251 | 0.0251 |
+| `h3__fernandez_market_to_book` | 0.644 | 0.733 | 0.938 | 7.8e-11 | 0.0251 | 0.0251 |
+| `h3__histories__autoencoder` | 0.951 | 0.837 | 0.938 | 1.9e-11 | 0.0251 | 0.0251 |
+| `h3__histories__direct` | 0.942 | 0.886 | 0.938 | 1e-10 | 0.0251 | 0.0251 |
+| `h3__histories__direct_no_indicators` | 0.865 | 0.909 | 0.938 | 7.6e-11 | 0.0251 | 0.0251 |
+| `h3__histories__euclidean` | 0.433 | 0.835 | 0.938 | 4.3e-14 | 0.0251 | 0.0251 |
+| `h3__histories__euclidean_no_indicators` | 0.433 | 0.835 | 0.938 | 4.3e-14 | 0.0251 | 0.0251 |
+| `h3__histories__exaone__item_first_concat` | 1.000 | 0.819 | 0.938 | 7.7e-13 | 0.0251 | 0.0251 |
+| `h3__histories__exaone__item_first_mean` | 1.000 | 0.797 | 0.938 | 1.3e-12 | 0.0251 | 0.0251 |
+| `h3__histories__exaone__item_last_concat` | 0.990 | 0.884 | 0.938 | 9.1e-11 | 0.0251 | 0.0251 |
+| `h3__histories__exaone__late` | 0.972 | 0.771 | 0.938 | 9.9e-14 | 0.0251 | 0.0251 |
+| `h3__histories__mahalanobis_lw` | 0.335 | 0.841 | 0.938 | 2e-11 | 0.0251 | 0.0251 |
+| `h3__histories__pca16` | 0.940 | 0.885 | 0.938 | 8.5e-11 | 0.0251 | 0.0251 |
+| `h3__histories__random_autoencoder` | 0.967 | 0.869 | 0.938 | 7.6e-11 | 0.0251 | 0.0251 |
+| `h3__histories__supervised_mlp16` | 0.895 | 0.767 | 0.938 | 5e-11 | 0.0251 | 0.0251 |
+| `h3__histories__tabfm__early_concat` | 0.980 | 0.919 | 0.938 | 1.9e-12 | 0.0251 | 0.0251 |
+| `h3__histories__tabfm__early_concat_labelnull` | 0.995 | 0.894 | 0.938 | 1e-11 | 0.0251 | 0.0251 |
+| `h3__histories__tabfm__early_mean` | 0.980 | 0.918 | 0.938 | 1.8e-12 | 0.0251 | 0.0251 |
+| `h3__histories__tabfm__late` | 0.994 | 0.865 | 0.938 | 1.2e-10 | 0.0251 | 0.0251 |
+| `h3__histories__tabpfn_fast__late` | 0.977 | 0.839 | 0.938 | 3.5e-11 | 0.0251 | 0.0251 |
+| `h3__histories__tabpfn_full__late` | 0.959 | 0.836 | 0.938 | 1.4e-14 | 0.0251 | 0.0251 |
+| `histories__autoencoder` | 0.953 | 0.845 | 0.938 | 3.8e-11 | 0.0251 | 0.0251 |
+| `histories__direct` | 0.949 | 0.907 | 0.938 | 1.3e-10 | 0.0251 | 0.0251 |
+| `histories__direct_no_indicators` | 0.883 | 0.929 | 0.938 | 2.2e-11 | 0.0251 | 0.0251 |
+| `histories__euclidean` | 0.345 | 0.867 | 0.938 | 9.8e-11 | 0.0251 | 0.0251 |
+| `histories__euclidean_no_indicators` | 0.345 | 0.867 | 0.938 | 9.8e-11 | 0.0251 | 0.0251 |
+| `histories__exaone__item_first_concat` | 1.000 | 0.812 | 0.938 | 1.2e-12 | 0.0251 | 0.0251 |
+| `histories__exaone__item_first_mean` | 1.000 | 0.790 | 0.938 | 1.8e-12 | 0.0251 | 0.0251 |
+| `histories__exaone__item_last_concat` | 0.990 | 0.894 | 0.938 | 8.9e-11 | 0.0251 | 0.0251 |
+| `histories__exaone__late` | 0.971 | 0.774 | 0.938 | 1.3e-12 | 0.0251 | 0.0251 |
+| `histories__mahalanobis_lw` | 0.237 | 0.877 | 0.938 | 6.7e-11 | 0.0251 | 0.0251 |
+| `histories__pca16` | 0.948 | 0.880 | 0.938 | 1e-10 | 0.0251 | 0.0251 |
+| `histories__random_autoencoder` | 0.959 | 0.890 | 0.938 | 7.9e-11 | 0.0251 | 0.0251 |
+| `histories__supervised_mlp16` | 0.893 | 0.809 | 0.938 | 5.2e-11 | 0.0251 | 0.0251 |
+| `histories__tabfm__early_concat` | 0.982 | 0.923 | 0.938 | 6.3e-12 | 0.0251 | 0.0251 |
+| `histories__tabfm__early_concat_labelnull` | 0.995 | 0.899 | 0.938 | 4.1e-11 | 0.0251 | 0.0251 |
+| `histories__tabfm__early_mean` | 0.982 | 0.921 | 0.938 | 6.6e-12 | 0.0251 | 0.0251 |
+| `histories__tabfm__late` | 0.994 | 0.869 | 0.938 | 3.6e-11 | 0.0251 | 0.0251 |
+| `histories__tabpfn_fast__late` | 0.977 | 0.841 | 0.938 | 1.4e-10 | 0.0251 | 0.0251 |
+| `histories__tabpfn_full__late` | 0.957 | 0.834 | 0.938 | 5e-12 | 0.0251 | 0.0251 |
+| `uniform_network` | nan | nan | nan | nan | nan | 0.0251 |
 
 ## Interpretation limits
 

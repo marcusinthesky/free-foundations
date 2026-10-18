@@ -1,8 +1,9 @@
 # Analysis: why measure financial proximity with pretrained tabular models?
 
-**Status: 17 October 2026. Provisional.** The `three` panel design and the encoder
-measurement audit are still running; figures below come from the completed
-`four` and `four-h5` panel designs and the cross-sectional ladder. The empirical
+**Status: 18 October 2026. Provisional.** All five panel designs and the encoder
+measurement audit are complete. Figures below come from them and the
+cross-sectional ladder; §3 and §6 read the predictions against the `three` and
+`three-support` results. The empirical
 record is [REPORT.md](REPORT.md); the formal results are in
 [the LaTeX draft](src/latex/main.tex). This note sets out the theoretical
 motivation for the study and reads the current evidence against it, drawing on
@@ -122,6 +123,17 @@ Gains over the joint Fernández network, diagonal innovations, median kernel:
 | Autoencoder | −80 | −71 |
 | Supervised MLP16 | −78 | −28 |
 
+The larger `three` design and the support-size experiment do not bear this
+prediction out. With 329–459 firms a year, PCA16 and the direct history distance
+beat every foundation readout under the exp and median kernels, and under the
+matched kernel TabFM's early state (+2,294) is only level with PCA16 (+2,209).
+Shrinking the in-context support from 256 to 32 rows on the same firms
+(`three-support`) does not open a foundation-model advantage either: TabFM's
+native gain falls from +2,294 to +1,507 while PCA16 stays near +2,460, so at 32
+rows TabFM trails PCA by −949 [−1,706, −492]. The native foundation geometry needs
+more task evidence, not less. The advantage that does appear is in decoded
+states (Prediction 2), and it is flat in support size.
+
 On the metrics rung (about 430 disclosure features), the prior matters less.
 Under the matched kernel, standardized metrics with a plain distance gain +288,
 level with TabFM's early state (+282). Richer task inputs let simple methods
@@ -130,15 +142,24 @@ recover what the prior supplied.
 **Prediction 2: the same labels without the prior should not help.** The
 supervised MLP16 sees the same 256 support rows and the same targets but has no
 pretraining. It loses to the joint Fernández network (−78 in `four`). The
-difference between it and TabFM given identical labels is the clearest estimate
-we have of what the prior contributes.
+difference between it and TabFM given identical labels was the clearest estimate
+we had of what the prior contributes. `three-support` adds a sharper one: full
+TabPFN with its weights re-initialized, the same architecture and preprocessing
+with no pretraining. Decoded through the same held-out readout, trained TabPFN
+beats it by +1,288 to +1,694 at every support size, every interval above zero,
+and decoder R² falls from 0.28 to 0.17–0.19 without trained weights. That is
+evidence that the trained weights carry recoverable signal. It is not evidence for
+the small-sample mechanism, since the gap does not grow as the support shrinks.
 
 **Prediction 3: the prior alone is not a financial geometry.** Setting the
 support labels to zero removes most of TabFM's advantage (+130 → +8 in `four`,
 +75 → +5 in `four-h5`; both intervals include zero). A prior learned from
 synthetic tabular tasks does not encode which firms share shocks; it becomes
 useful when combined with task evidence. The data do not support the claim that
-pretraining supplies economic structure on its own.
+pretraining supplies economic structure on its own. Decoded through a held-out
+readout, the label-null state loses less: TabFM with labels beats its label-null
+twin by only +309 to +703 at each support size (`three-support`), so most of the
+decodable signal survives constant labels.
 
 **Large in rows, small in experiences.** The note warns that economic data can be
 large in observations but small in independent experiences. That is literally
@@ -162,8 +183,8 @@ ladder, with ten-year histories, no learned network beats the single
 capitalization/assets Fernández network. The best learned rows (EXAONE label
 token and the supervised MLP under the median kernel) only reach the joint
 network. With longer histories and more firms, the task evidence may be enough
-on its own, which is again what Prediction 1 implies. The `three` panel design
-(about 330–470 firms per year) will test this in the panel setting.
+on its own. The `three` panel design (329–459 firms per year) found the same in
+the panel setting: simple distances match or beat the native foundation readouts.
 
 ## 4. Predictive state versus economic state
 
@@ -218,9 +239,9 @@ The note proposes five criteria. The current evidence covers them unevenly.
 
 | Criterion | Current evidence | Status |
 | --- | --- | --- |
-| Recovery of independently observed quantities | None; networks are judged only by downstream covariance fit | Not tested |
+| Recovery of independently observed quantities | Held-out decoding of a reliable statistical common-risk target: R² at most 0.10 (`four`) and 0.30 (`three`) against a 0.90 ceiling; no economically identified target | Partial |
 | Sensitivity to economically material changes | Placebo permutations; kernel and history-length sensitivity | Partial |
-| Invariance to nuisance transformations | Kernel scale; label-null and shuffled-label passes; query-cohort audit pending | Partial |
+| Invariance to nuisance transformations | Kernel scale; query cohort (distance Spearman ≥ 0.999); support redraws (median 0.90–0.97, minimum 0.57); shuffled labels change task-readout rankings almost completely (TabPFN median 0.13–0.20) | Partial |
 | Calibration of uncertainty | Gaussian densities only; no state uncertainty | Not tested |
 | Stability across regimes | Gains concentrated in 2020 | Weak |
 
@@ -361,20 +382,21 @@ much higher leverage changes the firm's state.
 
 ## 6. What the evidence supports
 
-**Supported, as development evidence:** on thin financial histories,
-label-conditioned states from pretrained tabular models produce better
-covariance networks than characteristic-correlation networks and than
-non-pretrained learners given the same labels, once kernel concentration is
-controlled. This is consistent with pretraining acting as a prior that
-substitutes for scarce task evidence.
+**Supported, as development evidence:** states from pretrained tabular models
+contain a common-risk signal that a held-out linear readout recovers better than
+from the same inputs, their PCA or autoencoder compressions, or a supervised
+network trained on the same labels. For TabPFN the signal depends on the trained
+weights: an untrained copy of the architecture recovers much less of it.
 
-**Qualifications that belong in the same sentence:** the gain needs in-context
-labels; it disappears when inputs are rich; it is concentrated in 2020; and it
-does not appear in the 395-firm cross-section.
+**Qualifications that belong in the same sentence:** the recovered share is small
+against the target's reliability; the target is a statistical return-based
+coordinate, not an identified economic exposure; native distances between the same
+states are no better than simple distances once the firm sample is larger; and
+nothing shrinks or grows with the support size as the prior mechanism predicts.
 
-**Not supported:** that pretrained models recover economic state, that their
-geometry is label-free, that the gains generalize across regimes, or that a
-foundation-model advantage exists independently of input richness.
+**Not supported:** that pretrained models recover economic state, that the
+advantage is a small-sample prior effect, that the native geometry is label-free
+or stable under support changes, or that gains generalize across regimes.
 
 The defensible contribution is therefore the measurement design itself: a
 comparison of financial proximity measurements that holds the information set,
@@ -386,15 +408,15 @@ placebo and alternate-target controls. It sits in the empirical programme the
 
 In order of value for the theoretical claim:
 
-1. **Recovery probes.** Regress pairwise TabFM-early distances on pairwise
-   differences in leverage, size, profitability, industry and *future* factor
-   exposures, with Fernández and direct distances as competitors. This is the
-   note's recovery criterion and the step from prediction to measurement.
+1. **Recovery probes.** Partly done: held-out decoding of reference-factor
+   exposures (REPORT §7.4). Still open: an economically identified target, such
+   as exposures to declared shocks, and probes against leverage, size,
+   profitability, industry and *future* factor exposures, with Fernández and direct
+   distances as competitors.
 2. **Regime stability.** Report all panel comparisons excluding 2020 and by
    year; treat 2020 as a separate experience rather than a share of firm-days.
-3. **Invariance.** Fold the encoder audit (query-cohort halves, reversed order,
-   singletons, shuffled support labels) into the claims. Material query-cohort
-   dependence would mean the geometry depends on who else is being measured.
+3. **Invariance.** Done for the encoder audit (§4 table): no query-cohort
+   dependence, material support-draw and label dependence.
 4. **Transfer diagnostics.** Estimate how distinguishable the support rows are
    from synthetic pretraining tasks (the `d_HΔH` term of the transfer bound), and
    relate that to where the prior helps.

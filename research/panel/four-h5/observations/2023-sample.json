@@ -1,0 +1,69 @@
+{
+  "tickers": [
+    "ACM",
+    "ALLE",
+    "AON",
+    "APTV",
+    "AVY",
+    "AWK",
+    "CMI",
+    "COF",
+    "CPB",
+    "CVX",
+    "DUK",
+    "ECL",
+    "EHC",
+    "EME",
+    "ENS",
+    "ESE",
+    "G",
+    "GD",
+    "GLW",
+    "HPE",
+    "KDP",
+    "LDOS",
+    "MAR",
+    "MDT",
+    "MMM",
+    "MPC",
+    "MU",
+    "NOC",
+    "PPG",
+    "PSX",
+    "R",
+    "SYY",
+    "TRU",
+    "VLO",
+    "VRSK",
+    "WM",
+    "WMB",
+    "WMT"
+  ],
+  "firms": 38,
+  "characteristics": [
+    "market_cap_assets",
+    "market_to_book",
+    "dividend_yield",
+    "debt_maturity"
+  ],
+  "history_years": [
+    3,
+    5
+  ],
+  "excluded_tickers": [],
+  "past_complete_days": 756,
+  "evaluation_days": 249,
+  "excluded_outcome_dates": [
+    "2023-01-03"
+  ],
+  "first_return_excluded_for_filing_time": "2023-01-03",
+  "factor_names": [
+    "intercept",
+    "Mkt-RF",
+    "SMB",
+    "HML",
+    "RMW",
+    "CMA",
+    "Mom"
+  ]
+}

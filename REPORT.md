@@ -1,48 +1,67 @@
 # Research report: financial proximity from tabular representations
 
-**Status: 17 October 2026. Author: Marcus Gawronsky.**
+**Status: 18 October 2026. Author: Marcus Gawronsky.**
 
 This report consolidates the completed experiments in `free-foundations`. It
 separates exploratory development results from the latest chronological panel,
 records the actual estimation sample and information set, and identifies the
-claims that the evidence supports. Figures below are taken from saved experiment
-artifacts; no new model fitting was performed to prepare this report.
+claims that the evidence supports. Figures below are taken from the saved
+experiment artifacts linked in §10.1, which are committed alongside this report.
 
 ## 1. Main findings
 
-The project now has an operational pipeline from dated SEC disclosures through
+The project has an operational pipeline from dated SEC disclosures through
 accounting characteristics, tabular representations, annual pairwise distance
-matrices, spatial networks, and return-covariance evaluation.
-
-The latest experiment compares **34 approaches on exactly the same 87,351
-held-out firm-days over 2020–2025**. Every spatial approach has one scalar
-coefficient, estimated on 2016–2019 and frozen thereafter. Each approach combines
-its selected fundamentals into one annual network; foundation models do not
-receive a separate spatial coefficient for each accounting feature.
+matrices, spatial networks, and return-covariance evaluation. The current
+comparison runs five declared panel designs on the same held-out years,
+2020–2025 (§7.4–7.5). Each network has one spatial coefficient per kernel and
+innovation arm, fitted on 2016–2019 and frozen. Designs differ in firms and are
+not ranked against each other. The 17 October summary of the v1 panel is kept as
+history in §3.8.
 
 The findings are:
 
-- **No pretrained configuration exceeds the joint Fernández-style four-characteristic
-  benchmark.** The closest is full TabPFN with broad disclosures: 219,990.10 versus
-  219,993.24 held-out log-likelihood, a difference of only −3.13.
-- **Richer accounting inputs help simple compression.** PCA with normalized metrics
-  scores 220,054.56, a gain of 61.32 over the joint benchmark. The corresponding
-  autoencoder scores 220,045.25, a gain of 52.01.
-- **Raw covariance and FF5+momentum remain substantially ahead.** Raw sample
-  covariance scores 224,819.87; FF5+momentum with diagonal residual covariance
-  scores 224,657.11. These gains also reflect differences in covariance
-  flexibility, not exclusively differences in financial geometry.
-- **The acquired universe is much larger than the matched estimation sample.**
-  We acquired 1,000 current issuers, with prices for 997, but strict complete
-  histories of all four Fernández characteristics leave 47–70 firms per
-  evaluation year.
-- **The chronological experiment resolves the earlier boundary-fit problem.**
-  No latest spatial estimate reaches the imposed coefficient boundary. The
-  earlier six-firm in-sample fits frequently did.
+- **Native foundation-model distances do not reliably beat simple distances.** In
+  the strict `four` design (47–70 firms a year) the best history-rung readout,
+  TabFM early concat, gains +37.8 over the joint Fernández network under the
+  paper's kernel, with an interval that includes zero. In `three` (329–459 firms)
+  PCA16 and the direct history distance beat every foundation readout under the
+  exp and median kernels. Under the matched kernel TabFM early concat (+2,294),
+  PCA16 (+2,209) and direct distance (+2,187) are level.
+- **The native geometry is fragile to nuisance choices.** Redrawing the 256-row
+  support moves learned gains by up to a third, and changing only the support label
+  moves them as much. Shuffling support labels changes TabPFN distance rankings
+  almost completely (median Spearman 0.13–0.20). Query-cohort composition has no
+  effect (Spearman ≥ 0.999).
+- **Honest calibration shows recoverable but small signal.** The calibration
+  target is now each firm's loadings on residual factors of firms outside the
+  cohort, so no held-out firm's returns enter a training target. It is reliable
+  (split-half Spearman–Brown 0.90). The best readouts recover R² 0.10 of it in
+  `four` and 0.30 in `three`, against 0.04–0.09 for direct distance. That is far
+  below the ceiling, and the gap could be missing information or readout error.
+- **Decoded pretrained states carry a signal the controls lack, at every support
+  size.** In `three-support`, decoded TabPFN beats decoded PCA, direct distance and
+  the supervised MLP by +2,973 to +4,140 at every support from 32 to 256 rows. It
+  beats an untrained copy of the same architecture by +1,288 to +1,694, with every
+  interval above zero. The advantage does not grow as the support shrinks, so it
+  is not the small-sample prior effect the pretraining argument predicts.
+- **Covariance-based networks remain far ahead.** Networks built directly from
+  prior residual covariance (`reference_exposures` +7,298 and
+  `covariance_exposures` +7,347 in `three`, matched kernel) dominate every
+  disclosure-based network. Raw covariance and FF5+momentum controls also remain
+  ahead in the v1 panel.
+- **Where the residual likelihood comes from.** Almost all of each network's
+  residual gain over the uniform network is in the term linear in λ. That term
+  measures weighted residual cross-products under the fitted model, not
+  recovered exposures (§7.4).
+- **The usable sample is much smaller than the acquired universe.** We acquired
+  1,000 issuers, with prices for 997. Strict four-characteristic histories leave
+  47–70 firms per evaluation year; the three-characteristic design keeps 329–459.
 
 These are development findings, not confirmatory significance statements.
 “Held out” describes the chronological estimation procedure; these calendar
-periods have already been examined during the research process.
+periods have already been examined during the research process, and several
+variants were added after earlier results were seen.
 
 ## 2. Research question and relationship to Fernández
 
@@ -203,8 +222,11 @@ The remainder of this report treats that chronological panel as the principal
 current comparison. Earlier files are retained as research history rather than
 overwritten or pooled with the new results. The first panel run (§7.1–7.3,
 files at the `research/panel/` root) is kept unchanged as the **v1 record**;
-the extended designs in §7.4 write to `research/panel/{four,four-h5,four-xqxo,three}/`
-and reproduce the v1 rows exactly where the specification is unchanged.
+the extended designs in §7.4–7.5 write to
+`research/panel/{four,four-h5,four-xqxo,three,three-support}/` and reproduce the v1
+rows exactly where the specification is unchanged. `three-support` re-encodes
+`three`'s firms at nested support sizes with a reduced, predeclared grid that
+includes label-null and untrained-architecture controls.
 
 ### 3.6 R0: practical replication of Fernández on the 1,000-issuer universe
 
@@ -277,6 +299,35 @@ likelihood ranking and add nothing.
 
 The 33-firm four-characteristic arm is uninformative: all gains lie between
 0.4 and 2.1 log-likelihood units and most placebo rank p-values exceed 0.1.
+
+### 3.8 The v1 chronological panel (17 October summary)
+
+The previous version of this report opened with the v1 panel (§7.1–7.3): 34
+approaches on exactly the same 87,351 held-out firm-days over 2020–2025, one
+spatial coefficient each, the `exp(-d)` kernel and spherical innovations. Its
+findings were:
+
+- **No pretrained configuration exceeds the joint Fernández-style four-characteristic
+  benchmark.** The closest is full TabPFN with broad disclosures: 219,990.10 versus
+  219,993.24 held-out log-likelihood, a difference of only −3.13.
+- **Richer accounting inputs help simple compression.** PCA with normalized metrics
+  scores 220,054.56, a gain of 61.32 over the joint benchmark. The corresponding
+  autoencoder scores 220,045.25, a gain of 52.01.
+- **Raw covariance and FF5+momentum remain substantially ahead.** Raw sample
+  covariance scores 224,819.87; FF5+momentum with diagonal residual covariance
+  scores 224,657.11. These gains also reflect differences in covariance
+  flexibility, not exclusively differences in financial geometry.
+- **The acquired universe is much larger than the matched estimation sample.**
+  We acquired 1,000 current issuers, with prices for 997, but strict complete
+  histories of all four Fernández characteristics leave 47–70 firms per
+  evaluation year.
+- **The chronological experiment resolves the earlier boundary-fit problem.**
+  No latest spatial estimate reaches the imposed coefficient boundary. The
+  earlier six-firm in-sample fits frequently did.
+
+The extended designs (§7.4–7.5) reproduce these rows exactly where the
+specification is unchanged; the newer kernels and controls qualify the first
+bullet (§1).
 
 ## 4. Current data, characteristics, and sample selection
 
@@ -445,7 +496,9 @@ Each input rung has eight approaches:
 | EXAONE Tabular | Frozen query label-token state entering the decoder |
 
 The random autoencoder controls for a small random nonlinear projection. It is
-**not** an architecture-matched untrained TabPFN, TabFM, or EXAONE model.
+**not** an architecture-matched untrained TabPFN, TabFM, or EXAONE model. The
+`three-support` design (§7.5) adds one such control for full TabPFN only: the same
+checkpoint and preprocessing with every weight re-initialized before encoding.
 Foundation runs use one ensemble member, seed 42, and CPU execution. They use
 internal row representations rather than point return predictions. Checkpoint
 identity, context, schemas, and preprocessing provenance are saved.
@@ -645,7 +698,12 @@ sample covariance under OLS orthogonality. Their equal scores are an algebraic
 consistency check, not two independent successes. The saved reconstruction
 errors are below approximately `7e-18`.
 
-## 7. Latest chronological results
+## 7. Chronological panel results
+
+§7.1–7.3 are the v1 panel record of 17 October: one strict four-characteristic
+cohort, spherical innovations and the `exp(-d)` kernel. §7.4 extends it to three
+kernels, three innovation arms and five designs; §7.5 adds the support-size
+comparison.
 
 ### 7.1 Input ladder: held-out log-likelihood
 
@@ -770,36 +828,127 @@ as a redraw (`four` EXAONE late: +23.1 with cap/assets, −0.4 with income/asset
 These shifts are why §9 grades every learned procedure as an exploratory
 comparator, not an economic dissimilarity measure.
 
-**Calibrated readouts.** Decoding five prior-covariance exposures out of fold
-works poorly in `four`: every representation has negative mean out-of-fold R²
-(best −0.005), with roughly 60 firms per year. In `three` the foundation states
-decode better than the classical compressions (R² 0.17–0.23 against at most 0.04
-for PCA and the autoencoders; decoded-distance Spearman 0.36–0.42 against
-0.18–0.23). Under the exp kernel every decoded network is effectively the uniform
-network (`four` −39.9 against −40.2; `three` −4,541 against −4,591; same mean
-Herfindahl index): decoded exposures are shrunk, so `exp(-d)` is flat. The
-rescaled kernels separate them. With the matched kernel in `three`, decoded
-TabPFN full (+3,390.8) and EXAONE late (+3,451.4) exceed their native readouts
-(+716.7, −149.1), and the `covariance_exposures` control reaches +7,347.1. In
-`four` decoding lowers the matched-kernel gains (TabFM +103.6 against +179.7
-native). One decoder is numerically unstable (`three`
-`exaone__item_first_concat`, mean R² −301.6) and is not interpreted.
+**Calibrated readouts.** A calibrated row decodes each firm's loadings on the
+five leading principal components of prior factor residuals of firms *outside*
+the cohort (680–873 reference firms a year in `four`, about 430 in `three`), using
+a ridge readout fitted out of fold across firms. The reference factors are fixed
+before folds are drawn, so a held-out firm's returns reach neither the training
+targets nor the readout. A perturbation test on raw returns enforces this
+(`tests/test_decoding.py`). The earlier target, the cohort's own rank-5 residual
+covariance coordinates, failed that test because its eigendecomposition pools every
+cohort firm; it is kept only as the `covariance_exposures` control. The readout
+clips held-out states and predictions to the training fold's range. Without the
+clip, one firm (BKH, 2017) whose first-layer EXAONE states sat up to 190
+training standard deviations outside the cloud drove that decoder's mean R² to
+−301.6. All decoded rows changed with the new target; every other row reproduces
+the previous run exactly.
+
+The target is reliable, but the readouts recover little of it:
+
+| Mean over years, rank 5 | `four` | `three` |
+| --- | ---: | ---: |
+| Target split-half reliability (Spearman–Brown) | 0.90 | 0.90 |
+| Best foundation readout R² (TabFM late; EXAONE last-layer items in `three`) | 0.10 | 0.30 |
+| TabPFN full late R² | 0.01 | 0.28 |
+| TabFM early concat R² (label-null twin) | 0.07 (0.03) | 0.22 (0.18) |
+| Direct, PCA16, supervised MLP16 R² | 0.04, 0.00, −0.03 | 0.09, 0.06, 0.06 |
+
+In `three` every foundation readout except EXAONE's first-layer item states
+decodes the target better than direct distance, the classical compressions and
+the supervised MLP. In `four` only the TabFM and last-layer EXAONE readouts beat
+direct distance. All remain far below the target's reliability. By the projection identity (§9) that
+gap mixes missing information with readout error, and these results do not
+separate the two. The reference target also escapes the review's
+diagonal-covariance concern better than the in-panel one: its squared mass is
+spread over an effective 48% (`four`) and 39% (`three`) of firms, against 16%
+and 12% for the in-panel coordinates.
+
+Under the exp kernel every decoded network is still effectively the uniform
+network (`four` −39.8 against −40.2), because decoded exposures are shrunk and
+`exp(-d)` is flat. Under the matched kernel the decoded TabFM, TabPFN and later-layer
+EXAONE rows in `three` gain +2,877 (TabFM early concat) to +3,613 (TabFM late),
+against +296 for decoded direct, −237 for decoded PCA and about −1,150 for decoded
+first-layer EXAONE states. The target's own network
+(`reference_exposures`) gains +7,298, which bounds what a readout of this target
+can deliver. In `four` decoding lowers TabFM early concat from +179.7 native to
++77.6. Decoded networks inherit historical return information through their
+target, so they are not pure disclosure geometry: they measure how well a
+representation reproduces a return-based common-risk geometry from disclosures.
 
 **Where the likelihood comes from.** The exact attribution (`Likelihood.spatial_loss`,
 [`four`](research/panel/four/RESULTS.md#where-the-residual-likelihood-comes-from))
-puts almost all of each network's residual gain over the uniform network in the
-alignment term, which is linear in λ. Under the exp kernel the joint network
+splits the residual likelihood *given realized factors*, not the headline
+unconditional score. It puts almost all of each network's residual gain over the
+uniform network in the alignment term, which is linear in λ. Under the exp kernel the joint network
 gains +411 (alignment +617) and TabFM early concat +211 (alignment +393). Mean
 row Herfindahl indices stay between 0.018 and 0.023, so the concentration
 charges are small (at most −104 for the joint network). Under the matched kernel
 the covariance-exposure control gains +2,058 from +4,080 alignment less −950
 concentration. That is the largest residual gain recorded, and it comes from a
-target the representations do not yet decode reliably.
+target the representations do not yet decode reliably. The split is exact
+algebra, but its "own" concentration part weights total residual second moments,
+common and idiosyncratic together, so it is not the pure noise term of
+`Likelihood.filtered_second_moment`. A large alignment term therefore shows
+strong weighted residual cross-products under the fitted specification, not
+recovered exposures.
 
 **QXO sensitivity.** Excluding QXO (`four-xqxo`), whose genuine −80% day falls on
 2024-07-30, moves no history-rung gain in `four` by more than 1.1 (TabFM early
 concat +37.8 → +37.4; TabPFN full late +21.4 → +20.5). The single extreme day
 does not drive the learned rows.
+
+### 7.5 Support size, labels and untrained weights
+
+`three-support` (§3.5) re-encodes `three`'s firms on nested 32-, 64-, 128- and
+256-row prefixes of the same support with a reduced, predeclared grid:
+
+| Readout | Role |
+| --- | --- |
+| Direct distance | No learning; does not depend on the support |
+| PCA16 | Unsupervised, not pretrained |
+| Supervised MLP16 | Same labels, not pretrained |
+| TabFM early concat | Pretrained state readout |
+| TabFM early concat, label-null | The same model with constant labels |
+| TabPFN full late | Pretrained task readout |
+| TabPFN full late, untrained | The same checkpoint architecture with re-initialized weights |
+
+The declared arm is the matched kernel with diagonal innovations; gains are over
+the joint network, and brackets are 95% stationary-bootstrap intervals with
+21-day blocks.
+
+| Gain, matched/diagonal | 32 rows | 64 rows | 128 rows | 256 rows |
+| --- | ---: | ---: | ---: | ---: |
+| PCA16, native | +2,456 | +2,503 | +2,460 | +2,209 |
+| TabFM early concat, native | +1,507 | +1,616 | +1,950 | +2,294 |
+| TabPFN full late, native | +363 | +642 | +540 | +717 |
+| TabPFN untrained, native | −1,046 | −1,102 | −829 | −32 |
+| TabFM early concat, decoded | +2,615 | +2,951 | +2,735 | +2,877 |
+| TabPFN full late, decoded | +3,293 | +3,397 | +3,282 | +3,331 |
+| TabPFN untrained, decoded | +1,634 | +1,703 | +1,994 | +1,860 |
+| TabPFN full late, decoder R² | 0.28 | 0.28 | 0.29 | 0.28 |
+
+Direct distance gains +2,187 native and +296 decoded at every size.
+
+- **No small-support advantage in native distances.** At 32 rows TabFM loses to
+  PCA by −949 [−1,706, −492] and TabPFN by −2,093 [−3,919, −1,082]. TabFM's
+  native gain grows with the support, while PCA's does not, so the native
+  foundation geometry needs more task evidence, not less.
+- **Trained weights matter.** Decoded TabPFN beats its untrained twin at every
+  size, by +1,288 to +1,694 (at 32 rows +1,660 [+1,175, +2,146]); native TabPFN
+  does so by +749 to +1,743. Decoder R² falls from 0.28 to 0.17–0.19 without
+  trained weights. This is the only architecture-matched pretraining contrast in
+  the study.
+- **Labels add a little.** Decoded TabFM beats its label-null twin by +309 to
+  +703, with every interval above zero.
+- **Decoded foundation rows beat every control at every size**: by +2,295 to
+  +4,140 over decoded direct, PCA and the supervised MLP, with every interval
+  above zero.
+
+The decoded advantage is flat in support size. It is therefore not the
+small-sample prior effect the pretraining argument predicts. It is a recoverable
+signal in the trained states that the classical compressions lack, and its
+source is not identified here. These are development results on inspected
+years, and the comparison was chosen after the `three` results were seen.
 
 ## 8. Leakage controls and remaining sources of bias
 
@@ -874,14 +1023,23 @@ times `η`, at least `1/m` for a row spread over `m` firms
 (`Likelihood.herfindahl_ge`). A diffuse row pays the least, which is one reason
 near-uniform learned networks can score well without proximity information.
 Matching mean effective neighbours (the `matched` kernel) does not equalise
-this cost, which depends on the mean Herfindahl index instead.
+this cost in general, which depends on the mean Herfindahl index instead. In
+practice it nearly does: under the matched kernel the held-out mean Herfindahl
+index is within 5% of the joint network's for 99% of `four` networks and 97% of
+`three` networks. The exceptions are the supervised MLP in `four` (11% more
+concentrated) and the Mahalanobis rows in `three` (26–40% more concentrated).
 
-**Native versus calibrated geometry.** The learned rows in §7 measure chord
-distance between raw hidden states. No decoder is fitted, so the recovery
-theorems certify none of them. A calibrated readout decodes a declared economic
-target from the states and measures distance between decoded values. Its error
-is bounded by `Measurement.rms_measurement_error` given an alignment error that
-must itself be estimated. Distances between posterior-mean exposures understate
+**Native versus calibrated geometry.** The native-distance rows in §7 measure
+chord distance between raw hidden states. No decoder is fitted for them, so the
+recovery theorems certify none of them. A calibrated readout (§7.4) decodes a
+declared target from the states and measures distance between decoded values.
+Its error is bounded by `Measurement.rms_measurement_error` given an alignment
+error that must itself be estimated. That alignment error belongs to the
+representation and the readout together: by the L² projection identity
+(`Recovery.excess_risk_condExp`)
+`E‖s − g(F)‖² = E‖s − E[s | F]‖² + E‖E[s | F] − g(F)‖²`, a ridge decoder can fail
+because the state lacks the information or because the readout cannot recover
+it, and a low out-of-fold R² does not distinguish the two. Distances between posterior-mean exposures understate
 expected distances by the posterior variance of each pair's difference
 (`Measurement.mean_sq_distance`).
 
@@ -891,7 +1049,7 @@ graded by the strongest claim its evidence supports:
 | Grade | Requires | Procedures here |
 | --- | --- | --- |
 | Exploratory comparator | A reproducible measurement procedure (checkpoint, context, extraction, readout, metric) | Every learned row |
-| Economic proxy | Independent validation against a declared economic target | Calibrated readouts, to the extent their decoders fit prior-covariance exposures out of fold (§7.4) |
+| Economic proxy | Independent validation against a declared economic target | None yet. Calibrated readouts are validated out of fold against a reliable *statistical* common-risk target, with R² at most 0.30 against a 0.90 ceiling (§7.4); no economically identified target has been tested |
 | Economic dissimilarity measure | Metric evidence: distances stable under declared nuisance changes and aligned with target distances | None. Support redraws move learned distance rankings materially (§7.4, §8) |
 | Structural or causal | Identification of responses under intervention | None |
 
@@ -930,7 +1088,7 @@ Tach, Vulture, and the repository quality gates passed for that implementation.
 These tests verify specific implementation properties, not economic validity or
 external checkpoint training provenance.
 
-Numerical and artifact checks also established:
+Numerical and artifact checks on the v1 panel also established:
 
 - 34 unique approaches and 204 annual evaluation rows, with common firm-day counts.
 - Annual scores sum to their corresponding pooled scores.
@@ -971,12 +1129,17 @@ Earlier interrupted development logs are not the authoritative results.
 | Six-firm combined fit (superseded) | [Combined results](research/fernandez/combined/RESULTS.md) |
 | R0 replication | [R0 results](research/ladder/r0/RESULTS.md), [replication manifest](research/ladder/r0/replication-manifest.md) |
 | Cross-sectional ladder | [Three arm](research/ladder/three/RESULTS.md), [four arm](research/ladder/four/RESULTS.md) |
-| Extended panel designs | [Panel index](research/panel/README.md) and `research/panel/{four,four-h5,three}/RESULTS.md` |
-| Encoder measurement audit | `research/panel/audit/` |
+| Extended panel designs | [Panel index](research/panel/README.md); [four](research/panel/four/RESULTS.md), [four-h5](research/panel/four-h5/RESULTS.md), [four-xqxo](research/panel/four-xqxo/RESULTS.md), [three](research/panel/three/RESULTS.md), [three-support](research/panel/three-support/RESULTS.md) |
+| Extended scores and contrasts | `comparison.csv`, `bootstrap.csv`, `contrasts.csv`, `mcs.csv`, `placebo.csv` in each design directory |
+| Likelihood attribution | `attribution.csv` in each design directory |
+| Calibrated readouts | [`decoding.csv`](research/panel/four/decoding.csv) and [`target-audit.csv`](research/panel/four/target-audit.csv) in `four`, `three` and `three-support` |
+| Price review | [Price audit](research/panel/price-audit.csv) |
+| Encoder measurement audit | [Audit summary](research/panel/audit/summary.csv), [all checks](research/panel/audit/measurement-audit.csv) |
 
 Year-specific contexts live under `research/panel/contexts/`. Labeled pairwise
 distance and weight matrices live under `research/panel/distances/<year>/` and
-`research/panel/weights/<year>/`. Observations, prior residuals, and sample timing
+`research/panel/weights/<year>/`; they and the extended designs' per-distance
+sidecars are hashed in each `manifest.json` but not committed. Observations, prior residuals, and sample timing
 records live under `research/panel/observations/`. Downloaded inputs and expensive
 intermediate caches are ignored by Git; possession of the source alone is not
 the same as possession of every reproduction input.
@@ -988,7 +1151,7 @@ access configured:
 
 ```sh
 devenv shell just python-universe
-devenv shell just python-panel            # extended designs: four, four-h5, three
+devenv shell just python-panel            # extended designs: four, four-h5, four-xqxo, three, three-support
 devenv shell just python-ladder-r0        # R0 replication and generated-beta bootstrap (needs R)
 devenv shell just python-ladder           # R1–R4 cross-sectional ladder
 devenv shell just python-encoder-audit    # context, query-cohort and label audits
@@ -1010,30 +1173,45 @@ report, and their numerical outputs must not be combined with panel scores.
 
 ## 11. Priorities for the next experimental stage
 
-These are proposed follow-ups, not completed results:
+These are proposed follow-ups, not completed results. Items completed since the
+17 October version are listed first.
 
-1. **Separate covariance restrictions from topology.** Repeat the matched network
-   comparison with a predetermined heterogeneous diagonal innovation covariance
-   while retaining one spatial coefficient per approach. This addresses the
-   strong diagonal-factor benchmark without giving encoders different samples.
-2. **Improve usable coverage transparently.** Reconcile additional debt and share
-   mappings where justified; report a strict Fernández cohort alongside any
-   broader cohort. Do not silently replace debt with liabilities, impute missing
-   debt as zero, or compare likelihoods across different firm samples.
-3. **Check history and geometry sensitivity.** Compare longer characteristic
-   histories, fixed-reference contexts, and prespecified distance/kernel choices
-   using development windows. Audit concentration and distinguish genuine state
-   movement from changes in scaling, schema, support, or query composition.
-4. **Add economic validation.** Test future exposure similarity and industry,
-   size, leverage, and reporting-pattern controls. Establish what the network
-   measures before interpreting it as a mechanism or an asset-pricing signal.
-5. **Quantify uncertainty appropriately.** Use paired time-block procedures and
-   explicitly account for overlapping estimation windows and model search.
-   Reserve genuinely new evidence where possible; do not relabel already
-   inspected years as an untouched confirmatory holdout.
-6. **Keep the manuscript claim aligned with the evidence.** Report near parity or
-   failure to improve if it persists. A stronger learning-to-economic-geometry
-   theorem requires assumptions beyond the conditional perturbation result.
+Completed in this revision:
+
+- **Honest calibration.** Decoded rows now target exposures to residual factors of
+  firms outside the cohort, so no held-out firm's returns enter a training target. A
+  raw-return perturbation test enforces this (`tests/test_decoding.py`).
+- **Target reliability.** Every decoded row is reported beside its target's
+  split-half reliability, at ranks 3, 5 and 8.
+- **Unstable decoder.** The readout no longer extrapolates beyond its training fold
+  (§7.4).
+- **Review-controlled price mask.** The recorded decision, not the tenfold threshold,
+  sets the mask (`observations.daily_returns`); the panel mask is unchanged.
+- **Focused support-size comparison** with label-null and untrained-architecture
+  controls (§7.5).
+
+Next, in order:
+
+1. **Economic validation of the target.** Replace or supplement the statistical
+   reference-factor target with exposures to a small declared set of identified
+   shocks (rates, credit spreads, oil, the dollar), validated on outcomes not used
+   for selection. Only then can a calibrated readout be graded an economic proxy.
+2. **Close the readout gap.** Decoder fit sits far below the target's reliability
+   (§7.4). Separate missing information from readout error, for example with
+   nonlinear readouts fitted under the same held-out protocol, before concluding
+   that the states lack the information.
+3. **Transfer and prior mismatch.** State a prior-mismatch term for the TabPFN
+   argument ([draft](src/latex/main.tex) §3.1) and relate it to where the support-size curve flattens.
+4. **Separate covariance restrictions from topology.** Repeat the matched comparison
+   with a predetermined heterogeneous diagonal innovation covariance; the
+   `diagonal` arm is a first step.
+5. **Improve usable coverage transparently.** Reconcile further debt and share
+   mappings where justified; keep the strict cohort beside any broader one. Do not
+   replace debt with liabilities, impute missing debt as zero, or compare
+   likelihoods across different firm samples.
+6. **Quantify uncertainty appropriately.** Account for overlapping estimation
+   windows and model search; reserve genuinely new evidence where possible; treat
+   2020 as a separate regime.
 
 The immediate empirical contribution is a reproducible, audited comparison of
 financial proximity measurements. A foundation-model advantage remains an open

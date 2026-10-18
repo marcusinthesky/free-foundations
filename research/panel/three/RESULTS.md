@@ -9,43 +9,44 @@ sample variances on every row so only implied correlations differ.
 
 ## Cohorts
 
-| Return year | Firms | Prior complete days | Scored days |
-| --- | ---: | ---: | ---: |
-| 2016 | 329 | 756 | 251 |
-| 2017 | 381 | 756 | 250 |
-| 2018 | 386 | 755 | 250 |
-| 2019 | 396 | 754 | 251 |
-| 2020 | 406 | 754 | 252 |
-| 2021 | 413 | 756 | 251 |
-| 2022 | 421 | 757 | 250 |
-| 2023 | 429 | 755 | 249 |
-| 2024 | 437 | 753 | 251 |
-| 2025 | 459 | 753 | 249 |
+| Return year | Firms | Prior complete days | Scored days | Reference firms |
+| --- | ---: | ---: | ---: | ---: |
+| 2016 | 329 | 756 | 251 | 409 |
+| 2017 | 381 | 756 | 250 | 383 |
+| 2018 | 386 | 755 | 250 | 397 |
+| 2019 | 396 | 754 | 251 | 412 |
+| 2020 | 406 | 754 | 252 | 419 |
+| 2021 | 413 | 756 | 251 | 424 |
+| 2022 | 421 | 757 | 250 | 440 |
+| 2023 | 429 | 755 | 249 | 457 |
+| 2024 | 437 | 753 | 251 | 472 |
+| 2025 | 459 | 753 | 249 | 484 |
 
 ## Held-out gains over the joint Fernández network
 
 | Approach | Arm | exp/spherical | exp/diagonal | median/diagonal | matched/diagonal | exp/correlation |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | `covariance_exposures` | control | -3,138.57 | -4,414.38 | +8,016.21 | +7,347.07 | -2,355.55 |
+| `reference_exposures` | control | -3,146.30 | -4,430.15 | +7,454.72 | +7,298.10 | -2,373.93 |
 | `fernandez_market_cap_assets` | fernandez | +298.20 | -322.86 | -793.72 | -1,025.51 | -106.37 |
 | `fernandez_market_to_book` | fernandez | -800.87 | -1,778.48 | -2,072.82 | -2,156.96 | -769.94 |
 | `fernandez_dividend_yield` | fernandez | -983.78 | -834.81 | -1,337.76 | -1,505.93 | -424.59 |
 | `fernandez_joint` | fernandez | +0.00 | +0.00 | -915.75 | -0.00 | +0.00 |
-| `histories@decoded__direct` | calibrated | -3,234.71 | -4,579.72 | +105.16 | -496.21 | -2,477.23 |
-| `histories@decoded__pca16` | calibrated | -3,236.78 | -4,579.06 | -2,614.50 | -1,379.37 | -2,477.48 |
-| `histories@decoded__autoencoder` | calibrated | -3,234.56 | -4,574.23 | +822.12 | -211.61 | -2,474.11 |
-| `histories@decoded__random_autoencoder` | calibrated | -3,234.34 | -4,574.35 | +390.40 | -246.45 | -2,474.13 |
-| `histories@decoded__supervised_mlp16` | calibrated | -3,236.23 | -4,578.59 | -1,295.24 | -1,376.71 | -2,476.19 |
-| `histories@decoded__tabpfn_fast__late` | calibrated | -3,215.74 | -4,540.59 | +4,474.15 | +3,442.75 | -2,452.13 |
-| `histories@decoded__tabpfn_full__late` | calibrated | -3,215.60 | -4,541.27 | +4,473.72 | +3,390.77 | -2,451.70 |
-| `histories@decoded__tabfm__early_concat` | calibrated | -3,220.78 | -4,551.63 | +3,527.37 | +2,700.97 | -2,458.38 |
-| `histories@decoded__tabfm__early_mean` | calibrated | -3,220.74 | -4,551.46 | +3,532.56 | +2,741.46 | -2,458.25 |
-| `histories@decoded__tabfm__late` | calibrated | -3,215.35 | -4,541.01 | +4,345.62 | +3,526.52 | -2,452.27 |
-| `histories@decoded__tabfm__early_concat_labelnull` | calibrated | -3,224.71 | -4,559.69 | +2,723.55 | +1,928.29 | -2,463.70 |
-| `histories@decoded__exaone__late` | calibrated | -3,216.64 | -4,541.87 | +4,378.81 | +3,451.42 | -2,452.20 |
-| `histories@decoded__exaone__item_first_concat` | calibrated | -3,235.57 | -4,597.89 | -204.48 | -1,224.69 | -2,487.03 |
-| `histories@decoded__exaone__item_first_mean` | calibrated | -3,235.67 | -4,582.92 | -196.64 | -1,197.50 | -2,479.38 |
-| `histories@decoded__exaone__item_last_concat` | calibrated | -3,213.82 | -4,537.35 | +4,385.72 | +3,426.04 | -2,449.28 |
+| `histories@decoded__direct` | calibrated | -3,234.93 | -4,576.87 | +1,852.54 | +295.90 | -2,475.76 |
+| `histories@decoded__pca16` | calibrated | -3,236.51 | -4,578.80 | +508.00 | -236.61 | -2,477.38 |
+| `histories@decoded__autoencoder` | calibrated | -3,234.18 | -4,573.78 | +1,829.42 | +114.37 | -2,473.57 |
+| `histories@decoded__random_autoencoder` | calibrated | -3,234.03 | -4,573.81 | +1,379.55 | +378.71 | -2,473.61 |
+| `histories@decoded__supervised_mlp16` | calibrated | -3,235.81 | -4,578.52 | -4,493.29 | -808.76 | -2,476.07 |
+| `histories@decoded__tabpfn_fast__late` | calibrated | -3,218.08 | -4,545.77 | +4,305.58 | +3,279.21 | -2,455.12 |
+| `histories@decoded__tabpfn_full__late` | calibrated | -3,217.53 | -4,544.74 | +4,371.18 | +3,330.98 | -2,454.73 |
+| `histories@decoded__tabfm__early_concat` | calibrated | -3,221.36 | -4,552.49 | +3,766.14 | +2,877.20 | -2,458.80 |
+| `histories@decoded__tabfm__early_mean` | calibrated | -3,221.39 | -4,552.47 | +3,791.58 | +2,903.81 | -2,458.85 |
+| `histories@decoded__tabfm__late` | calibrated | -3,216.37 | -4,542.96 | +4,405.87 | +3,612.89 | -2,453.49 |
+| `histories@decoded__tabfm__early_concat_labelnull` | calibrated | -3,224.71 | -4,559.92 | +3,063.70 | +2,209.99 | -2,463.37 |
+| `histories@decoded__exaone__late` | calibrated | -3,218.20 | -4,545.65 | +4,358.26 | +3,436.83 | -2,454.70 |
+| `histories@decoded__exaone__item_first_concat` | calibrated | -3,235.87 | -4,578.17 | -196.59 | -1,138.27 | -2,476.91 |
+| `histories@decoded__exaone__item_first_mean` | calibrated | -3,236.06 | -4,578.49 | -249.50 | -1,192.89 | -2,477.08 |
+| `histories@decoded__exaone__item_last_concat` | calibrated | -3,216.14 | -4,542.42 | +4,335.58 | +3,417.03 | -2,452.66 |
 | `histories__direct` | classical | +818.94 | +1,216.98 | +3,206.89 | +2,187.09 | +1,045.94 |
 | `histories__mahalanobis_lw` | classical | -5,315.24 | -10,613.60 | -2,514.62 | -1,429.82 | -14,963.39 |
 | `histories__euclidean` | classical | +1,310.49 | +861.37 | +2,983.00 | +703.78 | +1,372.50 |
@@ -250,24 +251,25 @@ were not preregistered and these years were inspected during development.
 | Approach | Difference | 21-day interval | 63-day interval | Politis-White block |
 | --- | ---: | ---: | ---: | ---: |
 | `covariance_exposures` | -4,414.38 | [-7,984.2, -2,415.0] | [-8,347.4, -2,208.3] | 49.7 |
+| `reference_exposures` | -4,430.15 | [-8,009.0, -2,426.0] | [-8,374.5, -2,218.1] | 49.7 |
 | `fernandez_market_cap_assets` | -322.86 | [-805.0, -4.4] | [-930.1, +48.7] | 50.2 |
 | `fernandez_market_to_book` | -1,778.48 | [-3,625.9, -688.2] | [-3,926.0, -558.4] | 53.7 |
 | `fernandez_dividend_yield` | -834.81 | [-1,837.7, -250.2] | [-1,973.8, -161.9] | 42.3 |
-| `histories@decoded__direct` | -4,579.72 | [-8,284.0, -2,505.9] | [-8,660.3, -2,291.0] | 49.7 |
-| `histories@decoded__pca16` | -4,579.06 | [-8,280.9, -2,506.9] | [-8,656.6, -2,292.0] | 49.7 |
-| `histories@decoded__autoencoder` | -4,574.23 | [-8,271.0, -2,504.9] | [-8,647.5, -2,290.4] | 49.7 |
-| `histories@decoded__random_autoencoder` | -4,574.35 | [-8,270.5, -2,505.3] | [-8,647.1, -2,290.6] | 49.7 |
-| `histories@decoded__supervised_mlp16` | -4,578.59 | [-8,280.6, -2,506.5] | [-8,656.9, -2,291.4] | 49.7 |
-| `histories@decoded__tabpfn_fast__late` | -4,540.59 | [-8,209.5, -2,486.5] | [-8,584.0, -2,274.0] | 49.7 |
-| `histories@decoded__tabpfn_full__late` | -4,541.27 | [-8,211.3, -2,486.1] | [-8,586.8, -2,273.6] | 49.7 |
-| `histories@decoded__tabfm__early_concat` | -4,551.63 | [-8,229.8, -2,492.3] | [-8,605.0, -2,278.8] | 49.7 |
-| `histories@decoded__tabfm__early_mean` | -4,551.46 | [-8,229.6, -2,492.1] | [-8,604.8, -2,278.6] | 49.7 |
-| `histories@decoded__tabfm__late` | -4,541.01 | [-8,209.9, -2,486.9] | [-8,584.2, -2,274.0] | 49.7 |
-| `histories@decoded__tabfm__early_concat_labelnull` | -4,559.69 | [-8,244.4, -2,497.2] | [-8,619.5, -2,283.1] | 49.7 |
-| `histories@decoded__exaone__late` | -4,541.87 | [-8,211.7, -2,487.4] | [-8,586.6, -2,274.5] | 49.7 |
-| `histories@decoded__exaone__item_first_concat` | -4,597.89 | [-8,325.7, -2,511.8] | [-8,700.3, -2,295.9] | 49.7 |
-| `histories@decoded__exaone__item_first_mean` | -4,582.92 | [-8,290.9, -2,507.7] | [-8,666.2, -2,292.1] | 49.7 |
-| `histories@decoded__exaone__item_last_concat` | -4,537.35 | [-8,203.9, -2,484.5] | [-8,579.0, -2,271.9] | 49.7 |
+| `histories@decoded__direct` | -4,576.87 | [-8,277.5, -2,505.1] | [-8,653.8, -2,290.5] | 49.7 |
+| `histories@decoded__pca16` | -4,578.80 | [-8,280.4, -2,506.8] | [-8,656.2, -2,292.0] | 49.7 |
+| `histories@decoded__autoencoder` | -4,573.78 | [-8,270.1, -2,504.6] | [-8,646.6, -2,290.1] | 49.7 |
+| `histories@decoded__random_autoencoder` | -4,573.81 | [-8,269.7, -2,505.0] | [-8,646.3, -2,290.3] | 49.7 |
+| `histories@decoded__supervised_mlp16` | -4,578.52 | [-8,280.9, -2,506.1] | [-8,657.3, -2,291.1] | 49.7 |
+| `histories@decoded__tabpfn_fast__late` | -4,545.77 | [-8,219.3, -2,489.2] | [-8,593.7, -2,276.5] | 49.7 |
+| `histories@decoded__tabpfn_full__late` | -4,544.74 | [-8,217.1, -2,488.7] | [-8,592.2, -2,276.0] | 49.7 |
+| `histories@decoded__tabfm__early_concat` | -4,552.49 | [-8,231.4, -2,492.9] | [-8,606.4, -2,279.4] | 49.7 |
+| `histories@decoded__tabfm__early_mean` | -4,552.47 | [-8,231.4, -2,492.8] | [-8,606.6, -2,279.3] | 49.7 |
+| `histories@decoded__tabfm__late` | -4,542.96 | [-8,213.7, -2,487.8] | [-8,587.9, -2,275.2] | 49.7 |
+| `histories@decoded__tabfm__early_concat_labelnull` | -4,559.92 | [-8,245.1, -2,496.9] | [-8,620.8, -2,282.9] | 49.7 |
+| `histories@decoded__exaone__late` | -4,545.65 | [-8,218.6, -2,489.3] | [-8,593.8, -2,276.5] | 49.7 |
+| `histories@decoded__exaone__item_first_concat` | -4,578.17 | [-8,279.6, -2,506.3] | [-8,655.7, -2,291.3] | 49.7 |
+| `histories@decoded__exaone__item_first_mean` | -4,578.49 | [-8,280.2, -2,506.6] | [-8,656.1, -2,291.4] | 49.7 |
+| `histories@decoded__exaone__item_last_concat` | -4,542.42 | [-8,213.2, -2,487.1] | [-8,588.4, -2,274.5] | 49.7 |
 | `histories__direct` | +1,216.98 | [+363.1, +2,412.5] | [+156.5, +2,802.8] | 63.3 |
 | `histories__mahalanobis_lw` | -10,613.60 | [-21,995.4, -3,855.5] | [-24,070.8, -2,743.0] | 54.0 |
 | `histories__euclidean` | +861.37 | [-496.7, +1,796.3] | [-497.8, +1,836.6] | 34.8 |
@@ -481,23 +483,23 @@ the fitted coefficients, networks and searched specifications fixed.
 | support redraw | `histories@redraw1__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/diagonal | +23.0 | [-107.5, +205.0] | +125 | -26 | -21 | -6 | +8 | -58 |
 | support redraw | `histories@redraw2__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/diagonal | -227.0 | [-461.4, -77.1] | -164 | -21 | -43 | -11 | +21 | -10 |
 | both targets vs one | `histories@shared_both__tabfm__early_concat` | `histories@shared_market_cap_assets__tabfm__early_concat` | matched/diagonal | +325.6 | [+146.4, +637.2] | +183 | +24 | +3 | +46 | +6 | +63 |
-| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/diagonal | +407.3 | [-416.8, +1,074.6] | -531 | +223 | +248 | +97 | +44 | +327 |
-| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | matched/diagonal | +3,197.2 | [+2,033.6, +5,126.0] | +1,349 | +317 | +399 | +260 | +201 | +672 |
+| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/diagonal | +583.6 | [-192.7, +1,222.0] | -432 | +216 | +242 | +105 | +89 | +365 |
+| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | matched/diagonal | +2,581.3 | [+1,708.1, +3,995.2] | +932 | +283 | +324 | +217 | +241 | +583 |
 | support redraw | `histories@redraw1__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/diagonal | -232.9 | [-478.0, -74.1] | -181 | -22 | +32 | -0 | -23 | -39 |
 | support redraw | `histories@redraw2__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/diagonal | +39.3 | [-50.7, +176.5] | +99 | -17 | -9 | -8 | +1 | -26 |
 | both targets vs one | `histories@shared_both__tabpfn_full__late` | `histories@shared_market_cap_assets__tabpfn_full__late` | matched/diagonal | +203.0 | [+135.8, +280.9] | +32 | +46 | +16 | +32 | +23 | +54 |
-| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/diagonal | +2,674.0 | [+1,602.4, +4,002.6] | +375 | +443 | +564 | +381 | +219 | +692 |
-| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | matched/diagonal | +3,887.0 | [+2,696.2, +5,865.3] | +1,457 | +364 | +544 | +378 | +351 | +793 |
+| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/diagonal | +2,614.3 | [+1,543.4, +3,961.2] | +375 | +419 | +519 | +379 | +195 | +726 |
+| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | matched/diagonal | +3,035.1 | [+2,182.9, +4,366.9] | +942 | +314 | +431 | +325 | +323 | +700 |
 | support redraw | `histories@redraw1__exaone__late` | `histories__exaone__late` | matched/diagonal | -143.7 | [-283.8, -47.1] | -118 | -7 | +11 | -13 | -7 | -10 |
 | support redraw | `histories@redraw2__exaone__late` | `histories__exaone__late` | matched/diagonal | -58.6 | [-91.9, -26.8] | -16 | +4 | -6 | -23 | -3 | -14 |
 | both targets vs one | `histories@shared_both__exaone__late` | `histories@shared_market_cap_assets__exaone__late` | matched/diagonal | +365.0 | [+227.2, +592.7] | +129 | +33 | +22 | +52 | +41 | +87 |
-| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | matched/diagonal | +3,600.5 | [+2,142.2, +5,696.3] | +855 | +546 | +632 | +384 | +280 | +904 |
-| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | matched/diagonal | +3,947.6 | [+2,595.5, +6,172.1] | +1,597 | +383 | +511 | +310 | +316 | +831 |
+| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | matched/diagonal | +3,585.9 | [+2,110.1, +5,698.2] | +841 | +538 | +607 | +414 | +269 | +917 |
+| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | matched/diagonal | +3,140.9 | [+2,144.6, +4,739.7] | +1,067 | +350 | +417 | +289 | +300 | +718 |
 | support redraw | `histories@redraw1__supervised_mlp16` | `histories__supervised_mlp16` | matched/diagonal | +71.3 | [-29.8, +212.9] | +89 | +18 | -25 | -7 | +15 | -19 |
 | support redraw | `histories@redraw2__supervised_mlp16` | `histories__supervised_mlp16` | matched/diagonal | +123.1 | [+13.1, +258.2] | +112 | +19 | -41 | +22 | +11 | +0 |
 | both targets vs one | `histories@shared_both__supervised_mlp16` | `histories@shared_market_cap_assets__supervised_mlp16` | matched/diagonal | +846.9 | [+525.3, +1,387.2] | +358 | +63 | +69 | +70 | +82 | +204 |
-| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | matched/diagonal | -243.6 | [-1,188.6, +454.2] | -775 | +249 | +85 | +75 | +13 | +111 |
-| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | matched/diagonal | -880.5 | [-1,593.5, -447.6] | -439 | -16 | -130 | -108 | -67 | -121 |
+| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | matched/diagonal | +324.4 | [-424.0, +892.9] | -532 | +276 | +113 | +128 | +80 | +260 |
+| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | matched/diagonal | -1,104.7 | [-2,231.2, -465.5] | -711 | -15 | -171 | -105 | -4 | -98 |
 | pretrained vs supervised | `histories__tabfm__early_concat` | `histories__supervised_mlp16` | matched/correlation | +1,821.8 | [+1,159.9, +2,497.9] | +68 | +417 | +328 | +393 | +169 | +447 |
 | pretrained vs direct | `histories__tabfm__early_concat` | `histories__direct` | matched/correlation | +778.7 | [+279.8, +1,523.6] | +616 | -26 | +75 | -18 | +65 | +67 |
 | pretrained vs Mahalanobis | `histories__tabfm__early_concat` | `histories__mahalanobis_lw` | matched/correlation | +3,887.2 | [+2,531.0, +5,604.2] | +1,226 | +237 | +374 | +271 | +144 | +1,634 |
@@ -521,23 +523,23 @@ the fitted coefficients, networks and searched specifications fixed.
 | support redraw | `histories@redraw1__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/correlation | -131.7 | [-209.7, -71.8] | -30 | -28 | -21 | -13 | +5 | -45 |
 | support redraw | `histories@redraw2__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/correlation | -255.4 | [-536.9, -76.1] | -207 | -14 | -39 | -5 | +14 | -5 |
 | both targets vs one | `histories@shared_both__tabfm__early_concat` | `histories@shared_market_cap_assets__tabfm__early_concat` | matched/correlation | -130.3 | [-483.5, +116.8] | -277 | +41 | +2 | +53 | +6 | +44 |
-| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/correlation | -2,730.8 | [-7,349.4, +307.2] | -3,578 | +330 | +205 | +185 | -44 | +172 |
-| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | matched/correlation | -471.2 | [-3,959.7, +1,833.7] | -2,346 | +472 | +359 | +388 | +180 | +474 |
+| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | matched/correlation | -3,270.4 | [-8,746.3, +304.3] | -4,220 | +350 | +200 | +223 | -18 | +193 |
+| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | matched/correlation | -1,278.9 | [-5,289.8, +1,325.4] | -2,819 | +424 | +289 | +329 | +110 | +389 |
 | support redraw | `histories@redraw1__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/correlation | -20.9 | [-85.5, +58.9] | +39 | -25 | +26 | -20 | -14 | -26 |
 | support redraw | `histories@redraw2__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/correlation | +91.4 | [-24.8, +272.6] | +135 | -12 | -4 | -10 | +2 | -19 |
 | both targets vs one | `histories@shared_both__tabpfn_full__late` | `histories@shared_market_cap_assets__tabpfn_full__late` | matched/correlation | +274.8 | [+156.2, +470.6] | +123 | +40 | +8 | +36 | +19 | +50 |
-| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/correlation | -1,652.0 | [-6,594.5, +1,724.8] | -3,727 | +612 | +472 | +484 | +65 | +443 |
-| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | matched/correlation | -627.9 | [-5,112.0, +2,295.3] | -3,023 | +558 | +480 | +527 | +278 | +553 |
+| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | matched/correlation | -2,373.8 | [-8,234.4, +1,565.9] | -4,426 | +611 | +428 | +499 | +38 | +477 |
+| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | matched/correlation | -1,617.8 | [-6,716.3, +1,645.0] | -3,554 | +488 | +370 | +445 | +153 | +480 |
 | support redraw | `histories@redraw1__exaone__late` | `histories__exaone__late` | matched/correlation | -58.1 | [-92.2, -20.4] | -13 | -11 | +5 | -23 | -6 | -11 |
 | support redraw | `histories@redraw2__exaone__late` | `histories__exaone__late` | matched/correlation | +3.9 | [-40.7, +66.0] | +28 | +2 | -1 | -13 | -1 | -12 |
 | both targets vs one | `histories@shared_both__exaone__late` | `histories@shared_market_cap_assets__exaone__late` | matched/correlation | +176.6 | [+80.3, +266.2] | -25 | +36 | +17 | +45 | +33 | +71 |
-| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | matched/correlation | -1,255.7 | [-6,247.1, +2,208.1] | -3,770 | +723 | +543 | +529 | +114 | +606 |
-| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | matched/correlation | -303.4 | [-4,212.6, +2,278.3] | -2,621 | +556 | +455 | +447 | +266 | +594 |
+| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | matched/correlation | -2,026.6 | [-8,064.9, +2,088.8] | -4,568 | +749 | +517 | +576 | +94 | +605 |
+| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | matched/correlation | -1,342.3 | [-5,974.2, +1,659.9] | -3,251 | +514 | +363 | +397 | +148 | +487 |
 | support redraw | `histories@redraw1__supervised_mlp16` | `histories__supervised_mlp16` | matched/correlation | +71.5 | [-42.8, +239.5] | +110 | +4 | -28 | -14 | +11 | -12 |
 | support redraw | `histories@redraw2__supervised_mlp16` | `histories__supervised_mlp16` | matched/correlation | +133.6 | [+11.6, +297.3] | +131 | +15 | -42 | +17 | +10 | +2 |
 | both targets vs one | `histories@shared_both__supervised_mlp16` | `histories@shared_market_cap_assets__supervised_mlp16` | matched/correlation | +635.6 | [+396.6, +1,002.1] | +196 | +85 | +56 | +85 | +51 | +163 |
-| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | matched/correlation | -348.5 | [-1,218.2, +316.6] | -756 | +217 | +60 | +84 | -6 | +53 |
-| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | matched/correlation | +89.3 | [-325.9, +613.9] | +408 | -57 | -114 | -106 | +49 | -92 |
+| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | matched/correlation | -164.5 | [-1,258.8, +647.8] | -896 | +259 | +90 | +166 | +35 | +182 |
+| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | matched/correlation | +5.2 | [-442.3, +579.4] | +437 | -83 | -150 | -122 | -7 | -70 |
 | pretrained vs supervised | `histories__tabfm__early_concat` | `histories__supervised_mlp16` | median/diagonal | +2,348.1 | [+1,244.1, +4,205.4] | +875 | +260 | +144 | +207 | +283 | +579 |
 | pretrained vs direct | `histories__tabfm__early_concat` | `histories__direct` | median/diagonal | -918.4 | [-1,755.2, -443.7] | -544 | -73 | -58 | -89 | -38 | -116 |
 | pretrained vs Mahalanobis | `histories__tabfm__early_concat` | `histories__mahalanobis_lw` | median/diagonal | +4,803.1 | [+2,223.1, +8,892.7] | +3,307 | +77 | +336 | +129 | +164 | +790 |
@@ -561,34 +563,37 @@ the fitted coefficients, networks and searched specifications fixed.
 | support redraw | `histories@redraw1__tabfm__early_concat` | `histories__tabfm__early_concat` | median/diagonal | +142.0 | [+28.6, +302.9] | +146 | +2 | -10 | +7 | +6 | -10 |
 | support redraw | `histories@redraw2__tabfm__early_concat` | `histories__tabfm__early_concat` | median/diagonal | -74.0 | [-199.8, +10.6] | -66 | -12 | -6 | -9 | +9 | +11 |
 | both targets vs one | `histories@shared_both__tabfm__early_concat` | `histories@shared_market_cap_assets__tabfm__early_concat` | median/diagonal | -159.9 | [-227.9, -105.0] | -73 | -11 | -46 | -7 | -11 | -13 |
-| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | median/diagonal | +1,238.9 | [+324.9, +2,014.7] | -387 | +367 | +453 | +243 | +96 | +467 |
-| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | median/diagonal | +3,422.2 | [+1,879.1, +5,889.3] | +1,959 | +142 | +254 | +249 | +179 | +639 |
+| decoded vs native | `histories@decoded__tabfm__early_concat` | `histories__tabfm__early_concat` | median/diagonal | +1,477.7 | [+550.0, +2,276.5] | -313 | +378 | +452 | +233 | +164 | +564 |
+| decoded vs decoded inputs | `histories@decoded__tabfm__early_concat` | `histories@decoded__direct` | median/diagonal | +1,913.6 | [+1,082.3, +3,216.2] | +797 | +118 | +173 | +116 | +214 | +496 |
 | support redraw | `histories@redraw1__tabpfn_full__late` | `histories__tabpfn_full__late` | median/diagonal | -191.5 | [-395.6, -55.6] | -159 | -6 | +20 | -12 | -30 | -5 |
 | support redraw | `histories@redraw2__tabpfn_full__late` | `histories__tabpfn_full__late` | median/diagonal | +219.2 | [+49.9, +484.9] | +213 | -5 | +5 | +4 | +6 | -4 |
 | both targets vs one | `histories@shared_both__tabpfn_full__late` | `histories@shared_market_cap_assets__tabpfn_full__late` | median/diagonal | +98.8 | [+8.2, +195.6] | +0 | +47 | -2 | +9 | -3 | +47 |
-| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | median/diagonal | +2,362.0 | [+1,225.9, +3,552.9] | -1 | +444 | +558 | +407 | +238 | +716 |
-| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | median/diagonal | +4,368.6 | [+2,618.2, +7,162.1] | +2,256 | +144 | +343 | +391 | +409 | +825 |
+| decoded vs native | `histories@decoded__tabpfn_full__late` | `histories__tabpfn_full__late` | median/diagonal | +2,259.4 | [+1,094.7, +3,439.6] | -93 | +448 | +553 | +367 | +194 | +791 |
+| decoded vs decoded inputs | `histories@decoded__tabpfn_full__late` | `histories@decoded__direct` | median/diagonal | +2,518.6 | [+1,598.2, +3,922.0] | +928 | +113 | +259 | +228 | +332 | +659 |
 | support redraw | `histories@redraw1__exaone__late` | `histories__exaone__late` | median/diagonal | -227.2 | [-464.6, -61.8] | -199 | -11 | +26 | -27 | -15 | -1 |
 | support redraw | `histories@redraw2__exaone__late` | `histories__exaone__late` | median/diagonal | -53.4 | [-115.8, +6.5] | -15 | +9 | +13 | -29 | -12 | -20 |
 | both targets vs one | `histories@shared_both__exaone__late` | `histories@shared_market_cap_assets__exaone__late` | median/diagonal | +156.4 | [-25.4, +399.7] | +37 | +24 | -20 | +23 | +16 | +77 |
-| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | median/diagonal | +1,973.5 | [+511.6, +3,468.5] | -250 | +465 | +498 | +324 | +184 | +753 |
-| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | median/diagonal | +4,273.6 | [+2,506.4, +7,090.6] | +2,231 | +196 | +322 | +353 | +345 | +827 |
+| decoded vs native | `histories@decoded__exaone__late` | `histories__exaone__late` | median/diagonal | +1,952.9 | [+451.9, +3,476.6] | -307 | +480 | +478 | +303 | +175 | +824 |
+| decoded vs decoded inputs | `histories@decoded__exaone__late` | `histories@decoded__direct` | median/diagonal | +2,505.7 | [+1,520.4, +4,049.5] | +938 | +175 | +222 | +210 | +303 | +658 |
 | support redraw | `histories@redraw1__supervised_mlp16` | `histories__supervised_mlp16` | median/diagonal | +265.3 | [+83.8, +479.6] | +93 | +67 | -45 | +1 | +129 | +20 |
 | support redraw | `histories@redraw2__supervised_mlp16` | `histories__supervised_mlp16` | median/diagonal | +462.0 | [+208.0, +783.4] | +239 | +63 | -71 | +63 | +133 | +36 |
 | both targets vs one | `histories@shared_both__supervised_mlp16` | `histories@shared_market_cap_assets__supervised_mlp16` | median/diagonal | +1,269.4 | [+554.4, +2,334.1] | +395 | +106 | +2 | +66 | +252 | +450 |
-| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | median/diagonal | -1,235.6 | [-3,449.0, +354.9] | -1,953 | +375 | +110 | +47 | +100 | +86 |
-| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | median/diagonal | -1,400.4 | [-2,529.5, -633.6] | -482 | -110 | -233 | -153 | -100 | -322 |
+| decoded vs native | `histories@decoded__supervised_mlp16` | `histories__supervised_mlp16` | median/diagonal | -4,433.7 | [-10,691.9, -481.0] | -4,790 | +295 | -22 | -25 | +125 | -16 |
+| decoded vs decoded inputs | `histories@decoded__supervised_mlp16` | `histories@decoded__direct` | median/diagonal | -6,345.8 | [-12,960.3, -2,549.2] | -4,555 | -225 | -445 | -348 | -108 | -664 |
 
 ## Where the residual likelihood comes from
 
-Exact split of the held-out spatial-error log-likelihood of factor residuals at the
-frozen coefficient and prior-window variances (Lean `Likelihood.spatial_loss`),
-summed over 2020-2025, minus the uniform network's parts. `alignment` is the term
-linear in lambda (covariance between a firm and its neighbours); the two
-`concentration` terms are quadratic, split into the neighbours' own variances
-weighted by squared weights (the Herfindahl noise cost) and their cross products.
-This is the residual model only; the reported held-out scores add the factor
-covariance. `H` is the mean row Herfindahl index.
+Exact split of the held-out spatial-error log-likelihood of factor residuals,
+conditional on realized factors, at the frozen coefficient and prior-window
+variances (Lean `Likelihood.spatial_loss`), summed over 2020-2025, minus the uniform
+network's parts. `alignment` is the term linear in lambda (weighted cross products
+of a firm's and its neighbours' residuals); the two `concentration` terms are
+quadratic, split into the neighbours' own second moments weighted by squared
+weights and their cross products. Those second moments hold common and
+idiosyncratic variance together, so `concentration_own` is not a pure noise cost,
+and a larger `alignment` is not by itself evidence of recovered exposures. This
+split does not decompose the headline unconditional scores, which add factor
+uncertainty around the prior mean. `H` is the mean row Herfindahl index.
 
 ### exp kernel, diagonal innovations
 
@@ -597,14 +602,15 @@ covariance. `H` is the mean row Herfindahl index.
 | `uniform_network` | 0.707 | -782 | +2,145,743 | -549,849 | +42,398 | -815 | -13,101 | +1,623,593 | 0.0023 |
 | `fernandez_joint` | 0.776 | -360 | +3,791 | -6,242 | +10,899 | -268 | -3,053 | +4,767 | 0.0026 |
 | `covariance_exposures` | 0.710 | -12 | +154 | -254 | +426 | -5 | -145 | +164 | 0.0023 |
+| `reference_exposures` | 0.710 | -11 | +131 | -224 | +381 | -6 | -127 | +145 | 0.0023 |
 | `histories__direct` | 0.793 | -428 | +3,116 | -7,402 | +13,559 | -281 | -4,269 | +4,294 | 0.0026 |
 | `histories__supervised_mlp16` | 0.752 | -343 | +1,689 | -4,521 | +8,617 | -403 | -2,885 | +2,154 | 0.0031 |
 | `histories__tabfm__early_concat` | 0.757 | -217 | +1,978 | -4,440 | +8,343 | -144 | -2,779 | +2,740 | 0.0024 |
 | `histories__tabfm__early_concat_labelnull` | 0.724 | -67 | +577 | -1,186 | +2,321 | -43 | -797 | +806 | 0.0024 |
 | `histories__tabpfn_full__late` | 0.764 | -265 | +2,055 | -4,100 | +9,043 | -221 | -3,437 | +3,075 | 0.0025 |
 | `histories__exaone__late` | 0.744 | -164 | +1,331 | -2,715 | +6,240 | -150 | -2,549 | +1,992 | 0.0025 |
-| `histories@decoded__direct` | 0.707 | -1 | +10 | -18 | +25 | -0 | -5 | +11 | 0.0023 |
-| `histories@decoded__tabfm__early_concat` | 0.708 | -3 | +27 | -51 | +92 | -1 | -28 | +36 | 0.0023 |
+| `histories@decoded__direct` | 0.707 | -1 | +9 | -17 | +28 | -0 | -8 | +11 | 0.0023 |
+| `histories@decoded__tabfm__early_concat` | 0.708 | -3 | +27 | -52 | +94 | -1 | -29 | +36 | 0.0023 |
 
 ### matched kernel, diagonal innovations
 
@@ -613,14 +619,15 @@ covariance. `H` is the mean row Herfindahl index.
 | `uniform_network` | 0.707 | -782 | +2,145,743 | -549,849 | +42,398 | -815 | -13,101 | +1,623,593 | 0.0023 |
 | `fernandez_joint` | 0.776 | -360 | +3,791 | -6,242 | +10,899 | -268 | -3,053 | +4,767 | 0.0026 |
 | `covariance_exposures` | 0.894 | -1,292 | +15,864 | -32,733 | +48,811 | -527 | -13,823 | +16,299 | 0.0026 |
+| `reference_exposures` | 0.902 | -1,407 | +16,149 | -34,411 | +52,576 | -583 | -15,410 | +16,913 | 0.0026 |
 | `histories__direct` | 0.804 | -514 | +3,669 | -8,500 | +15,628 | -341 | -4,977 | +4,965 | 0.0026 |
 | `histories__supervised_mlp16` | 0.746 | -207 | +1,185 | -2,958 | +5,983 | -214 | -2,225 | +1,564 | 0.0026 |
 | `histories__tabfm__early_concat` | 0.796 | -462 | +4,323 | -9,230 | +16,800 | -324 | -5,415 | +5,692 | 0.0026 |
 | `histories__tabfm__early_concat_labelnull` | 0.781 | -374 | +3,432 | -7,111 | +13,022 | -281 | -4,131 | +4,557 | 0.0026 |
 | `histories__tabpfn_full__late` | 0.772 | -329 | +2,930 | -5,446 | +11,435 | -295 | -4,104 | +4,190 | 0.0026 |
 | `histories__exaone__late` | 0.755 | -242 | +2,216 | -4,204 | +9,070 | -243 | -3,484 | +3,114 | 0.0026 |
-| `histories@decoded__direct` | 0.783 | -377 | +3,196 | -6,948 | +11,133 | -344 | -2,576 | +4,084 | 0.0029 |
-| `histories@decoded__tabfm__early_concat` | 0.834 | -715 | +6,383 | -14,385 | +23,470 | -390 | -6,385 | +7,979 | 0.0026 |
+| `histories@decoded__direct` | 0.795 | -444 | +3,602 | -8,002 | +12,933 | -290 | -3,222 | +4,577 | 0.0027 |
+| `histories@decoded__tabfm__early_concat` | 0.837 | -741 | +6,369 | -14,563 | +24,411 | -409 | -6,851 | +8,216 | 0.0026 |
 
 The uniform row shows its own parts; every other row is its difference from it.
 
@@ -629,49 +636,96 @@ The uniform row shows its own parts; every other row is its difference from it.
 Held-out gains over the joint network (exp kernel) for the history rung: the native
 readout, two re-encodings on differently salted 256-row supports, the two support
 targets on shared rows and their combination (RMS of the two distances), and
-networks built from exposures decoded out of the same states (see `decoding.py`).
+networks built from reference-factor exposures decoded out of the same states
+(see `decoding.py`).
 
 ### exp kernel, diagonal innovations
 
 | Representation | native | redraw 1 | redraw 2 | shared cap/assets | shared income/assets | both shared | decoded |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `direct` | +1,217.0 | — | — | +1,167.6 | +1,167.6 | — | -4,579.7 |
-| `tabfm__early_concat` | -1,035.2 | -1,052.3 | -952.6 | -896.4 | -37.5 | -444.9 | -4,551.6 |
-| `tabpfn_full__late` | -225.8 | -297.1 | -88.8 | -250.2 | -1,192.3 | -665.1 | -4,541.3 |
-| `exaone__late` | -1,390.2 | -1,501.1 | -1,558.0 | -1,385.6 | -2,223.4 | -1,731.4 | -4,541.9 |
-| `supervised_mlp16` | -51.7 | +67.1 | +79.8 | -34.9 | +768.9 | +1,133.5 | -4,578.6 |
+| `direct` | +1,217.0 | — | — | +1,167.6 | +1,167.6 | — | -4,576.9 |
+| `tabfm__early_concat` | -1,035.2 | -1,052.3 | -952.6 | -896.4 | -37.5 | -444.9 | -4,552.5 |
+| `tabpfn_full__late` | -225.8 | -297.1 | -88.8 | -250.2 | -1,192.3 | -665.1 | -4,544.7 |
+| `exaone__late` | -1,390.2 | -1,501.1 | -1,558.0 | -1,385.6 | -2,223.4 | -1,731.4 | -4,545.7 |
+| `supervised_mlp16` | -51.7 | +67.1 | +79.8 | -34.9 | +768.9 | +1,133.5 | -4,578.5 |
 
 ### matched kernel, diagonal innovations
 
 | Representation | native | redraw 1 | redraw 2 | shared cap/assets | shared income/assets | both shared | decoded |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `direct` | +2,187.1 | — | — | +2,194.6 | +2,194.6 | — | -496.2 |
-| `tabfm__early_concat` | +2,293.6 | +2,316.7 | +2,066.6 | +2,382.9 | +2,841.1 | +2,708.5 | +2,701.0 |
-| `tabpfn_full__late` | +716.7 | +483.8 | +756.0 | +649.1 | +657.9 | +852.1 | +3,390.8 |
-| `exaone__late` | -149.1 | -292.8 | -207.7 | -120.4 | +701.8 | +244.6 | +3,451.4 |
-| `supervised_mlp16` | -1,133.1 | -1,061.8 | -1,010.0 | -1,105.3 | -602.1 | -258.4 | -1,376.7 |
+| `direct` | +2,187.1 | — | — | +2,194.6 | +2,194.6 | — | +295.9 |
+| `tabfm__early_concat` | +2,293.6 | +2,316.7 | +2,066.6 | +2,382.9 | +2,841.1 | +2,708.5 | +2,877.2 |
+| `tabpfn_full__late` | +716.7 | +483.8 | +756.0 | +649.1 | +657.9 | +852.1 | +3,331.0 |
+| `exaone__late` | -149.1 | -292.8 | -207.7 | -120.4 | +701.8 | +244.6 | +3,436.8 |
+| `supervised_mlp16` | -1,133.1 | -1,061.8 | -1,010.0 | -1,105.3 | -602.1 | -258.4 | -808.8 |
 
-Decoders: mean over years of the out-of-fold R^2 of the five prior-covariance
-exposures, and the Spearman correlation between decoded and covariance-exposure
-distances.
+Decoders: out-of-fold R^2 of the rank-5 reference exposures (mean over
+years, median in brackets), and the Spearman correlation between decoded and
+target distances. The target's reliability bounds R^2 near 0.90
+and distance Spearman near 0.77; see Calibration targets.
 
 | Representation | Out-of-fold R^2 | Distance Spearman |
 | --- | ---: | ---: |
-| `autoencoder` | 0.035 | 0.184 |
-| `direct` | -0.384 | 0.231 |
-| `exaone__item_first_concat` | -301.567 | 0.132 |
-| `exaone__item_first_mean` | -3.127 | 0.126 |
-| `exaone__item_last_concat` | 0.229 | 0.420 |
-| `exaone__late` | 0.204 | 0.377 |
-| `pca16` | 0.025 | 0.194 |
-| `random_autoencoder` | 0.036 | 0.191 |
-| `supervised_mlp16` | 0.007 | 0.164 |
-| `tabfm__early_concat` | 0.165 | 0.358 |
-| `tabfm__early_concat_labelnull` | 0.111 | 0.327 |
-| `tabfm__early_mean` | 0.165 | 0.359 |
-| `tabfm__late` | 0.222 | 0.409 |
-| `tabpfn_fast__late` | 0.216 | 0.402 |
-| `tabpfn_full__late` | 0.217 | 0.395 |
+| `direct` | 0.092 [0.086] | 0.220 |
+| `pca16` | 0.059 [0.071] | 0.175 |
+| `autoencoder` | 0.063 [0.051] | 0.168 |
+| `random_autoencoder` | 0.068 [0.060] | 0.178 |
+| `supervised_mlp16` | 0.059 [0.059] | 0.160 |
+| `tabpfn_fast__late` | 0.285 [0.304] | 0.378 |
+| `tabpfn_full__late` | 0.282 [0.307] | 0.371 |
+| `tabfm__early_concat` | 0.224 [0.245] | 0.349 |
+| `tabfm__early_mean` | 0.223 [0.244] | 0.349 |
+| `tabfm__late` | 0.292 [0.315] | 0.388 |
+| `tabfm__early_concat_labelnull` | 0.175 [0.192] | 0.319 |
+| `exaone__late` | 0.274 [0.297] | 0.361 |
+| `exaone__item_first_concat` | 0.049 [0.052] | 0.122 |
+| `exaone__item_first_mean` | 0.050 [0.059] | 0.119 |
+| `exaone__item_last_concat` | 0.302 [0.324] | 0.392 |
+
+## Calibration targets
+
+`reference` is each cohort firm's OLS loadings on the leading principal components
+of standardized prior factor residuals of firms outside the cohort
+(383-484 a year); a held-out firm's returns never reach another
+firm's target. `covariance` is the earlier in-panel construction, the rank-k
+coordinates of the cohort's own residual covariance, kept as a control. Means over
+years. Halves split the prior window; the reference halves share the full-window
+factor series, so the Spearman-Brown value estimates the reliability of the
+full-window target and bounds any decoder's R^2 against it. In-panel coordinates
+rotate between halves, so only their distances are compared. Commonality is the
+share of each firm's residual variance the target explains; the effective firm
+fraction is (1 / sum p_i^2) / N for p_i a firm's share of the target's squared
+mass, low when a few firms hold it, as for a diagonal covariance.
+
+| Target | Rank | Half-window correlation | Spearman-Brown | Distance reliability | Commonality | Effective firm fraction |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| reference | 3 | 0.844 | 0.915 | 0.762 | 0.126 | 0.362 |
+| covariance | 3 | — | — | 0.670 | 0.136 | 0.120 |
+| reference | 5 | 0.820 | 0.901 | 0.774 | 0.158 | 0.390 |
+| covariance | 5 | — | — | 0.701 | 0.178 | 0.118 |
+| reference | 8 | 0.794 | 0.884 | 0.793 | 0.193 | 0.432 |
+| covariance | 8 | — | — | 0.715 | 0.223 | 0.133 |
+
+Mean out-of-fold decoder R^2 against the reference target at each rank (history
+rung); networks use rank 5 only.
+
+| Representation | Rank 3 | Rank 5 | Rank 8 |
+| --- | ---: | ---: | ---: |
+| `direct` | 0.105 | 0.092 | 0.080 |
+| `pca16` | 0.063 | 0.059 | 0.052 |
+| `autoencoder` | 0.075 | 0.063 | 0.058 |
+| `random_autoencoder` | 0.079 | 0.068 | 0.061 |
+| `supervised_mlp16` | 0.075 | 0.059 | 0.053 |
+| `tabpfn_fast__late` | 0.317 | 0.285 | 0.255 |
+| `tabpfn_full__late` | 0.313 | 0.282 | 0.254 |
+| `tabfm__early_concat` | 0.252 | 0.224 | 0.201 |
+| `tabfm__early_mean` | 0.250 | 0.223 | 0.198 |
+| `tabfm__late` | 0.326 | 0.292 | 0.262 |
+| `tabfm__early_concat_labelnull` | 0.195 | 0.175 | 0.158 |
+| `exaone__late` | 0.309 | 0.274 | 0.244 |
+| `exaone__item_first_concat` | 0.071 | 0.049 | 0.044 |
+| `exaone__item_first_mean` | 0.075 | 0.050 | 0.048 |
+| `exaone__item_last_concat` | 0.337 | 0.302 | 0.273 |
 
 ## Model confidence sets (size 0.10)
 
@@ -681,15 +735,15 @@ its family only; choosing a family after seeing the results is not accounted for
 
 | Family | Members | Included |
 | --- | ---: | --- |
-| spherical|exp | 203 | `metrics__euclidean_no_indicators` |
-| diagonal|exp | 206 | `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__supervised_mlp16`, `broad__mahalanobis_lw`, `broad__euclidean`, `broad__euclidean_no_indicators`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_full__late`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_full__late`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@shared_both__supervised_mlp16`, `h3__histories__direct`, `h3__histories__direct_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder` |
-| correlation|exp | 206 | `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__supervised_mlp16`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `broad__mahalanobis_lw`, `broad__euclidean`, `broad__euclidean_no_indicators`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__exaone__late`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__exaone__late`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean` |
-| spherical|median | 203 | `covariance_exposures` |
-| diagonal|median | 206 | `covariance_exposures`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__direct_no_indicators`, `histories__pca16`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `broad__exaone__late`, `metrics__autoencoder`, `metrics__exaone__late`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__exaone__late`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__pca16`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__exaone__late`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
-| correlation|median | 206 | `covariance_exposures`, `histories@decoded__direct`, `histories@decoded__autoencoder`, `histories@decoded__supervised_mlp16`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_fast__late`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__tabfm__late`, `broad__tabfm__early_concat_labelnull`, `broad__exaone__late`, `broad__exaone__item_first_concat`, `broad__exaone__item_first_mean`, `broad__exaone__item_last_concat`, `metrics__direct`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_fast__late`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__tabfm__late`, `metrics__tabfm__early_concat_labelnull`, `metrics__exaone__late`, `metrics__exaone__item_first_concat`, `metrics__exaone__item_first_mean`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__random_autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_fast__late`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@income_assets__tabfm__late`, `histories@income_assets__tabfm__early_concat_labelnull`, `histories@income_assets__exaone__late`, `histories@income_assets__exaone__item_first_concat`, `histories@income_assets__exaone__item_first_mean`, `histories@income_assets__exaone__item_last_concat`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__random_autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabpfn_fast__late`, `histories@shared_market_cap_assets__tabpfn_full__late`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__tabfm__late`, `histories@shared_market_cap_assets__tabfm__early_concat_labelnull`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_first_concat`, `histories@shared_market_cap_assets__exaone__item_first_mean`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__random_autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabpfn_fast__late`, `histories@shared_income_assets__tabpfn_full__late`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@shared_income_assets__tabfm__late`, `histories@shared_income_assets__tabfm__early_concat_labelnull`, `histories@shared_income_assets__exaone__late`, `histories@shared_income_assets__exaone__item_first_concat`, `histories@shared_income_assets__exaone__item_first_mean`, `histories@shared_income_assets__exaone__item_last_concat`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__random_autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_fast__late`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw1__tabfm__late`, `histories@redraw1__tabfm__early_concat_labelnull`, `histories@redraw1__exaone__late`, `histories@redraw1__exaone__item_first_concat`, `histories@redraw1__exaone__item_first_mean`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__random_autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_fast__late`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@redraw2__tabfm__late`, `histories@redraw2__tabfm__early_concat_labelnull`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_first_concat`, `histories@redraw2__exaone__item_first_mean`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabpfn_fast__late`, `histories@shared_both__tabpfn_full__late`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `histories@shared_both__tabfm__late`, `histories@shared_both__exaone__late`, `histories@shared_both__exaone__item_last_concat`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat` |
-| spherical|matched | 203 | `covariance_exposures` |
-| diagonal|matched | 206 | `covariance_exposures`, `metrics__direct`, `metrics__direct_no_indicators`, `metrics__direct_no_size`, `metrics__direct_no_changes` |
-| correlation|matched | 206 | `covariance_exposures`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__direct_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `broad__direct`, `broad__euclidean`, `broad__direct_no_indicators`, `broad__euclidean_no_indicators`, `broad__direct_no_size`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_fast__late`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__tabfm__late`, `broad__tabfm__early_concat_labelnull`, `broad__exaone__late`, `broad__exaone__item_last_concat`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__random_autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_fast__late`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__tabfm__late`, `metrics__tabfm__early_concat_labelnull`, `metrics__exaone__late`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__random_autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_fast__late`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@income_assets__tabfm__late`, `histories@income_assets__tabfm__early_concat_labelnull`, `histories@income_assets__exaone__late`, `histories@income_assets__exaone__item_first_concat`, `histories@income_assets__exaone__item_first_mean`, `histories@income_assets__exaone__item_last_concat`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__random_autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabpfn_fast__late`, `histories@shared_market_cap_assets__tabpfn_full__late`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__tabfm__late`, `histories@shared_market_cap_assets__tabfm__early_concat_labelnull`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_first_concat`, `histories@shared_market_cap_assets__exaone__item_first_mean`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__random_autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabpfn_fast__late`, `histories@shared_income_assets__tabpfn_full__late`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@shared_income_assets__tabfm__late`, `histories@shared_income_assets__tabfm__early_concat_labelnull`, `histories@shared_income_assets__exaone__late`, `histories@shared_income_assets__exaone__item_first_concat`, `histories@shared_income_assets__exaone__item_first_mean`, `histories@shared_income_assets__exaone__item_last_concat`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__random_autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_fast__late`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw1__tabfm__late`, `histories@redraw1__tabfm__early_concat_labelnull`, `histories@redraw1__exaone__late`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__random_autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_fast__late`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@redraw2__tabfm__late`, `histories@redraw2__tabfm__early_concat_labelnull`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabpfn_fast__late`, `histories@shared_both__tabpfn_full__late`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `histories@shared_both__tabfm__late`, `histories@shared_both__exaone__late`, `histories@shared_both__exaone__item_last_concat`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
+| spherical/exp | 204 | `metrics__euclidean_no_indicators` |
+| diagonal/exp | 207 | `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__supervised_mlp16`, `broad__mahalanobis_lw`, `broad__euclidean`, `broad__euclidean_no_indicators`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_full__late`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_full__late`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@shared_both__supervised_mlp16`, `h3__histories__direct`, `h3__histories__direct_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder` |
+| correlation/exp | 207 | `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__supervised_mlp16`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `broad__mahalanobis_lw`, `broad__euclidean`, `broad__euclidean_no_indicators`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__exaone__late`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__exaone__late`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean` |
+| spherical/median | 204 | `covariance_exposures` |
+| diagonal/median | 207 | `covariance_exposures`, `reference_exposures`, `histories@decoded__direct`, `histories@decoded__supervised_mlp16`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__exaone__late`, `histories__exaone__item_last_concat`, `broad__autoencoder`, `broad__exaone__late`, `broad__exaone__item_last_concat`, `metrics__pca16`, `metrics__autoencoder`, `metrics__tabpfn_full__late`, `metrics__exaone__late`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__exaone__late`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__exaone__late`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__exaone__late`, `h3__histories__direct`, `h3__histories__direct_no_indicators`, `h3__histories__pca16`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
+| correlation/median | 207 | `covariance_exposures`, `reference_exposures`, `histories@decoded__direct`, `histories@decoded__pca16`, `histories@decoded__autoencoder`, `histories@decoded__random_autoencoder`, `histories@decoded__supervised_mlp16`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_fast__late`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__tabfm__late`, `broad__tabfm__early_concat_labelnull`, `broad__exaone__late`, `broad__exaone__item_first_concat`, `broad__exaone__item_first_mean`, `broad__exaone__item_last_concat`, `metrics__direct`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__random_autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_fast__late`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__tabfm__late`, `metrics__tabfm__early_concat_labelnull`, `metrics__exaone__late`, `metrics__exaone__item_first_concat`, `metrics__exaone__item_first_mean`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__random_autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_fast__late`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@income_assets__tabfm__late`, `histories@income_assets__tabfm__early_concat_labelnull`, `histories@income_assets__exaone__late`, `histories@income_assets__exaone__item_first_concat`, `histories@income_assets__exaone__item_first_mean`, `histories@income_assets__exaone__item_last_concat`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__random_autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabpfn_fast__late`, `histories@shared_market_cap_assets__tabpfn_full__late`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__tabfm__late`, `histories@shared_market_cap_assets__tabfm__early_concat_labelnull`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_first_concat`, `histories@shared_market_cap_assets__exaone__item_first_mean`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__random_autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabpfn_fast__late`, `histories@shared_income_assets__tabpfn_full__late`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@shared_income_assets__tabfm__late`, `histories@shared_income_assets__tabfm__early_concat_labelnull`, `histories@shared_income_assets__exaone__late`, `histories@shared_income_assets__exaone__item_first_concat`, `histories@shared_income_assets__exaone__item_first_mean`, `histories@shared_income_assets__exaone__item_last_concat`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__random_autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_fast__late`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw1__tabfm__late`, `histories@redraw1__tabfm__early_concat_labelnull`, `histories@redraw1__exaone__late`, `histories@redraw1__exaone__item_first_concat`, `histories@redraw1__exaone__item_first_mean`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__random_autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_fast__late`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@redraw2__tabfm__late`, `histories@redraw2__tabfm__early_concat_labelnull`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_first_concat`, `histories@redraw2__exaone__item_first_mean`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabpfn_fast__late`, `histories@shared_both__tabpfn_full__late`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `histories@shared_both__tabfm__late`, `histories@shared_both__exaone__late`, `histories@shared_both__exaone__item_last_concat`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_first_concat`, `h3__histories__exaone__item_first_mean`, `h3__histories__exaone__item_last_concat` |
+| spherical/matched | 204 | `reference_exposures` |
+| diagonal/matched | 207 | `covariance_exposures`, `reference_exposures`, `metrics__direct`, `metrics__direct_no_indicators`, `metrics__direct_no_size`, `metrics__direct_no_changes` |
+| correlation/matched | 207 | `covariance_exposures`, `reference_exposures`, `histories@decoded__tabpfn_fast__late`, `histories@decoded__tabpfn_full__late`, `histories@decoded__tabfm__early_concat`, `histories@decoded__tabfm__early_mean`, `histories@decoded__tabfm__late`, `histories@decoded__tabfm__early_concat_labelnull`, `histories@decoded__exaone__late`, `histories@decoded__exaone__item_last_concat`, `histories__direct`, `histories__euclidean`, `histories__direct_no_indicators`, `histories__euclidean_no_indicators`, `histories__pca16`, `histories__autoencoder`, `histories__random_autoencoder`, `histories__supervised_mlp16`, `histories__tabpfn_fast__late`, `histories__tabpfn_full__late`, `histories__tabfm__early_concat`, `histories__tabfm__early_mean`, `histories__tabfm__late`, `histories__tabfm__early_concat_labelnull`, `histories__exaone__late`, `histories__exaone__item_first_concat`, `histories__exaone__item_first_mean`, `histories__exaone__item_last_concat`, `broad__direct`, `broad__euclidean`, `broad__direct_no_indicators`, `broad__euclidean_no_indicators`, `broad__direct_no_size`, `broad__euclidean_no_size`, `broad__pca16`, `broad__autoencoder`, `broad__supervised_mlp16`, `broad__tabpfn_fast__late`, `broad__tabpfn_full__late`, `broad__tabfm__early_concat`, `broad__tabfm__early_mean`, `broad__tabfm__late`, `broad__tabfm__early_concat_labelnull`, `broad__exaone__late`, `broad__exaone__item_first_concat`, `broad__exaone__item_last_concat`, `metrics__direct`, `metrics__mahalanobis_lw`, `metrics__euclidean`, `metrics__direct_no_indicators`, `metrics__euclidean_no_indicators`, `metrics__direct_no_size`, `metrics__euclidean_no_size`, `metrics__direct_no_changes`, `metrics__euclidean_no_changes`, `metrics__pca16`, `metrics__autoencoder`, `metrics__random_autoencoder`, `metrics__supervised_mlp16`, `metrics__tabpfn_fast__late`, `metrics__tabpfn_full__late`, `metrics__tabfm__early_concat`, `metrics__tabfm__early_mean`, `metrics__tabfm__late`, `metrics__tabfm__early_concat_labelnull`, `metrics__exaone__late`, `metrics__exaone__item_first_concat`, `metrics__exaone__item_last_concat`, `histories@income_assets__direct`, `histories@income_assets__euclidean`, `histories@income_assets__direct_no_indicators`, `histories@income_assets__euclidean_no_indicators`, `histories@income_assets__pca16`, `histories@income_assets__autoencoder`, `histories@income_assets__random_autoencoder`, `histories@income_assets__supervised_mlp16`, `histories@income_assets__tabpfn_fast__late`, `histories@income_assets__tabpfn_full__late`, `histories@income_assets__tabfm__early_concat`, `histories@income_assets__tabfm__early_mean`, `histories@income_assets__tabfm__late`, `histories@income_assets__tabfm__early_concat_labelnull`, `histories@income_assets__exaone__late`, `histories@income_assets__exaone__item_first_concat`, `histories@income_assets__exaone__item_first_mean`, `histories@income_assets__exaone__item_last_concat`, `histories@shared_market_cap_assets__direct`, `histories@shared_market_cap_assets__euclidean`, `histories@shared_market_cap_assets__direct_no_indicators`, `histories@shared_market_cap_assets__euclidean_no_indicators`, `histories@shared_market_cap_assets__pca16`, `histories@shared_market_cap_assets__autoencoder`, `histories@shared_market_cap_assets__random_autoencoder`, `histories@shared_market_cap_assets__supervised_mlp16`, `histories@shared_market_cap_assets__tabpfn_fast__late`, `histories@shared_market_cap_assets__tabpfn_full__late`, `histories@shared_market_cap_assets__tabfm__early_concat`, `histories@shared_market_cap_assets__tabfm__early_mean`, `histories@shared_market_cap_assets__tabfm__late`, `histories@shared_market_cap_assets__tabfm__early_concat_labelnull`, `histories@shared_market_cap_assets__exaone__late`, `histories@shared_market_cap_assets__exaone__item_first_concat`, `histories@shared_market_cap_assets__exaone__item_first_mean`, `histories@shared_market_cap_assets__exaone__item_last_concat`, `histories@shared_income_assets__direct`, `histories@shared_income_assets__euclidean`, `histories@shared_income_assets__direct_no_indicators`, `histories@shared_income_assets__euclidean_no_indicators`, `histories@shared_income_assets__pca16`, `histories@shared_income_assets__autoencoder`, `histories@shared_income_assets__random_autoencoder`, `histories@shared_income_assets__supervised_mlp16`, `histories@shared_income_assets__tabpfn_fast__late`, `histories@shared_income_assets__tabpfn_full__late`, `histories@shared_income_assets__tabfm__early_concat`, `histories@shared_income_assets__tabfm__early_mean`, `histories@shared_income_assets__tabfm__late`, `histories@shared_income_assets__tabfm__early_concat_labelnull`, `histories@shared_income_assets__exaone__late`, `histories@shared_income_assets__exaone__item_first_concat`, `histories@shared_income_assets__exaone__item_first_mean`, `histories@shared_income_assets__exaone__item_last_concat`, `histories@redraw1__pca16`, `histories@redraw1__autoencoder`, `histories@redraw1__random_autoencoder`, `histories@redraw1__supervised_mlp16`, `histories@redraw1__tabpfn_fast__late`, `histories@redraw1__tabpfn_full__late`, `histories@redraw1__tabfm__early_concat`, `histories@redraw1__tabfm__early_mean`, `histories@redraw1__tabfm__late`, `histories@redraw1__tabfm__early_concat_labelnull`, `histories@redraw1__exaone__late`, `histories@redraw1__exaone__item_first_concat`, `histories@redraw1__exaone__item_first_mean`, `histories@redraw1__exaone__item_last_concat`, `histories@redraw2__pca16`, `histories@redraw2__autoencoder`, `histories@redraw2__random_autoencoder`, `histories@redraw2__supervised_mlp16`, `histories@redraw2__tabpfn_fast__late`, `histories@redraw2__tabpfn_full__late`, `histories@redraw2__tabfm__early_concat`, `histories@redraw2__tabfm__early_mean`, `histories@redraw2__tabfm__late`, `histories@redraw2__tabfm__early_concat_labelnull`, `histories@redraw2__exaone__late`, `histories@redraw2__exaone__item_last_concat`, `histories@shared_both__supervised_mlp16`, `histories@shared_both__tabpfn_fast__late`, `histories@shared_both__tabpfn_full__late`, `histories@shared_both__tabfm__early_concat`, `histories@shared_both__tabfm__early_mean`, `histories@shared_both__tabfm__late`, `histories@shared_both__exaone__late`, `histories@shared_both__exaone__item_last_concat`, `h3__histories__direct`, `h3__histories__euclidean`, `h3__histories__direct_no_indicators`, `h3__histories__euclidean_no_indicators`, `h3__histories__pca16`, `h3__histories__autoencoder`, `h3__histories__random_autoencoder`, `h3__histories__supervised_mlp16`, `h3__histories__tabpfn_fast__late`, `h3__histories__tabpfn_full__late`, `h3__histories__tabfm__early_concat`, `h3__histories__tabfm__early_mean`, `h3__histories__tabfm__late`, `h3__histories__tabfm__early_concat_labelnull`, `h3__histories__exaone__late`, `h3__histories__exaone__item_last_concat` |
 
 ## Label-permutation placebos (exp kernel, diagonal innovations)
 
@@ -708,213 +762,215 @@ within prior-year log-assets terciles; the spectrum, and so the Jacobian, is unc
 
 Mean effective-neighbour fraction (1/sum w^2)/(N-1); one is uniform. The matched
 kernel targets the joint network's mean effective neighbours under exp each year;
-the last column is the largest achieved miss, in neighbours, over all years. Matching
-the mean leaves row-wise concentration and spectral structure free to differ.
+`Matched miss` is the largest achieved miss, in neighbours, over all years. Matching
+the mean of 1/H_i does not match the mean row Herfindahl H, which the last two
+columns compare (held-out years), nor spectral structure.
 
-| Approach | exp | median | matched | Matched miss |
-| --- | ---: | ---: | ---: | ---: |
-| `broad__autoencoder` | 0.917 | 0.951 | 0.898 | 2.2e-09 |
-| `broad__direct` | 0.992 | 0.996 | 0.898 | 1.3e-09 |
-| `broad__direct_no_indicators` | 0.987 | 0.993 | 0.898 | 1.4e-09 |
-| `broad__direct_no_size` | 0.991 | 0.995 | 0.898 | 1.7e-09 |
-| `broad__euclidean` | 0.076 | 0.991 | 0.898 | 1.5e-09 |
-| `broad__euclidean_no_indicators` | 0.128 | 0.977 | 0.898 | 1.2e-09 |
-| `broad__euclidean_no_size` | 0.080 | 0.991 | 0.898 | 1.5e-09 |
-| `broad__exaone__item_first_concat` | 1.000 | 0.786 | 0.898 | 1.2e-09 |
-| `broad__exaone__item_first_mean` | 1.000 | 0.771 | 0.898 | 1.4e-09 |
-| `broad__exaone__item_last_concat` | 0.981 | 0.868 | 0.898 | 2.7e-10 |
-| `broad__exaone__late` | 0.952 | 0.752 | 0.898 | 4.5e-10 |
-| `broad__mahalanobis_lw` | 0.076 | 0.991 | 0.898 | 1.2e-09 |
-| `broad__pca16` | 0.928 | 0.961 | 0.898 | 1.7e-09 |
-| `broad__random_autoencoder` | 0.957 | 0.973 | 0.898 | 7.6e-10 |
-| `broad__supervised_mlp16` | 0.857 | 0.885 | 0.898 | 6.7e-12 |
-| `broad__tabfm__early_concat` | 0.975 | 0.918 | 0.898 | 8.9e-10 |
-| `broad__tabfm__early_concat_labelnull` | 0.997 | 0.936 | 0.898 | 7.6e-10 |
-| `broad__tabfm__early_mean` | 0.975 | 0.916 | 0.898 | 1.2e-09 |
-| `broad__tabfm__late` | 0.991 | 0.850 | 0.898 | 6.9e-11 |
-| `broad__tabpfn_fast__late` | 0.969 | 0.848 | 0.898 | 2.8e-11 |
-| `broad__tabpfn_full__late` | 0.938 | 0.841 | 0.898 | 4.8e-11 |
-| `covariance_exposures` | 1.000 | 0.841 | 0.898 | 1.2e-09 |
-| `fernandez_dividend_yield` | 0.795 | 0.885 | 0.898 | 1e-09 |
-| `fernandez_joint` | 0.898 | 0.942 | 0.898 | 9.5e-11 |
-| `fernandez_market_cap_assets` | 0.801 | 0.885 | 0.898 | 1.9e-12 |
-| `fernandez_market_to_book` | 0.804 | 0.883 | 0.898 | 1.9e-10 |
-| `h3__fernandez_dividend_yield` | 0.640 | 0.655 | 0.898 | 1.6e-09 |
-| `h3__fernandez_joint` | 0.785 | 0.875 | 0.898 | 1.6e-10 |
-| `h3__fernandez_market_cap_assets` | 0.636 | 0.636 | 0.898 | 1.7e-09 |
-| `h3__fernandez_market_to_book` | 0.638 | 0.654 | 0.898 | 1.4e-09 |
-| `h3__histories__autoencoder` | 0.886 | 0.800 | 0.898 | 1.2e-09 |
-| `h3__histories__direct` | 0.918 | 0.831 | 0.898 | 6.5e-10 |
-| `h3__histories__direct_no_indicators` | 0.898 | 0.838 | 0.898 | 3.3e-10 |
-| `h3__histories__euclidean` | 0.759 | 0.781 | 0.898 | 8.1e-10 |
-| `h3__histories__euclidean_no_indicators` | 0.759 | 0.781 | 0.898 | 8.1e-10 |
-| `h3__histories__exaone__item_first_concat` | 1.000 | 0.800 | 0.898 | 6.9e-10 |
-| `h3__histories__exaone__item_first_mean` | 1.000 | 0.787 | 0.898 | 1.5e-09 |
-| `h3__histories__exaone__item_last_concat` | 0.981 | 0.849 | 0.898 | 1.3e-09 |
-| `h3__histories__exaone__late` | 0.952 | 0.745 | 0.898 | 7.5e-10 |
-| `h3__histories__mahalanobis_lw` | 0.741 | 0.811 | 0.898 | 6.7e-10 |
-| `h3__histories__pca16` | 0.891 | 0.838 | 0.898 | 2.4e-10 |
-| `h3__histories__random_autoencoder` | 0.949 | 0.816 | 0.898 | 2e-09 |
-| `h3__histories__supervised_mlp16` | 0.817 | 0.614 | 0.898 | 3.8e-10 |
-| `h3__histories__tabfm__early_concat` | 0.971 | 0.906 | 0.898 | 4.1e-10 |
-| `h3__histories__tabfm__early_concat_labelnull` | 0.995 | 0.864 | 0.898 | 9.2e-10 |
-| `h3__histories__tabfm__early_mean` | 0.970 | 0.906 | 0.898 | 4.1e-10 |
-| `h3__histories__tabfm__late` | 0.990 | 0.826 | 0.898 | 4.1e-10 |
-| `h3__histories__tabpfn_fast__late` | 0.967 | 0.842 | 0.898 | 7.8e-11 |
-| `h3__histories__tabpfn_full__late` | 0.939 | 0.836 | 0.898 | 5.8e-11 |
-| `histories@decoded__autoencoder` | 1.000 | 0.783 | 0.898 | 5.4e-10 |
-| `histories@decoded__direct` | 1.000 | 0.800 | 0.898 | 7.3e-10 |
-| `histories@decoded__exaone__item_first_concat` | 1.000 | 0.831 | 0.898 | 1.2e-09 |
-| `histories@decoded__exaone__item_first_mean` | 1.000 | 0.828 | 0.898 | 1.6e-09 |
-| `histories@decoded__exaone__item_last_concat` | 1.000 | 0.865 | 0.898 | 9.9e-10 |
-| `histories@decoded__exaone__late` | 1.000 | 0.865 | 0.898 | 1.5e-09 |
-| `histories@decoded__pca16` | 1.000 | 0.791 | 0.898 | 4.1e-10 |
-| `histories@decoded__random_autoencoder` | 1.000 | 0.789 | 0.898 | 1.1e-09 |
-| `histories@decoded__supervised_mlp16` | 1.000 | 0.793 | 0.898 | 7.7e-10 |
-| `histories@decoded__tabfm__early_concat` | 1.000 | 0.868 | 0.898 | 4.1e-10 |
-| `histories@decoded__tabfm__early_concat_labelnull` | 1.000 | 0.857 | 0.898 | 9.3e-10 |
-| `histories@decoded__tabfm__early_mean` | 1.000 | 0.869 | 0.898 | 4.5e-10 |
-| `histories@decoded__tabfm__late` | 1.000 | 0.869 | 0.898 | 1.4e-09 |
-| `histories@decoded__tabpfn_fast__late` | 1.000 | 0.867 | 0.898 | 1.4e-09 |
-| `histories@decoded__tabpfn_full__late` | 1.000 | 0.866 | 0.898 | 1.3e-09 |
-| `histories@income_assets__autoencoder` | 0.923 | 0.806 | 0.898 | 8.9e-10 |
-| `histories@income_assets__direct` | 0.936 | 0.860 | 0.898 | 1.7e-09 |
-| `histories@income_assets__direct_no_indicators` | 0.886 | 0.878 | 0.898 | 9.5e-10 |
-| `histories@income_assets__euclidean` | 0.666 | 0.809 | 0.898 | 3e-10 |
-| `histories@income_assets__euclidean_no_indicators` | 0.666 | 0.809 | 0.898 | 3e-10 |
-| `histories@income_assets__exaone__item_first_concat` | 1.000 | 0.789 | 0.898 | 1e-09 |
-| `histories@income_assets__exaone__item_first_mean` | 1.000 | 0.776 | 0.898 | 1.4e-09 |
-| `histories@income_assets__exaone__item_last_concat` | 0.993 | 0.907 | 0.898 | 1.6e-09 |
-| `histories@income_assets__exaone__late` | 0.979 | 0.815 | 0.898 | 1.2e-09 |
-| `histories@income_assets__mahalanobis_lw` | 0.625 | 0.834 | 0.898 | 1.1e-10 |
-| `histories@income_assets__pca16` | 0.926 | 0.850 | 0.898 | 1.7e-09 |
-| `histories@income_assets__random_autoencoder` | 0.957 | 0.839 | 0.898 | 1.1e-09 |
-| `histories@income_assets__supervised_mlp16` | 0.816 | 0.803 | 0.898 | 1.8e-09 |
-| `histories@income_assets__tabfm__early_concat` | 0.957 | 0.913 | 0.898 | 1e-09 |
-| `histories@income_assets__tabfm__early_concat_labelnull` | 0.993 | 0.874 | 0.898 | 4e-10 |
-| `histories@income_assets__tabfm__early_mean` | 0.957 | 0.913 | 0.898 | 1e-09 |
-| `histories@income_assets__tabfm__late` | 0.995 | 0.892 | 0.898 | 3.3e-10 |
-| `histories@income_assets__tabpfn_fast__late` | 0.986 | 0.858 | 0.898 | 1.9e-09 |
-| `histories@income_assets__tabpfn_full__late` | 0.961 | 0.843 | 0.898 | 2e-09 |
-| `histories@redraw1__autoencoder` | 0.898 | 0.818 | 0.898 | 2.1e-09 |
-| `histories@redraw1__exaone__item_first_concat` | 1.000 | 0.794 | 0.898 | 9.6e-10 |
-| `histories@redraw1__exaone__item_first_mean` | 1.000 | 0.781 | 0.898 | 5.9e-10 |
-| `histories@redraw1__exaone__item_last_concat` | 0.979 | 0.843 | 0.898 | 1.1e-09 |
-| `histories@redraw1__exaone__late` | 0.950 | 0.742 | 0.898 | 2.1e-10 |
-| `histories@redraw1__mahalanobis_lw` | 0.636 | 0.832 | 0.898 | 1.2e-09 |
-| `histories@redraw1__pca16` | 0.905 | 0.861 | 0.898 | 2.4e-12 |
-| `histories@redraw1__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 |
-| `histories@redraw1__supervised_mlp16` | 0.787 | 0.660 | 0.898 | 1.2e-09 |
-| `histories@redraw1__tabfm__early_concat` | 0.972 | 0.898 | 0.898 | 1e-09 |
-| `histories@redraw1__tabfm__early_concat_labelnull` | 0.995 | 0.875 | 0.898 | 6.7e-10 |
-| `histories@redraw1__tabfm__early_mean` | 0.972 | 0.898 | 0.898 | 1.1e-09 |
-| `histories@redraw1__tabfm__late` | 0.990 | 0.828 | 0.898 | 3.1e-10 |
-| `histories@redraw1__tabpfn_fast__late` | 0.966 | 0.837 | 0.898 | 5.2e-11 |
-| `histories@redraw1__tabpfn_full__late` | 0.933 | 0.835 | 0.898 | 1.2e-10 |
-| `histories@redraw2__autoencoder` | 0.902 | 0.815 | 0.898 | 1.3e-09 |
-| `histories@redraw2__exaone__item_first_concat` | 1.000 | 0.797 | 0.898 | 1.6e-09 |
-| `histories@redraw2__exaone__item_first_mean` | 1.000 | 0.783 | 0.898 | 1.1e-09 |
-| `histories@redraw2__exaone__item_last_concat` | 0.980 | 0.838 | 0.898 | 1.1e-09 |
-| `histories@redraw2__exaone__late` | 0.955 | 0.742 | 0.898 | 1.4e-09 |
-| `histories@redraw2__mahalanobis_lw` | 0.643 | 0.830 | 0.898 | 6e-11 |
-| `histories@redraw2__pca16` | 0.910 | 0.857 | 0.898 | 2.3e-12 |
-| `histories@redraw2__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 |
-| `histories@redraw2__supervised_mlp16` | 0.795 | 0.679 | 0.898 | 9.9e-10 |
-| `histories@redraw2__tabfm__early_concat` | 0.971 | 0.901 | 0.898 | 1.6e-09 |
-| `histories@redraw2__tabfm__early_concat_labelnull` | 0.995 | 0.867 | 0.898 | 1.3e-09 |
-| `histories@redraw2__tabfm__early_mean` | 0.971 | 0.901 | 0.898 | 1.7e-09 |
-| `histories@redraw2__tabfm__late` | 0.990 | 0.832 | 0.898 | 3.3e-10 |
-| `histories@redraw2__tabpfn_fast__late` | 0.967 | 0.832 | 0.898 | 5e-11 |
-| `histories@redraw2__tabpfn_full__late` | 0.935 | 0.831 | 0.898 | 4.4e-11 |
-| `histories@shared_both__exaone__item_last_concat` | 0.988 | 0.881 | 0.898 | 7.7e-11 |
-| `histories@shared_both__exaone__late` | 0.967 | 0.785 | 0.898 | 1.3e-09 |
-| `histories@shared_both__supervised_mlp16` | 0.812 | 0.807 | 0.898 | 1.2e-09 |
-| `histories@shared_both__tabfm__early_concat` | 0.966 | 0.910 | 0.898 | 1e-09 |
-| `histories@shared_both__tabfm__early_mean` | 0.966 | 0.910 | 0.898 | 7.7e-10 |
-| `histories@shared_both__tabfm__late` | 0.993 | 0.867 | 0.898 | 2.3e-10 |
-| `histories@shared_both__tabpfn_fast__late` | 0.978 | 0.857 | 0.898 | 4.3e-12 |
-| `histories@shared_both__tabpfn_full__late` | 0.952 | 0.852 | 0.898 | 2.3e-11 |
-| `histories@shared_income_assets__autoencoder` | 0.900 | 0.813 | 0.898 | 2.1e-09 |
-| `histories@shared_income_assets__direct` | 0.926 | 0.864 | 0.898 | 1.4e-09 |
-| `histories@shared_income_assets__direct_no_indicators` | 0.885 | 0.877 | 0.898 | 1.1e-09 |
-| `histories@shared_income_assets__euclidean` | 0.665 | 0.809 | 0.898 | 2.7e-10 |
-| `histories@shared_income_assets__euclidean_no_indicators` | 0.665 | 0.809 | 0.898 | 2.7e-10 |
-| `histories@shared_income_assets__exaone__item_first_concat` | 1.000 | 0.792 | 0.898 | 1e-09 |
-| `histories@shared_income_assets__exaone__item_first_mean` | 1.000 | 0.779 | 0.898 | 1.1e-09 |
-| `histories@shared_income_assets__exaone__item_last_concat` | 0.993 | 0.911 | 0.898 | 1.1e-10 |
-| `histories@shared_income_assets__exaone__late` | 0.979 | 0.819 | 0.898 | 1.3e-09 |
-| `histories@shared_income_assets__mahalanobis_lw` | 0.645 | 0.833 | 0.898 | 9.2e-10 |
-| `histories@shared_income_assets__pca16` | 0.913 | 0.851 | 0.898 | 1.6e-10 |
-| `histories@shared_income_assets__random_autoencoder` | 0.956 | 0.839 | 0.898 | 1.1e-09 |
-| `histories@shared_income_assets__supervised_mlp16` | 0.812 | 0.808 | 0.898 | 5.4e-10 |
-| `histories@shared_income_assets__tabfm__early_concat` | 0.960 | 0.914 | 0.898 | 8e-10 |
-| `histories@shared_income_assets__tabfm__early_concat_labelnull` | 0.994 | 0.876 | 0.898 | 4.4e-10 |
-| `histories@shared_income_assets__tabfm__early_mean` | 0.960 | 0.914 | 0.898 | 9.1e-10 |
-| `histories@shared_income_assets__tabfm__late` | 0.995 | 0.895 | 0.898 | 2.8e-11 |
-| `histories@shared_income_assets__tabpfn_fast__late` | 0.986 | 0.859 | 0.898 | 1.9e-09 |
-| `histories@shared_income_assets__tabpfn_full__late` | 0.960 | 0.844 | 0.898 | 1.9e-09 |
-| `histories@shared_market_cap_assets__autoencoder` | 0.900 | 0.813 | 0.898 | 2.1e-09 |
-| `histories@shared_market_cap_assets__direct` | 0.926 | 0.864 | 0.898 | 1.4e-09 |
-| `histories@shared_market_cap_assets__direct_no_indicators` | 0.885 | 0.877 | 0.898 | 1.1e-09 |
-| `histories@shared_market_cap_assets__euclidean` | 0.665 | 0.809 | 0.898 | 2.7e-10 |
-| `histories@shared_market_cap_assets__euclidean_no_indicators` | 0.665 | 0.809 | 0.898 | 2.7e-10 |
-| `histories@shared_market_cap_assets__exaone__item_first_concat` | 1.000 | 0.792 | 0.898 | 1e-09 |
-| `histories@shared_market_cap_assets__exaone__item_first_mean` | 1.000 | 0.779 | 0.898 | 1.1e-09 |
-| `histories@shared_market_cap_assets__exaone__item_last_concat` | 0.981 | 0.853 | 0.898 | 8.6e-10 |
-| `histories@shared_market_cap_assets__exaone__late` | 0.952 | 0.747 | 0.898 | 7.6e-10 |
-| `histories@shared_market_cap_assets__mahalanobis_lw` | 0.645 | 0.833 | 0.898 | 9.2e-10 |
-| `histories@shared_market_cap_assets__pca16` | 0.913 | 0.851 | 0.898 | 1.6e-10 |
-| `histories@shared_market_cap_assets__random_autoencoder` | 0.956 | 0.839 | 0.898 | 1.1e-09 |
-| `histories@shared_market_cap_assets__supervised_mlp16` | 0.782 | 0.645 | 0.898 | 1.4e-09 |
-| `histories@shared_market_cap_assets__tabfm__early_concat` | 0.971 | 0.899 | 0.898 | 4.5e-10 |
-| `histories@shared_market_cap_assets__tabfm__early_concat_labelnull` | 0.994 | 0.876 | 0.898 | 4.4e-10 |
-| `histories@shared_market_cap_assets__tabfm__early_mean` | 0.971 | 0.899 | 0.898 | 4.7e-10 |
-| `histories@shared_market_cap_assets__tabfm__late` | 0.990 | 0.830 | 0.898 | 2.5e-10 |
-| `histories@shared_market_cap_assets__tabpfn_fast__late` | 0.968 | 0.842 | 0.898 | 2.7e-11 |
-| `histories@shared_market_cap_assets__tabpfn_full__late` | 0.938 | 0.840 | 0.898 | 6.3e-11 |
-| `histories__autoencoder` | 0.899 | 0.813 | 0.898 | 1.5e-09 |
-| `histories__direct` | 0.925 | 0.864 | 0.898 | 1.1e-09 |
-| `histories__direct_no_indicators` | 0.883 | 0.877 | 0.898 | 8.5e-10 |
-| `histories__euclidean` | 0.658 | 0.808 | 0.898 | 3.7e-10 |
-| `histories__euclidean_no_indicators` | 0.658 | 0.808 | 0.898 | 3.7e-10 |
-| `histories__exaone__item_first_concat` | 1.000 | 0.795 | 0.898 | 1.4e-09 |
-| `histories__exaone__item_first_mean` | 1.000 | 0.781 | 0.898 | 1.1e-09 |
-| `histories__exaone__item_last_concat` | 0.981 | 0.856 | 0.898 | 1e-09 |
-| `histories__exaone__late` | 0.951 | 0.747 | 0.898 | 8e-10 |
-| `histories__mahalanobis_lw` | 0.633 | 0.831 | 0.898 | 6.5e-10 |
-| `histories__pca16` | 0.913 | 0.853 | 0.898 | 3.3e-10 |
-| `histories__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 |
-| `histories__supervised_mlp16` | 0.784 | 0.655 | 0.898 | 1.4e-09 |
-| `histories__tabfm__early_concat` | 0.972 | 0.905 | 0.898 | 6.5e-12 |
-| `histories__tabfm__early_concat_labelnull` | 0.995 | 0.874 | 0.898 | 3.5e-10 |
-| `histories__tabfm__early_mean` | 0.972 | 0.905 | 0.898 | 4.4e-10 |
-| `histories__tabfm__late` | 0.990 | 0.829 | 0.898 | 3.1e-10 |
-| `histories__tabpfn_fast__late` | 0.967 | 0.844 | 0.898 | 2.8e-11 |
-| `histories__tabpfn_full__late` | 0.938 | 0.841 | 0.898 | 4e-11 |
-| `metrics__autoencoder` | 0.911 | 0.944 | 0.898 | 4.9e-11 |
-| `metrics__direct` | 0.985 | 0.993 | 0.898 | 1.2e-09 |
-| `metrics__direct_no_changes` | 0.983 | 0.991 | 0.898 | 2.4e-09 |
-| `metrics__direct_no_indicators` | 0.979 | 0.990 | 0.898 | 8.1e-10 |
-| `metrics__direct_no_size` | 0.984 | 0.992 | 0.898 | 2.1e-09 |
-| `metrics__euclidean` | 0.060 | 0.985 | 0.898 | 8.6e-10 |
-| `metrics__euclidean_no_changes` | 0.101 | 0.984 | 0.898 | 1.8e-09 |
-| `metrics__euclidean_no_indicators` | 0.180 | 0.956 | 0.898 | 1e-09 |
-| `metrics__euclidean_no_size` | 0.060 | 0.984 | 0.898 | 9.1e-10 |
-| `metrics__exaone__item_first_concat` | 1.000 | 0.807 | 0.898 | 1.4e-09 |
-| `metrics__exaone__item_first_mean` | 1.000 | 0.778 | 0.898 | 1.3e-09 |
-| `metrics__exaone__item_last_concat` | 0.980 | 0.864 | 0.898 | 6.5e-10 |
-| `metrics__exaone__late` | 0.951 | 0.749 | 0.898 | 3.7e-10 |
-| `metrics__mahalanobis_lw` | 0.106 | 0.983 | 0.898 | 1.1e-09 |
-| `metrics__pca16` | 0.915 | 0.952 | 0.898 | 2e-10 |
-| `metrics__random_autoencoder` | 0.961 | 0.968 | 0.898 | 3.9e-10 |
-| `metrics__supervised_mlp16` | 0.851 | 0.879 | 0.898 | 7.6e-10 |
-| `metrics__tabfm__early_concat` | 0.980 | 0.919 | 0.898 | 8.1e-11 |
-| `metrics__tabfm__early_concat_labelnull` | 0.998 | 0.916 | 0.898 | 7.5e-10 |
-| `metrics__tabfm__early_mean` | 0.979 | 0.916 | 0.898 | 1.7e-09 |
-| `metrics__tabfm__late` | 0.991 | 0.842 | 0.898 | 8.8e-11 |
-| `metrics__tabpfn_fast__late` | 0.968 | 0.849 | 0.898 | 1.6e-11 |
-| `metrics__tabpfn_full__late` | 0.937 | 0.842 | 0.898 | 2.3e-11 |
-| `uniform_network` | nan | nan | nan | nan |
+| Approach | exp | median | matched | Matched miss | Matched H | Joint exp H |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `broad__autoencoder` | 0.917 | 0.951 | 0.898 | 2.2e-09 | 0.0026 | 0.0026 |
+| `broad__direct` | 0.992 | 0.996 | 0.898 | 1.3e-09 | 0.0027 | 0.0026 |
+| `broad__direct_no_indicators` | 0.987 | 0.993 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `broad__direct_no_size` | 0.991 | 0.995 | 0.898 | 1.7e-09 | 0.0027 | 0.0026 |
+| `broad__euclidean` | 0.076 | 0.991 | 0.898 | 1.5e-09 | 0.0026 | 0.0026 |
+| `broad__euclidean_no_indicators` | 0.128 | 0.977 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `broad__euclidean_no_size` | 0.080 | 0.991 | 0.898 | 1.5e-09 | 0.0026 | 0.0026 |
+| `broad__exaone__item_first_concat` | 1.000 | 0.786 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `broad__exaone__item_first_mean` | 1.000 | 0.771 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `broad__exaone__item_last_concat` | 0.981 | 0.868 | 0.898 | 2.7e-10 | 0.0026 | 0.0026 |
+| `broad__exaone__late` | 0.952 | 0.752 | 0.898 | 4.5e-10 | 0.0026 | 0.0026 |
+| `broad__mahalanobis_lw` | 0.076 | 0.991 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `broad__pca16` | 0.928 | 0.961 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `broad__random_autoencoder` | 0.957 | 0.973 | 0.898 | 7.6e-10 | 0.0026 | 0.0026 |
+| `broad__supervised_mlp16` | 0.857 | 0.885 | 0.898 | 6.7e-12 | 0.0026 | 0.0026 |
+| `broad__tabfm__early_concat` | 0.975 | 0.918 | 0.898 | 8.9e-10 | 0.0026 | 0.0026 |
+| `broad__tabfm__early_concat_labelnull` | 0.997 | 0.936 | 0.898 | 7.6e-10 | 0.0026 | 0.0026 |
+| `broad__tabfm__early_mean` | 0.975 | 0.916 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `broad__tabfm__late` | 0.991 | 0.850 | 0.898 | 6.9e-11 | 0.0026 | 0.0026 |
+| `broad__tabpfn_fast__late` | 0.969 | 0.848 | 0.898 | 2.8e-11 | 0.0026 | 0.0026 |
+| `broad__tabpfn_full__late` | 0.938 | 0.841 | 0.898 | 4.8e-11 | 0.0026 | 0.0026 |
+| `covariance_exposures` | 1.000 | 0.841 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `fernandez_dividend_yield` | 0.795 | 0.885 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `fernandez_joint` | 0.898 | 0.942 | 0.898 | 9.5e-11 | 0.0026 | 0.0026 |
+| `fernandez_market_cap_assets` | 0.801 | 0.885 | 0.898 | 1.9e-12 | 0.0026 | 0.0026 |
+| `fernandez_market_to_book` | 0.804 | 0.883 | 0.898 | 1.9e-10 | 0.0026 | 0.0026 |
+| `h3__fernandez_dividend_yield` | 0.640 | 0.655 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `h3__fernandez_joint` | 0.785 | 0.875 | 0.898 | 1.6e-10 | 0.0026 | 0.0026 |
+| `h3__fernandez_market_cap_assets` | 0.636 | 0.636 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `h3__fernandez_market_to_book` | 0.638 | 0.654 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `h3__histories__autoencoder` | 0.886 | 0.800 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `h3__histories__direct` | 0.918 | 0.831 | 0.898 | 6.5e-10 | 0.0026 | 0.0026 |
+| `h3__histories__direct_no_indicators` | 0.898 | 0.838 | 0.898 | 3.3e-10 | 0.0026 | 0.0026 |
+| `h3__histories__euclidean` | 0.759 | 0.781 | 0.898 | 8.1e-10 | 0.0027 | 0.0026 |
+| `h3__histories__euclidean_no_indicators` | 0.759 | 0.781 | 0.898 | 8.1e-10 | 0.0027 | 0.0026 |
+| `h3__histories__exaone__item_first_concat` | 1.000 | 0.800 | 0.898 | 6.9e-10 | 0.0026 | 0.0026 |
+| `h3__histories__exaone__item_first_mean` | 1.000 | 0.787 | 0.898 | 1.5e-09 | 0.0026 | 0.0026 |
+| `h3__histories__exaone__item_last_concat` | 0.981 | 0.849 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `h3__histories__exaone__late` | 0.952 | 0.745 | 0.898 | 7.5e-10 | 0.0026 | 0.0026 |
+| `h3__histories__mahalanobis_lw` | 0.741 | 0.811 | 0.898 | 6.7e-10 | 0.0029 | 0.0026 |
+| `h3__histories__pca16` | 0.891 | 0.838 | 0.898 | 2.4e-10 | 0.0026 | 0.0026 |
+| `h3__histories__random_autoencoder` | 0.949 | 0.816 | 0.898 | 2e-09 | 0.0026 | 0.0026 |
+| `h3__histories__supervised_mlp16` | 0.817 | 0.614 | 0.898 | 3.8e-10 | 0.0026 | 0.0026 |
+| `h3__histories__tabfm__early_concat` | 0.971 | 0.906 | 0.898 | 4.1e-10 | 0.0026 | 0.0026 |
+| `h3__histories__tabfm__early_concat_labelnull` | 0.995 | 0.864 | 0.898 | 9.2e-10 | 0.0026 | 0.0026 |
+| `h3__histories__tabfm__early_mean` | 0.970 | 0.906 | 0.898 | 4.1e-10 | 0.0026 | 0.0026 |
+| `h3__histories__tabfm__late` | 0.990 | 0.826 | 0.898 | 4.1e-10 | 0.0026 | 0.0026 |
+| `h3__histories__tabpfn_fast__late` | 0.967 | 0.842 | 0.898 | 7.8e-11 | 0.0026 | 0.0026 |
+| `h3__histories__tabpfn_full__late` | 0.939 | 0.836 | 0.898 | 5.8e-11 | 0.0026 | 0.0026 |
+| `histories@decoded__autoencoder` | 1.000 | 0.787 | 0.898 | 1.3e-09 | 0.0027 | 0.0026 |
+| `histories@decoded__direct` | 1.000 | 0.803 | 0.898 | 1.1e-09 | 0.0027 | 0.0026 |
+| `histories@decoded__exaone__item_first_concat` | 1.000 | 0.829 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__exaone__item_first_mean` | 1.000 | 0.825 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__exaone__item_last_concat` | 1.000 | 0.858 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__exaone__late` | 1.000 | 0.860 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__pca16` | 1.000 | 0.790 | 0.898 | 8.1e-10 | 0.0026 | 0.0026 |
+| `histories@decoded__random_autoencoder` | 1.000 | 0.788 | 0.898 | 9.8e-10 | 0.0027 | 0.0026 |
+| `histories@decoded__supervised_mlp16` | 1.000 | 0.784 | 0.898 | 1.5e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__tabfm__early_concat` | 1.000 | 0.859 | 0.898 | 4.4e-10 | 0.0026 | 0.0026 |
+| `histories@decoded__tabfm__early_concat_labelnull` | 1.000 | 0.852 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__tabfm__early_mean` | 1.000 | 0.860 | 0.898 | 3.7e-10 | 0.0026 | 0.0026 |
+| `histories@decoded__tabfm__late` | 1.000 | 0.863 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__tabpfn_fast__late` | 1.000 | 0.861 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@decoded__tabpfn_full__late` | 1.000 | 0.860 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__autoencoder` | 0.923 | 0.806 | 0.898 | 8.9e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__direct` | 0.936 | 0.860 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__direct_no_indicators` | 0.886 | 0.878 | 0.898 | 9.5e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__euclidean` | 0.666 | 0.809 | 0.898 | 3e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__euclidean_no_indicators` | 0.666 | 0.809 | 0.898 | 3e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__exaone__item_first_concat` | 1.000 | 0.789 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__exaone__item_first_mean` | 1.000 | 0.776 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__exaone__item_last_concat` | 0.993 | 0.907 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__exaone__late` | 0.979 | 0.815 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__mahalanobis_lw` | 0.625 | 0.834 | 0.898 | 1.1e-10 | 0.0033 | 0.0026 |
+| `histories@income_assets__pca16` | 0.926 | 0.850 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__random_autoencoder` | 0.957 | 0.839 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__supervised_mlp16` | 0.816 | 0.803 | 0.898 | 1.8e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabfm__early_concat` | 0.957 | 0.913 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabfm__early_concat_labelnull` | 0.993 | 0.874 | 0.898 | 4e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabfm__early_mean` | 0.957 | 0.913 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabfm__late` | 0.995 | 0.892 | 0.898 | 3.3e-10 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabpfn_fast__late` | 0.986 | 0.858 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@income_assets__tabpfn_full__late` | 0.961 | 0.843 | 0.898 | 2e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__autoencoder` | 0.898 | 0.818 | 0.898 | 2.1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__exaone__item_first_concat` | 1.000 | 0.794 | 0.898 | 9.6e-10 | 0.0026 | 0.0026 |
+| `histories@redraw1__exaone__item_first_mean` | 1.000 | 0.781 | 0.898 | 5.9e-10 | 0.0026 | 0.0026 |
+| `histories@redraw1__exaone__item_last_concat` | 0.979 | 0.843 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__exaone__late` | 0.950 | 0.742 | 0.898 | 2.1e-10 | 0.0026 | 0.0026 |
+| `histories@redraw1__mahalanobis_lw` | 0.636 | 0.832 | 0.898 | 1.2e-09 | 0.0032 | 0.0026 |
+| `histories@redraw1__pca16` | 0.905 | 0.861 | 0.898 | 2.4e-12 | 0.0026 | 0.0026 |
+| `histories@redraw1__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__supervised_mlp16` | 0.787 | 0.660 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabfm__early_concat` | 0.972 | 0.898 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabfm__early_concat_labelnull` | 0.995 | 0.875 | 0.898 | 6.7e-10 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabfm__early_mean` | 0.972 | 0.898 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabfm__late` | 0.990 | 0.828 | 0.898 | 3.1e-10 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabpfn_fast__late` | 0.966 | 0.837 | 0.898 | 5.2e-11 | 0.0026 | 0.0026 |
+| `histories@redraw1__tabpfn_full__late` | 0.933 | 0.835 | 0.898 | 1.2e-10 | 0.0026 | 0.0026 |
+| `histories@redraw2__autoencoder` | 0.902 | 0.815 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__exaone__item_first_concat` | 1.000 | 0.797 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__exaone__item_first_mean` | 1.000 | 0.783 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__exaone__item_last_concat` | 0.980 | 0.838 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__exaone__late` | 0.955 | 0.742 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__mahalanobis_lw` | 0.643 | 0.830 | 0.898 | 6e-11 | 0.0037 | 0.0026 |
+| `histories@redraw2__pca16` | 0.910 | 0.857 | 0.898 | 2.3e-12 | 0.0026 | 0.0026 |
+| `histories@redraw2__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__supervised_mlp16` | 0.795 | 0.679 | 0.898 | 9.9e-10 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabfm__early_concat` | 0.971 | 0.901 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabfm__early_concat_labelnull` | 0.995 | 0.867 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabfm__early_mean` | 0.971 | 0.901 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabfm__late` | 0.990 | 0.832 | 0.898 | 3.3e-10 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabpfn_fast__late` | 0.967 | 0.832 | 0.898 | 5e-11 | 0.0026 | 0.0026 |
+| `histories@redraw2__tabpfn_full__late` | 0.935 | 0.831 | 0.898 | 4.4e-11 | 0.0026 | 0.0026 |
+| `histories@shared_both__exaone__item_last_concat` | 0.988 | 0.881 | 0.898 | 7.7e-11 | 0.0026 | 0.0026 |
+| `histories@shared_both__exaone__late` | 0.967 | 0.785 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `histories@shared_both__supervised_mlp16` | 0.812 | 0.807 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories@shared_both__tabfm__early_concat` | 0.966 | 0.910 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_both__tabfm__early_mean` | 0.966 | 0.910 | 0.898 | 7.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_both__tabfm__late` | 0.993 | 0.867 | 0.898 | 2.3e-10 | 0.0026 | 0.0026 |
+| `histories@shared_both__tabpfn_fast__late` | 0.978 | 0.857 | 0.898 | 4.3e-12 | 0.0026 | 0.0026 |
+| `histories@shared_both__tabpfn_full__late` | 0.952 | 0.852 | 0.898 | 2.3e-11 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__autoencoder` | 0.900 | 0.813 | 0.898 | 2.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__direct` | 0.926 | 0.864 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__direct_no_indicators` | 0.885 | 0.877 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__euclidean` | 0.665 | 0.809 | 0.898 | 2.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__euclidean_no_indicators` | 0.665 | 0.809 | 0.898 | 2.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__exaone__item_first_concat` | 1.000 | 0.792 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__exaone__item_first_mean` | 1.000 | 0.779 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__exaone__item_last_concat` | 0.993 | 0.911 | 0.898 | 1.1e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__exaone__late` | 0.979 | 0.819 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__mahalanobis_lw` | 0.645 | 0.833 | 0.898 | 9.2e-10 | 0.0033 | 0.0026 |
+| `histories@shared_income_assets__pca16` | 0.913 | 0.851 | 0.898 | 1.6e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__random_autoencoder` | 0.956 | 0.839 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__supervised_mlp16` | 0.812 | 0.808 | 0.898 | 5.4e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabfm__early_concat` | 0.960 | 0.914 | 0.898 | 8e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabfm__early_concat_labelnull` | 0.994 | 0.876 | 0.898 | 4.4e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabfm__early_mean` | 0.960 | 0.914 | 0.898 | 9.1e-10 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabfm__late` | 0.995 | 0.895 | 0.898 | 2.8e-11 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabpfn_fast__late` | 0.986 | 0.859 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@shared_income_assets__tabpfn_full__late` | 0.960 | 0.844 | 0.898 | 1.9e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__autoencoder` | 0.900 | 0.813 | 0.898 | 2.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__direct` | 0.926 | 0.864 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__direct_no_indicators` | 0.885 | 0.877 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__euclidean` | 0.665 | 0.809 | 0.898 | 2.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__euclidean_no_indicators` | 0.665 | 0.809 | 0.898 | 2.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__exaone__item_first_concat` | 1.000 | 0.792 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__exaone__item_first_mean` | 1.000 | 0.779 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__exaone__item_last_concat` | 0.981 | 0.853 | 0.898 | 8.6e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__exaone__late` | 0.952 | 0.747 | 0.898 | 7.6e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__mahalanobis_lw` | 0.645 | 0.833 | 0.898 | 9.2e-10 | 0.0033 | 0.0026 |
+| `histories@shared_market_cap_assets__pca16` | 0.913 | 0.851 | 0.898 | 1.6e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__random_autoencoder` | 0.956 | 0.839 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__supervised_mlp16` | 0.782 | 0.645 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabfm__early_concat` | 0.971 | 0.899 | 0.898 | 4.5e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabfm__early_concat_labelnull` | 0.994 | 0.876 | 0.898 | 4.4e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabfm__early_mean` | 0.971 | 0.899 | 0.898 | 4.7e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabfm__late` | 0.990 | 0.830 | 0.898 | 2.5e-10 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabpfn_fast__late` | 0.968 | 0.842 | 0.898 | 2.7e-11 | 0.0026 | 0.0026 |
+| `histories@shared_market_cap_assets__tabpfn_full__late` | 0.938 | 0.840 | 0.898 | 6.3e-11 | 0.0026 | 0.0026 |
+| `histories__autoencoder` | 0.899 | 0.813 | 0.898 | 1.5e-09 | 0.0026 | 0.0026 |
+| `histories__direct` | 0.925 | 0.864 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories__direct_no_indicators` | 0.883 | 0.877 | 0.898 | 8.5e-10 | 0.0026 | 0.0026 |
+| `histories__euclidean` | 0.658 | 0.808 | 0.898 | 3.7e-10 | 0.0026 | 0.0026 |
+| `histories__euclidean_no_indicators` | 0.658 | 0.808 | 0.898 | 3.7e-10 | 0.0026 | 0.0026 |
+| `histories__exaone__item_first_concat` | 1.000 | 0.795 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories__exaone__item_first_mean` | 1.000 | 0.781 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `histories__exaone__item_last_concat` | 0.981 | 0.856 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `histories__exaone__late` | 0.951 | 0.747 | 0.898 | 8e-10 | 0.0026 | 0.0026 |
+| `histories__mahalanobis_lw` | 0.633 | 0.831 | 0.898 | 6.5e-10 | 0.0033 | 0.0026 |
+| `histories__pca16` | 0.913 | 0.853 | 0.898 | 3.3e-10 | 0.0026 | 0.0026 |
+| `histories__random_autoencoder` | 0.955 | 0.839 | 0.898 | 1.2e-09 | 0.0026 | 0.0026 |
+| `histories__supervised_mlp16` | 0.784 | 0.655 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `histories__tabfm__early_concat` | 0.972 | 0.905 | 0.898 | 6.5e-12 | 0.0026 | 0.0026 |
+| `histories__tabfm__early_concat_labelnull` | 0.995 | 0.874 | 0.898 | 3.5e-10 | 0.0026 | 0.0026 |
+| `histories__tabfm__early_mean` | 0.972 | 0.905 | 0.898 | 4.4e-10 | 0.0026 | 0.0026 |
+| `histories__tabfm__late` | 0.990 | 0.829 | 0.898 | 3.1e-10 | 0.0026 | 0.0026 |
+| `histories__tabpfn_fast__late` | 0.967 | 0.844 | 0.898 | 2.8e-11 | 0.0026 | 0.0026 |
+| `histories__tabpfn_full__late` | 0.938 | 0.841 | 0.898 | 4e-11 | 0.0026 | 0.0026 |
+| `metrics__autoencoder` | 0.911 | 0.944 | 0.898 | 4.9e-11 | 0.0026 | 0.0026 |
+| `metrics__direct` | 0.985 | 0.993 | 0.898 | 1.2e-09 | 0.0027 | 0.0026 |
+| `metrics__direct_no_changes` | 0.983 | 0.991 | 0.898 | 2.4e-09 | 0.0027 | 0.0026 |
+| `metrics__direct_no_indicators` | 0.979 | 0.990 | 0.898 | 8.1e-10 | 0.0027 | 0.0026 |
+| `metrics__direct_no_size` | 0.984 | 0.992 | 0.898 | 2.1e-09 | 0.0027 | 0.0026 |
+| `metrics__euclidean` | 0.060 | 0.985 | 0.898 | 8.6e-10 | 0.0026 | 0.0026 |
+| `metrics__euclidean_no_changes` | 0.101 | 0.984 | 0.898 | 1.8e-09 | 0.0026 | 0.0026 |
+| `metrics__euclidean_no_indicators` | 0.180 | 0.956 | 0.898 | 1e-09 | 0.0026 | 0.0026 |
+| `metrics__euclidean_no_size` | 0.060 | 0.984 | 0.898 | 9.1e-10 | 0.0026 | 0.0026 |
+| `metrics__exaone__item_first_concat` | 1.000 | 0.807 | 0.898 | 1.4e-09 | 0.0026 | 0.0026 |
+| `metrics__exaone__item_first_mean` | 1.000 | 0.778 | 0.898 | 1.3e-09 | 0.0026 | 0.0026 |
+| `metrics__exaone__item_last_concat` | 0.980 | 0.864 | 0.898 | 6.5e-10 | 0.0026 | 0.0026 |
+| `metrics__exaone__late` | 0.951 | 0.749 | 0.898 | 3.7e-10 | 0.0026 | 0.0026 |
+| `metrics__mahalanobis_lw` | 0.106 | 0.983 | 0.898 | 1.1e-09 | 0.0026 | 0.0026 |
+| `metrics__pca16` | 0.915 | 0.952 | 0.898 | 2e-10 | 0.0026 | 0.0026 |
+| `metrics__random_autoencoder` | 0.961 | 0.968 | 0.898 | 3.9e-10 | 0.0026 | 0.0026 |
+| `metrics__supervised_mlp16` | 0.851 | 0.879 | 0.898 | 7.6e-10 | 0.0026 | 0.0026 |
+| `metrics__tabfm__early_concat` | 0.980 | 0.919 | 0.898 | 8.1e-11 | 0.0026 | 0.0026 |
+| `metrics__tabfm__early_concat_labelnull` | 0.998 | 0.916 | 0.898 | 7.5e-10 | 0.0026 | 0.0026 |
+| `metrics__tabfm__early_mean` | 0.979 | 0.916 | 0.898 | 1.7e-09 | 0.0026 | 0.0026 |
+| `metrics__tabfm__late` | 0.991 | 0.842 | 0.898 | 8.8e-11 | 0.0027 | 0.0026 |
+| `metrics__tabpfn_fast__late` | 0.968 | 0.849 | 0.898 | 1.6e-11 | 0.0026 | 0.0026 |
+| `metrics__tabpfn_full__late` | 0.937 | 0.842 | 0.898 | 2.3e-11 | 0.0026 | 0.0026 |
+| `reference_exposures` | 1.000 | 0.860 | 0.898 | 1.6e-09 | 0.0026 | 0.0026 |
+| `uniform_network` | nan | nan | nan | nan | nan | 0.0026 |
 
 ## Interpretation limits
 

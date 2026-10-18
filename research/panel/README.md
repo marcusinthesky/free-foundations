@@ -4,7 +4,7 @@ The [original panel](RESULTS.md) at this directory's root is the v1 record cited
 the report: one strict four-characteristic design, spherical innovations, the
 `exp(-d)` kernel and late foundation-model readouts. Its files are left unchanged.
 
-The extension runs four declared designs, each in its own subdirectory. Designs
+The extension runs five declared designs, each in its own subdirectory. Designs
 differ in firms and must not be ranked against each other.
 
 | Design | Cohort | Networks | Results |
@@ -13,6 +13,7 @@ differ in firms and must not be ranked against each other.
 | `four-h5` | All four, five-year histories | Five- and three-year networks on the same firms | [four-h5](four-h5/RESULTS.md) |
 | `four-xqxo` | `four` without QXO | History rung only; sensitivity to QXO's genuine −80% day (2024-07-30) | [four-xqxo](four-xqxo/RESULTS.md) |
 | `three` | Cap/assets, market-to-book, dividend yield; five-year histories | All rungs, plus three-year networks on the same firms; measurement variants | [three](three/RESULTS.md) |
+| `three-support` | `three`'s firms | History rung at nested 32-, 64-, 128- and 256-row supports; seven declared readouts and controls, including an untrained TabPFN | [three-support](three-support/RESULTS.md) |
 
 Every design fits one spatial coefficient per network, kernel and innovation arm on
 2016–2019 and scores 2020–2025 daily excess-return densities:
@@ -28,23 +29,39 @@ Every design fits one spatial coefficient per network, kernel and innovation arm
   differences (21- and 63-day expected blocks), model confidence sets within each
   kernel and innovation family, and within-size-tercile placebos `P W P'`.
 - **Measurement variants** (`four`, `three`). The history rung is re-encoded on two
-  differently salted 256-row supports (`histories@redraw1`, `@redraw2`); the two
-  shared-row support targets are combined by RMS distance (`histories@shared_both`);
-  and `histories@decoded__X` builds networks from five prior-covariance exposures
-  decoded out of fold from representation `X`, beside the `covariance_exposures`
-  control built from those exposures directly.
+  differently salted 256-row supports (`histories@redraw1`, `@redraw2`), and the two
+  shared-row support targets are combined by RMS distance (`histories@shared_both`).
+- **Calibrated readouts** (`four`, `three`, `three-support`). `histories@decoded__X`
+  builds a network from exposures decoded out of fold from representation `X`. The
+  target is each firm's loadings on the five leading principal components of the
+  prior factor residuals of firms outside the cohort, so no held-out firm's returns
+  reach a training target. `reference_exposures` is the network of that target
+  itself. `covariance_exposures` keeps the earlier in-panel coordinates of the
+  cohort's own residual covariance as a control. [`decoding.csv`](four/decoding.csv)
+  records out-of-fold decoder fit at ranks 3, 5 and 8, and
+  [`target-audit.csv`](four/target-audit.csv) records each target's split-half
+  reliability, commonality and mass concentration.
+- **Support size** (`three-support`). Nested prefixes of the same hash-ordered
+  support (`histories@support32` and so on) re-encode fixed query firms. Contrasts
+  compare each pretrained readout with direct distance, PCA, the supervised MLP, its
+  label-null twin or the untrained architecture at every size.
 - **Likelihood attribution.** `attribution.csv` splits every residual spatial-error
   log-likelihood, by year, into spectrum, variance, baseline, alignment (linear in λ)
-  and concentration (quadratic in λ; own-variance and cross parts) terms, which sum
-  exactly to the score (Lean `Likelihood.spatial_loss`).
+  and concentration (quadratic in λ; own and cross parts) terms, which sum exactly to
+  the score (Lean `Likelihood.spatial_loss`). It is the residual likelihood given
+  realized factors, not the headline unconditional score. The own part uses total
+  residual second moments, common and idiosyncratic together.
 - **Price audit.** [`price-audit.csv`](price-audit.csv) lists every daily move beyond
-  ±50% and every price ratio outside [1/10, 10]. Only reviewed series errors are
-  masked (CHRD, 2020-11-20); a new flagged day stops the run until reviewed.
+  ±50% and every price ratio outside [1/10, 10]. The recorded review decides the
+  mask, not the threshold: reviewed series errors are masked (CHRD, 2020-11-20),
+  reviewed genuine moves are kept, and an unreviewed flagged day stops the run.
 - **Measurement audit.** [`audit/`](audit/summary.csv) re-encodes cohorts with query
   subsets, alternative support draws, shuffled or null support labels, and the
   alternate support target, reporting embedding drift, distance-rank agreement, and
   weight changes under the exp, median and matched kernels.
 
 Distances carry a JSON sidecar fingerprint (context digest, readout, metric, code
-hash) and are always recomputed from the fingerprinted embedding cache.
+hash) and are always recomputed from the fingerprinted embedding cache. Sidecars are
+hashed in each design's `manifest.json` but not committed; the CSV and JSON summaries
+are.
 Run `devenv shell just python-panel [designs]` and `just python-encoder-audit`.

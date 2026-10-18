@@ -1,0 +1,41 @@
+{
+  "exaone": {
+    "repository": "LG-AI-Research/EXAONE-Tabular",
+    "revision": "093ad1c2613e1e95d26df8610451d2e02ed53cbe",
+    "files": [
+      "exaone-tabular-regressor-v1_default.safetensors"
+    ],
+    "sha256": {
+      "exaone-tabular-regressor-v1_default.safetensors": "24891e14e649c6509f07ee62b5583e06544b68eaf9a9195ee58777eb9cf6fa0d"
+    }
+  },
+  "tabfm": {
+    "repository": "google/tabfm-1.1.0-pytorch",
+    "revision": "d7cfd3b8d184d7c8fed4210aeba9e1c967d45f2a",
+    "files": [
+      "regression/config.json",
+      "regression/model.safetensors"
+    ],
+    "sha256": {
+      "regression/config.json": "2e0dc47760bb1890629885bc2449550ca49168d88d12f615229757903efdb4c2",
+      "regression/model.safetensors": "6b75cf04d5ace29209dde0106c7969233fda9808983a145b3a742aaee0903d0e"
+    }
+  },
+  "tabpfn_full": {
+    "repository": "Prior-Labs/tabpfn_3_5",
+    "revision": "06bf2ba35c80a92a3b9abb436b99cf49e7a0365e",
+    "files": [
+      "tabpfn-v3.5-20260909.safetensors"
+    ],
+    "sha256": {
+      "tabpfn-v3.5-20260909.safetensors": "ece4d67eadfea42eb0e610df5189bea60cb7f31073d81e9c7a019b76eacf0be3"
+    }
+  },
+  "tabpfn_fast": {
+    "repository": "Prior-Labs/tabpfn_3_5",
+    "revision": "06bf2ba35c80a92a3b9abb436b99cf49e7a0365e",
+    "filename": "tabpfn-v3.5-fast-20260909.safetensors",
+    "path": "/home/marcussky/Git/free-foundations/research/pilot/cache/tabpfn-v3.5-fast-20260909.safetensors",
+    "observed_sha256": "14e0b81285bca7a6d1ef121169f27f651f76dff49cad6c0b8779d5c836018550"
+  }
+}
