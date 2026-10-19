@@ -12,7 +12,7 @@ tabpfn = ["tabpfn==9.2.0", "torch>=2.9,<3"]
 limix = ["LimiX"]
 causilo = ["causilo==1.0.3"]
 tabfm = ["tabfm[pytorch]"]
-sap = ["sap-rpt-oss", "transformers<5"]
+sap = ["sap-rpt-oss", "transformers<6"]
 
 [dependency-groups]
 data = [
