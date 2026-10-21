@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from free_foundations.data import write_json
 from free_foundations.fernandez.characteristics import CHARACTERISTICS, history_view
 from free_foundations.panel.characteristics import ROOT, SOURCE
-from free_foundations.pilot.data import write_json
 
 if TYPE_CHECKING:
     from pathlib import Path

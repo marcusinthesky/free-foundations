@@ -1,21 +1,19 @@
-"""Kernel scaling, concentration matching and placebo invariants."""
+"""Kernel scaling, concentration matching and unattainable targets."""
 
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from numpy.testing import assert_allclose
 
-from free_foundations.expanded.baselines import group_permutation
 from free_foundations.fernandez.kernels import (
     effective_neighbours,
     geometry,
     kernel_weights,
     matched_scale,
-    placebo,
     scaled_weights,
-    size_groups,
 )
-from free_foundations.fernandez.models import paper_weights, rank_distance, symmetric_spectrum
+from free_foundations.fernandez.models import paper_weights, rank_distance
 
 
 def distances(seed: int, firms: int = 25) -> np.ndarray:
@@ -55,19 +53,25 @@ def test_matching_the_reference_to_itself_recovers_unit_bandwidth() -> None:
     assert_allclose(matched_scale(distance, target), 1.0, rtol=1e-6)
 
 
-def test_uniform_network_has_zero_gap_and_placebo_keeps_spectrum_and_groups() -> None:
+def test_uniform_network_has_zero_gap_and_maximal_effective_count() -> None:
     firms = 12
     uniform = (np.ones((firms, firms)) - np.eye(firms)) / (firms - 1)
     record = geometry(None, uniform)
     assert_allclose(record["frobenius_gap"], 0, atol=1e-12)
     assert_allclose(record["effective_fraction"], 1)
-    weights = paper_weights(distances(5, firms))
-    groups = size_groups(np.arange(firms, dtype=float))
-    permuted = placebo(weights, groups, seed=3)
-    assert_allclose(np.sort(symmetric_spectrum(permuted)), np.sort(symmetric_spectrum(weights)))
-    order = group_permutation(groups, seed=3)
-    assert_allclose(permuted, weights[np.ix_(order, order)])
-    assert np.array_equal(groups[order], groups)
+
+
+def test_matched_kernel_rejects_self_links_and_reports_unattainable_geometry() -> None:
+    with pytest.raises(ValueError, match="zero self-links only"):
+        kernel_weights(distances(9), "matched", self_links=True, target=3)
+    identical = np.zeros((6, 6))
+    weights, bandwidth = kernel_weights(identical, "matched", target=3)
+    assert bandwidth > 0
+    assert_allclose(effective_neighbours(weights), 5)
+    assert_allclose(geometry(identical, weights)["effective_neighbours"], 5)
+    # A target above the maximal concentration limit chooses the upper endpoint.
+    weights, _ = kernel_weights(distances(9, 6), "matched", target=8)
+    assert_allclose(effective_neighbours(weights), 5, atol=1e-6)
 
 
 def test_empty_rows_have_no_effective_neighbours_and_herfindahl_is_reported() -> None:

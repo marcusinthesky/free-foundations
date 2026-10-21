@@ -68,37 +68,5 @@
         "size": 824695714
       }
     }
-  },
-  "exaone": {
-    "repository": "LG-AI-Research/EXAONE-Tabular",
-    "revision": "093ad1c2613e1e95d26df8610451d2e02ed53cbe",
-    "files": [
-      "exaone-tabular-regressor-v1_default.safetensors"
-    ],
-    "sha256": {
-      "exaone-tabular-regressor-v1_default.safetensors": "24891e14e649c6509f07ee62b5583e06544b68eaf9a9195ee58777eb9cf6fa0d"
-    },
-    "upstream": {
-      "exaone-tabular-regressor-v1_default.safetensors": {
-        "etag": "24891e14e649c6509f07ee62b5583e06544b68eaf9a9195ee58777eb9cf6fa0d",
-        "size": 84502160
-      }
-    }
-  },
-  "tabpfn_fast": {
-    "repository": "Prior-Labs/tabpfn_3_5",
-    "revision": "06bf2ba35c80a92a3b9abb436b99cf49e7a0365e",
-    "files": [
-      "tabpfn-v3.5-fast-20260909.safetensors"
-    ],
-    "sha256": {
-      "tabpfn-v3.5-fast-20260909.safetensors": "14e0b81285bca7a6d1ef121169f27f651f76dff49cad6c0b8779d5c836018550"
-    },
-    "upstream": {
-      "tabpfn-v3.5-fast-20260909.safetensors": {
-        "etag": "14e0b81285bca7a6d1ef121169f27f651f76dff49cad6c0b8779d5c836018550",
-        "size": 334181708
-      }
-    }
   }
 }

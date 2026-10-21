@@ -37,7 +37,7 @@ class FixedReadout:
 
 def encoder(readout: FixedReadout) -> TabularEncoder:
     return TabularEncoder(
-        model="exaone",
+        model="tabfm",
         extract=readout,
         feature_names=("assets", "debt"),
         checkpoint="test-revision",
@@ -137,16 +137,16 @@ def test_native_ensemble_conversion_never_interleaves_rows(values: FloatArray) -
 
 
 def test_registry_is_complete_and_unsupported_extraction_is_explicit() -> None:
-    assert set(MODELS) == {"exaone", "tabpfn", "limix", "causilo", "tabfm", "sap", "kumo"}
+    assert set(MODELS) == {"tabpfn", "limix", "tabfm", "kumo"}
     assert model_spec("tabfm").url.endswith("google/tabfm-1.1.0-pytorch")
     with pytest.raises(ValueError, match="Unknown model"):
         model_spec("typo")
-    for deferred in ("nori", "tabldm"):
+    for deferred in ("nori", "tabldm", "exaone", "causilo", "sap"):
         with pytest.raises(ValueError, match="Unknown model"):
             model_spec(deferred)
     with pytest.raises(NotImplementedError, match="explicit readout"):
         from_fitted(
-            "causilo",
+            "tabfm",
             NativeBackend(np.ones((1, 1, 1))),
             feature_names=("assets",),
             checkpoint="sha",

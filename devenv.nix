@@ -3,6 +3,7 @@
   name = "free-foundations";
   packages = with pkgs; [
     git
+    dvc
     gh
     just
     prek

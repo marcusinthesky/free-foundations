@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 from scipy.optimize import brentq
 
-from free_foundations.expanded.baselines import group_permutation
 from free_foundations.fernandez.models import paper_weights, symmetric_spectrum
 
 if TYPE_CHECKING:
@@ -76,6 +75,9 @@ def kernel_weights(
     target: float | None = None,
 ) -> tuple[FloatArray, float]:
     """Return W and its bandwidth; ``exp`` is equation (10) exactly, with h = 1."""
+    if kernel == "matched" and self_links:
+        message = "Matched bandwidth supports zero self-links only."
+        raise ValueError(message)
     if kernel == "exp":
         weights = paper_weights(distance, self_links=self_links)
         if not np.isfinite(weights).all():
@@ -119,18 +121,3 @@ def geometry(distance: FloatArray | None, weights: FloatArray) -> dict[str, floa
             "distinct_distances": float(np.unique(np.round(values, 10)).size),
         }
     return record
-
-
-def size_groups(values: FloatArray, groups: int = 3) -> FloatArray:
-    """Quantile groups of a point-in-time size measure; missing sizes form their own group."""
-    result = np.full(len(values), -1.0)
-    finite = np.isfinite(values)
-    ranks = np.argsort(np.argsort(values[finite]))
-    result[finite] = np.floor(ranks * groups / finite.sum())
-    return result
-
-
-def placebo(weights: FloatArray, groups: FloatArray, seed: int) -> FloatArray:
-    """P W P' with permutations restricted within groups; the spectrum is unchanged."""
-    order = group_permutation(groups, seed=seed)
-    return weights[np.ix_(order, order)]

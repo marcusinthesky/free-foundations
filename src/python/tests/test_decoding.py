@@ -3,7 +3,6 @@
 import numpy as np
 import pytest
 
-from free_foundations.expanded.distance import pairwise_distance
 from free_foundations.panel.decoding import (
     covariance_exposures,
     decode,
@@ -15,6 +14,7 @@ from free_foundations.panel.decoding import (
     targets,
 )
 from free_foundations.panel.observations import residualize
+from free_foundations.representations.distance import pairwise_distance
 
 
 def test_exposures_recover_the_common_distances_of_a_factor_structure() -> None:

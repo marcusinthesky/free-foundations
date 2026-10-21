@@ -83,36 +83,19 @@ python-universe:
     uv run --project src/python --frozen free-foundations universe run
     dvc commit -f universe
 
-python-pilot:
-    dvc unprotect research/pilot/cache
-    TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn free-foundations pilot run --stage all --pretrained
-    dvc commit -f pilot
+# The paper has one declared study; preparation and model extraction are cached separately.
+python-panel:
+    dvc repro measurement
 
-# Reuse the original pilot data and run the expanded representation/metric grid.
-python-expanded:
-    dvc repro expanded_report
+python-representations:
+    dvc repro representations
 
-# Paper-aligned MM/IV/ML replication plus the matched-characteristic ladder.
+# The supporting CAPM replication and VaR audit do not load foundation models.
 python-fernandez:
-    dvc repro fernandez_report
+    dvc repro replication
 
-# One spatial-error likelihood per combined network on a fixed common cohort.
-python-fernandez-combined:
-    dvc repro fernandez_combined
-
-# Declared designs (four, four-h5, four-xqxo, three, three-support, three-foundations); one 2016-2019
-# intensity per network, kernel and innovation arm; 2020-2025 held out. The original
-# v1 output at the panel root is a recorded snapshot, not a stage.
-python-panel *designs:
-    dvc repro {{ if designs == "" { "--glob 'panel_report_*'" } else { replace(prepend("panel_report_", designs), "-", "_") } }}
-
-# Query-cohort, support-draw, support-label and target sensitivity of model geometry.
-python-encoder-audit:
-    dvc repro panel_audit
-
-# R0 plus the R1-R4 matched cross-sectional ladder on both characteristic arms.
-python-ladder:
-    dvc repro ladder_report
+python-publication:
+    dvc repro publication
 
 # Recheck code fingerprints, then rebuild every stale stage.
 build:
@@ -125,10 +108,6 @@ semflow-refresh:
 
 pipeline-graph:
     dvc dag --mermaid
-
-# Re-snapshot the shared resume caches and recorded v1 artifacts after a run.
-data-snapshot:
-    dvc add research/expanded/cache/embeddings research/expanded/cache/initial-diagnostic-summary.csv research/panel/distances research/panel/weights research/panel/observations research/fernandez/cache/superseded-lease-mapping
 
 # The bucket is private: set S3 credentials in .dvc/config.local first (README).
 data-pull *targets:

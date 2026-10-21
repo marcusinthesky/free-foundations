@@ -2,27 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import logging
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 LOGGER = logging.getLogger(__name__)
 CHARACTERISTICS = ("market_cap_assets", "market_to_book", "dividend_yield", "debt_maturity")
-
-
-def market_history(ticker: str, cache: Path) -> pd.DataFrame:
-    """Read the frozen split-adjusted market history and corporate actions."""
-    path = cache / f"{ticker}.parquet"
-    if not path.exists():
-        message = f"Missing frozen Yahoo snapshot: {path}. Restore market_metadata with DVC."
-        raise FileNotFoundError(message)
-    return pd.read_parquet(path)
 
 
 def at_period(facts: pd.DataFrame, tags: tuple[str, ...], period: pd.Timestamp) -> float:
@@ -113,52 +99,6 @@ def snapshot(facts: pd.DataFrame, market: pd.DataFrame) -> dict[str, float | str
         "share_date": str(share_period.date()),
         "latest_filed": str(facts.loc[facts["end"].eq(period), "filed"].max().date()),
     }
-
-
-def build_panel(source: Path, expanded: Path, output: Path) -> pd.DataFrame:
-    """Use archived point-in-time SEC selections, retaining exclusions and market data."""
-    path = output / "cache" / "characteristics.parquet"
-    if path.exists():
-        return pd.read_parquet(path)
-    audit = pd.read_parquet(expanded / "cache" / "broad-audit.parquet")
-    audit = audit.loc[audit["kind"].eq("instant")]
-    universe = pd.read_csv(source.parent / "universe.csv")
-    records: list[dict[str, str | int | float]] = []
-    failures: list[dict[str, str]] = []
-    for ticker in universe["ticker"]:
-        # The SEC aggregate share count is not a verified Yahoo share-class count.
-        if ticker in {"GOOG", "GOOGL", "BRK-B", "BRK-A", "FOX", "FOXA", "NWS", "NWSA"}:
-            failures.append({"ticker": ticker, "reason": "unresolved multiple share classes"})
-            continue
-        market = market_history(ticker, output / "cache" / "markets")
-        cik = int(universe.set_index("ticker").loc[ticker, "cik"])
-        payload = json.loads((source / "facts" / f"{cik:010}.json").read_text())
-        concept = payload["facts"].get("dei", {}).get("EntityCommonStockSharesOutstanding", {})
-        shares = pd.DataFrame(concept.get("units", {}).get("shares", []))
-        if not shares.empty:
-            shares["tag"] = "EntityCommonStockSharesOutstanding"
-            for column in ("end", "filed"):
-                shares[column] = pd.to_datetime(shares[column])
-        for year, annual_facts in audit.loc[audit["ticker"].eq(ticker)].groupby("year"):
-            facts = annual_facts
-            cutoff = pd.Timestamp(f"{year}-12-31")
-            if not shares.empty:
-                known = shares.loc[
-                    (shares["filed"] <= cutoff)
-                    & shares["end"].between(cutoff - pd.Timedelta(days=550), cutoff)
-                ]
-                facts = pd.concat([facts, known], ignore_index=True)
-            records.append(
-                {"year": int(str(year)), "ticker": str(ticker), **snapshot(facts, market)}
-            )
-        LOGGER.info("Characteristics: %s", ticker)
-    frame = pd.DataFrame(records).set_index(["year", "ticker"]).sort_index()
-    frame.reset_index().to_csv(output / "characteristic-audit.csv", index=False)
-    pd.DataFrame(failures).to_csv(output / "excluded-issuers.csv", index=False)
-    panel = frame[list(CHARACTERISTICS)].astype(float).replace([np.inf, -np.inf], np.nan)
-    panel.to_parquet(path)
-    panel.notna().groupby("year").sum().to_csv(output / "coverage.csv")
-    return panel
 
 
 def history_view(panel: pd.DataFrame, length: int) -> pd.DataFrame:

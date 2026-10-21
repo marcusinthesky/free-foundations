@@ -1,4 +1,4 @@
-"""The command line forwards to the study functions that DVC stages fingerprint."""
+"""The small publication CLI rejects undeclared experiment overrides."""
 
 from pathlib import Path
 
@@ -15,7 +15,7 @@ PIPELINE = Path(__file__).parents[3] / "dvc.yaml"
 
 
 def commands() -> list[tuple[str, str]]:
-    """Every (group, command) pair the application registers."""
+    """Every registered group/command pair."""
     groups = get_command(cli.app).commands  # type: ignore[attr-defined]
     return [(group, name) for group, item in groups.items() for name in item.commands]
 
@@ -26,38 +26,46 @@ def test_every_command_resolves(group: str, name: str) -> None:
     assert result.exit_code == 0, result.output
 
 
-def test_panel_run_forwards_each_design_and_model(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls: list[tuple[list[str], list[str] | None]] = []
-
-    def record(designs: list[str], models: list[str] | None) -> None:
-        calls.append((designs, models))
-
-    monkeypatch.setattr(panel_run, "main", record)
-    arguments = ["panel", "run", "--design", "three", "--design", "four", "--model", "tabfm"]
-    result = RUNNER.invoke(cli.app, arguments)
+def test_panel_run_uses_the_fixed_study(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+    monkeypatch.setattr(panel_run, "main", lambda: calls.append("study"))
+    result = RUNNER.invoke(cli.app, ["panel", "run"])
     assert result.exit_code == 0, result.output
-    assert calls == [(["three", "four"], ["tabfm"])]
+    assert calls == ["study"]
 
 
-def test_undeclared_designs_are_rejected_before_any_work(monkeypatch: pytest.MonkeyPatch) -> None:
-    def refuse(*_: object) -> None:
-        pytest.fail("ran an undeclared design")
+@pytest.mark.parametrize("option", ["--design", "--model"])
+def test_arbitrary_overrides_are_rejected_before_work(
+    option: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def refuse() -> None:
+        pytest.fail("ran an undeclared experiment")
 
     monkeypatch.setattr(panel_run, "main", refuse)
-    result = RUNNER.invoke(cli.app, ["panel", "run", "--design", "five"])
+    result = RUNNER.invoke(cli.app, ["panel", "run", option, "other"])
     assert result.exit_code == 2
-    assert "five not in" in result.output
+    assert "No such option" in result.output
+
+
+def test_only_retained_research_commands_are_exposed() -> None:
+    assert set(commands()) == {
+        ("universe", "run"),
+        ("models", "checkpoints"),
+        ("fernandez", "run"),
+        ("panel", "prepare"),
+        ("panel", "encode"),
+        ("panel", "run"),
+        ("panel", "report"),
+    }
 
 
 def test_every_stage_runs_a_registered_command() -> None:
-    """A renamed command must not leave a DVC stage pointing at nothing."""
     pipeline = yaml.safe_load(PIPELINE.read_text())
     variables = {name: value for item in pipeline["vars"] for name, value in item.items()}
     registered = {f"free-foundations {group} {name}" for group, name in commands()}
-    for stage_name, stage in pipeline["stages"].items():
+    for stage in pipeline["stages"].values():
         command = stage["cmd"]
-        if stage_name == "market_metadata":
-            assert stage["frozen"] is True
+        if stage.get("frozen"):
             assert command == "false"
             continue
         for name, value in variables.items():

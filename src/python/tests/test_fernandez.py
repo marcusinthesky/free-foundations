@@ -12,7 +12,6 @@ from free_foundations.fernandez.models import (
     lag_iv,
     paper_weights,
     rank_distance,
-    residual_covariance,
 )
 
 
@@ -39,17 +38,6 @@ def test_spatial_iv_recovers_the_structural_coefficient_without_ols_endogeneity(
     fit = lag_iv(returns, beta, weights)
     assert_allclose([fit.premium, fit.intensity], [0.02, 0.7], atol=1e-10)
     assert_allclose(fit.innovations, 0, atol=1e-10)
-
-
-def test_spherical_sem_recovers_covariance_in_original_units() -> None:
-    weights = np.roll(np.eye(8), 1, axis=1)
-    operator = np.eye(8) - 0.65 * weights
-    inverse = np.linalg.inv(operator)
-    rng = np.random.default_rng(42)
-    residuals = rng.normal(scale=0.02, size=(20000, 8)) @ inverse.T
-    covariance, intensity = residual_covariance(residuals, weights)
-    assert abs(intensity - 0.65) < 0.02
-    assert_allclose(covariance, 0.02**2 * inverse @ inverse.T, rtol=0.03)
 
 
 def test_missing_debt_is_not_zero_and_histories_never_pull_forward() -> None:

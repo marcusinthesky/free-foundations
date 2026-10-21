@@ -26,7 +26,7 @@ from scipy.stats import spearmanr
 from sklearn.linear_model import RidgeCV
 from sklearn.preprocessing import StandardScaler
 
-from free_foundations.expanded.distance import pairwise_distance
+from free_foundations.representations.distance import pairwise_distance
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray

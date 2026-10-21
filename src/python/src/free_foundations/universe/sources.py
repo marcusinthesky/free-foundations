@@ -18,7 +18,7 @@ import yfinance as yf
 from edgar.httprequests import download_json
 from httpx import HTTPStatusError
 
-from free_foundations.pilot.data import FrenchReader, write_json
+from free_foundations.data import FrenchReader, write_json
 
 LOGGER = logging.getLogger(__name__)
 

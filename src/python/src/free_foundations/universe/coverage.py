@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from free_foundations.data import fact_rows
 from free_foundations.fernandez.characteristics import debt_components
-from free_foundations.pilot.data import fact_rows
 from free_foundations.universe.sources import company_facts
 
 if TYPE_CHECKING:

@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from free_foundations.expanded import cache, checkpoints
+from free_foundations.representations import cache, checkpoints
 
 
 def test_checkpoint_migration_verifies_bytes_and_never_rewrites_expected(
@@ -96,7 +96,7 @@ def test_actual_adapter_and_runtime_changes_invalidate_states(
 ) -> None:
     from types import SimpleNamespace  # noqa: PLC0415 -- fixture only.
 
-    from free_foundations.expanded.encoding import Prepared  # noqa: PLC0415
+    from free_foundations.representations.encoding import Prepared  # noqa: PLC0415
 
     root = tmp_path / "src/free_foundations"
     for name in cache.SOURCES:
@@ -104,7 +104,7 @@ def test_actual_adapter_and_runtime_changes_invalidate_states(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("original adapter")
     (tmp_path / "uv.lock").write_text("locked dependencies")
-    monkeypatch.setattr(cache, "__file__", str(root / "expanded/cache.py"))
+    monkeypatch.setattr(cache, "__file__", str(root / "representations/cache.py"))
     package = SimpleNamespace(version="one", read_text=lambda _name="direct_url.json": "null")
     monkeypatch.setattr(cache, "distribution", lambda _name="torch": package)
     data = Prepared(
@@ -122,8 +122,14 @@ def test_actual_adapter_and_runtime_changes_invalidate_states(
         "revision": "pinned",
         "sha256": {"weights": "verified"},
     }
+    monkeypatch.setattr(cache, "inference_device", lambda: "cpu")
     original = cache.identity(data, "tabpfn_full", checkpoint)
-    (root / "expanded/encoding.py").write_text("changed extraction")
+    monkeypatch.setattr(cache, "inference_device", lambda: "cuda")
+    gpu = cache.identity(data, "tabpfn_full", checkpoint)
+    assert cache.location(tmp_path, original) != cache.location(tmp_path, gpu)
+    assert gpu["execution"]["device"] == "cuda"
+    monkeypatch.setattr(cache, "inference_device", lambda: "cpu")
+    (root / "representations/encoding.py").write_text("changed extraction")
     changed = cache.identity(data, "tabpfn_full", checkpoint)
     assert cache.location(tmp_path, original) != cache.location(tmp_path, changed)
     package.version = "two"

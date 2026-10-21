@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from arch.bootstrap import MCS, StationaryBootstrap, optimal_block_length
 
-from free_foundations.panel.design import DESIGNS, SUPPORT_SIZES
+from free_foundations.panel.design import PRINCIPAL, RESET_MODELS
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
@@ -17,6 +18,7 @@ BLOCKS = (21, 63)  # Declared: one and three trading months of expected block le
 REPLICATES = 9999
 
 
+@lru_cache(maxsize=2)
 def resample_counts(
     days: int, block: int, replicates: int = REPLICATES, seed: int = 42
 ) -> FloatArray:
@@ -29,6 +31,7 @@ def resample_counts(
     counts = np.zeros((replicates, days))
     for row, (arguments, _) in enumerate(bootstrap.bootstrap(replicates)):
         counts[row] = np.bincount(arguments[0], minlength=days)
+    counts.setflags(write=False)
     return counts
 
 
@@ -44,187 +47,129 @@ def reference_for(column: str) -> dict[str, str]:
 
 
 def paired(daily: pd.DataFrame) -> pd.DataFrame:
-    """Summed daily differences with stationary-bootstrap percentile intervals."""
-    columns = [column for column in map(str, daily.columns) if "__placebo" not in column]
-    counts = {block: resample_counts(len(daily), block) for block in BLOCKS}
-    rows = []
-    for column in columns:
-        for label, reference in reference_for(column).items():
-            if reference not in daily or reference == column:
-                continue
-            difference = (daily[column] - daily[reference]).to_numpy(dtype=float)
-            row: dict[str, str | float] = {
-                "column": column,
-                "versus": label,
-                "reference": reference,
-                "difference": float(difference.sum()),
-                "politis_white_block": float(
-                    optimal_block_length(difference)["stationary"].iloc[0]
-                ),
+    """Principal daily differences against joint and uniform financial benchmarks."""
+    principal = {column for columns in families(daily).values() for column in columns}
+    resets = {
+        f"histories{suffix}__{model}__late|matched|{arm}"
+        for model in RESET_MODELS
+        for suffix in ("", "@decoded")
+        for arm in ("diagonal", "correlation")
+    }
+    pairs = [
+        (label, column, reference)
+        for column in map(str, daily.columns)
+        if column in principal | resets
+        for label, reference in reference_for(column).items()
+        if reference in daily and reference != column
+    ]
+    if not pairs:
+        return pd.DataFrame()
+    differences = np.column_stack(
+        [(daily[left] - daily[right]).to_numpy(dtype=float) for _, left, right in pairs]
+    )
+    rows: list[dict[str, str | float]] = [
+        {
+            "column": left,
+            "versus": label,
+            "reference": right,
+            "difference": float(differences[:, index].sum()),
+            "politis_white_block": float(
+                optimal_block_length(differences[:, index])["stationary"].iloc[0]
+            ),
+        }
+        for index, (label, left, right) in enumerate(pairs)
+    ]
+    for block in BLOCKS:
+        sums = resample_counts(len(daily), block) @ differences
+        lower, upper = np.percentile(sums, [2.5, 97.5], axis=0)
+        for index, row in enumerate(rows):
+            row |= {
+                f"lower_{block}": float(lower[index]),
+                f"upper_{block}": float(upper[index]),
+                f"share_nonpositive_{block}": float(np.mean(sums[:, index] <= 0)),
             }
-            for block, matrix in counts.items():
-                sums = matrix @ difference
-                row |= {
-                    f"lower_{block}": float(np.percentile(sums, 2.5)),
-                    f"upper_{block}": float(np.percentile(sums, 97.5)),
-                    f"share_nonpositive_{block}": float(np.mean(sums <= 0)),
-                }
-            rows.append(row)
     return pd.DataFrame(rows)
 
 
-# Declared matched-input contrasts: (label, left, right) within one rung, kernel and arm.
-# "TabFM" is the early-concatenation state readout.
-RUNG_CONTRASTS = (
-    ("pretrained vs supervised", "tabfm__early_concat", "supervised_mlp16"),
-    ("pretrained vs direct", "tabfm__early_concat", "direct"),
-    ("pretrained vs Mahalanobis", "tabfm__early_concat", "mahalanobis_lw"),
-    ("pretrained vs random autoencoder", "tabfm__early_concat", "random_autoencoder"),
-    ("labels vs constant labels", "tabfm__early_concat", "tabfm__early_concat_labelnull"),
-)
-INPUT_CONTRASTS = ("direct", "tabfm__early_concat")
-# Measurement contrasts on the history rung, for one readout per model family and the
-# supervised control: support redraw, two shared targets against one, decoded exposures
-# against native distance, and decoded states against decoded inputs.
-MEASURED = (
-    "tabfm__early_concat",
-    "tabfm__late",
-    "tabpfn_full__late",
-    "exaone__late",
-    "kumo__late",
-    "limix__late",
-    "supervised_mlp16",
-)
-MEASUREMENT_CONTRASTS = (
-    ("support redraw", "histories@redraw1__{}", "histories__{}"),
-    ("support redraw", "histories@redraw2__{}", "histories__{}"),
-    ("both targets vs one", "histories@shared_both__{}", "histories@shared_market_cap_assets__{}"),
-    ("decoded vs native", "histories@decoded__{}", "histories__{}"),
-    ("decoded vs native inputs", "histories@decoded__{}", "histories__direct"),
-    ("decoded vs decoded inputs", "histories@decoded__{}", "histories@decoded__direct"),
-)
-# Support-size contrasts: each pretrained readout against controls without pretraining,
-# labels or trained weights, at every nested support size, native and decoded.
-SUPPORT_CONTRASTS = (
-    *(
-        (name, control)
-        for name in ("kumo__late", "limix__late", "tabfm__late")
-        for control in ("direct", "pca16", "supervised_mlp16")
-    ),
-    *(
-        (f"{model}__late", f"{model}_random{suffix}__late")
-        for model in ("kumo", "tabpfn_full")
-        for suffix in ("", "43", "44")
-        if (model, suffix) != ("tabpfn_full", "")
-    ),
-    ("tabfm__early_concat", "direct"),
-    ("tabfm__early_concat", "pca16"),
-    ("tabfm__early_concat", "supervised_mlp16"),
-    ("tabfm__early_concat", "tabfm__early_concat_labelnull"),
-    ("tabpfn_full__late", "direct"),
-    ("tabpfn_full__late", "pca16"),
-    ("tabpfn_full__late", "supervised_mlp16"),
-    ("tabpfn_full__late", "tabpfn_full_random__late"),
-)
-CONTRAST_ARMS = (("matched", "diagonal"), ("matched", "correlation"), ("median", "diagonal"))
-
-
-def support_contrasts() -> list[tuple[str, str, str]]:
-    """Declared support-size pairs; ``direct`` is query-only, so its 256-row column serves."""
-    pairs: list[tuple[str, str, str]] = []
-    for rows in (*SUPPORT_SIZES, 256):
-        rung = "histories" if rows == 256 else f"histories@support{rows}"
-        for kind, suffix in (("native", ""), ("decoded", "@decoded")):
-            for left, right in SUPPORT_CONTRASTS:
-                base = "histories" if right == "direct" else rung
-                for kernel, innovation in CONTRAST_ARMS:
-                    pairs.append(
-                        (
-                            f"support {rows} {kind}",
-                            f"{rung}{suffix}__{left}|{kernel}|{innovation}",
-                            f"{base}{suffix}__{right}|{kernel}|{innovation}",
-                        )
-                    )
-    return pairs
-
-
 def declared_contrasts(columns: set[str]) -> list[tuple[str, str, str]]:
-    """Every declared contrast whose two columns were scored in this design."""
+    """Full-context calibration, direct-input and learned-weight comparisons."""
     pairs: list[tuple[str, str, str]] = []
-    for kernel, innovation in CONTRAST_ARMS:
-
-        def column(name: str, kernel: str = kernel, innovation: str = innovation) -> str:
-            return f"{name}|{kernel}|{innovation}"
-
-        for rung in ("histories", "broad", "metrics"):
-            pairs += [
-                (label, column(f"{rung}__{left}"), column(f"{rung}__{right}"))
-                for label, left, right in RUNG_CONTRASTS
-            ]
-            pairs.append(
-                ("topology", column(f"{rung}__direct"), f"uniform_network|none|{innovation}")
+    for arm in ("diagonal", "correlation"):
+        for name in PRINCIPAL:
+            left = f"histories@decoded__{name}|matched|{arm}"
+            pairs.append(("decoded vs native", left, f"histories__{name}|matched|{arm}"))
+            if name != "direct":
+                pairs.append(("decoded vs native inputs", left, f"histories__direct|matched|{arm}"))
+        for model in RESET_MODELS:
+            trained = model.partition("_random")[0]
+            pairs.extend(
+                (
+                    "pretrained vs reset",
+                    f"histories{suffix}__{trained}__late|matched|{arm}",
+                    f"histories{suffix}__{model}__late|matched|{arm}",
+                )
+                for suffix in ("", "@decoded")
             )
-        pairs += [
-            (f"inputs ({name})", column(f"metrics__{name}"), column(f"histories__{name}"))
-            for name in INPUT_CONTRASTS
-        ]
-        pairs += [
-            (label, column(left.format(name)), column(right.format(name)))
-            for name in MEASURED
-            for label, left, right in MEASUREMENT_CONTRASTS
-        ]
-    if any("@support" in column for column in columns):
-        pairs += support_contrasts()
     return [pair for pair in pairs if pair[1] in columns and pair[2] in columns]
 
 
 def contrasts(daily: pd.DataFrame, pairs: list[tuple[str, str, str]] | None = None) -> pd.DataFrame:
-    """Direct paired differences for the declared contrasts, with yearly totals.
-
-    Intervals resample realized daily score differences in time blocks. They hold the
-    fitted coefficients, networks and the searched specification fixed.
-    """
+    """Fixed-procedure paired intervals and yearly totals using common time resamples."""
     years = pd.to_datetime(daily.index).year
-    counts = {block: resample_counts(len(daily), block) for block in BLOCKS}
-    rows = []
     selected = declared_contrasts(set(map(str, daily.columns))) if pairs is None else pairs
-    for label, left, right in selected:
-        difference = (daily[left] - daily[right]).to_numpy(dtype=float)
-        row: dict[str, str | float] = {
+    if not selected:
+        return pd.DataFrame()
+    missing = {column for _, left, right in selected for column in (left, right)} - set(
+        daily.columns
+    )
+    if missing:
+        message = f"Missing declared contrast scores: {sorted(missing)}"
+        raise ValueError(message)
+    differences = np.column_stack(
+        [(daily[left] - daily[right]).to_numpy(dtype=float) for _, left, right in selected]
+    )
+    rows: list[dict[str, str | float]] = [
+        {
             "contrast": label,
             "left": left,
             "right": right,
-            "difference": float(difference.sum()),
+            "difference": float(differences[:, index].sum()),
+            **{
+                f"year_{year}": float(differences[years == year, index].sum())
+                for year in sorted(set(years))
+            },
         }
-        row |= {
-            f"year_{year}": float(difference[years == year].sum()) for year in sorted(set(years))
-        }
-        for block, matrix in counts.items():
-            sums = matrix @ difference
-            row |= {
-                f"lower_{block}": float(np.percentile(sums, 2.5)),
-                f"upper_{block}": float(np.percentile(sums, 97.5)),
-            }
-        rows.append(row)
+        for index, (label, left, right) in enumerate(selected)
+    ]
+    for block in BLOCKS:
+        sums = resample_counts(len(daily), block) @ differences
+        lower, upper = np.percentile(sums, [2.5, 97.5], axis=0)
+        for index, row in enumerate(rows):
+            row |= {f"lower_{block}": float(lower[index]), f"upper_{block}": float(upper[index])}
     return pd.DataFrame(rows)
 
 
 def families(daily: pd.DataFrame) -> dict[str, list[str]]:
-    """MCS families: networks within one kernel and innovation arm, with every control.
-
-    Nonspatial covariance controls and the uniform and zero networks enter every family
-    of their innovation arm, so a family's set is also a comparison with those benchmarks.
-    The heterogeneous-variance controls join the diagonal families.
-    """
+    """Principal matched procedures and the same financial benchmarks in each arm."""
+    names = {f"histories{suffix}__{name}" for name in PRINCIPAL for suffix in ("", "@decoded")}
+    names |= {
+        "zero_network",
+        "uniform_network",
+        "fernandez_joint",
+        "reference_exposures",
+        "covariance_exposures",
+        "raw_sample_covariance",
+        "ff5_mom_diagonal",
+        "ff5_mom_sample_residual_covariance",
+    }
     groups: dict[str, list[str]] = {}
     for column in map(str, daily.columns):
         name, kernel, innovation = column.split("|")
-        if "__placebo" in name:
-            continue
         arm = "diagonal" if innovation == "control" else innovation
-        kernels = ("exp", "median", "matched") if kernel == "none" else (kernel,)
-        for selected in kernels:
-            groups.setdefault(f"{arm}|{selected}", []).append(column)
+        if name not in names or arm not in ("diagonal", "correlation"):
+            continue
+        if kernel in {"matched", "none"} or (name == "fernandez_joint" and kernel == "exp"):
+            groups.setdefault(f"{arm}|matched", []).append(column)
     return groups
 
 
@@ -255,13 +200,3 @@ def confidence_set(daily: pd.DataFrame, size: float = 0.10) -> pd.DataFrame:
             for column in columns
         )
     return pd.DataFrame(rows)
-
-
-def main(designs: list[str]) -> None:
-    """Recompute paired intervals, contrasts and confidence sets from saved daily scores."""
-    for name in designs:
-        output = DESIGNS[name].output
-        daily = pd.read_parquet(output / "daily-scores.parquet")
-        paired(daily).to_csv(output / "bootstrap.csv", index=False)
-        contrasts(daily).to_csv(output / "contrasts.csv", index=False)
-        confidence_set(daily).to_csv(output / "mcs.csv", index=False)

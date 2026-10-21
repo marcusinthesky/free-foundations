@@ -1,1419 +1,1105 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsthm,array,booktabs,expl3,graphicx}
-\usepackage{longtable,pdflscape,xurl,pgf,float,hyperref}
+\usepackage{amsmath,amssymb,amsthm,array,booktabs,graphicx}
+\usepackage{xurl,pgf,float,hyperref}
 \hypersetup{hidelinks}
 \urlstyle{same}
 \setlength{\emergencystretch}{1em}
 \input{../lean/blueprint/src/macros/common}
 \input{../lean/blueprint/src/macros/print}
-% Preserve source-level declaration checks without printing
-% implementation identifiers.
+% Retained mathematical statements carry source-level declaration checks.
 \renewcommand{\lean}[1]{\ignorespaces}
 \renewcommand{\leanok}{\ignorespaces}
-\title{Do Pretrained Tabular Models Measure Financial Proximity?}
-\author{Marcus Gawronsky\\\small gwrmar002@myuct.ac.za}
+\title{Pretrained Tabular Features and the Measurement of Financial Proximity}
+\author{Marcus Gawronsky\\\small gwrmar002@myuct.ac.za
+\and Chun-Sung Huang}
 \date{October 2026}
 \begin{document}
 \input{build/numbers}
 \maketitle
 \begin{abstract}
-  Spatial financial models require a measure of which firms are economically
-  close. Foundation models supply reusable features learned from external data,
-  creating an opportunity to construct financial measurements from
-  firm histories.
-  We distinguish information retained by these features, approximation by an
-  economic readout, and estimation from a financial sample. A replication and
-  controlled extension of Fern\'andez's characteristic-history approach provides
-  comparisons motivated by these distinctions. Four frozen tabular
-  models receive
-  the same financial histories as conventional and random-weight controls.
-  With matched-neighbor bandwidths and fitted firm-specific
-  innovation variances,
-  native pretrained distances trail direct and principal-component distances,
-  whereas exposure calibration improves all four pretrained procedures.
-  Calibrated-minus-native gains become negative in point estimates
-  when forecasts
-  share marginal variances, with paired intervals spanning zero. Mean
-  out-of-fold prediction
-  $R^2$ for the historical exposure proxy ranges from \LimixDecoder{} to
-  \TabfmHeadDecoder{}, compared with \DirectDecoder{} for direct inputs.
-  Prediction is more sensitive to financial calibration size than to encoder
-  context within the examined ranges. TabPFN's learned weights outperform its
-  specified reset controls in the principal covariance specification.
-  These development results support pretrained features as inputs to an
-  interpretable measurement procedure whose financial value depends jointly on
-  its target, estimated readout, and covariance use.
+  Financial proximity measures similarity in firms' exposure to common shocks.
+  We examine whether frozen features from four pretrained tabular models help
+  estimate this relationship from financial histories. Our framework
+  distinguishes information retained by a prediction task, estimation of
+  economic exposures, and the use of exposure distances in a covariance
+  forecast. Conditional on fixed weights and context, pretrained features
+  transform the supplied histories; their potential advantage is to make
+  exposure information more accessible to a restricted regression. In a
+  retrospective US equity study, pretrained features predict historical exposure
+  proxies more accurately than direct histories, but their native distances
+  yield weaker covariance forecasts than direct or principal-component
+  distances. Estimating exposure coordinates improves all four pretrained
+  forecasts when each procedure fits its own innovation variances. When full
+  forecasts are rescaled to common marginal variances, the corresponding
+  calibration differences have negative point estimates and confidence intervals
+  spanning zero. Exposure prediction improves more with additional financial
+  calibration firms than with additional encoder examples over the ranges
+  examined. These results locate the contribution of pretrained features in
+  target-specific estimation and illustrate why covariance performance requires
+  separate assessment.
 \end{abstract}
 
 % MAIN-TEXT-BEGIN
 \section{Introduction}
-Spatial financial models use economic neighbors to describe dependence among
-firms' returns, making the choice of neighbors consequential for measured risk.
-Firms with similar accounting ratios may differ in combinations of
-characteristics relevant to their exposures, while firms in different industries
-may respond similarly to common shocks. Fern\'andez's characteristic-history
-networks~\cite{fernandez} make this proximity operational and provide a setting
-in which to examine how artificial intelligence can support economic
-measurement. We ask whether frozen tabular features improve exposure prediction
-and the financial use of proximity when inputs and estimation rules are held
-constant.
+Financial proximity concerns how firms respond to common shocks. Similar
+accounting ratios can conceal different exposures, while firms in different
+industries can share responses to interest rates or demand. These relationships
+matter when a risk model uses neighboring firms to forecast their common
+movements. A useful proximity measure must then distinguish firms according to
+their exposures, rather than simply group firms whose reported characteristics
+look alike. In a spatial covariance model, these neighbor relations
+determine how
+residual risk is shared across firms.
+The economic content of the distance consequently matters even when all
+procedures use the same factor model. Pretrained features offer a way
+to extract combinations of those
+characteristics, but their value depends on the connection between the
+prediction task, the economic target, and the risk model using the distance.
 
-Foundation models learn reusable relationships before application to
-a particular
-question, a procedure called pretraining. Its statistical appeal is that earlier
-learning can supply useful transformations of characteristics, leaving a limited
-financial sample to estimate a simpler relationship with the target.
-Self-supervised learning derives training signals from observations, for example
-by predicting withheld entries. Synthetic-task pretraining instead generates
-example prediction problems from a specified distribution. Tabular
-foundation models learn
-relationships across tables whose columns can change, supporting regression
-and classification on new data. Here a row describes a firm, with financial
-characteristics as predictors and a subsequent valuation ratio as the supplied
-outcome.
+Pretrained tabular models learn across prediction problems before receiving a
+financial table. Examples pairing financial histories with observed outcomes
+then adapt the frozen model to the supplied problem, a procedure called
+in-context learning. Features extracted from these models can express
+interactions that a simple regression would struggle to estimate directly.
+Ye et al.~\cite{ye}, for example, use TabPFN features with a separate linear
+classifier. For finance, the relevant question is whether such features help
+estimate economic exposures and whether distances between them provide useful
+financial neighbors. Accurate predictions of an auxiliary valuation outcome
+alone leave both questions unresolved.
 
-For financial economists, a representation is a vector of constructed features,
-and its readout maps those features to a declared quantity, such as risk
-exposure. Our framework specifies conditions under which information rewarded by a
-learning task can support recovery of a declared economic target.
-Separating information, readout approximation, and estimation error
-then connects
-this measurement to financial distances and covariance forecasts.
+Existing financial models connect firm characteristics to exposures in several
+ways. Kelly, Pruitt, and Su~\cite{kps} estimate time-varying loadings
+instrumented
+by characteristics; Gu, Kelly, and Xiu~\cite{gkx} allow a nonlinear
+characteristic-to-loading map. Alouadi and Lehalle~\cite{alouadi} learn
+representations and exposures jointly with a covariance-oriented objective.
+Gabaix et al.~\cite{assetembeddings} instead evaluate holdings-based asset
+embeddings with restricted financial readouts, including ridge regressions on
+held-out firms and a return-comovement exercise. We examine externally
+pretrained, frozen tabular features within a common financial estimation
+procedure. The measurement framework connects the information needed to recover
+an exposure target, the estimation of that target, and its use in a covariance
+forecast. It also links these questions to the ambiguity of distances between
+prediction-equivalent embeddings~\cite{steck}.
 
-A controlled extension of characteristic-based spatial finance examines these
-links across four pretrained models, conventional representations, and
-random-weight controls. Varying encoder examples and financial training firms
-separately distinguishes adaptation from readout estimation. In the
-principal covariance
-specification, exposure calibration improves
-forecasts even when native distances trail conventional measures. Comparing
-variance treatments then reveals how the financial use of a measurement
-conditions that improvement.
+A retrospective US equity study compares four pretrained models with direct
+histories, principal components, and a valuation-task neural control.
+All receive
+the same financial histories, and a separate regression predicts a common
+historical exposure proxy. Pretrained features improve exposure prediction, but
+their native distances yield weaker covariance forecasts than direct or
+principal-component distances. Estimating exposure coordinates improves all four
+pretrained forecasts when each procedure fits its own innovation variances.
+With common marginal variances, the corresponding differences have negative
+point estimates and intervals spanning zero. Historical return-based procedures
+also remain the strongest retained benchmarks. The evidence places the feature
+advantage in target-specific estimation and makes its forecasting value
+conditional on the covariance construction.
 
-\section{Literature review}
-Financial contiguity provides the application. Fern\'andez~\cite{fernandez}
-constructs networks from characteristic histories, while F\"ulle and
-Otto~\cite{fulleotto} model volatility through covariate proximity.
-Portfolio-holdings representations offer another way to locate assets relative
-to one another~\cite{assetembeddings}. These approaches establish the economic
-importance of choosing a useful representation of financial relationships.
+This distinction provides a practical framework for evaluating pretrained
+features as financial measurements. A restricted regression can exploit their
+coordinates more effectively without those coordinates defining a useful risk
+distance. Expressing the features in exposure units addresses the meaning of
+distance; evaluating the resulting forecast assesses its use. To hold that use
+common, we follow Fern\'andez's~\cite{fernandez} characteristic-history approach
+to financial neighborhoods, related to covariate-based spatial volatility
+models~\cite{fulleotto}. The resulting comparison shows why exposure prediction,
+distance construction, and covariance performance each need evidence. In this
+application, a forecasting advantage under fitted innovation variances does not
+establish a corresponding improvement after marginal variances are standardized.
 
-The statistical rationale for reusing representations precedes current
-foundation architectures. Baxter~\cite{baxter} and Maurer et al.~\cite{maurer}
-show how learning across related tasks can improve generalization to new tasks.
-Lee et al.~\cite{lee} establish conditions under which self-supervised
-prediction supplies features accessible to a simple downstream regression.
-Their results connect useful task relationships to approximation error and
-the amount of labeled data required. Foundation models scale this division
-between earlier representation learning and subsequent
-application~\cite{foundation}.
-
-In tabular applications, synthetic-task learning includes prior-data fitted
-prediction~\cite{pfn,nagler}, quantile forecasting~\cite{kumo}, and masked
-modeling of joint predictor and outcome structure~\cite{limix}.
-Supplying labeled
-examples to a frozen model, called in-context learning, adapts its predictions
-to a new table. Our contribution connects this general learning rationale to
-financial measurement through a common exposure target and spatial experiment.
-The relationship between economic weights and disturbances~\cite{qulee}
-motivates defining that target before studying the resulting covariance model.
-
-\section{Methodology: information and geometry}
-The measurement target is similarity in responses to common shocks, so firms
-are close when their exposures imply similar common return movements.
-At a given date, let $b_i=b(S_i)\in\R^k$ describe firm $i$'s exposures in state
-$S_i$, and let $q$ be a centered shock vector with covariance $\Omega$.
-Residual return $u_i$ contains this common response and an idiosyncratic
-component $e_i$:
-\[
-  u_i=b_i'q+e_i.
-\]
-The dispersion of two firms' common-response difference defines economic
-dissimilarity,
+\section{From predictive information to economic measurement}
+\subsection{An economic target for proximity}
+To give proximity an economic meaning, consider two firms receiving the same
+shocks. They are close when their common responses differ little, even if their
+accounting histories or industries differ. At a given date, let firm $i$ have
+latent exposure $b_i=b(S_i)\in\R^k$ in economic state $S_i$. For centered common
+shocks $q$ with covariance $\Omega\succeq0$, write residual return as
+$u_i=b_i'q+e_i$, where $e_i$ is idiosyncratic. Economic dissimilarity is
 \begin{equation}\label{eq:economic-distance}
-  d_E(i,j)\equiv\sqrt{\operatorname{Var}((b_i-b_j)'q)}
+  d_E(i,j)=\sqrt{\operatorname{Var}((b_i-b_j)'q)}
   =\norm{\Omega^{1/2}(b_i-b_j)}_2.
 \end{equation}
-Measured in return units, this distance weights exposure differences by shock
-variability; together with exposure magnitudes, it determines common covariance,
-as the appendix shows. It supplies an economic scale against which a learned
-representation can be assessed.
+This distance is measured in return units and weights exposure differences by
+shock variability. With risk-scaled exposures $a_i=\Omega^{1/2}b_i$, it becomes
+Euclidean distance in a shared exposure system. Common covariance depends on
+both this distance and the magnitudes of the exposures, so comparing directions
+alone loses economically relevant information. Appendix~\ref{sec:theory} gives
+the covariance identity and the implications of rotations and singular shock
+covariance.
 
-To connect this target to pretraining, let an encoder $E$ map firm history $H$
-into features $z=E(H;C)$, conditional on examples $C$. At a population optimum,
-the training loss and prediction task specify a statistic $F(H)$ recoverable
-through the representation's prediction head. Squared loss targets a conditional mean, whereas distributional
-prediction can preserve richer risk information. Masking determines which
-observations predict which others: reconstructing contemporaneous accounts and
-predicting future cash flows pose different tasks even under the same loss.
+The economic exposure need not be determined by observed financial history
+$H$. A history-based estimator can predict only the component accessible from
+those observations; estimated historical loadings also contain measurement
+error. We keep these objects distinct. The task-alignment result concerns a
+declared target determined by history, whereas the risk decomposition below
+allows uncertainty remaining after history is observed. The application uses
+historical loadings as an exposure proxy and evaluates how well a fitted
+regression predicts that proxy for held-out firms. This target makes the
+economic units explicit while leaving the quality of the proxy open to
+assessment. Predicting the estimated historical coordinate and recovering a
+latent exposure are different empirical claims.
 
-Suppressing fixed $C$, suppose the task readout $h_{\rm task}$ recovers $F$,
-and an economic target $s(H)$ is a function $g$ of that statistic. Then
-\[
-  F=h_{\rm task}\circ E,\qquad s=g\circ F
-  \quad\Longrightarrow\quad s=(g\circ h_{\rm task})\circ E.
-\]
-The representation therefore supports economic measurement when its task
-preserves the distinctions required by the target. The appendix establishes
-this alignment condition precisely. For example, equal expected cash flows
-can coexist with different downside exposures; measuring those exposures
-requires information beyond the mean. This condition guides both task design
-and the assessment of existing features.
+\subsection{Prediction and distance}
+A prediction task can reward information different from that needed for risk
+measurement. Two firms can have equal expected cash flows and different downside
+exposures. An encoder that preserves only the expected cash flow can therefore
+solve a mean-prediction task while merging economically distinct firms.
+The task's outcome and loss jointly determine the distinction it rewards:
+squared loss targets a conditional mean, quantile loss a conditional quantile,
+and a strictly proper distributional score a conditional law~\cite{gneiting}.
+Predicting future cash flows and reconstructing contemporaneous accounts can
+reward different information even with the same loss.
 
-Recovery also needs an economic scale. An invertible change of feature
-coordinates preserves predictions after adjusting the readout, while changing
-native distances (Proposition~\ref{prop:geometry}). Calibration supplies that
-scale by estimating exposure coordinates. Its accuracy depends on retained
-information, the readout's flexibility, and financial estimation.
-Under the financial distribution $Q$, let $s$ be a square-integrable exposure
-target and $m_E(z)=\mathbb E_Q[s\mid z]$. Among a declared class $\mathcal G$
-of readouts, define information error $I_Q(E)=\mathbb E_Q\|s-m_E(z)\|^2$
-and approximation error
-$A_Q(E,\mathcal G)=\inf_{g\in\mathcal G}\mathbb E_Q\|m_E(z)-g(z)\|^2$.
-Let $R_Q$ denote expected squared exposure error, $\Delta_{n,Q}$ bound
-sample-to-population risk discrepancies across $\mathcal G$, and
-$\varepsilon_{\rm fit}$ measure empirical fitting error. For a fitted
-readout $\widehat g\in\mathcal G$, the appendix establishes the following bound
-under its uniform-risk and empirical-fitting assumptions:
-\begin{equation}\label{eq:learning-measurement}
-  R_Q(\widehat g;E)\leq I_Q(E)+A_Q(E,\mathcal G)
-  +2\Delta_{n,Q}+\varepsilon_{\rm fit}.
+Write the features as $z=E(H;C)$, holding pretrained weights and supplied
+examples $C$ fixed. For a task statistic $F(H)$ and a target $s(H)$,
+task success
+guarantees target recovery across all task-supporting representations precisely
+when equal task statistics imply equal targets.
+Proposition~\ref{prop:factorization} in Appendix~\ref{sec:theory} states this
+condition formally. A particular encoder may retain more information than the
+task requires. Conversely, the existence of a recovering map gives no bound on
+its complexity or the financial sample needed to estimate it. We assess the
+observed features through a fitted exposure regression, without assuming that
+their supplied valuation task is sufficient for exposures.
+
+Even full information about the target leaves feature distance undetermined.
+For an invertible transformation $T$, replacing a prediction function $h$ by
+$h\circ T^{-1}$ leaves predictions unchanged. Stretching one feature coordinate
+can nevertheless change angles and relative separations, including after unit
+normalization~\cite{steck}. A financial readout addresses this ambiguity by
+mapping features into the coordinates and units of the exposure target. Its
+estimation determines how accurately those coordinates describe firms. Thus a
+representation may retain useful exposure information while assigning large
+native distances to firms with similar exposures. Fitting the economic map
+provides a way to test that information without treating the original feature
+scale as economically identified.
+
+\subsection{Estimating exposures}
+The exposure readout is a fitted regression predicting exposures from features.
+Its performance combines what the features retain with how well the available
+regression and financial sample exploit them. Let $s\in\R^k$ be a
+square-integrable random target under financial distribution $Q$, and define
+$m_E(z)=\mathbb E_Q[s\mid z]$. For a square-integrable prediction $g(z)$,
+conditional-mean projection gives
+\begin{equation}\label{eq:readout-split}
+  R_Q(g;E)\equiv\mathbb E_Q\norm{s-g(z)}_2^2
+  =\mathbb E_Q\norm{s-m_E(z)}_2^2
+  +\mathbb E_Q\norm{m_E(z)-g(z)}_2^2.
 \end{equation}
-Conditional on its pretrained weights and supplied context, freezing the encoder
-restricts the class of exposure mappings fitted from scarce financial labels.
-A flexible supervised procedure learns features and their exposure mapping from
-those labels; calibration estimates a restricted readout of the frozen features.
-Pretraining can improve finite-sample risk when reduced estimation difficulty
-offsets information or approximation loss. The bound organizes these terms for
-the calibrated readout, which our decoder evaluates as a complete procedure.
-The support experiments distinguish sensitivity to encoder context from
-financial calibration size.
+The first term is uncertainty remaining after the features are observed; the
+second is the chosen regression's departure from their best squared-error
+prediction. For deterministic features with fixed weights and context, the full
+history is at least as informative as its transformation. Pretrained features
+can instead make interactions accessible to a restricted estimator using the
+same financial labels. For example, a linear regression on direct histories
+can miss an interaction already expressed in one pretrained coordinate. The
+financial regression can then estimate its association with exposure without
+learning the full interaction from the available firms. That advantage concerns
+the estimator and its sample, even though the transformed features remain
+functions of the original history.
 
-For the financial comparison, native distances measure chord length between
-unit-normalized feature vectors, emphasizing their direction. Calibrated
-distances measure Euclidean separation between predicted exposure vectors,
-preserving differences in exposure magnitude. The supplement crosses
-coordinates and normalization to assess their effects. For $N$ firms,
-an exponential
-kernel converts either distance $d_{ij}$ into row-normalized weights $W_{ij}$,
-with bandwidth $h>0$ controlling smoothing:
+Freezing the encoder reduces the mappings fitted from those labels. This can
+improve finite-sample performance when easier estimation offsets information or
+approximation loss; a more flexible financially trained model can be preferable
+when the sample supports it. Proposition~\ref{prop:calibrated-risk} separates
+information, approximation, and fitting error under explicit empirical-risk
+discrepancy conditions. Its full setup and proof appear in
+Appendix~\ref{sec:theory}. The bound is conditional on those assumptions and
+supplies no pretraining-specific convergence rate. Related-task
+learning~\cite{baxter,maurer} and self-supervised transfer~\cite{lee} motivate
+examining the auxiliary-to-financial relationship rather than inferring it
+from general tabular performance.
+
+For historical exposure labels, prediction error includes uncertainty about the
+proxy that characteristics cannot resolve. Differences between fitted readouts
+therefore combine information, approximation, and estimation effects; they do
+not identify those components separately. Accurate exposure estimates do control
+errors in the resulting distances: if
+$\delta_i=\norm{\widehat a_i-a_i}_2$, then
+$|\widehat d_{ij}-d_E(i,j)|\le\delta_i+\delta_j$ for shared coordinates.
+Applying this inequality to proxy predictions controls proxy-distance error;
+a claim about latent distances additionally requires accurate proxy estimation.
+Their forecasting value also depends on how the risk model uses the neighbors.
+The conditional stability result in Appendix~\ref{sec:theory} makes that
+last dependency explicit: small distance changes give controlled network and
+covariance changes when bandwidth, spatial coefficient, and innovation
+covariance remain fixed. The empirical procedures instead fit these quantities
+under common rules. Their comparison therefore evaluates the entire forecast,
+rather than applying a fixed-parameter bound to claim a performance ordering.
+
+\section{Empirical design}
+The study uses a current-survivor US equity universe, frozen SEC filings and
+Yahoo prices. Publicly disclosed financial characteristics supply the feature
+inputs, while prior returns supply the exposure labels and the risk
+estimates. Maintaining the same eligible firms across representations
+prevents differences in coverage from determining their score comparison.
+SEC filing dates~\cite{secapi} determine disclosure availability.
+The characteristics are market capitalization/assets, market-to-book, and
+dividend yield, supplied as five-year histories. Common eligibility rules yield
+\MinFirms{}--\MaxFirms{} firms annually, \ScoredDates{} evaluation
+return vectors,
+and \FirmDays{} firm-days in 2020--2025. Annual exposures, factor loadings, and
+variances use the preceding three years of returns. Spatial coefficients are
+fitted on 2016--2019 outcomes and frozen thereafter. Scoring omits each year's
+first close-to-close return to accommodate filings after the preceding year-end
+close. Appendix~\ref{sec:empirical-supplement} details eligibility
+and the source
+and corporate-action reviews.
+
+Direct inputs, principal components, a valuation-task neural network, and four
+frozen models receive identical histories. The pretrained models are TabPFN
+3.5, Google TabFM 1.1, Kumo-Tabular Large, and LimiX-2; their features are taken
+immediately before the regression prediction functions. These
+intermediate features, rather than
+the models' final valuation predictions, enter the exposure
+regression. Past examples pair
+histories with the next observed market capitalization/assets ratio. The neural
+control learns this same auxiliary task from those examples. Its role is to
+compare features under a common exposure readout; it is not a flexible model
+trained directly on exposure labels.
+
+The exposure target uses firms outside the evaluation cohort. After removing
+the Fama--French % chktex 8
+five factors and momentum, five unit-variance principal components of those
+firms' prior residuals define common reference factors. They explain an annual
+mean \TargetCommonality\% of prior residual variance. Each cohort firm's target
+is its historical loading on those factors. Reference coordinates are fixed
+before splitting cohort firms into five groups. A separate ridge regression
+predicts exposures for each group using the other firms, which also determine
+standardization, penalty selection, and clipping. The common
+reference basis makes predictions for different held-out groups
+comparable in the same coordinates. Its construction uses historical returns
+and precedes the split, so holding out a firm concerns estimation of the
+characteristic-to-exposure map. Exposure-prediction $R^2$
+averages annual out-of-fold fits over 2016--2025; forecast scores cover
+2020--2025. Holding out firms tests this historical mapping, rather than future
+exposure recovery or an independently observed structural target.
+
+Native distances compare unit-normalized feature vectors; calibrated distances
+compare predicted exposures in Euclidean units. The direct benchmark appends a
+unit coordinate before normalization. A crossed metric check assesses that
+construction separately. For $N$ firms, exponential weights turn distance into
+neighbors:
 \begin{equation}\label{eq:weights}
   W_{ij}=\frac{\exp(-d_{ij}/h)}{\sum_{k\ne i}\exp(-d_{ik}/h)},\quad i\ne j,
   \qquad W_{ii}=0.
 \end{equation}
-Each row distributes unit weight across the other firms, with larger bandwidths
-spreading weights more evenly.
-We choose it to match the unit-bandwidth joint benchmark's mean effective
-neighbor count, $N^{-1}\sum_i{(\sum_j W_{ij}^2)}^{-1}$,
-using distances
-available before forecasting.
+Each row distributes unit weight over other firms. Using preforecast distances,
+we choose bandwidth $h>0$ to match the joint characteristic reference's mean
+effective neighbor count,
+$N^{-1}\sum_i{(\sum_j W_{ij}^2)}^{-1}$.
+This holds average concentration common while allowing neighbors to have
+different exposures and idiosyncratic variances.
 
-Let $r_t$ denote excess returns, $f_t$ conventional factors, $B_t$
-their loadings,
-and $D_t$ the diagonal covariance of spatial innovations $\varepsilon_t$.
-The coefficient $\lambda$, with $|\lambda|<1$, measures dependence on weighted
-neighboring residuals. With innovations orthogonal to factors, the spatial-error
-specification and covariance forecast $C_t$ are
+Those differences matter because spatial neighbors help reconstruct common
+residual movements while also importing their own noise. The forecast combines
+conventional factor risk with spatial residual dependence:
 \begin{align}
-  r_t&=B_t f_t+u_t,\qquad u_t=\lambda W_t u_t+\varepsilon_t,
-  \notag\\
-  C_t&=B_t\widehat{\operatorname{Var}}(f_t)B_t'
-  +P_t D_t P_t',\qquad P_t={(I-\lambda W_t)}^{-1}.
-  \label{eq:forecast}
+  r_t&=B_t f_t+u_t,\qquad u_t=\lambda W_t u_t+\varepsilon_t,\notag\\
+  C_t&=B_t\widehat{\operatorname{Var}}(f_t)B_t'+P_t D_t P_t',
+  \qquad P_t={(I-\lambda W_t)}^{-1}.\label{eq:forecast}
 \end{align}
-Here $t$ indexes trading days, with matrices updated annually.
-The multiplier $P_t$ maps innovations into joint residual risk.
-Each procedure estimates its own $\lambda$ and innovation variances using the
-same rules. A companion comparison gives all forecasts identical marginal
-variances, leaving their implied correlations to differ. Summed Gaussian log
-scores evaluate these second-moment forecasts around a common prior-sample mean;
-higher scores indicate better predictive performance. By combining the forecast
-distribution's volume with return errors weighted by its inverse covariance,
-the score rewards greater density at the observed return vector and supplies
-a common criterion for the empirical comparison.
+Here $r_t$ is excess return, innovations have diagonal covariance $D_t$ and are
+orthogonal to factors, and $|\lambda|<1$. Every principal forecast includes the
+five factors plus momentum, with matrices updated annually. Neighborhoods and
+innovation scales jointly determine residual covariance. A firm with a similar
+exposure can help reconstruct common movements and still be a noisy neighbor.
+Matching effective neighbor counts controls one concentration summary; it
+does not equalize the exposures or innovation variances of the
+selected firms. Predicted exposures
+supply distances rather than the loadings of a new factor model, so improved
+exposure prediction alone does not order these forecast scores.
+Appendix~\ref{sec:theory} derives the filtered-residual identity and conditional
+propagation from distance error to covariance error.
 
-\section{Empirical design and data}
-The framework motivates two linked exercises: a replication establishes how
-characteristic-based neighborhoods affect financial inference, while a
-controlled extension examines their use in covariance forecasts. The replication
-replaces Fern\'andez's Economatica sample with public US data.
-Robust regression estimates CAPM betas from 40 quarterly excess returns in
-2016--2025; a second-stage regression relates median quarterly excess returns
-to these betas without an intercept. Four networks use histories of market
-capitalization/assets, market-to-book, dividend yield, and debt maturity.
-Spatial lag and spatial-error estimators implement the comparison, with a joint
-characteristic network added as our extension.
+Summed Gaussian log scores evaluate full return vectors around a common
+prior-sample mean. Higher scores assign greater density to observed outcomes;
+the expected comparison concerns second moments and does not require normal
+returns. For a positive definite forecast, the expected loss combines its log
+determinant with the return-error second moment weighted by its inverse.
+The score therefore evaluates the full covariance forecast, including its
+scales and correlations. A companion comparison rescales full
+forecasts to common marginal
+variances, leaving their implied correlations to differ. This assesses whether
+the calibration benefit persists under that variance treatment, without causally
+attributing the principal gain to volatility estimation.
 
-Table~\ref{tab:replication} reports the spatial-error fits for the 33 firms with
-all four histories. The estimated quarterly beta slope falls from
-\ReplicationOlsSlope\% in the nonspatial fit to \ReplicationJointSlope\%
-under the joint network, with conditional standard errors of
-\ReplicationOlsSe{} and \ReplicationJointSe{} percentage points.
-The altered slope and precision show how neighbors affect financial inference.
-Equally parameterized networks have identical likelihood and
-information-criterion
-rankings; the supplement accounts for estimation of the betas.
+Two sample-size exercises distinguish the information entering each stage.
+Nested encoder contexts contain 32--256 valuation examples. Separately, we fix
+context at 256 and vary financial training firms from 32 to 256 per
+readout fold,
+keeping evaluation firms and reference coordinates fixed. Additional context
+changes the supplied prediction problem; additional calibration firms supply
+historical exposure labels to the fitted regression. Crossed distance metrics,
+alternative firm folds, three TabPFN resets, and Kumo's fresh initialization
+assess construction and learned-weight sensitivity.
 
-\begin{table}[htbp]
-  \centering\small
-  \input{build/replication}
-  \caption{Characteristic-history replication, 33 firms. The dependent variable
-    is median quarterly excess return and the regressor is estimated CAPM beta.
-    Beta slopes are in percent; parentheses give conditional standard errors.
-    Spatial-error maximum likelihood uses zero self-links and a unit-bandwidth
-    exponential kernel.
-    Log-likelihood gains are relative to OLS\@; the Akaike
-    information criterion (AIC) counts the
-  additional spatial parameter.}\label{tab:replication}
-\end{table}
-
-The controlled panel broadens coverage by retaining the first three
-characteristics. Five-year histories are primary, with common eligibility
-for three-year comparisons. Annual cohorts contain \MinFirms{}--\MaxFirms{}
-firms, contributing \ScoredDates{} scored return vectors and \FirmDays{}
-firm-days in 2020--2025. Each spatial
-coefficient is estimated over 2016--2019 and then frozen; annual exposures and
-variances use the preceding three years. Every principal forecast includes
-Fama--French five factors plus momentum. % chktex 8
-
-Direct inputs, principal components, a valuation-task neural network, and four
-pretrained models receive identical histories. The neural control learns the
-same auxiliary valuation task from the supplied examples. The
-synthetic-task models TabPFN 3.5,
-Google TabFM 1.1, Kumo-Tabular
-Large, and LimiX-2 contribute features immediately before their regression
-prediction functions. Three weight initializations of TabPFN and Kumo provide
-architecture controls. The frozen models receive past examples paired with the
-next observed market capitalization/assets ratio; nested supports contain
-32--256 examples with evaluation firms fixed.
-
-A separate ridge regression predicts a statistical exposure proxy: loadings on
-five unit-variance principal components of prior factor residuals from firms
-outside the cohort. These factors explain an annual mean of
-\TargetCommonality\% of prior residual variance. Holding
-out one of five firm groups at a time evaluates these exposure predictions.
-The reference factors are fixed before splitting firms, and their outside
-universe varies annually. A second sequence holds encoder support at 256 while
-varying financial training firms from 32 to 256 per fold. Thus the experiment
-separates adaptation to a table from estimation of its economic readout.
-
-Dated SEC disclosures~\cite{secapi}, Yahoo equity histories, and conventional
-factors supply the data. The study uses a current-survivor universe and
-pretrained models applied retrospectively, with configurations examined on the
-evaluation years.
-Inference describes these development comparisons: paired stationary-bootstrap
+These are retrospective development comparisons. The universe consists of
+current survivors, checkpoints postdate some evaluated years, and configurations
+were examined using evaluation-year results. Paired stationary-bootstrap
 intervals condition on fitted procedures and omit configuration-search
-uncertainty. Decoder means cover 2016--2025; forecast scores cover
-2020--2025. Together,
-these comparisons assess whether features that predict historical exposures
-also produce useful financial neighborhoods.
+uncertainty. The resampling unit is a trading date because each daily score
+evaluates the full firm vector. Temporal blocks preserve local dependence in
+these paired score differences, with expected lengths of 21 and 63 days.
+Dated inputs and fixed estimation windows limit information within
+each fitted procedure, while the study's selection history precludes
+interpreting
+it as an untouched historical backtest.
 
-\section{Results and discussion}
-Table~\ref{tab:measurement} compares matched-neighbor bandwidths and fitted
-firm-specific innovation variances. Under this principal specification, every
-pretrained model's native distance trails direct inputs and principal
-components.
-Calibrating those features to historical exposures improves all four
-covariance forecasts. TabPFN, TabFM, and Kumo then exceed the direct native
-benchmark, with gains of \PfnCalibrated{}, \TabfmHeadCalibrated{}, and
-\KumoCalibrated{} log-score units over the joint characteristic reference;
-LimiX gains \LimixCalibrated{}. Calibration gains have positive paired intervals
-at both block lengths. Against native direct distance, TabFM and Kumo retain
-positive intervals at both lengths, while TabPFN's 63-day interval crosses zero.
-Its advantage equals \PfnDirectNormalized{} joint log-score units per firm-day,
-a normalization that makes the aggregate score's scale explicit.
-Crossing coordinates with normalization preserves the four calibration gains
-under either metric in this specification. Across five fold assignments,
-TabPFN, TabFM, and Kumo retain positive point differences from native direct
-distance, while their relative ranking changes.
+\section{Results}
+\subsection{Exposure prediction and native-distance forecasts}
+Pretrained features improve prediction of the historical exposure proxy under
+the common ridge regression. In Table~\ref{tab:measurement}, their mean
+out-of-fold $R^2$ ranges from \LimixDecoder{} to \DecoderBest{}, compared with
+\DirectDecoder{} for direct histories. This is an advantage of the combined
+features and fitted regression, evaluated on other firms. It does not isolate
+the information retained from the approximation and estimation errors.
 
 \begin{table}[htbp]
   \centering\small
+  \textit{A. Common-input representations}\par\smallskip
   \input{build/measurement}
-  \caption{Financial measurement on matched inputs. Gains are summed Gaussian
-    log-score differences over 2020--2025, relative to the joint characteristic
-    exponential-kernel reference, on \FirmDays{} common firm-days.
-    Networks match
-    effective neighbor counts and estimate firm-specific innovation variances.
-    Decoder $R^2$ averages annual out-of-fold fits over 2016--2025. Encoder
-  support contains 256 observations where applicable.}\label{tab:measurement}
+  \par\medskip
+  \textit{B. Historical return-based benchmarks}\par\smallskip
+  \input{build/measurement-benchmarks}
+  \caption{Exposure prediction and covariance forecasts. Forecast gains are
+    summed Gaussian log-score differences over 2020--2025 relative to the joint
+    characteristic reference, on \FirmDays{} common firm-days. Networks match
+    effective neighbor counts and fit firm-specific innovation variances.
+    Exposure $R^2$ averages annual out-of-fold predictions over 2016--2025.
+    Encoder context contains 256 observations where applicable. Panel B uses
+    prior returns directly to construct exposure
+  neighborhoods.}\label{tab:measurement}
 \end{table}
 
-Exposure prediction explains why this calibration can help. Mean annual
-out-of-fold $R^2$ ranges from \LimixDecoder{} for LimiX to
-\TabfmHeadDecoder{} for TabFM, compared with \DirectDecoder{} for direct
-inputs, \PcaDecoder{} for principal components, and \SupervisedDecoder{}
-for the valuation-task network. Each firm is predicted by a readout
-fitted to other
-firms, and the statistic compares squared prediction errors with centered
-variation in the exposure proxy. With ridge regression restricting the mapping,
-the stronger fits show that pretrained features make the target more accessible
-to the complete estimation procedure. The supplementary extraction-stage
-comparison reinforces this interpretation: earlier TabFM features have stronger
-native geometry but weaker exposure prediction than its final features.
+Better exposure prediction does not make native distances select more useful
+neighbors for this forecast. Every pretrained native-distance forecast trails
+direct histories and principal components under fitted innovation variances.
+The pretrained features supply useful inputs to a financial regression without
+their native distances improving this covariance model.
 
-The weight controls compare learned representations within a fixed architecture.
-Calibrated pretrained TabPFN exceeds its three reset counterparts by
-\PfnWeightMin{} to \PfnWeightMax{} log-score units, with positive 21-day
-intervals. Kumo's fresh initialization produces constant features, whose
-cross-fitted predictions equal five training-group exposure means. Its
-calibrated baseline therefore describes fold-induced null geometry, as the
-supplement's intercept-only diagnostic demonstrates.
+\subsection{Calibration and covariance specification}
+Expressing the features in estimated exposure coordinates improves all four
+pretrained forecasts under fitted innovation variances. Their
+calibrated score gains range from \LimixCalibrated{} to
+\KumoCalibrated{} relative to the joint characteristic reference. The
+within-model calibrated-minus-native contrasts have positive paired
+intervals at both examined block lengths. TabPFN, TabFM, and Kumo then exceed
+native direct distance in point estimates; TabFM and Kumo retain positive
+intervals at both lengths, whereas TabPFN's 63-day interval spans zero.
+TabPFN's advantage is \PfnDirectNormalized{} joint log-score units per firm-day,
+a normalization of the aggregate score rather than a return or welfare measure.
 
-Variance treatment changes the economic interpretation. With common marginal
-variances, calibrated-minus-native point estimates reverse for all four models,
-and their paired intervals span zero. Pretrained-minus-random intervals also
-span zero. The positive principal results concern the complete covariance
-procedure, in which neighborhoods and innovation scales jointly determine risk.
-Reference-factor loadings measure responses to estimated common residual
-movements, providing an economically motivated statistical target whose
-forecasting value depends on this covariance construction.
+With common marginal variances, the calibrated-minus-native point estimates
+are negative for all four models, and their intervals span zero at both block
+lengths (Table~\ref{tab:variance-contrasts}). These intervals leave
+the direction
+of the difference uncertain rather than establish equivalence. The observed
+calibration advantage therefore concerns the full procedure with separately
+fitted innovation variances; the evidence does not establish improved
+correlation forecasts after marginal variances are standardized. This
+specification comparison qualifies the financial use of the exposure
+predictions without causally decomposing the gain or changing the
+exposure-prediction result.
 
-Figure~\ref{fig:support} distinguishes two sources of sample sensitivity.
-The left panels vary examples supplied to the frozen encoder, with the financial
-calibration sample fixed; the right panels vary training firms per readout fold,
-with encoder context fixed. Across the four pretrained models, exposure
-prediction changes comparatively little with encoder context but improves
-substantially as financial training expands from 32 to 256 firms. Forecast gains
-follow less regular paths because the spatial model also depends on the
-resulting neighborhoods and variances.
+\begin{table}[htbp]
+  \centering\footnotesize\setlength{\tabcolsep}{4pt}
+  \textit{A. Fitted innovation variances}\par\smallskip
+  \input{build/variance-contrasts}
+  \par\medskip
+  \textit{B. Common marginal variances}\par\smallskip
+  \input{build/variance-contrasts-marginal}
+  \caption{Calibration and covariance specification. Differences compare
+    calibrated with native distance for each model on common outcomes, using
+    matched-neighbor bandwidths. Positive differences favor calibration.
+    Panel A fits innovation variances separately by procedure; panel B rescales
+    full forecasts to common marginal variances. Brackets give conditional 95\%
+    stationary-bootstrap intervals with 21- and 63-day expected blocks.
+    Appendix~\ref{sec:empirical-supplement} also reports direct-benchmark
+  contrasts.}\label{tab:variance-contrasts}
+\end{table}
 
-Historical returns provide a further economic benchmark. The 10\% model
-confidence set retains the direct reference-exposure and in-panel
-covariance-exposure procedures, which construct neighborhoods from
-prior returns.
-Their performance shows the value of using risk histories directly when they
-are available. The disclosure-based experiment answers the complementary
-measurement question: pretrained features improve access to an exposure proxy,
-while the readout and covariance specification determine its financial use.
+Calibration also worsens direct and principal-component forecasts, and LimiX
+remains below native direct distance in the principal comparison. These findings
+show why calibration needs empirical evaluation even with a declared target.
+The fitted regression changes both coordinates and neighborhoods, whose value
+depends on estimation accuracy and the covariance procedure using them.
 
-\begin{figure}[H]
+\subsection{Where additional observations help}
+Because the exposure regression must be fitted from financial observations,
+we next examine how prediction changes with that sample.
+Figure~\ref{fig:support} separates financial calibration size from encoder
+context. Exposure prediction varies comparatively little as valuation examples
+increase, but improves substantially as financial training grows from 32 to 256
+firms per fold. Within these ranges, fitting the financial readout is the more
+sensitive stage. Forecast scores follow less regular paths, reflecting the
+additional assessment required when those predictions define neighborhoods in
+a covariance model. The curves describe the examined samples and carry no
+uncertainty bands.
+
+More valuation examples supply a richer context to a fixed encoder,
+whereas more exposure labels estimate the financial map. The different
+responses therefore concern two distinct additions to the procedure, rather
+than competing ways of spending an interchangeable training budget. They also
+do not separately estimate the information and approximation terms of the risk
+decomposition.
+
+\begin{figure}[htbp]
   \centering
   %TC:ignore
   \input{build/support.pgf}
   %TC:endignore
-  \caption{Two sources of sample-size sensitivity. Left: nested encoder
+  \caption{Encoder context and financial estimation size. Left: nested encoder
     examples with all available non-test firms used for calibration. Right:
-    training firms per fold capped at 256, with 256 encoder examples;
-    the endpoints
-    therefore need not coincide. Evaluation firms remain fixed. Upper panels
-    show 2020--2025 gains over the joint characteristic reference
-    with matched kernels and
-    diagonal innovations; lower panels show mean 2016--2025 decoder $R^2$.
-    Curves describe sample sensitivity without uncertainty
+    training firms per fold, with encoder context fixed at 256. The context
+    experiment uses all available calibration firms, whereas the financial-size
+    experiment limits their number; endpoints therefore use different
+    calibration samples. Evaluation firms remain fixed. Upper panels show
+    2020--2025 forecast gains over the joint characteristic reference with
+    matched kernels and fitted innovation variances; lower panels show mean
+    2016--2025 out-of-fold exposure $R^2$. Curves have no uncertainty
   bands.}\label{fig:support}
 \end{figure}
 
-\section{Conclusion}
-Pretrained representations enter economic measurement through a connection
-between the information their training tasks preserve and the quantities
-financial researchers seek to estimate. Our framework states the alignment
-condition for recovery and separates it from readout approximation, estimation,
-and the economic scale of distance.
+\subsection{Construction sensitivity and financial benchmarks}
+The construction checks preserve the contrast between exposure prediction and
+covariance use. Calibration improves all four pretrained procedures under either
+Euclidean or chord distance with fitted innovation variances, while
+common-marginal point differences remain negative. Alternative five-fold
+assignments preserve positive fitted-variance point differences from native
+direct distance for TabPFN, TabFM, and Kumo, but change their ranking. LimiX's
+difference crosses zero across assignments.
 
-The controlled extension demonstrates the value of these distinctions.
-Across four tabular models, exposure calibration improves covariance forecasts
-under matched bandwidths and fitted innovation variances; TabPFN's learned
-weights also outperform its reset controls. Calibration gains become negative
-in point estimates under common marginal variances, with intervals spanning
-zero. Together, these findings show how pretrained features can support a
-financial measurement procedure whose target, readout, and covariance use are
-assessed explicitly. The framework gives researchers a basis for choosing
-learning tasks, interpreting their representations, and evaluating the resulting
-economic measurements.
+Learned-weight controls require a separate interpretation. TabPFN exceeds each
+of its three specified resets under every assignment, while common-marginal
+weight intervals span zero. Kumo's fresh initializations produce constant
+features and reproduce an intercept-only cross-fitted control: different
+held-out groups receive different training-sample target means. That control
+exposes fold-induced geometry rather than informative random features.
+Appendix~\ref{sec:empirical-supplement} explains the constructions and reports
+the complete contrasts.
+
+Historical returns remain the demanding financial benchmark.
+Table~\ref{tab:measurement}
+places the reference-exposure and in-panel-exposure procedures beside the
+feature-based forecasts. Both construct neighborhoods directly from prior
+returns and achieve substantially larger principal point gains. The 10\% model
+confidence set retains these two procedures. Pretrained features do not displace
+them in this study; their demonstrated value is estimating a historical
+exposure proxy from financial characteristic histories through a common
+restricted regression.
+
+This benchmark comparison gives the forecast gains their financial
+scale: improvement over a characteristic network leaves a
+substantial gap to procedures with direct access to historical return
+relationships. The return-based procedures are useful comparators precisely
+because they obtain the historical relationship directly, whereas the feature
+procedures predict exposures from characteristics. A feature-based score gain
+answers whether those inputs help the chosen forecast; it does not make the
+same information claim as observing the target's historical returns.
+The confidence set summarizes comparisons within the declared
+family and common evaluation dates; its retention of the two return-based
+procedures does not imply that one is universally optimal.
+
+\section{Conclusion}
+Pretrained tabular features improve estimation of a historical exposure proxy
+from common financial histories. Their native distances nevertheless yield
+weaker covariance forecasts than simple alternatives. Mapping features into
+exposure coordinates gives distance an economic interpretation and improves
+the pretrained forecasts when innovation variances are fitted separately. The
+framework explains why these findings can coexist: a useful representation,
+an estimable exposure map, and a useful covariance forecast answer different
+questions.
+
+For financial measurement, the practical contribution is to carry evaluation
+through each of those questions. The pretrained features help the restricted
+exposure regression in this retrospective application, while the covariance
+benefit depends on specification and the return-based benchmarks remain
+stronger. Common-marginal point estimates provide no corresponding positive
+calibration gain. An exposure target makes the intended relationship explicit;
+forecast evaluation determines how well the estimated relationship serves the
+chosen risk model.
 % MAIN-TEXT-END
 \clearpage
 %TC:ignore
 \appendix
-\section{Empirical methods and reproducibility}\label{sec:empirical-supplement}
-This supplement develops the estimation choices behind the two empirical
-exercises, beginning with the replication and then following the panel from
-its dated information sets through calibration to forecast evaluation.
-The theoretical sections explain why those choices matter for the economic
-interpretation of proximity and the propagation of measurement error.
-
-\subsection{Code and data availability}
-The replication source and machine-readable result tables accompany the study.
-Frozen financial artifacts are retained in a private archive, with access for
-reviewers available from the author on request. The archive preserves the SEC
-and equity-price vintages used in estimation; retrieving current observations
-from the original providers would create a different vintage. Public model
-checkpoints are identified by immutable revisions and independently verified
-content hashes. The replication documentation distinguishes restored artifacts,
-regenerated estimates, and the publication build, and records the source
-identities used to produce them.
-
-\subsection{Replication substitutions and inference}
-The replication preserves the original two-stage financial comparison while
-adapting its data definitions to a US setting. Its working universe contains
-1,000 currently listed US issuers, replacing the original 126 Latin American
-firms, with SEC accounting disclosures and Yahoo prices supplying the
-information
-previously obtained from Economatica. Returns are measured in US
-dollars. Total assets operationalize
-firm size; lease-inclusive noncurrent debt divided by total debt measures
-maturity; trailing 365-day cash dividends divided by price measure dividend
-yield. Missing debt components remain missing, and ratios use nominal values.
-The Fama--French market excess-return factor and one-month risk-free % chktex 8
-series replace the original market and Treasury measures, completing the
-variable substitutions needed for the characteristic-history comparison.
-
-Given these data, stage one uses robust MM regression to estimate an intercept
-and market beta from 40 complete quarterly returns, limiting the influence of
-large residuals. Stage two relates median excess returns to the estimated
-betas without an intercept, using characteristic histories to describe the
-spatial dependence among firms. The corresponding distances are
-$\sqrt{2(1-\rho_{\rm Spearman})}$, using average ranks
-for ties, exponential kernels, and row normalization. The main networks have
-zero self-links; a supplementary convention includes positive self-links to
-examine the diagonal choice left open by the original kernel expression.
-The joint network aggregates characteristic distances by their root mean square.
-
-The main cohort comprises 33 firms with all four characteristic histories.
-Dropping debt maturity gives a common-three cohort of 395 firms;
-characteristic-specific maximal cohorts contain 653, 490, 571, and 62 firms.
-Likelihood comparisons remain within common cohorts so that changes in fit
-reflect the network specification rather than changes in the firms observed.
-
-For spatial lag estimation, let $X$ denote the estimated-beta regressor and
-$W$ the network of financial neighbors. Two-stage least squares uses $[X,WX]$
-as instruments, while spatial-error maximum likelihood concentrates the
-Gaussian likelihood and searches coefficients within $(-0.99,0.99)$.
-Conditional standard errors treat betas and networks as given, using the
-information matrix for maximum likelihood and the instrument-based covariance
-estimator for instrumental variables. The spatial
-log determinant is a joint-sample term, so the information-matrix calculation
-provides a defined alternative to the original outer-product convention.
-Residual Moran moments, Shapiro--Wilk tests, % chktex 8
-pseudo-$R^2$, boundary indicators, % chktex 8
-and alternative self-link results provide supplementary diagnostics of fit
-and sensitivity to network construction.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/replication-iv}
-  \caption{Common-four spatial lag IV coefficients. Bootstrap intervals resample
-    quarters jointly across returns and factors, recompute MM betas and medians,
-    and hold networks fixed; expected block length is four quarters.
-    IV bootstrap intervals are unconstrained and can extend beyond the spatial
-    stability region; spatial-error estimation instead constrains its
-    coefficient.
-  Conditional $p$-values treat generated betas as given.}
-\end{table}
-
-Each reported replication bootstrap interval uses 199 valid draws, with rejected
-draws recorded separately. Conditional Akaike, Bayesian, and
-Hannan--Quinn information criteria % chktex 8
-use firms as the observation count and include premiums, innovation
-variance, and any estimated spatial
-coefficient in the parameter count. Among equally parameterized networks,
-$\Delta\mathrm{IC}=-2\Delta\log L$; these criteria assess the in-sample ML
-comparison. Additional factor specifications, disclosure inputs,
-support labels, and
-placebos extend this sensitivity analysis within their respective cohorts.
-The panel carries this concern for comparable samples into a setting where
-information is dated before each forecast year.
-
-\subsection{Model coverage and the interpretation of pretraining}
-The representative set covers several ways of learning reusable relationships
-among rows and columns. TabPFN and TabFM learn prediction across synthetic
-tables; Kumo emphasizes conditional quantiles, while LimiX models contextual
-relationships among predictors and outcomes. The shared financial experiment
-extracts each model's final regression features, then applies an identical
-exposure readout. Kumo's leading default-model position on the tabular
-\href{https://huggingface.co/spaces/TabArena/leaderboard}{prediction benchmark}
-inspected in October 2026 motivates its inclusion;
-financial validity is assessed by the exposure and covariance comparisons.
-
-Table~\ref{tab:landscape} locates this set within the wider model landscape.
-Synthetic data determine where training examples come from, while
-self-supervision determines how prediction tasks are constructed. LimiX combines
-these choices through masked learning on synthetic tables~\cite{limix}.
-Relational models additionally exploit links across tables. These training and
-information choices determine what a model has had an opportunity to learn.
-The framework accommodates each through the relationship between its task
-statistic and the declared economic target, with empirical comparisons holding
-the supplied financial information constant.
-
-\begin{table}[htbp]
-  \centering\small
-  \begin{tabular}{>{\raggedright\arraybackslash}p{0.22\linewidth}
-      >{\raggedright\arraybackslash}p{0.42\linewidth}
-    >{\raggedright\arraybackslash}p{0.27\linewidth}}
-    \toprule
-    Model & Training or information interface & Empirical coverage \\
-    \midrule
-    \href{https://huggingface.co/Prior-Labs/tabpfn_3_5}{TabPFN 3.5} &
-    Prediction across synthetic tasks & Core comparison \\
-    \href{https://huggingface.co/google/tabfm-1.1.0-pytorch}{Google
-    TabFM 1.1} & Synthetic tables and in-context prediction &
-    Core comparison \\
-    \href{https://huggingface.co/nvidia/Kumo-Tabular}{Kumo-Tabular
-    Large} & Synthetic tasks and conditional quantiles &
-    Core comparison \\
-    \href{https://huggingface.co/stable-ai/LimiX-2}{LimiX-2} &
-    Masked contextual modeling on synthetic tables & Core comparison \\
-    \href{https://huggingface.co/LG-AI-Research/EXAONE-Tabular}{EXAONE-Tabular}
-    & Synthetic tasks and cross-axis representations &
-    Earlier supplementary cohorts \\
-    \href{https://huggingface.co/Synthefy/Nori}{Nori} &
-    Synthetic-task in-context regression & Landscape \\
-    \href{https://huggingface.co/nums-ai/causilo}{Causilo} &
-    Synthetic tasks and refined row representations & Landscape \\
-    \href{https://huggingface.co/occams/Xiaomi-TabLDM}{Xiaomi TabLDM}
-    & Synthetic mechanisms and in-context prediction &
-    Landscape \\
-    \href{https://huggingface.co/SAP/sap-rpt-1-oss}{SAP RPT-1} & Real
-    tables and semantic representations & Distinct
-    semantic interface \\
-    \href{https://huggingface.co/stanford-star/rt-j}{Stanford RT-J} &
-    Relational databases and entity prediction &
-    Distinct relational interface \\
-    \bottomrule
-  \end{tabular}
-  \caption{Representative coverage of tabular foundation models. The core set
-    uses common numerical inputs. Earlier EXAONE evidence retains its own
-    cohorts; the remaining entries describe the landscape rather than additional
-  financial estimates.}\label{tab:landscape}
-\end{table}
-
-This selection makes cross-model evidence interpretable without requiring every
-model to accept the same semantic or relational information. The following
-sample construction fixes the financial observations on which the four core
-representations are compared.
-
-\subsection{Panel timing, information sets, and samples}
-Extending the comparison to annual forecasts requires a common information set
-available before each outcome year. At each annual cutoff, eligibility therefore
-requires complete, nonconstant characteristic histories and at least 500
-observed prior returns. Estimation uses
-common complete dates within the preceding three years,
-and outside reference firms must have complete returns on those same
-dates. Outcome scoring uses common observed
-trading days and excludes the first close-to-close return to accommodate
-filings made after the preceding year-end close. Cohort eligibility uses prior
-information within the current-listing universe.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/cohorts}
-  \caption{Three-characteristic panel cohorts. Outcomes in 2016--2019 calibrate
-    spatial coefficients; 2020--2025 evaluate forecasts. Reference firms supply
-  the exposure target; encoder support observations supply the prediction task.}
-\end{table}
-
-All comparisons use fixed SEC disclosure and Yahoo price snapshots, preserving
-the data vintage when estimates are reproduced. SEC facts are selected by
-filing availability with a maximum age of 550 days.
-The disclosure audit finds no future filings, future periods, or duplicate
-concepts within an annual snapshot. Shared feature preprocessing is estimated
-from past support
-observations and then held fixed as smaller samples are taken from a single,
-deterministically ordered set of examples. This nesting keeps each smaller
-sample within the next larger one, isolating sensitivity to the amount of
-context supplied to the model. Outcome normalization and model-internal
-preprocessing follow each prediction interface at its supplied support size.
-Native direct-input distance appends a unit coordinate before normalization;
-pretrained and compressed vectors are normalized directly.
-The replication record identifies the examples,
-evaluation firms, predictors, outcomes, and cutoffs for each annual comparison.
-
-The core comparison uses four pretrained models: TabPFN 3.5, Google TabFM 1.1,
-Kumo-Tabular Large, and LimiX-2. Each receives the same numerical histories,
-examples, and prediction target, and each contributes the vector immediately
-before its regression prediction function. This common location connects the
-features to the task being performed. Earlier row features from TabFM and Kumo
-provide a supplementary comparison of extraction stages. The supervised neural
-network learns the same prediction task from the supplied examples, after which
-every representation receives the same financial calibration.
-
-The architectures remain frozen during financial use. Kumo learns conditional
-quantiles through synthetic-task training, while LimiX learns contextual
-relationships among predictors and outcomes; these differences broaden the
-comparison beyond a single prediction interface. We evaluate one prediction
-member per model under common preprocessing, which isolates representations
-from the model-specific ensembles used in general prediction benchmarks.
-Kumo and LimiX process evaluation firms in batches with the entire support table
-fixed. Checks establish that batching preserves their extracted features to
-numerical precision and that those features reproduce the prediction function's
-output.
-
-The weight comparisons use three initializations of both TabPFN and Kumo,
-numbered 42, 43, and 44 to identify the reproducible draws. Kumo uses its
-architecture's fresh initialization. TabPFN retains the established reset
-procedure: layers with initialization rules use those rules, remaining learned
-tensors are redrawn at their observed location and scale, and architectural
-frequencies remain fixed. Each comparison therefore measures the contribution
-of learned weights relative to its specified initialization procedure, with
-architecture, inputs, and financial calibration held constant. Kumo's
-attention and residual output projections are initialized at zero, leaving
-constant query features within each cohort under all three draws. Each fitted
-intercept predicts its training group's target mean, creating five distinct
-exposure predictions after cross-fitting. Their forecasts coincide with the
-explicit intercept-only control, which identifies the fold structure created by
-this estimation procedure;
-TabPFN's reset produces nonconstant features and different forecasts
-across draws.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/supplementary-measurement}
-  \caption{Alternative extraction stages and random-weight controls. Gains use
-    matched kernels and firm-specific innovation variances; decoder means cover
-  2016--2025. The numbered initializations identify separate weight draws.}
-\end{table}
-
-The price audit masks CHRD's reviewed series discontinuity on 20 November 2020
-and retains QXO's reviewed repricing on 30 July 2024. Observations
-crossing review thresholds receive individual inspection, and
-a separate four-characteristic design evaluates sensitivity to excluding
-QXO\@. With the sample and information set established, the next step is to
-define the common exposure target used to compare representations.
-
-\subsection{Decoder, calibration target, and reliability}
-Calibration requires common exposure coordinates so that predictions and
-distances remain comparable across firms. We construct these coordinates from
-five unit-variance principal components of standardized prior residuals of
-outside firms, after removing the Fama--French five factors and % chktex 8
-momentum.
-Each cohort firm's target is its ordinary least-squares loading on these
-components, estimated using its own historical returns. The reference-factor
-series is fixed before firms are divided into estimation and evaluation groups,
-and each firm's decoder is fitted to the other groups' characteristics and
-targets. The reference universe contains 383--484 firms over 2016--2025 and
-419--484 in the forecast years.
-
-The five groups are assigned by a fixed rule based on firm identifiers. For
-each held-out group, the remaining firms supply the feature standardization
-and selection of the ridge penalty by cross-validation over 13 logarithmically
-spaced values between $10^{-2}$ and $10^4$. Features of the held-out firms are
-restricted to the ranges observed during estimation, as are their predicted
-exposures. The complete readout therefore combines scaling, ridge regression,
-and clipping to those ranges. Its annual $R^2$
-equals one minus total squared out-of-fold error divided
-by the centered target sum of squares across firms and coordinates; the
-reported mean weights these annual values equally.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/decoder-periods}
-  \caption{Rank-five decoder means. The first window covers all annual
-    measurements; the second restricts the comparison to forecast years.
-  Both use unweighted means of annual out-of-fold $R^2$.}
-\end{table}
-\begin{table}[htbp]
-  \centering\small
-  \input{build/target-reliability}
-  \caption{Reference-target diagnostics, annual means over 2016--2025.
-    Commonality is the explained residual-variance share. Networks use rank
-  five; ranks three and eight assess target sensitivity.}
-\end{table}
-
-To distinguish financial estimation from encoder adaptation, a second sequence
-holds encoder support at 256 examples while fitting the decoder to 32, 64, 128,
-or 256 training firms per fold. A fixed ordering of eligible training firms
-makes these samples nested within each fold. Evaluation groups and their
-exposure coordinates remain fixed, while scaling, penalty selection, and
-clipping ranges are estimated afresh from the selected training firms.
-Consequently, this sequence measures sensitivity of the financial readout to
-its estimation sample, whereas the encoder-support sequence varies the
-examples used by the frozen representation.
-
-The interpretation of decoder fit also depends on the stability of its exposure
-target. We assess this reliability by splitting the prior return window in half
-while retaining the reference-factor coordinates estimated over the full window.
-Spearman--Brown % chktex 8
-values summarize agreement under this construction; their use as attainable-fit
-ceilings additionally requires a measurement-error model. In-panel exposure
-controls use the cohort's own residual covariance. Because independently fitted
-half-window coordinates can rotate, their reliability is assessed through
-distances. Rank sensitivity, exposure concentration, commonality, and
-distance agreement
-provide complementary diagnostics of the target. These checks clarify what the
-decoder predicts before the resulting distances enter the financial forecast.
-
-\begin{table}[htbp]
-  \centering\scriptsize
-  \input{build/measurement-contrasts}
-  \caption{Paired measurement contrasts. Calibration compares each model's
-    decoded and native procedures; the direct benchmark compares calibrated
-    predictions with native direct-input distance. Entries are summed joint
-    log-score differences over 2020--2025 with conditional 95\%
-    stationary-bootstrap intervals. All comparisons use matched-neighbor
-    bandwidths. Innovation denotes fitted firm-specific innovation variances;
-  marginal denotes common marginal variances across forecasts.}
-\end{table}
-
-\subsection{Normalization and fold-assignment diagnostics}
-The native-to-calibrated comparison changes the coordinates in which firms are
-compared and the role of their vector magnitudes. To separate these choices,
-we cross native features and predicted exposures with Euclidean and chord
-distance for the four principal pretrained models, direct inputs, principal
-components, and the valuation-task neural network. Decoder fitting remains
-fixed across metrics. The direct-input rows use the original prepared vector
-in this crossed comparison, with the published unit-coordinate construction
-retained as a separate benchmark. All networks match the joint reference's
-effective neighbor count, and each spatial coefficient is fitted on 2016--2019
-before scoring 2020--2025.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/normalization}
-  \caption{Normalization and exposure calibration. Entries are point estimates
-    of calibrated-minus-native joint log-score differences within each metric.
-    Both variance treatments use
-  matched-neighbor bandwidths and common observations.}
-\end{table}
-
-Under fitted innovation variances, all four pretrained models gain from
-calibration within either metric, with positive paired intervals at both block
-lengths. The common-marginal point estimates remain negative for both metrics,
-with intervals spanning zero. Thus normalization changes the size of the
-contrast, while the covariance specification continues to determine its sign.
-The comparison locates the principal gain in the exposure-calibrated procedure,
-which combines financial supervision and an estimated change of coordinates.
-For direct inputs, appending the unit coordinate changes the native score by
-\DirectUnitInnovation{} under fitted innovation variances and
-\DirectUnitMarginal{} under common marginals, relative to direct chord distance
-without that coordinate. This construction choice therefore also affects the
-conventional benchmark.
-
-Cross-fitting introduces a second source of variation because different groups
-receive predictions from different fitted mappings. With constant features,
-firm $i$ in held-out group $f$ receives the training-target mean
-$\widehat a_i=\overline a_{-f}$. Distances therefore vanish within a group
-but can be positive between groups, despite the absence of variation in encoder
-features. An explicit intercept-only control checks this identity against all
-three Kumo reset draws in every year. Four additional balanced assignments of
-firms to five groups then assess the sensitivity of the principal readouts,
-TabPFN reset controls, and intercept-only baseline. The reference factors,
-encoder states, and evaluation observations remain fixed, while standardization,
-penalty selection, clipping, and spatial fitting are repeated for
-each assignment.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/fold-sensitivity}
-  \caption{Sensitivity to five fixed fold assignments. Entries summarize each
-    calibrated procedure's 2020--2025 score difference from native direct
-    distance and its mean 2016--2025 decoder fit. Both forecast specifications
-    use matched-neighbor bandwidths; fitted variances refer to spatial
-    innovations. Ranges describe assignments rather than
-  confidence intervals.}
-\end{table}
-
-The intercept-only predictions and their forecast scores reproduce all three
-Kumo reset controls exactly on the original assignment. Across assignments,
-the three strongest calibrated pretrained procedures retain positive score
-differences from native direct distance under fitted innovation variances,
-while their ordering changes. LimiX's point difference crosses zero across
-assignments. TabPFN's learned weights exceed each of its three reset controls
-under every assignment, with positive intervals at both block lengths in the
-fitted-variance specification; the common-marginal intervals span zero.
-These results distinguish stability of the principal weight comparison from
-sensitivity of the ranking among pretrained procedures. Date-block intervals
-condition on each fitted procedure, whereas the ranges across assignments
-describe sensitivity to partitioning the calibration sample.
-
-\subsection{Forecasts, inference, and robustness}
-With the measurements constructed, the financial test asks how their networks
-perform in forecasting joint return risk. Forecasts evaluate excess returns
-centered by the prior sample mean, with the factor component estimated before
-the outcome year. At each fitted spatial
-coefficient, prior residuals determine innovation variances: one shared scalar
-in the spherical specification or one value per firm in the diagonal
-specification. The fixed-marginal comparison rescales the diagonal forecast to
-prior raw-return variances, preserving its spatial coefficient and implied
-correlations. Setting the spatial coefficient to zero in the diagonal
-specification gives the FF5+momentum diagonal-residual benchmark.
-
-\begin{table}[htbp]
-  \centering\scriptsize
-  \input{build/weight-contrasts}
-  \caption{Calibrated pretrained-minus-random comparisons, matched kernel,
-    256 support observations. Paired 95\% percentile intervals use stationary
-    bootstrap expected block lengths of 21 and 63 trading days, with
-    9,999 draws.
-    Innovation denotes fitted firm-specific innovation variances; marginal
-  denotes common marginal variances across forecasts.}
-\end{table}
-
-Each daily score evaluates the full return vector, making dates the resampling
-unit. Pairing keeps firms and dates identical across procedures, while temporal
-blocks retain local dependence in the score differences and hold encoders,
-networks, and targets fixed. The intervals
-therefore describe uncertainty conditional on the fitted procedures and
-examined specifications. Model confidence sets use size 0.10, the max method,
-expected block length 21, and 1,000 draws within each kernel/innovation family.
-The matched/diagonal set retains the reference-exposure and in-panel
-covariance-exposure controls. These benchmarks use historical returns directly
-to construct neighborhoods. The 19 label-permutation placebos preserve the
-spectrum through $\Pi W\Pi'$, where $\Pi$ is a permutation matrix,
-and permute within prior-year log-assets terciles;
-their rank probabilities describe the corresponding development comparisons.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/confidence-set}
-  \caption{Forecasts retained by the matched-kernel, diagonal-innovation model
-    confidence set at a 10\% test size. The procedure compares the complete
-  declared family on common evaluation dates.}\label{tab:confidence-set}
-\end{table}
-
-The complete three-characteristic comparison below organizes sensitivity around
-the choices that turn a distance into a risk forecast. Spherical, diagonal, and
-fixed-marginal specifications vary the treatment of variances, while unit,
-median-distance, and matched-neighbor bandwidths vary the concentration of
-exponential-kernel weights. Matching effective neighbor counts holds average
-inverse concentration constant. Within these choices, native and calibrated
-representations, supervised and random-weight controls, nested supports,
-and shorter histories show how the information and its readout affect results.
-
-\begin{table}[htbp]
-  \centering\scriptsize
-  \input{build/covariance-controls}
-  \caption{Additional covariance controls. Gains are relative to the joint
-    exponential-kernel reference in the indicated specification.
-  These procedures construct covariance forecasts directly.}
-\end{table}
-
-The earlier four-characteristic panel supplies complementary evidence on
-EXAONE alongside TabPFN and TabFM\@. Its three-year histories and
-more restrictive
-cohort define a separate comparison, shown in Table~\ref{tab:earlier-four}.
-Keeping its scores within that cohort preserves the distinction between
-broadening model coverage and changing the information or firms being evaluated.
-
-\begin{table}[htbp]
-  \centering\small
-  \input{build/earlier-four}
-  \caption{Earlier four-characteristic experiment, 87,351 scored firm-days.
-    Gains use matched kernels and diagonal innovations, relative to this
-    cohort's joint exponential-kernel reference. Decoder means cover
-    2016--2025; forecasts cover 2020--2025. All model features are taken before
-  their regression prediction functions.}\label{tab:earlier-four}
-\end{table}
-
-Additional designs examine three-year four-characteristic histories,
-five- versus three-year histories, sensitivity to extreme returns, and broader
-input sets, with each design retaining its own cohort. A complementary
-measurement audit varies evaluation subsets, support draws, labels, and targets
-to assess the stability of distances and network weights.
-
-\begin{samepage}
-  Residual likelihood attribution separates spectrum, variance, baseline,
-  alignment, and concentration terms. It conditions on realized factors and uses
-  total residual second moments, combining common and idiosyncratic variation.
-  The alignment term consequently measures weighted residual cross-products
-  within that likelihood decomposition. The financial forecast score
-  evaluates the full covariance before observing
-  the outcome-year factors. This distinction between conditional residual fit
-  and forecast performance motivates the theoretical analysis of exposure
-  geometry, measurement, and financial use that follows.
-
-\end{samepage}
-
-\begin{landscape}
-  \scriptsize\setlength{\tabcolsep}{3pt}
-  \setlength{\LTcapwidth}{\linewidth}
-  \input{build/full-grid}
-\end{landscape}
-\normalsize
-\clearpage
-
-\section{Exposure geometry and predictive information}\label{sec:theory}
-The preceding comparisons depend on three relationships: exposure distance must
-have a financial meaning, the prediction task must preserve useful information,
-and the calibrated measurement must support the covariance forecast.
-We begin with the first two relationships
-to establish the economic target and the conditions under which a representation
-can recover it; the following sections develop the readout and its
-financial use.
-
-\subsection{Exposure distance and common covariance}
-Consider centered shocks $q\in\R^k$ with finite covariance
-$\Omega\succeq0$ and fixed firm exposures $b_i$. Define the risk-scaled exposure
-$a_i=\Omega^{1/2}b_i$. For any exposure difference $c=b_i-b_j$, expanding the
-square and taking expectations gives
-\[
-  \E[{(c'q)}^2]=\sum_{\ell,m}c_\ell c_m\E[q_\ell q_m]
-  =c'\Omega c=\norm{a_i-a_j}_2^2.
-\]
-Because $q$ is centered, this is the variance of the common-response difference,
-which establishes equation~\eqref{eq:economic-distance}. The target measures
-how differently the two firms respond to the same shocks.
-
-To connect this dissimilarity to portfolio risk, expand the squared distance
-and rearrange it to recover the common covariance. The resulting identity shows
-why exposure magnitudes accompany distances in a covariance comparison.
-\begin{proposition}[Exposure distance and covariance]\label{prop:exposure}
-  \lean{FreeFoundations.Exposure.covariance_eq,
-  FreeFoundations.Score.response_sq}\leanok{}
-  The common covariance of two firms satisfies
-  \[
-    b_i'\Omega b_j
-    =\tfrac12\bigl(\norm{a_i}_2^2+\norm{a_j}_2^2
-    -\norm{a_i-a_j}_2^2\bigr).
-  \]
-\end{proposition}
-\begin{proof}
-  Expand $\norm{a_i-a_j}_2^2$ as
-  $\norm{a_i}_2^2+\norm{a_j}_2^2-2a_i'a_j$ and rearrange, using
-  $a_i'a_j=b_i'\Omega b_j$.
-\end{proof}
-For given common variances, smaller exposure distance implies larger common
-covariance. Across firms with different exposure magnitudes, both the distances
-and those magnitudes enter the comparison. In the empirical target,
-unit-variance
-reference factors supply the shock weighting; estimated loadings express firms'
-responses in daily return units.
-
-\subsection{What a prediction task preserves}
-The rationale for pretraining is a division of statistical labor. A broad
-training task develops a map from observations to features, while the financial
-sample estimates how those features relate to its target. Freezing the map
-restricts the second-stage learning problem to the chosen readout; useful
-transfer occurs when the earlier task preserves distinctions needed by that
-readout. The prior-data fitted network approach makes the earlier task explicit
-through a distribution over generated datasets, whose examples teach a
-prediction rule that can be applied to a new table~\cite{pfn}. This is the
-statistical rationale for testing pretrained weights separately from the
-architecture and the financial calibration.
-
-Self-supervision provides a related way to construct abundant training tasks:
-withheld portions of an observation become prediction targets. Its economic
-use likewise depends on the relationship between the prediction target and the
-quantity to be measured. To express that relationship in terms of
-task information, we first identify
-the statistical target defined by the prediction loss and then ask whether it
-preserves the distinctions required by the economic target. For
-example, on finite label and context spaces, let $p_c$ be the true
-conditional label law in
-context $c$, $q_c$ a strictly positive forecast, and $\pi_c$ the probability of
-that context. Define cross-entropy as
-$H(p,q)=-\sum_y p_y\log q_y$ and Kullback--Leibler divergence % chktex 8
-$\KL(p\Vert q)=\sum_y p_y\log(p_y/q_y)$, with zero-probability
-terms taken as zero. Subtracting the optimal expected log loss yields
-\begin{equation}\label{eq:predictive-loss}
-  \sum_c\pi_c\{H(p_c,q_c)-H(p_c,p_c)\}
-  =\sum_c\pi_c\KL(p_c\Vert q_c).
+\section{Mathematical development}\label{sec:theory}
+The results below formalize the three links used in the main text: recovery
+of a target from task information, estimation of its financial readout, and
+propagation of distance error through a specified covariance model. The final
+stability result holds its financial parameters fixed.
+\subsection{Exposure distance and task information}
+For centered shocks $q$ with finite covariance $\Omega\succeq0$, let
+$a_i=\Omega^{1/2}b_i$. Then
+$\E[{((b_i-b_j)'q)}^2]=(b_i-b_j)'\Omega(b_i-b_j)=\norm{a_i-a_j}_2^2$.
+Expanding this norm also gives
+\begin{equation}\label{eq:exposure-covariance}
+  b_i'\Omega b_j
+  =\tfrac12\bigl(\norm{a_i}_2^2+\norm{a_j}_2^2-\norm{a_i-a_j}_2^2\bigr).
 \end{equation}
-\lean{FreeFoundations.Score.pretraining_excess}\leanok{}
-To obtain the identity, subtract the two log sums within each context and
-combine them into $\sum_y p_{cy}\log(p_{cy}/q_{cy})$, taking zero-probability
-terms as zero. Averaging over contexts gives
-equation~\eqref{eq:predictive-loss}.
-For prior-data fitted networks, the task prior generates those contexts and
-conditional laws~\cite{pfn}. The identity expresses excess prediction
-loss as a discrepancy between
-conditional outcome distributions, specifying the information rewarded by the
-training objective.
+\lean{FreeFoundations.Exposure.covariance_eq,
+FreeFoundations.Score.response_sq}\leanok{}
+For given common variances, closer exposures imply larger common covariance;
+when magnitudes differ, distance alone does not determine its level.
+Unit-variance reference factors in the application supply the shock weighting,
+and loadings express responses in daily return units.
 
-Recovery guaranteed by task performance requires a factorization: the economic
-target must be obtainable by applying a mapping to the task statistic.
-Let $F:\mathcal H\to\mathcal
-F$ be a task statistic and
-$s:\mathcal H\to\mathcal S$ an economic target, where $\mathcal S$ is nonempty.
-A representation $E:\mathcal H\to\mathcal Z$ supports the task when
-$F=h_{\rm task}\circ E$ for some readout
-$h_{\rm task}:\mathcal Z\to\mathcal F$.
-\begin{proposition}[Alignment of task and economic
-  target]\label{prop:factorization}
+Exposure distance is unchanged when a unit-variance factor basis and its
+loadings rotate together. Stretching a coordinate without adjusting shock
+weighting changes the economic distance. If $\Omega$ is singular, exposure
+differences in directions with no shock variation contribute zero distance.
+These properties follow from the declared shock system rather than the scale
+of encoder coordinates.
+
+For a task statistic $F(H)$, hold the pretrained weights and context fixed and
+suppose a task readout recovers $F$ through the representation. The following
+condition characterizes when task success guarantees recovery of a declared
+target $s(H)$ determined by history.
+\begin{proposition}[Alignment of task and target]\label{prop:factorization}
   \lean{FreeFoundations.Alignment.optimal_imp_sufficient_iff}\leanok{}
-  Every representation supporting $F$ also determines $s$ if and only if
+  Let $F:\mathcal H\to\mathcal F$ and $s:\mathcal H\to\mathcal S$, with
+  $\mathcal S$ nonempty. Every representation satisfying
+  $F=h_{\rm task}\circ E$ for some task readout also determines $s$
+  if and only if
   $F(H)=F(H')$ implies $s(H)=s(H')$ for all histories $H,H'$.
 \end{proposition}
-\begin{proof}
-  Suppose every task-supporting representation determines $s$. Taking $E=F$
-  and the identity readout shows that $s$ is a function of $F$, so equal task
-  statistics give equal targets. Conversely, suppose the stated implication
-  holds. Define $g$ on the image of $F$ by $g(F(H))=s(H)$; the implication
-  makes this definition independent of the chosen history. Extend $g$
-  arbitrarily outside that image. For any $F=h_{\rm task}\circ E$, we obtain
-  $s=g\circ h_{\rm task}\circ E$, so $E$ determines the economic target.
+The universal quantifier concerns all task-supporting representations. A
+particular encoder can retain additional information, while existence of a
+recovering map supplies no complexity or estimation guarantee.
+The task statistic describes what an ideal task predictor must preserve,
+rather than every feature a trained encoder can retain. For example,
+on finite label and context spaces, subtracting optimal
+expected log loss from forecast log loss gives
+\[
+  \sum_c\pi_c\{H(p_c,q_c)-H(p_c,p_c)\}
+  =\sum_c\pi_c\KL(p_c\Vert q_c),
+\]
+where $p_c$ is the conditional outcome law, $q_c$ is strictly positive,
+$\pi_c$ is the context probability, and zero-probability terms are zero.
+\lean{FreeFoundations.Score.pretraining_excess}\leanok{}
+This identity concerns the conditional law rewarded by log loss. A task prior
+specifies generated contexts in a prior-data fitted network~\cite{pfn,nagler};
+transferring its performance to finance additionally requires a relationship
+between the generated and financial tasks.
+
+\begin{proof}[Proof of Proposition~\ref{prop:factorization}]
+  If every task-supporting representation determines $s$, take $E=F$ with
+  the identity task readout. Then $s$ is a function of $F$, so equal task
+  statistics imply equal targets. Conversely, under the stated implication,
+  define $g(F(H))=s(H)$ on the image of $F$. Equal-statistic histories have
+  equal targets, making $g$ well-defined. Extend it arbitrarily outside that
+  image, using nonemptiness of $\mathcal S$. For any
+  $F=h_{\rm task}\circ E$, we have $s=g\circ h_{\rm task}\circ E$.
 \end{proof}
-The condition identifies which economic distinctions a task must preserve to
-make recovery follow from task performance alone. A particular hidden
-representation may retain additional distinctions, which the empirical decoder
-can assess directly.
 
-The statistic preserved by prediction depends on the learning objective.
-Squared-error prediction targets a conditional mean, quantile loss targets a
-conditional quantile, and a strictly proper distributional score targets a
-conditional law~\cite{gneiting}. These objects can carry different information
-about an economic exposure, even when their predictors use similar
-architectures. The shared question is whether the economic target can be
-expressed as a function of the task statistic and whether the chosen readout
-can approximate that function.
+For predictive equivalence, let $T$ be invertible and set
+$\widetilde h=h\circ T^{-1}$. Then
+$\widetilde h(T E(H))=h(E(H))$.
+Taking $T=\diag(c,1)$, with $c>0$, maps the normalized versions of $(1,0)$ and
+$(1,1)$ to $(1,0)$ and $(c,1)/\sqrt{c^2+1}$. Their distance tends to zero as
+$c\to\infty$, despite its initially positive value. The prediction problem
+therefore does not identify even the geometry of normalized features.
 
-The four-model comparison illustrates this distinction. Prior-data fitted
-prediction learns across synthetic tasks; Kumo predicts a grid of conditional
-quantiles, and LimiX models contextual relationships among variables.
-TabFM learns table representations and in-context prediction through a distinct
-architecture~\cite{tabfm,kumo,limix}. Nagler's sensitivity and localization
-conditions~\cite{nagler} provide a convergence route for prior-data fitted
-predictors, while the representation-learning results~\cite{baxter,maurer,lee}
-explain why related tasks can make subsequent estimation easier. Applying any
-of these routes to financial measurement requires specifying the relationship
-between its training target and the exposure of interest. The next result
-expresses that relationship through a readout and an alignment error.
+A related conditional error bound requires only a $K$-Lipschitz economic readout
+$g$ between metric spaces, an ideal task statistic $F$, and an approximation
+$\widehat F$. Inserting $g(F)$ and applying the triangle inequality gives
+\begin{equation}\label{eq:measurement}
+  d_S(g(\widehat F),s)
+  \le Kd_F(\widehat F,F)+d_S(g(F),s).
+\end{equation}
+\lean{FreeFoundations.Measurement.measurement_error}\leanok{}
+The second term need not vanish: accuracy on an auxiliary task does
+not establish
+alignment with the economic target.
 
-\subsection{Predictive information and coordinate choice}
-Alignment establishes recoverability of an economic target, while its scale
-requires a further choice of coordinates. Let $h_{\rm pred}$ be a prediction
-function acting on $E(H)$, with context held fixed. The following result
-explains why calibration can be necessary even for predictively useful features.
-\begin{proposition}[Prediction-preserving transformations]\label{prop:geometry}
-  An invertible transformation of the features preserves their predictive use
-  under a corresponding transformation of the prediction function, while native
-  distances can change.
-\end{proposition}
-\begin{proof}
-  For invertible $T$, set $\widetilde h=h_{\rm pred}\circ T^{-1}$, giving
-  $\widetilde h(TE(H))=h_{\rm pred}(E(H))$. For $T=\diag(c,1)$ with $c>0$,
-  the normalized vectors corresponding to $(1,0)$ and $(1,1)$ become
-  $(1,0)$ and $(c,1)/\sqrt{c^2+1}$. Their straight-line distance
-  tends to zero as
-  $c\to\infty$, despite their initially positive separation, establishing that
-  predictive equivalence allows different geometries.
-\end{proof}
-The transformation leaves the prediction task unchanged but alters the
-neighbors implied by native distance. An economic readout resolves this
-ambiguity by expressing features in the units of the declared target.
+\subsection{Information, approximation and estimation}
+For square-integrable $s$ and measurable square-integrable prediction $g(z)$,
+write $s-g(z)=(s-m_E(z))+(m_E(z)-g(z))$. Conditional on $z$, the first term has
+mean zero, so its expected cross-product with the second vanishes. This proves
+equation~\eqref{eq:readout-split}; finite-dimensional targets follow by summing
+coordinates.
+\lean{FreeFoundations.Recovery.excess_risk_condExp}\leanok{}
 
-\subsection{Approximation of the learning task}
-To connect task accuracy to a declared economic target, let $F(H)$ be the
-ideal statistic selected by the learning objective, $\widehat F(H)$ its
-approximation, and $s(H)$ the economic target. Distances $d_F$ and $d_S$ measure
-errors in their respective spaces. A $K$-Lipschitz readout $g$ changes its
-output by at most $K$ times the change in its input.
-\begin{proposition}[Approximation and alignment]\label{prop:measurement}
-  \lean{FreeFoundations.Measurement.measurement_error}\leanok{}
-  For $K\geq0$, the measurement error satisfies
-  \begin{equation}\label{eq:measurement}
-    d_S(g(\widehat F),s)
-    \leq Kd_F(\widehat F,F)+d_S(g(F),s).
-  \end{equation}
-\end{proposition}
-\begin{proof}
-  Insert $g(F)$ using the triangle inequality and apply the Lipschitz condition:
-  $d_S(g(\widehat F),s)\leq d_S(g(\widehat F),g(F))+d_S(g(F),s)
-  \leq Kd_F(\widehat F,F)+d_S(g(F),s)$.
-\end{proof}
-The first term transmits approximation error from the learning task; the second
-measures alignment between its statistic, the readout, and the economic target.
-Both are evaluated under the financial distribution. Transferring a training
-loss guarantee to this distribution additionally requires a relationship
-between source and financial tasks, as in the cited learning theories.
-
-\section{Calibration, recovery, and distance error}\label{sec:readout}
-The conditional bound in equation~\eqref{eq:measurement} separates
-approximation
-of a task statistic from its alignment with an economic target. The latter term
-can be studied more closely under squared loss. Let $s\in\R^k$ be a
-square-integrable
-random target, $F$ the statistic available to the readout, and $g(F)$ a
-square-integrable measurable prediction. Conditional expectation
-defines the best mean-square prediction
-$m(F)=\E[s\mid F]$.
-\begin{proposition}[Information and readout error]\label{prop:readout-split}
-  \lean{FreeFoundations.Recovery.excess_risk_condExp}\leanok{}
-  Expected squared measurement error decomposes as
-  \begin{equation}\label{eq:readout-split}
-    \E\norm{s-g(F)}_2^2
-    =\E\norm{s-m(F)}_2^2+\E\norm{m(F)-g(F)}_2^2.
-  \end{equation}
-\end{proposition}
-\begin{proof}
-  Write $s-g(F)=(s-m(F))+(m(F)-g(F))$ and expand its squared norm.
-  Conditional on $F$, the second vector is measurable and the first has mean
-  zero. The expected cross-product therefore vanishes, leaving the two
-  squared terms in equation~\eqref{eq:readout-split}. The scalar result extends
-  to a finite-dimensional target by summing over coordinates.
-\end{proof}
-The first term is the uncertainty about the target remaining after observing
-$F$; the second is the gap between the chosen readout and its conditional-mean
-benchmark. Decoder comparisons evaluate these terms jointly through
-the fitted procedure.
-For deterministic feature construction, this distinction also clarifies the
-comparison with direct inputs. Condition on the pretrained weights and context,
-let $z=E(H)$, and define $m_H=\E[s\mid H]$ and $m_E=\E[s\mid z]$.
-Because $z$ is a function of $H$, the tower property gives
-$m_E=\E[m_H\mid z]$. Expanding $s-m_E=(s-m_H)+(m_H-m_E)$ and conditioning
-the cross-product on $H$ yields
+The same projection argument gives the informational comparison with direct
+inputs. Condition on pretrained weights and context, and let
+$m_H=\E[s\mid H]$, $z=E(H)$ and $m_E=\E[s\mid z]$ under $Q$.
+The tower property gives $m_E=\E[m_H\mid z]$, and hence
 \[
   \E\norm{s-m_E}_2^2
   =\E\norm{s-m_H}_2^2+\E\norm{m_H-m_E}_2^2.
 \]
-The full history therefore provides the informational benchmark. Pretraining's
-potential advantage over direct inputs lies in expressing its information in
-coordinates accessible to the restricted financial readout, with an estimation
-burden suited to the available sample. The decoder comparison measures this
-accessibility through its complete prediction procedure.
+The full history supplies the informational benchmark. A favorable decoder
+comparison identifies an advantage of the restricted fitted procedure,
+combining approximation and estimation with any information loss; it does not
+estimate the separate components of this identity.
 
-For the ridge decoder, the readout combines standardization, a linear mapping,
-and clipping to the estimation ranges. Once its parameters are fitted, this
-composition is Lipschitz because clipping cannot increase distances and the
-affine mappings have finite operator norms. The approximation-and-alignment
-bound therefore applies to each group's fitted readout, while the decomposition
-explains why prediction error can reflect both retained information
-and the fitted readout.
-
-\subsection{Learning a financial readout}
-The projection identity separates information from the chosen mapping. To
-account for estimation, condition on the externally fitted encoder and its
-supplied context, writing $z=E(H;C)$ and
-$R_Q(g;E)=\mathbb E_Q\|s-g(z)\|^2$. Let $\mathcal G$ be a nonempty readout
-class with finite risks, and define $R_n(g;E)$ as mean squared error in the
-financial training sample. Assume that a finite $\Delta_{n,Q}$ bounds
-$|R_n(g;E)-R_Q(g;E)|$ uniformly over this class and that a fitted
-$\widehat g\in\mathcal G$ satisfies
-$R_n(\widehat g;E)\leq\inf_{g\in\mathcal G}R_n(g;E)+\varepsilon_{\rm fit}$.
-These are deterministic conditions on the realized sample; an independent or
-dependent sampling model is needed to give the discrepancy a probability bound.
-
-\begin{proposition}[Calibrated measurement risk]
+To account for estimation, let $\mathcal G$ be a nonempty class of readouts with
+finite risks. Define information and approximation error by
+\begin{align*}
+  I_Q(E)&=\mathbb E_Q\norm{s-m_E(z)}_2^2,\\
+  A_Q(E,\mathcal G)&=\inf_{g\in\mathcal G}
+  \mathbb E_Q\norm{m_E(z)-g(z)}_2^2.
+\end{align*}
+Write $R_n$ for empirical squared risk. Suppose the realized financial sample
+satisfies a uniform discrepancy bound
+$|R_n(g;E)-R_Q(g;E)|\le\Delta_{n,Q}$ for every $g\in\mathcal G$, and the fitted
+readout $\widehat g\in\mathcal G$ obeys
+$R_n(\widehat g;E)\le\inf_{g\in\mathcal G}R_n(g;E)+\varepsilon_{\rm fit}$.
+\begin{proposition}[Calibrated measurement risk]\label{prop:calibrated-risk}
   \lean{FreeFoundations.Score.calibrated_measurement_bound}\leanok{}
-  Under these conditions, equation~\eqref{eq:learning-measurement} holds with
-  $I_Q(E)=\mathbb E_Q\|s-m_E(z)\|^2$ and
-  $A_Q(E,\mathcal G)=\inf_{g\in\mathcal G}\mathbb E_Q\|m_E(z)-g(z)\|^2$.
+  Under these conditions,
+  \begin{equation}\label{eq:learning-measurement}
+    R_Q(\widehat g;E)\le I_Q(E)+A_Q(E,\mathcal G)
+    +2\Delta_{n,Q}+\varepsilon_{\rm fit}.
+  \end{equation}
 \end{proposition}
-\begin{proof}
-  For any $g\in\mathcal G$, apply the uniform discrepancy bound to the fitted
-  and comparison readouts, inserting empirical optimality between them:
+
+\begin{proof}[Proof of Proposition~\ref{prop:calibrated-risk}]
+  For every $g\in\mathcal G$, insert empirical fitting between the two
+  applications of the uniform discrepancy bound:
   \[
-    R_Q(\widehat g;E)\leq R_n(\widehat g;E)+\Delta_{n,Q}
-    \leq R_n(g;E)+\varepsilon_{\rm fit}+\Delta_{n,Q}
-    \leq R_Q(g;E)+2\Delta_{n,Q}+\varepsilon_{\rm fit}.
+    R_Q(\widehat g;E)\le R_n(\widehat g;E)+\Delta_{n,Q}
+    \le R_n(g;E)+\varepsilon_{\rm fit}+\Delta_{n,Q}
+    \le R_Q(g;E)+2\Delta_{n,Q}+\varepsilon_{\rm fit}.
   \]
-  Substitute the projection identity for $R_Q(g;E)$ and take the infimum over
-  $g$. Information error is constant across readouts, yielding the stated bound.
+  Apply equation~\eqref{eq:readout-split} to $R_Q(g;E)$ and take the infimum
+  over $g$. The information term is constant across readouts.
 \end{proof}
-The result identifies three ways a representation can improve measurement:
-preserve economically relevant information, make it accessible within a
-restricted readout class, and permit reliable estimation of that class.
-Learning across related tasks can supply such
-representations~\cite{baxter,maurer};
-self-supervised prediction does so under relationships connecting its auxiliary
-and downstream targets~\cite{lee}. For independent bounded observations,
-uniform learning bounds connect $\Delta_{n,Q}$ to readout complexity and sample
-size. Financial dependence instead calls for a corresponding dependent-data
-bound; the displayed inequality itself requires no independence.
+These are deterministic conditions on a realized sample. An independent or
+dependent sampling model is needed to give $\Delta_{n,Q}$ a probability bound.
+For a nonnegative penalty $J$ and fixed $\alpha\ge0$, approximate
+minimization of
+$R_n(g;E)+\alpha J(g)$ similarly gives a bound with approximation term
+$\inf_g\{\E_Q\norm{m_E-g(z)}_2^2+\alpha J(g)\}$ after dropping the nonnegative
+fitted penalty. The application selects its ridge penalty and clipping ranges
+within training firms. Its reported risk includes those fitted choices and is
+not a direct estimate of an unpenalized population minimizer.
 
-Regularization trades readout flexibility against estimation sensitivity.
-For a nonnegative penalty $J$ and a fixed coefficient $\alpha\geq0$, an
-approximate minimizer of $R_n(g;E)+\alpha J(g)$ satisfies the analogous bound
-with approximation term
-$\inf_g\{\mathbb E_Q\|m_E(z)-g(z)\|^2+\alpha J(g)\}$, after dropping the
-nonnegative fitted penalty. The empirical procedure selects its ridge penalty
-within the training sample and clips predictions, so its evaluated risk includes
-these fitted choices. Cross-fitted exposure predictions assess their combined
-performance against the historical reference proxy. Their estimand is
-the complete procedure's prediction error against that proxy;
-the decomposition explains the sources of error that this assessment combines.
-With this distinction established, exposure error can be propagated to the
-pairwise distances used by the spatial model.
+For fitted affine maps with finite operator norms, standardization followed by
+ridge regression and coordinatewise clipping is Lipschitz; clipping cannot
+increase distance. Equation~\eqref{eq:measurement} therefore applies to each
+fitted group-specific readout. Common output coordinates make their exposure
+predictions comparable even though the mappings differ across groups.
 
-To connect prediction errors to proximity, let $a_i$ be a firm's target exposure
-and $\widehat a_i$ its decoded exposure in the same coordinates. Set
-$d_{ij}=\norm{a_i-a_j}_2$ and
-$\widehat d_{ij}=\norm{\widehat a_i-\widehat a_j}_2$.
-\begin{proposition}[Propagation to pairwise distances]\label{prop:pairwise}
-  \lean{FreeFoundations.Recovery.distance_error,
-  FreeFoundations.Recovery.pairwise_distance_error}\leanok{}
-  With $\delta_i=\norm{\widehat a_i-a_i}_2$, the distance errors satisfy
-  \[
-    |\widehat d_{ij}-d_{ij}|\le \delta_i+\delta_j,
-    \qquad
-    \sum_i\sum_{j\ne i}{(\widehat d_{ij}-d_{ij})}^2
-    \le4(N-1)\sum_i \delta_i^2.
-  \]
-\end{proposition}
-\begin{proof}
-  Apply the reverse triangle inequality to the two exposure differences,
-  then the triangle inequality to their difference, obtaining
-  $\delta_i+\delta_j$.
-  Squaring gives ${(\delta_i+\delta_j)}^2\le2\delta_i^2+2\delta_j^2$.
-  In the sum over ordered distinct pairs, each firm's squared error appears
-  $N-1$ times in each position, giving the stated coefficient.
-\end{proof}
-The result applies to the cross-fitted predictions because their exposure
-coordinates are shared across folds. It bounds distance error by target
-prediction error; the empirical forecast comparison evaluates the financial use
-of those distances.
+\subsection{Distance error and second-moment scoring}
+For shared target coordinates, let $d_{ij}=\norm{a_i-a_j}_2$,
+$\widehat d_{ij}=\norm{\widehat a_i-\widehat a_j}_2$, and
+$\delta_i=\norm{\widehat a_i-a_i}_2$. The reverse triangle inequality gives
+$|\widehat d_{ij}-d_{ij}|\le\delta_i+\delta_j$. Squaring and summing
+over ordered
+distinct pairs yields
+\[
+  \sum_i\sum_{j\ne i}{(\widehat d_{ij}-d_{ij})}^2
+  \le4(N-1)\sum_i\delta_i^2,
+\]
+because ${(\delta_i+\delta_j)}^2\le2\delta_i^2+2\delta_j^2$ and each
+firm's error
+appears in both positions $N-1$ times.
+\lean{FreeFoundations.Recovery.distance_error,
+FreeFoundations.Recovery.pairwise_distance_error}\leanok{}
 
-\section{The financial meaning of the score}\label{sec:score}
-The preceding bound links exposure prediction to the accuracy of measured
-distances. Their financial value depends on the covariance forecasts they
-produce, which we evaluate around a specified common mean. Expectations in
-this section condition on the information used to form the forecast.
-Write $v=r-\mu$ for the forecast error and $M=\E[vv']$ for its second-moment
-matrix. For positive definite forecast $C$, twice the expected negative Gaussian
-log score, apart from its common constant, is
+Condition on forecast information and write $v=r-\mu$ and $M=\E[vv']$.
+For positive definite forecast $C$, twice expected negative Gaussian log score,
+apart from its common constant, is
 \begin{equation}\label{eq:expected-score}
   L(C,M)=\log\det C+\tr(C^{-1}M).
 \end{equation}
-The equality follows by writing $v'C^{-1}v=\tr(C^{-1}vv')$ and taking
-expectations. Finite second moments suffice for this interpretation. When
-$\mu$ is the conditional mean, $M$ is the conditional covariance; otherwise it
-also includes the outer product of the mean forecast error.
-\begin{proposition}[Second-moment scoring]\label{prop:score}
-  \lean{FreeFoundations.Score.expected_loss,
-  FreeFoundations.Score.loss_le}\leanok{}
-  For positive definite $C$ and $M$, $L(M,M)\le L(C,M)$.
-\end{proposition}
-\begin{proof}
-  Subtracting the score at $M$ gives
-  $\tr(C^{-1}M)-\log\det(C^{-1}M)-N$.
-  Let $\nu_1,\ldots,\nu_N>0$ be the eigenvalues of
-  $C^{-1/2}MC^{-1/2}$, which has the same trace and determinant as $C^{-1}M$.
-  The difference is $\sum_j(\nu_j-\log\nu_j-1)$.
-  Each term is nonnegative because $\log x\le x-1$ for $x>0$.
-\end{proof}
-The loss in equation~\eqref{eq:expected-score} thus rewards accurate
-second-moment forecasts on common outcomes. In the principal specification,
-the forecast mean and factor component are common, so differences arise through
-the residual covariance. The marginal-variance comparison subsequently rescales
-the full forecasts. To interpret these comparisons, we now examine how financial
-neighborhoods shape the residual component.
+This follows from $v'C^{-1}v=\tr(C^{-1}vv')$.
+For positive definite $M$, subtracting the score at $M$ gives
+$\sum_j(\nu_j-\log\nu_j-1)\ge0$, where $\nu_j>0$ are the eigenvalues of
+$C^{-1/2}MC^{-1/2}$. Thus $L(M,M)\le L(C,M)$.
+\lean{FreeFoundations.Score.expected_loss,
+FreeFoundations.Score.loss_le}\leanok{}
+Finite second moments suffice. If $\mu$ is not the conditional mean, $M$ also
+contains the outer product of the mean forecast error. The application holds
+this mean and the conventional factor component common across procedures.
 
-\subsection{Common exposure and imported noise}
-To explain why alternative neighborhoods change that residual component,
-the spatial model separates common-exposure reconstruction from the
-idiosyncratic risk imported through neighboring firms.
-Working in risk-scaled coordinates, let $u_i=a_i'q+e_i$, where $q$ is
-centered with covariance $I$, the centered
-idiosyncratic disturbances have variances $\sigma_i^2$, and disturbances are
-uncorrelated across firms and with $q$. For zero-diagonal $W$, the spatial
-filter is $Q=I-\lambda W$ and the filtered residual is ${(Qu)}_i$.
-\begin{proposition}[Exposure reconstruction and noise]\label{prop:filtered}
-  \lean{FreeFoundations.Likelihood.filtered_second_moment}\leanok{}
-  The expected squared filtered residual satisfies
-  \begin{equation}\label{eq:filtered}
-    m_i(\lambda)\equiv\E[{(Qu)}_i^2]
-    =\Bigl\lVert a_i-\lambda\sum_j W_{ij}a_j\Bigr\rVert_2^2
-    +\sigma_i^2+\lambda^2\sum_j W_{ij}^2\sigma_j^2.
-  \end{equation}
-\end{proposition}
-\begin{proof}
-  Substitute the common-shock model into the filter:
-  ${(Qu)}_i=(a_i-\lambda\sum_j W_{ij}a_j)'q
-  +e_i-\lambda\sum_j W_{ij}e_j$.
-  Orthogonality between shocks and disturbances eliminates their cross term.
-  The common term has variance equal to its squared loading norm.
-  Cross-firm orthogonality and $W_{ii}=0$ make the disturbance variance
-  $\sigma_i^2+\lambda^2\sum_j W_{ij}^2\sigma_j^2$, completing the decomposition.
-\end{proof}
-Equation~\eqref{eq:filtered} shows how neighbors help reconstruct the firm's
-common exposure while bringing their own idiosyncratic variation into
-the filter. With equal idiosyncratic variances,
-this imported component is proportional to $\sum_j W_{ij}^2$.
-Matching effective neighbor counts controls one summary of that concentration
-while allowing exposure alignment and heterogeneous noise to differ.
+\subsection{Spatial filtering and conditional stability}
+Write risk-scaled residuals as $u_i=a_i'q+e_i$, with centered
+unit-covariance common shocks and centered, mutually uncorrelated idiosyncratic
+disturbances of variances $\sigma_i^2$, orthogonal to $q$. For the spatial
+filter $Q=I-\lambda W$, the expected squared filtered residual is
+\begin{equation}\label{eq:filtered}
+  \E[{(Qu)}_i^2]
+  =\Bigl\lVert a_i-\lambda\sum_j W_{ij}a_j\Bigr\rVert_2^2
+  +\sigma_i^2+\lambda^2\sum_j W_{ij}^2\sigma_j^2.
+\end{equation}
+To derive the identity, substitute the residual decomposition:
 
-The same terms enter the residual likelihood. For this calculation, write
-$M_u=\E[uu']$ for the residual second moment. For innovation covariance
-$D=\diag(d_1,\ldots,d_N)$ with $d_i>0$, and invertible $Q$, define
-$P=Q^{-1}$ and $\Sigma=PDP'$. Inverting the product and expanding its
-determinant
-gives
+\[
+  {(Qu)}_i=\Bigl(a_i-\lambda\sum_j W_{ij}a_j\Bigr)'q
+  +e_i-\lambda\sum_j W_{ij}e_j.
+\]
+Unit-covariance shocks give the squared loading norm; orthogonality of shocks
+and disturbances eliminates their cross term. Cross-firm uncorrelatedness and
+$W_{ii}=0$ give disturbance variance
+$\sigma_i^2+\lambda^2\sum_j W_{ij}^2\sigma_j^2$.
+\lean{FreeFoundations.Likelihood.filtered_second_moment}\leanok{}
+With equal idiosyncratic variances, imported noise is proportional to
+$\sum_j W_{ij}^2$, explaining the concentration control while retaining the role
+of heterogeneous noise.
+
+For residual second moment $M_u=\E[uu']$, positive diagonal
+$D=\diag(d_1,\ldots,d_N)$ and invertible $Q$, put $P=Q^{-1}$ and $\Sigma=PDP'$.
+Cycling the trace and expanding the determinant in
+$L(\Sigma,M_u)$ gives
 \begin{equation}\label{eq:spatial-loss}
   L(\Sigma,M_u)=\sum_i\log d_i-2\log|\det Q|
-  +\sum_i\frac{m_i(\lambda)}{d_i}.
+  +\sum_i\frac{{(Q M_u Q')}_{ii}}{d_i}.
 \end{equation}
 \lean{FreeFoundations.Likelihood.spatial_loss}\leanok{}
-Here $m_i(\lambda)={(Q M_u Q')}_{ii}$. The quadratic term follows by cycling the
-trace in $\tr(Q'D^{-1}Q M_u)$; the determinant term follows from
-$\det\Sigma=\det D/{(\det Q)}^2$. Equation~\eqref{eq:spatial-loss}
-shows how network structure
-and innovation scales jointly enter fit. The panel's headline score instead
-uses the full return forecast in equation~\eqref{eq:forecast}; the residual
-likelihood decomposition explains the model's construction and recorded
-attribution exercise.
+This residual identity explains the joint role of the network and innovation
+scales. The empirical score evaluates the full forecast in
+equation~\eqref{eq:forecast} before observing outcome-year factors.
 
-\section{Stability and financial use}\label{sec:stability}
-The score decomposition explains how a given network enters forecast fit.
-To establish how errors in measured proximity affect that network and its
-covariance forecast, compare two distance matrices
-on the same $N\ge2$ firms. Hold bandwidth $h>0$, spatial coefficient $\lambda$,
-and innovation covariance $D$ fixed. These conditions isolate the propagation
-of a change in distances through a given spatial model. Write
-$\norm{\cdot}_\infty$ for the maximum absolute row-sum norm and
-$\norm{\cdot}_2$ for the spectral norm of a matrix.
-\begin{proposition}[Network and covariance stability]\label{prop:stability}
+\begin{proposition}[Conditional network and covariance
+  stability]\label{prop:stability}
   \lean{FreeFoundations.Kernel.expKernel_linfty_le,
   FreeFoundations.Stability.matrix_covariance_sub_le}\leanok{}
-  Suppose $\epsilon\ge0$ and $|d_{ij}-d^\star_{ij}|\le\epsilon$ for
-  every $i\ne j$, and construct
-  $W,W^\star$ using equation~\eqref{eq:weights} with common bandwidth.
-  Then
+  Consider two distance matrices on the same $N\ge2$ firms, with
+  $|d_{ij}-d^\star_{ij}|\le\epsilon$ for every $i\ne j$ and $\epsilon\ge0$.
+  Construct $W,W^\star$ by equation~\eqref{eq:weights} at common $h>0$.
+  For the maximum absolute row-sum norm,
   \[
     \norm{W-W^\star}_\infty\le\min\{2,e^{2\epsilon/h}-1\}.
   \]
-  If $P={(I-\lambda W)}^{-1}$ and $P^\star={(I-\lambda W^\star)}^{-1}$ exist
-  and have spectral norms at most $M_P$, then
+  Hold $\lambda$ and $D$ fixed. If $P={(I-\lambda W)}^{-1}$ and
+  $P^\star={(I-\lambda W^\star)}^{-1}$ exist with spectral norms at most $M_P$,
+  then
   \[
     \norm{PDP'-P^\star D(P^\star)'}_2
     \le2\norm D_2|\lambda|M_P^3\norm{W-W^\star}_2.
   \]
 \end{proposition}
 \begin{proof}
-  Corresponding unnormalized kernel entries have ratios between
-  $e^{-\epsilon/h}$ and $e^{\epsilon/h}$, as do their row sums.
-  Normalization therefore bounds entry ratios between
-  $e^{-2\epsilon/h}$ and $e^{2\epsilon/h}$.
-  Summing absolute differences against a probability row gives
-  $e^{2\epsilon/h}-1$; the absolute difference of two probability rows also
-  sums to at most two. Taking the maximum row sum proves the first bound.
-
-  For the second bound, the inverse-difference identity gives
-  $P-P^\star=\lambda P(W-W^\star)P^\star$ and hence
+  Corresponding unnormalized kernel entries and their row sums have ratios
+  between $e^{-\epsilon/h}$ and $e^{\epsilon/h}$. Normalized entry ratios
+  therefore lie between $e^{-2\epsilon/h}$ and $e^{2\epsilon/h}$. Summing
+  absolute differences against a probability row gives $e^{2\epsilon/h}-1$;
+  the difference between two probability rows is also bounded by two.
+  For covariance, the inverse-difference identity gives
+  $P-P^\star=\lambda P(W-W^\star)P^\star$, so
   $\norm{P-P^\star}_2\le|\lambda|M_P^2\norm{W-W^\star}_2$.
   Expand the covariance difference as
-  $(P-P^\star)DP'+P^\star D(P-P^\star)'$.
-  Applying the triangle inequality and submultiplicativity to both products
-  yields the second bound.
+  $(P-P^\star)DP'+P^\star D(P-P^\star)'$ and apply submultiplicativity.
 \end{proof}
-The bandwidth governs how distance error affects weights, while the inverse
-norm governs its amplification through the spatial model. The spectral-norm
-assumption is explicit for these generally nonsymmetric row-normalized networks.
-Connecting the two bounds uses
+The bounds connect using
 $\norm{W-W^\star}_2\le\sqrt N\norm{W-W^\star}_\infty$.
-The empirical procedures re-estimate bandwidths and innovation scales under
-common rules; their forecast comparison evaluates that full procedure.
+Bandwidth governs weight sensitivity, and the spatial inverse norm governs
+amplification. The spectral-norm assumption is explicit for generally
+nonsymmetric row-normalized networks. These conditional results hold bandwidth,
+spatial coefficient and innovation covariance fixed; the empirical comparison
+instead evaluates procedures that re-estimate those quantities under common
+rules.
 
-Covariance accuracy also has a direct interpretation for portfolio risk.
-Let $\Sigma$ and $\widehat\Sigma$ be the true and estimated covariance
-matrices. Suppose a feasible portfolio set has $\norm w_2\le B$ and
-contains a minimizer
-$\widehat w$ of estimated variance $w'\widehat\Sigma w$.
-\begin{proposition}[Variance cost of covariance error]\label{prop:portfolio}
-  \lean{FreeFoundations.Stability.portfolio_regret,
-  FreeFoundations.Stability.long_only_sq_le}\leanok{}
-  For every feasible comparator $w$,
-  \[
-    \widehat w'\Sigma\widehat w-w'\Sigma w
-    \le2B^2\norm{\widehat\Sigma-\Sigma}_2.
-  \]
-\end{proposition}
-\begin{proof}
-  Add and subtract estimated variances to express the difference as
-  \[
-    \widehat w'(\Sigma-\widehat\Sigma)\widehat w
-    +(\widehat w'\widehat\Sigma\widehat w-w'\widehat\Sigma w)
-    +w'(\widehat\Sigma-\Sigma)w.
-  \]
-  The middle term is nonpositive by the minimizing property of $\widehat w$.
-  Each remaining term is at most $B^2\norm{\widehat\Sigma-\Sigma}_2$ by
-  the operator-norm quadratic bound. For fully invested long-only portfolios,
-  $\sum_i w_i^2\le{(\sum_i w_i)}^2=1$, so $B=1$ suffices.
-\end{proof}
-Together, these bounds trace a path from exposure prediction through distance
-and network error to covariance accuracy and the variance cost of portfolio
-choice. This connection supplies the economic motivation for evaluating
-financial proximity through covariance forecasts, while the empirical
-comparisons establish how the fitted measurement procedures perform.
+\section{Empirical construction and decisive
+diagnostics}\label{sec:empirical-supplement}
+The construction details below identify the information available to each
+procedure. The diagnostics then distinguish target uncertainty, metric choice,
+fold-induced geometry, and covariance specification, which affect different
+links in the measurement argument.
+\subsection{Information sets, data and encoder contexts}
+At each annual cutoff, eligible firms require complete, nonconstant
+characteristic histories and at least 500 observed prior returns. Estimation
+uses common complete dates within the preceding three years, and reference
+firms outside the cohort require complete returns on those dates. SEC facts are
+selected by filing availability, with a maximum age of 550 days. Frozen SEC and
+Yahoo snapshots preserve the estimation vintage; current retrievals would
+constitute different inputs. The disclosure audit checks future filings,
+observation periods, duplicate keys and agreement of selected filing facts with
+the characteristic snapshots.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/cohorts}
+  \caption{Annual samples and information sets. Outcomes in
+    2016--2019 fit spatial
+    coefficients; 2020--2025 evaluate forecasts. Outside reference firms define
+  the historical exposure target.}
+\end{table}
+
+Shared feature preprocessing is fitted to past support observations and remains
+fixed across nested encoder contexts. Outcome normalization and model-internal
+preprocessing follow each interface at its supplied context size. The four
+models contribute features immediately before their regression prediction
+functions, using one prediction member under common input preprocessing rather
+than model-specific prediction ensembles~\cite{tabpfn,tabfm,kumo,limix}.
+Kumo and LimiX query batches retain the whole support table; numerical checks
+verify batch consistency, row ordering and agreement with the prediction head.
+
+Native direct distance normalizes the prepared vector after appending a unit
+coordinate. Other principal native representations are normalized directly.
+The crossed metric comparison also evaluates direct chord distance without the
+extra coordinate, rather than silently redefining the principal comparator.
+The price review masks CHRD's series discontinuity on 20 November 2020 and
+retains QXO's reviewed repricing on 30 July 2024. These decisions are recorded
+with the frozen sources.
+
+\subsection{The exposure proxy and fitted readout}
+Five unit-variance principal components of standardized prior residuals from
+outside firms define the reference factors, after removing the
+Fama--French % chktex 8
+five factors and momentum. Each cohort firm's target is its ordinary
+least-squares loading on these factors using its own prior returns. Reference
+coordinates are fixed before firm folds are formed; the reference universe
+varies annually. Holding out firms tests the exposure mapping, not the
+independence of returns or recovery of a uniquely identified latent
+factor model.
+
+Five groups are assigned by a fixed rule based on firm identifiers. Within each
+held-out group, remaining firms determine feature standardization, the ridge
+penalty selected by cross-validation over 13 logarithmically spaced values from
+$10^{-2}$ to $10^4$, and feature/prediction clipping ranges. Annual $R^2$ is one
+minus total squared out-of-fold error divided by the centered target sum of
+squares across firms and coordinates; reported means weight years equally.
+The separate financial-size sequence uses nested sets of 32, 64, 128 and 256
+training firms per fold, refitting every readout choice on the selected firms.
+Evaluation groups and target coordinates remain fixed.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/decoder-periods}
+  \caption{Exposure prediction by reporting window. Entries are unweighted means
+    of annual out-of-fold $R^2$. The forecast-year window does not alter the
+  exposure target or financial estimation rules.}
+\end{table}
+\begin{table}[htbp]
+  \centering\small
+  \input{build/target-reliability}
+  \caption{Reference-target diagnostics, annual means over 2016--2025.
+    Commonality is the explained residual-variance share. Rank five defines
+  the principal networks; ranks three and eight assess target sensitivity.}
+\end{table}
+
+Target reliability is assessed by splitting the prior return window in half
+while retaining coordinates fitted over the full window.
+Spearman--Brown % chktex 8
+values summarize agreement under this construction; treating them as attainable
+prediction ceilings requires an additional measurement-error model. In-panel
+exposure controls derive coordinates from the cohort's own residual covariance.
+Their independently fitted half-window coordinates can rotate, so reliability
+is assessed through distances. Commonality, rank sensitivity and distance
+agreement describe limitations of the proxy rather than validate
+latent recovery.
+
+\subsection{Normalization, folds and learned-weight controls}
+Crossing native features and predicted exposures with Euclidean and chord
+distance separates coordinate changes from normalization. Decoder fitting is
+fixed across metrics. All networks match the joint reference's mean effective
+neighbor count, fit spatial coefficients in 2016--2019 and score common
+2020--2025 outcomes under both variance treatments.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/normalization}
+  \caption{Calibration within each distance metric. Entries compare calibrated
+    and native coordinates under Euclidean or chord distance, holding outcomes
+  and neighbor-count rules common.}
+\end{table}
+
+All four pretrained calibration gains have positive paired intervals at both
+block lengths under fitted innovation variances and either metric. Under
+common marginal variances, point differences are negative and intervals include
+zero. Appending a unit coordinate changes the direct native score by
+\DirectUnitInnovation{} with fitted innovation variances and
+\DirectUnitMarginal{} with common marginals relative to direct chord distance
+without that coordinate. The conventional benchmark's geometry is therefore
+also a construction choice.
+
+Cross-fitting itself can create distances. With constant features, every firm
+in held-out group $f$ receives $\widehat a_i=\overline a_{-f}$, the
+other groups'
+target mean. Distances vanish within groups but can be positive between them,
+despite there being no encoder-feature variation. Kumo's zero-initialized output
+projections produce constant query features; its three fresh draws coincide
+with this explicit intercept-only control in every year. These equivalent draws
+are one null geometry, not three independent informative controls.
+
+TabPFN resets retain its specified procedure: layers with initialization rules
+use them, remaining learned tensors are redrawn at observed location and scale,
+and architectural frequencies remain fixed. Its three draws produce nonconstant
+features. The resulting learned-minus-reset comparison concerns that declared
+initialization scheme rather than an invariant contribution of all pretrained
+weights.
+
+\begin{table}[htbp]
+  \centering\footnotesize\setlength{\tabcolsep}{4pt}
+  \input{build/weight-contrasts}
+  \caption{Calibrated learned-minus-control forecasts. TabPFN uses
+    three specified
+    resets; Kumo's three fresh draws reproduce one intercept-only null,
+    displayed once. Entries give
+    paired joint log-score differences and conditional 95\% intervals at both
+  block lengths, under both variance treatments.}
+\end{table}
+\begin{table}[htbp]
+  \centering\small
+  \input{build/fold-sensitivity}
+  \caption{Sensitivity to five fixed fold assignments. Ranges summarize
+    calibrated-minus-native-direct forecast differences and exposure $R^2$.
+  They describe partition sensitivity rather than confidence intervals.}
+\end{table}
+
+Four additional balanced assignments retain reference coordinates, encoder
+states and evaluation observations, while refitting the readouts and spatial
+coefficients. TabPFN, TabFM and Kumo retain positive fitted-variance point
+differences from direct distance, but their ranking changes; LimiX's difference
+crosses zero. TabPFN exceeds each reset under every assignment with positive
+intervals at both lengths. Common-marginal weight intervals span zero.
+Partition ranges and conditional date-block intervals address different
+sources of sensitivity.
+
+\subsection{Forecast evaluation and uncertainty}
+Each covariance forecast is formed before the outcome year and evaluated on
+excess returns around a common prior mean. Prior residuals determine one
+innovation variance per firm. The common-marginal comparison rescales the full
+forecast to prior raw-return variances, preserving its spatial coefficient and
+implied correlations. The factor-plus-diagonal-residual benchmark sets the
+spatial coefficient to zero. Additional controls use raw sample covariance and
+factor plus sample residual covariance; historical-exposure networks use prior
+returns directly.
+
+\begin{table}[htbp]
+  \centering\footnotesize\setlength{\tabcolsep}{4pt}
+  \input{build/measurement-contrasts}
+  \caption{Paired calibration and direct-benchmark contrasts.
+    Calibration compares
+    each pretrained model's calibrated and native procedures; direct compares
+    its calibrated forecast with native direct distance. Entries report summed
+    joint log-score differences and conditional 95\% intervals using stationary
+    bootstrap expected blocks of 21 and 63 trading days, with 9,999 draws.
+  All networks match effective neighbor counts.}
+\end{table}
+\begin{table}[htbp]
+  \centering\small
+  \input{build/covariance-controls}
+  \caption{Direct covariance controls on common evaluation outcomes. Gains are
+  relative to the joint characteristic reference within each specification.}
+\end{table}
+\begin{table}[htbp]
+  \centering\small
+  \input{build/confidence-set}
+  \caption{Forecasts retained by the principal model confidence set at 10\%
+  test size, using common evaluation dates.}\label{tab:confidence-set}
+\end{table}
+
+A daily score evaluates the full firm vector, making dates the resampling unit.
+Pairing uses identical firms and dates; temporal blocks preserve local score
+dependence while holding fitted encoders, targets and networks fixed. Confidence
+sets use the max method, size 0.10, expected block length 21 and 1,000 draws
+within the declared forecast family. Neither these intervals nor partition
+sensitivity incorporate configuration selection, survivor selection or
+uncertainty from retrospective application of released checkpoints.
+
+\subsection{Code and data availability}
+Source code and machine-readable results accompany the study. Frozen financial
+artifacts are retained in a private archive, with reviewer access available
+from the author on request. Public checkpoints have immutable revisions and
+independently verified content hashes. The current regeneration uses
+CPU\@; saved
+feature contracts record device, runtime and checkpoint identities.
+Restored artifacts, regenerated estimates
+and publication builds are distinct reproducibility claims; the accompanying
+record identifies their source revisions and validation status. Earlier
+exploratory configurations were examined on evaluation years. The retained
+study and diagnostics do not create a new holdout or erase that development
+history.
+
+\section{Fern\'andez core replication and risk audit}\label{sec:replication}
+The characteristic-history benchmark follows Fern\'andez's spatial approach.
+This appendix reports the accompanying methodological replication and audits
+the stated portfolio-risk calibration, separately from the frozen-feature
+comparison. The methodological replication preserves the
+characteristic-history spatial
+CAPM comparison of Fern\'andez~\cite{fernandez}, adapting the financial data
+rather than reproducing the original Economatica/S-Plus computation. Her sample
+contains 126 Latin American firms; ours draws from 1,000 currently listed US
+issuers. Forty quarterly excess returns in 2016--2025 estimate firm intercepts
+and CAPM betas by robust MM regression. Stage two relates median quarterly
+excess returns to these betas without an intercept.
+
+Four characteristic networks use market capitalization/assets, market-to-book,
+dividend yield and debt maturity. History distances are
+$\sqrt{2(1-\rho_{\rm Spearman})}$ with average ranks for ties, exponential
+weights and row normalization. Zero self-links are primary; an alternative
+retains positive self-links because the original kernel expression leaves the
+diagonal convention open. The joint network combines characteristic distances
+by their root mean square and is an extension to the original comparison.
+The common-four cohort has 33 firms; dropping debt maturity yields 395.
+Likelihood comparisons remain within common cohorts.
+
+SEC disclosures and Yahoo prices replace Economatica. Total assets
+operationalize
+size; lease-inclusive noncurrent debt divided by total debt measures maturity;
+trailing 365-day cash dividends divided by price measure yield. Missing debt
+components remain missing and ratios use nominal values. The
+Fama--French % chktex 8
+market factor and one-month risk-free series replace the original market and
+Treasury proxies. These substitutions and modern MM implementation prevent an
+exact numerical reproduction of the original study.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/replication}
+  \caption{Common-four characteristic-history replication, 33 firms. Beta slopes
+    are percentages, with conditional standard errors in parentheses.
+    Spatial-error ML uses zero self-links and unit-bandwidth
+    exponential weights.
+    Likelihood gains are relative to OLS\@; AIC counts the spatial parameter.
+  The joint characteristic network is an extension.}\label{tab:replication}
+\end{table}
+
+The quarterly beta slope falls from \ReplicationOlsSlope\% without spatial
+dependence to \ReplicationJointSlope\% under the joint network, with conditional
+standard errors of \ReplicationOlsSe{} and \ReplicationJointSe{} percentage
+points. The original study instead reports an increase in the estimated premium
+and improved precision after allowing spatial dependence. Positive spatial
+coefficients in the US comparison therefore do not reproduce the original
+market-premium conclusion. The smaller common-four sample and data substitutions
+also limit comparisons of economic magnitudes.
+
+Spatial-lag two-stage least squares uses $[X,WX]$ as instruments, where $X$ is
+the estimated-beta regressor. Spatial-error ML concentrates the Gaussian
+likelihood over coefficients in $(-0.99,0.99)$. Conditional uncertainty treats
+betas and networks as fixed; ML uses the information matrix because the spatial
+log determinant has no unique observation-level allocation. The generated-beta
+bootstrap jointly resamples quarters of returns and factors, recomputes MM
+betas and medians, and holds networks fixed. Reported intervals use 199 valid
+draws with expected blocks of four quarters; rejected draws are recorded.
+Lag-IV bootstrap intervals are unconstrained and can extend beyond the stability
+region. Residual Moran moments, normality and boundary diagnostics, self-links,
+and common-cohort comparisons accompany the result records.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/replication-iv}
+  \caption{Common-four spatial-lag IV estimates and generated-beta bootstrap
+    uncertainty. Conditional $p$-values hold estimated betas fixed; bootstrap
+    intervals recompute first-stage estimates and can cross the
+    stability bounds.
+  Networks remain fixed during resampling.}
+\end{table}
+
+The risk audit implements the original spatial-lag and spatial-error portfolio
+VaR formulas, two beta distributions, five portfolio sizes, four spatial
+coefficients and 200 draws under the printed calibration. Dispersion across
+draws is distinguished from Monte Carlo uncertainty in their mean. The exercise
+also compares the published simulation table with the bound implied by its
+stated calibration. At zero
+spatial dependence, an initial value of \$1,000, shock standard deviations of
+0.01 and the one-day 95\% Gaussian quantile imply
+\[
+  \operatorname{VaR}_{0.95}
+  =1000\,\Phi^{-1}(0.95)\,0.01\sqrt{\overline\beta^{\,2}+1/N}.
+\]
+For $N=20$ and every beta in $[0.5,1]$, this is at most approximately \$16.85;
+the original Table 6 reports \$36.27 for that cell. At zero spatial dependence,
+weights disappear from the formula, so seeds and self-links cannot reconcile
+the discrepancy. The reported cell therefore differs from the bound
+implied by the stated
+equations and calibration.
 
 \begin{thebibliography}{99}
   \bibitem{fernandez}
@@ -1424,18 +1110,14 @@ comparisons establish how the fitted measurement procedures perform.
   \bibitem{assetembeddings}
   Gabaix, X., Koijen, R. S. J., Richmond, R. J., and Yogo, M. (2025).
   Asset Embeddings. BFI Working Paper 2025-51, April version. % chktex 8
-  % chktex 8
+% tex-fmt: off
+  \url{https://bfi.uchicago.edu/wp-content/uploads/2025/04/BFI_WP_2025-51.pdf}. % chktex 8
+% tex-fmt: on
   \bibitem{fulleotto}
   F\"ulle, M. J., and Otto, P. (2024).
   Spatial GARCH models for unknown spatial locations---an application to
   financial stock returns.\ \emph{Spatial Economic Analysis}, 19(1), 92--105.
   \url{https://doi.org/10.1080/17421772.2023.2237067}.
-  \bibitem{qulee}
-  Qu, X., and Lee, L.-F. (2015).
-  Estimating a spatial autoregressive model with an endogenous
-  spatial weight matrix.
-  \emph{Journal of Econometrics}, 184(2), 209--232.
-  \url{https://doi.org/10.1016/j.jeconom.2014.08.008}.
   \bibitem{baxter}
   Baxter, J. (2000). A model of inductive bias learning.
   \emph{Journal of Artificial Intelligence Research}, 12, 149--198.
@@ -1450,11 +1132,6 @@ comparisons establish how the fitted measurement procedures perform.
   Predicting what you already know helps: Provable self-supervised learning.
   \emph{Advances in Neural Information Processing Systems}, 34.
   \url{https://proceedings.neurips.cc/paper/2021/hash/02e656adee09f8394b402d9958389b7d-Abstract.html}.
-  \bibitem{foundation}
-  Bommasani, R., et al. (2021).
-  On the Opportunities and Risks of Foundation Models.
-  \emph{arXiv preprint}, arXiv:2108.07258.
-  \url{https://arxiv.org/abs/2108.07258}.
   \bibitem{tabpfn}
   Hollmann, N., et al. (2025).
   Accurate predictions on small data with a tabular foundation model.
@@ -1490,6 +1167,31 @@ comparisons establish how the fitted measurement procedures perform.
   US Securities and Exchange Commission.
   EDGAR Application Programming Interfaces.
   \url{https://www.sec.gov/search-filings/edgar-application-programming-interfaces}.
+  \bibitem{kps}
+  Kelly, B., Pruitt, S., and Su, Y. (2019).
+  Characteristics are covariances: A unified model of risk and return.
+  \emph{Journal of Financial Economics}, 134(3), 501--524.
+  \url{https://doi.org/10.1016/j.jfineco.2019.05.001}.
+  \bibitem{gkx}
+  Gu, S., Kelly, B., and Xiu, D. (2021).
+  Autoencoder asset pricing models.
+  \emph{Journal of Econometrics}, 222(1), 429--450.
+  \url{https://doi.org/10.1016/j.jeconom.2020.07.009}.
+  \bibitem{alouadi}
+  Alouadi, A., and Lehalle, C.-A. (2026).
+  The Fundamental Structure of Risk: From Characteristics to Covariance.
+  \emph{arXiv preprint}, arXiv:2607.24410, July version.
+  \url{https://arxiv.org/abs/2607.24410v1}.
+  \bibitem{ye}
+  Ye, H.-J., Liu, S.-Y., and Chao, W.-L. (2025).
+  A Closer Look at TabPFN v2: Understanding Its Strengths and Extending Its
+  Capabilities.\ \emph{Advances in Neural Information Processing Systems}, 38.
+  \url{https://papers.nips.cc/paper_files/paper/2025/file/c57b3718381cb2bf9c1ccd63377f2448-Paper-Conference.pdf}.
+  \bibitem{steck}
+  Steck, H., Ekanadham, C., and Kallus, N. (2024).
+  Is Cosine-Similarity of Embeddings Really About Similarity?
+  \emph{Companion Proceedings of the ACM Web Conference 2024}.
+  \url{https://doi.org/10.1145/3589335.3651526}.
 \end{thebibliography}
 %TC:endignore
 \end{document}

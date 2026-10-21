@@ -10,13 +10,13 @@
 %TC:macrocount \PcaNative 1
 \newcommand{\PcaNative}{((* '{:,.1f}'.format(claims.pca16.native_gain) *))}
 %TC:macrocount \TabfmNative 1
-\newcommand{\TabfmNative}{((* '{:,.1f}'.format(claims.tabfm__early_concat.native_gain) *))}
+\newcommand{\TabfmNative}{((* '{:,.1f}'.format(claims.tabfm__late.native_gain) *))}
 %TC:macrocount \DirectCalibrated 1
 \newcommand{\DirectCalibrated}{((* '{:,.1f}'.format(claims.direct.calibrated_gain) *))}
 %TC:macrocount \PcaCalibratedLoss 1
 \newcommand{\PcaCalibratedLoss}{((* '{:,.1f}'.format(-claims.pca16.calibrated_gain) *))}
 %TC:macrocount \TabfmCalibrated 1
-\newcommand{\TabfmCalibrated}{((* '{:,.1f}'.format(claims.tabfm__early_concat.calibrated_gain) *))}
+\newcommand{\TabfmCalibrated}{((* '{:,.1f}'.format(claims.tabfm__late.calibrated_gain) *))}
 %TC:macrocount \PfnDecoder 1
 \newcommand{\PfnDecoder}{((* '{:.3f}'.format(claims.tabpfn_full__late.decoder_mean_2016_2025) *))}
 %TC:macrocount \RandomDecoder 1
@@ -26,7 +26,7 @@
 %TC:macrocount \PcaDecoder 1
 \newcommand{\PcaDecoder}{((* '{:.3f}'.format(claims.pca16.decoder_mean_2016_2025) *))}
 %TC:macrocount \TabfmDecoder 1
-\newcommand{\TabfmDecoder}{((* '{:.3f}'.format(claims.tabfm__early_concat.decoder_mean_2016_2025) *))}
+\newcommand{\TabfmDecoder}{((* '{:.3f}'.format(claims.tabfm__late.decoder_mean_2016_2025) *))}
 %TC:macrocount \FirmDays 1
 \newcommand{\FirmDays}{((* '{:,}'.format(claims.firm_days) *))}
 %TC:macrocount \MinFirms 1
@@ -90,3 +90,6 @@
 \newcommand{\PfnDirectNormalized}{((* '{:.5f}'.format(claims.pfn_direct_normalized) *))}
 \newcommand{\DirectUnitInnovation}{((* '{:+,.1f}'.format(claims.direct_unit_diagonal) *))}
 \newcommand{\DirectUnitMarginal}{((* '{:+,.1f}'.format(claims.direct_unit_correlation) *))}
+
+\newcommand{\DecoderBest}{((* '{:.3f}'.format(claims.decoder_best.value) *))}
+\newcommand{\DecoderBestName}{((* claims.decoder_best.name *))}

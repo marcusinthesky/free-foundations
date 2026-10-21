@@ -2,50 +2,17 @@
 
 from __future__ import annotations
 
-import hashlib
-import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
-import pandas as pd
 
-from free_foundations.expanded.distance import pairwise_distance
-from free_foundations.expanded.representations import representation_states
-from free_foundations.panel.decoding import decode, folds, intercept_only, targets
-from free_foundations.panel.design import DESIGNS, FOUNDATION_MODELS
-from free_foundations.panel.evaluation import (
-    EVALUATION,
-    Panel,
-    daily_frame,
-    update,
-)
-from free_foundations.panel.inference import contrasts
-from free_foundations.panel.networks import (
-    MODEL_CACHE,
-    MODEL_SOURCE,
-    classical,
-    context,
-    labels,
-    rung_views,
-)
-from free_foundations.panel.observations import annual_data
-from free_foundations.pilot.data import write_json
+from free_foundations.panel.decoding import decode, folds, intercept_only
+from free_foundations.panel.design import PRINCIPAL
+from free_foundations.representations.distance import pairwise_distance
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
 
-LOGGER = logging.getLogger(__name__)
-OUTPUT = Path("research/panel/three-foundations-validation")
-PRINCIPAL = (
-    "direct",
-    "pca16",
-    "supervised_mlp16",
-    "tabpfn_full__late",
-    "tabfm__late",
-    "kumo__late",
-    "limix__late",
-)
 RANDOM = tuple(f"tabpfn_full_random{seed}__late" for seed in ("", "43", "44"))
 SALTS = ("", "fold-audit-1", "fold-audit-2", "fold-audit-3", "fold-audit-4")
 
@@ -183,113 +150,8 @@ def diagnostic_pairs(columns: set[str]) -> list[tuple[str, str, str]]:
                 column("normalization_native_chord__direct"),
             )
         )
-    return [p for p in pairs if p[1] in columns and p[2] in columns]
-
-
-def main() -> None:
-    """Refit a bounded diagnostic grid using verified states and frozen financial inputs."""
-    OUTPUT.mkdir(parents=True, exist_ok=True)
-    write_json(
-        OUTPUT / "configuration.json",
-        {
-            "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-            "protocol_sha256": hashlib.sha256((OUTPUT / "README.md").read_bytes()).hexdigest(),
-            "partitions": SALTS,
-            "principal": PRINCIPAL,
-            "reset_controls": RANDOM,
-            "encoder_support": 256,
-            "rank": 5,
-            "calibration": [2016, 2019],
-            "evaluation": [2020, 2025],
-            "bootstrap_blocks": [21, 63],
-            "bootstrap_replicates": 9999,
-            "bootstrap_seed": 42,
-        },
-    )
-    design = DESIGNS["three-foundations"]
-    four = pd.read_parquet("research/panel/cache/four.parquet")
-    broad = pd.read_parquet("research/panel/cache/broad.parquet")
-    panel = Panel(kernels=("matched",), include_placebos=False, diagonal_only=True)
-    quality: list[dict[str, object]] = []
-    checks: list[dict[str, object]] = []
-    firm_days = 0
-    for year in range(2016, 2026):
-        LOGGER.info("Measurement diagnostics: %s", year)
-        annual = annual_data(
-            four,
-            year,
-            characteristics=design.characteristics,
-            histories=design.cohort_histories,
-            output=OUTPUT,
-        )
-        view = rung_views(four, broad, year, design.characteristics, design.history)["histories"]
-        data = context(view, labels(four, broad, "market_cap_assets"), annual.tickers, year)
-        states = representation_states(
-            data, cache=MODEL_CACHE, source=MODEL_SOURCE, models=FOUNDATION_MODELS
-        )
-        exposure = targets(annual.prior, annual.reference, ranks=(5,)).reference[5]
-        distances, rows, null = diagnostic_distances(states, exposure, annual.tickers, year)
-        distances["fernandez_joint"] = classical(
-            four, year, annual.tickers, design.characteristics, design.history
-        )["fernandez_joint"]
-        quality += rows
-        checks += null
-        update(panel, year, annual, distances, broad)
-        if year in EVALUATION:
-            firm_days += annual.raw_realized.size
-    daily = daily_frame(panel)
-    daily.to_parquet(OUTPUT / "daily-scores.parquet")
-    # comparison expects registered representation names; all diagnostic rows share the
-    # same estimator, so annual sums and explicit labels are the sufficient summary here.
-    summary = pd.DataFrame({"column": daily.columns, "score": daily.sum().to_numpy()})
-    summary["firm_days"] = firm_days
-    summary["dates"] = len(daily)
-    summary.to_csv(OUTPUT / "scores.csv", index=False)
-    pd.DataFrame(panel.annual).to_csv(OUTPUT / "annual-scores.csv", index=False)
-    pd.DataFrame(quality).to_csv(OUTPUT / "decoding.csv", index=False)
-    pd.DataFrame(checks).to_csv(OUTPUT / "null-checks.csv", index=False)
-    contrasts(daily, diagnostic_pairs(set(daily.columns))).to_csv(
-        OUTPUT / "contrasts.csv", index=False
-    )
-    saved = pd.read_parquet(design.output / "daily-scores.parquet")
-    principal_pairs = [
-        (
-            "calibrated vs native direct",
-            f"histories@decoded__{name}|matched|{arm}",
-            f"histories__direct|matched|{arm}",
-        )
-        for name in PRINCIPAL[3:]
-        for arm in ("diagonal", "correlation")
-    ]
-    contrasts(saved, principal_pairs).to_csv(OUTPUT / "principal-contrasts.csv", index=False)
-    if not daily.index.equals(saved.index):
-        message = "Diagnostic dates differ from the principal experiment."
+    required = {column for _, left, right in pairs for column in (left, right)}
+    if missing := required - columns:
+        message = f"Incomplete diagnostic scores: {sorted(missing)}"
         raise ValueError(message)
-    overlap = []
-    for arm in ("diagonal", "correlation"):
-        for name in PRINCIPAL:
-            pairs = [
-                (f"fold0@decoded__{name}|matched|{arm}", f"histories@decoded__{name}|matched|{arm}")
-            ]
-            if name != "direct":
-                pairs.append(
-                    (
-                        f"normalization_native_chord__{name}|matched|{arm}",
-                        f"histories__{name}|matched|{arm}",
-                    )
-                )
-            for current, previous in pairs:
-                error = float(np.max(np.abs(daily[current] - saved[previous])))
-                np.testing.assert_allclose(daily[current], saved[previous], atol=1e-5, rtol=0)
-                overlap.append({"current": current, "previous": previous, "max_daily_error": error})
-        for suffix in ("", "43", "44"):
-            np.testing.assert_allclose(
-                daily[f"fold0@decoded__intercept_only|matched|{arm}"],
-                saved[f"histories@decoded__kumo_random{suffix}__late|matched|{arm}"],
-                atol=1e-5,
-                rtol=0,
-            )
-    write_json(
-        OUTPUT / "validation.json",
-        {"overlap": overlap, "firm_days": firm_days, "dates": len(daily), "partitions": SALTS},
-    )
+    return pairs

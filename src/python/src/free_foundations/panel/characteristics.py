@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
-from free_foundations.expanded.disclosures import broad_facts
 from free_foundations.fernandez.characteristics import CHARACTERISTICS, snapshot
+from free_foundations.filings import broad_facts
 from free_foundations.universe.sources import company_facts
 
 LOGGER = logging.getLogger(__name__)
@@ -136,6 +136,15 @@ def assemble(universe: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def audit_disclosures() -> dict[str, int]:
     """Validate filing timing and agreement between wide snapshots and their audit trail."""
+    pieces = ROOT / "cache/characteristics"
+    wide_paths = [p for p in pieces.glob("*.parquet") if not p.name.endswith(".audit.parquet")]
+    if not wide_paths:
+        message = "No frozen disclosure snapshots to audit. Restore the preparation inputs."
+        raise FileNotFoundError(message)
+    for wide_path in wide_paths:
+        if not wide_path.with_name(wide_path.stem + ".audit.parquet").is_file():
+            message = f"Missing filing audit record: {wide_path}"
+            raise ValueError(message)
     selected_facts = 0
     populated_snapshots = 0
     issuers = 0
@@ -156,15 +165,30 @@ def audit_disclosures() -> dict[str, int]:
             raise ValueError(message)
         wide = pd.read_parquet(path.with_name(path.name.replace(".audit", "")), use_threads=False)
         concepts = [name for name in wide if str(name).startswith(("us-gaap:", "dei:"))]
-        expected = wide.set_index("year")[concepts].notna().sum(axis=1)
-        actual = (
-            frame.loc[frame["val"].notna()]
-            .groupby("year")
-            .size()
-            .reindex(expected.index, fill_value=0)
+        keys = ["year", "ticker", "concept"]
+        if wide.duplicated(["year", "ticker"]).any():
+            message = f"Duplicate wide snapshots: {path}"
+            raise ValueError(message)
+        expected = wide.melt(
+            id_vars=["year", "ticker"],
+            value_vars=concepts,
+            var_name="concept",
+            value_name="snapshot",
         )
-        if not np.array_equal(expected, actual):
-            message = f"Wide characteristics and filing audit disagree: {path}"
+        # Wide tables have structural missing cells for concepts absent in a year.
+        # Match every selected audit record (including selected missing values), and
+        # reject populated wide cells without an audit key.
+        actual = frame[[*keys, "val"]]
+        joined = expected.merge(actual, on=keys, how="outer", validate="one_to_one", indicator=True)
+        unmatched = (joined["_merge"].eq("left_only") & joined["snapshot"].notna()) | joined[
+            "_merge"
+        ].eq("right_only")
+        both = joined["_merge"].eq("both")
+        values_equal = (joined["snapshot"].isna() & joined["val"].isna()) | joined["snapshot"].eq(
+            joined["val"]
+        )
+        if unmatched.any() or not values_equal[both].all():
+            message = f"Wide characteristics and filing audit disagree in keys or values: {path}"
             raise ValueError(message)
         issuers += 1
         selected_facts += len(frame)

@@ -23,12 +23,9 @@ class ModelSpec:
 
 _SPECS = (
     ModelSpec("kumo", "nvidia/Kumo-Tabular", "kumo", "custom", "structured-data-models"),
-    ModelSpec("exaone", "LG-AI-Research/EXAONE-Tabular", "exaone", "custom", "exaonetabular"),
     ModelSpec("tabpfn", "Prior-Labs/tabpfn_3_5", "tabpfn", "native", "tabpfn"),
     ModelSpec("limix", "stable-ai/LimiX-2", "limix", "custom", "LimiX"),
-    ModelSpec("causilo", "nums-ai/causilo", "causilo", "custom", "causilo"),
     ModelSpec("tabfm", "google/tabfm-1.1.0-pytorch", "tabfm", "custom", "tabfm"),
-    ModelSpec("sap", "SAP/sap-rpt-1-oss", "sap", "custom", "sap-rpt-oss"),
 )
 MODELS = MappingProxyType({spec.name: spec for spec in _SPECS})
 

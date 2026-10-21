@@ -12,7 +12,7 @@ from pathlib import Path
 
 from edgar import set_identity
 
-from free_foundations.pilot.data import write_json
+from free_foundations.data import write_json
 from free_foundations.universe.coverage import coverage, snapshots
 from free_foundations.universe.report import write_report
 from free_foundations.universe.sources import factors, issuers, prices

@@ -1,6 +1,5 @@
 """Independent density and chronological information-set checks."""
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +9,6 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from scipy.stats import multivariate_normal
 
-from free_foundations.expanded.encoding import prepare
 from free_foundations.fernandez.models import paper_weights
 from free_foundations.panel import inference, observations
 from free_foundations.panel.likelihood import (
@@ -21,7 +19,7 @@ from free_foundations.panel.likelihood import (
     gaussian_daily,
     gaussian_score,
 )
-from free_foundations.panel.report import control_table
+from free_foundations.representations.encoding import prepare
 
 
 @given(st.integers(min_value=3, max_value=12), st.floats(min_value=-0.8, max_value=0.8))
@@ -198,92 +196,6 @@ def test_cohort_requires_nonconstant_histories_at_every_length() -> None:
     assert list(observations.eligible(four, 2016, observations.CHARACTERISTICS, 3)) == ["B"]
 
 
-def test_saved_distances_are_recomputed_never_reused(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from free_foundations.panel import design, networks  # noqa: PLC0415
-
-    rng = np.random.default_rng(4)
-    tickers = tuple("ABCDEF")
-    index = pd.MultiIndex.from_product([range(2010, 2020), tickers], names=["year", "ticker"])
-    four = pd.DataFrame(
-        rng.uniform(0.1, 2, (len(index), 4)),
-        index=index,
-        columns=list(observations.CHARACTERISTICS),
-    )
-    broad = pd.DataFrame(
-        {
-            networks.ASSETS: rng.uniform(1, 9, len(index)),
-            networks.INCOME: rng.normal(size=len(index)),
-        },
-        index=index,
-    )
-    calls: list[str] = []
-
-    def encoded(data: object, **_: object) -> dict[str, np.ndarray]:
-        calls.append(str(getattr(data, "digest", "")))
-        return {"direct": np.zeros((len(tickers), len(tickers)))}
-
-    monkeypatch.setattr(networks, "representation_distances", encoded)
-    monkeypatch.setattr(networks, "ARMS", {"direct": "classical"})
-    monkeypatch.setattr(design, "ROOT", tmp_path)
-    plan = design.Design("unit", observations.CHARACTERISTICS, 3, ("histories",))
-    stale = tmp_path / "unit" / "distances" / "2019" / "histories__direct.parquet"
-    stale.parent.mkdir(parents=True)
-    pd.DataFrame(np.ones((6, 6)), index=list(tickers), columns=list(tickers)).to_parquet(stale)
-    result = networks.distances(four, broad, 2019, tickers, plan)
-    assert calls
-    np.testing.assert_array_equal(result["histories__direct"], 0)
-    np.testing.assert_array_equal(pd.read_parquet(stale).to_numpy(), 0)
-    sidecar = json.loads(stale.with_suffix(".json").read_text())
-    assert sidecar["context_digest"] == calls[0]
-
-
-def test_designs_declare_cohort_history_for_every_network() -> None:
-    from free_foundations.panel.design import DESIGNS  # noqa: PLC0415
-
-    assert DESIGNS["four"].cohort_histories == (3,)
-    assert DESIGNS["four-h5"].cohort_histories == (3, 5)
-    assert DESIGNS["three"].cohort_histories == (3, 5)
-    assert "debt_maturity" not in DESIGNS["three"].characteristics
-
-
-def test_every_scored_column_is_described() -> None:
-    from free_foundations.panel.evaluation import describe  # noqa: PLC0415
-
-    assert describe("raw_sample_covariance")["arm"] == "control"
-    assert describe("uniform_network")["arm"] == "reference"
-    assert describe("h3__fernandez_joint")["history"] == "h3"
-    assert describe("histories__tabfm__early_concat")["arm"] == "state"
-    assert describe("fernandez_joint__placebo3")["arm"] == "fernandez"
-    assert describe("histories@decoded__exaone__late")["arm"] == "calibrated"
-    assert describe("histories@shared_both__tabfm__late")["arm"] == "task"
-    assert describe("histories@redraw1__tabpfn_full__late")["rung"] == "histories@redraw1"
-    assert describe("covariance_exposures")["arm"] == "control"
-
-
-def test_control_table_lists_each_covariance_control_once() -> None:
-    rows = [
-        ("ff5_mom_diagonal", "none", "control", 1.0),
-        ("ff5_mom_diagonal", "none", "correlation", 2.0),
-        ("raw_sample_covariance", "none", "control", 3.0),
-        ("raw_sample_covariance", "none", "correlation", 4.0),
-    ]
-    rows += [  # PCA controls are networks with every kernel and arm; they are not listed here.
-        ("histories__pca16", kernel, innovation, 9.0)
-        for kernel in ("exp", "median")
-        for innovation in ("spherical", "diagonal", "correlation")
-    ]
-    comparison = pd.DataFrame(
-        rows, columns=["approach", "kernel", "innovation", "heldout_log_likelihood"]
-    )
-    body = control_table(comparison)[2:]
-    assert body == [
-        "| `ff5_mom_diagonal` | 1.00 | 2.00 |",
-        "| `raw_sample_covariance` | 3.00 | 4.00 |",
-    ]
-
-
 def test_price_breaks_are_missing_returns_not_outliers() -> None:
     dates = pd.bdate_range("2020-11-18", periods=4)
     prices = pd.DataFrame(
@@ -333,108 +245,157 @@ def test_every_masked_price_break_must_be_reviewed() -> None:
     assert audit["reviewed"].tolist() == [True]
 
 
-@pytest.mark.parametrize("innovations", ["spherical", "diagonal"])
-def test_attribution_splits_the_spatial_likelihood_exactly(innovations: str) -> None:
-    from free_foundations.panel.evaluation import attribute, own_variance  # noqa: PLC0415
+def test_study_keeps_the_declared_cohort_and_principal_labels() -> None:
+    from free_foundations.panel.design import STUDY  # noqa: PLC0415
+    from free_foundations.panel.evaluation import describe  # noqa: PLC0415
 
-    rng = np.random.default_rng(3)
-    firms = 9
-    distance = np.abs(rng.normal(size=(firms, firms)))
-    weights = paper_weights((distance + distance.T) / 2)
-    residuals = rng.normal(size=(40, firms)) @ rng.normal(size=(firms, firms)) * 0.01
-    stats = block(residuals, weights)
-    variances = stats.variances(0.4, innovations)  # type: ignore[arg-type]
-    parts = attribute(stats, own_variance(weights, stats), 0.4, variances)
-    np.testing.assert_allclose(
-        sum(parts.values()), stats.score(0.4, variances=variances), rtol=1e-12
-    )
-    # The own part is the Herfindahl-weighted second moment of the neighbours.
-    np.testing.assert_allclose(
-        own_variance(weights, stats), (weights**2) @ np.mean(residuals**2, axis=0)
+    assert STUDY.cohort_histories == (3, 5)
+    assert "debt_maturity" not in STUDY.characteristics
+    assert describe("raw_sample_covariance")["arm"] == "control"
+    assert describe("histories__tabfm__late")["arm"] == "task"
+    assert describe("histories@decoded__limix__late")["arm"] == "calibrated"
+    assert (
+        describe("histories@support32@decoded__tabpfn_full__late")["rung"]
+        == "histories@support32@decoded"
     )
 
 
-def test_combined_distance_is_chord_of_concatenated_states() -> None:
-    from free_foundations.expanded.distance import pairwise_distance  # noqa: PLC0415
-    from free_foundations.panel.networks import combined  # noqa: PLC0415
-
-    rng = np.random.default_rng(5)
-    first, second = rng.normal(size=(6, 4)), rng.normal(size=(6, 3))
-    unit = np.column_stack(
-        [
-            first / np.linalg.norm(first, axis=1, keepdims=True),
-            second / np.linalg.norm(second, axis=1, keepdims=True),
-        ]
-    )
-    np.testing.assert_allclose(
-        combined(pairwise_distance(first), pairwise_distance(second)),
-        pairwise_distance(unit, metric="euclidean") / np.sqrt(2),
-        atol=1e-12,
-    )
-
-
-def test_contrasts_are_matched_and_controls_join_every_family() -> None:
+def test_contrasts_and_confidence_sets_use_principal_matched_procedures() -> None:
     columns = [
-        "histories__tabfm__early_concat|matched|diagonal",
-        "histories__supervised_mlp16|matched|diagonal",
+        "histories@decoded__tabfm__late|matched|diagonal",
+        "histories__tabfm__late|matched|diagonal",
         "histories__direct|matched|diagonal",
+        "histories@decoded__tabpfn_full__late|matched|diagonal",
+        "histories@decoded__tabpfn_full_random__late|matched|diagonal",
         "uniform_network|none|diagonal",
         "ff5_mom_diagonal|none|control",
-        "histories__direct|exp|diagonal",
-        "histories__direct__placebo0|exp|diagonal",
+        "fernandez_joint|exp|diagonal",
+        "histories@support32@decoded__tabfm__late|matched|diagonal",
     ]
     rng = np.random.default_rng(0)
     daily = pd.DataFrame(
         rng.normal(size=(30, len(columns))),
         columns=columns,
-        index=pd.date_range("2020-01-02", periods=30).astype(str),
+        index=pd.date_range("2020-01-02", periods=30),
     )
     table = inference.contrasts(daily)
     assert set(table["contrast"]) == {
-        "pretrained vs supervised",
-        "pretrained vs direct",
-        "topology",
+        "decoded vs native",
+        "decoded vs native inputs",
+        "pretrained vs reset",
     }
-    first = table.loc[table["contrast"].eq("pretrained vs supervised")].iloc[0]
+    first = table.loc[table["contrast"].eq("decoded vs native")].iloc[0]
     expected = (daily[columns[0]] - daily[columns[1]]).sum()
     assert first["difference"] == pytest.approx(expected)
     assert first["year_2020"] == pytest.approx(expected)
     groups = inference.families(daily)
+    assert set(groups) == {"diagonal|matched"}
     assert "ff5_mom_diagonal|none|control" in groups["diagonal|matched"]
-    assert "ff5_mom_diagonal|none|control" in groups["diagonal|exp"]
-    assert not any("placebo" in column for group in groups.values() for column in group)
+    assert "fernandez_joint|exp|diagonal" in groups["diagonal|matched"]
+    assert not any(
+        "random" in column or "@support" in column for column in groups["diagonal|matched"]
+    )
 
 
-def test_shared_support_targets_change_only_the_labels() -> None:
-    from free_foundations.expanded.baselines import compression_states  # noqa: PLC0415
-    from free_foundations.expanded.representations import ablated_distances  # noqa: PLC0415
-    from free_foundations.panel import networks  # noqa: PLC0415
+def test_duplicate_networks_reuse_construction_and_sample_curves_score_diagonal_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from free_foundations.contracts import FloatArray  # noqa: PLC0415
+    from free_foundations.fernandez.kernels import Kernel  # noqa: PLC0415
+    from free_foundations.fernandez.models import rank_distance  # noqa: PLC0415
+    from free_foundations.panel import evaluation  # noqa: PLC0415
 
-    rng = np.random.default_rng(5)
-    tickers = tuple("ABCDEFGH")
-    index = pd.MultiIndex.from_product([range(2010, 2020), tickers], names=["year", "ticker"])
-    four = pd.DataFrame(
-        rng.uniform(0.1, 2, (len(index), 4)),
-        index=index,
-        columns=list(observations.CHARACTERISTICS),
+    rng = np.random.default_rng(27)
+    firms = 8
+    joint = rank_distance(rng.normal(size=(firms, 5)))
+    learned = np.abs(
+        np.subtract.outer(np.arange(firms, dtype=float), np.arange(firms, dtype=float))
     )
-    income = rng.normal(size=len(index))
-    income[::5] = np.nan  # the income target is missing for some support rows
-    broad = pd.DataFrame(
-        {networks.ASSETS: rng.uniform(1, 9, len(index)), networks.INCOME: income}, index=index
+    distances = {
+        "fernandez_joint": joint,
+        "histories__direct": learned,
+        "histories@support32@decoded__pca16": learned.copy(),
+    }
+    calls: list[str] = []
+    original = evaluation.kernel_weights
+
+    def counted(
+        distance: FloatArray,
+        kernel: Kernel,
+        *,
+        self_links: bool = False,
+        target: float | None = None,
+    ) -> tuple[FloatArray, float]:
+        calls.append(kernel)
+        return original(distance, kernel, self_links=self_links, target=target)
+
+    monkeypatch.setattr(evaluation, "kernel_weights", counted)
+    built = evaluation.networks(distances)
+    assert calls == ["exp", "matched"]
+    assert (
+        built["histories__direct", "matched"]
+        is built["histories@support32@decoded__pca16", "matched"]
     )
-    view = networks.rung_views(four, broad, 2019, observations.CHARACTERISTICS, 3)["histories"]
-    shared = networks.shared_contexts(view, four, broad, tickers, 2019)
-    first, second = shared["market_cap_assets"], shared["income_assets"]
-    assert first.support_ids == second.support_ids
-    assert not np.array_equal(first.targets, second.targets)
-    for name, distance in ablated_distances(first).items():
-        np.testing.assert_array_equal(distance, ablated_distances(second)[name])
-    for name, states in compression_states(first).items():
-        np.testing.assert_array_equal(states, compression_states(second)[name])
-    # The alternative task pipeline, by contrast, selects different support rows.
-    pipeline = networks.context(view, networks.labels(four, broad, "income_assets"), tickers, 2019)
-    primary = networks.context(
-        view, networks.labels(four, broad, "market_cap_assets"), tickers, 2019
+    annual = observations.Annual(
+        tuple(f"T{i}" for i in range(firms)),
+        rng.normal(size=(100, firms)),
+        rng.normal(size=(20, firms)),
+        rng.normal(size=(100, firms)),
+        rng.normal(size=(20, firms)),
+        np.eye(firms),
+        tuple(str(day) for day in pd.bdate_range("2020-01-02", periods=20)),
+        rng.normal(size=(100, 6)),
     )
-    assert pipeline.support_ids != primary.support_ids
+    panel = evaluation.Panel()
+    for name, kernel in built:
+        panel.intensities[name, kernel, "diagonal"] = (0.0 if name == "zero_network" else 0.2, 0.0)
+    evaluation.update(panel, 2020, annual, distances)
+    native = "histories__direct|matched|diagonal"
+    sampled = "histories@support32@decoded__pca16|matched|diagonal"
+    np.testing.assert_array_equal(panel.daily[native][0], panel.daily[sampled][0])
+    assert "histories__direct|matched|correlation" in panel.daily
+    assert "histories@support32@decoded__pca16|matched|correlation" not in panel.daily
+
+
+def test_same_current_network_preserves_different_frozen_spatial_coefficients() -> None:
+    from free_foundations.fernandez.models import rank_distance  # noqa: PLC0415
+    from free_foundations.panel import evaluation  # noqa: PLC0415
+
+    rng = np.random.default_rng(91)
+    firms = 7
+    distance = rank_distance(rng.normal(size=(firms, 5)))
+    distances = {
+        "fernandez_joint": distance,
+        "histories__direct": distance,
+        "histories__pca16": distance.copy(),
+    }
+    annual = observations.Annual(
+        tuple(f"T{i}" for i in range(firms)),
+        rng.normal(size=(100, firms)),
+        rng.normal(size=(20, firms)),
+        rng.normal(size=(100, firms)),
+        rng.normal(size=(20, firms)),
+        np.eye(firms),
+        tuple(str(day) for day in pd.bdate_range("2020-01-02", periods=20)),
+        rng.normal(size=(100, 6)),
+    )
+    panel = evaluation.Panel()
+    built = evaluation.networks(distances)
+    for name, kernel in built:
+        intensity = 0.6 if name == "histories__pca16" else 0.1
+        panel.intensities[name, kernel, "diagonal"] = (intensity, 0.0)
+    evaluation.update(panel, 2020, annual, distances)
+    for name in ("histories__direct", "histories__pca16"):
+        weights = built[name, "matched"][0]
+        intensity = panel.intensities[name, "matched", "diagonal"][0]
+        expected_covariance = forecast_covariance(
+            block(annual.prior, weights), weights, intensity, annual.factor_covariance, "diagonal"
+        )
+        expected = gaussian_daily(
+            annual.raw_realized - annual.raw_prior.mean(axis=0), expected_covariance
+        )
+        np.testing.assert_allclose(panel.daily[f"{name}|matched|diagonal"][0], expected)
+    assert not np.allclose(
+        panel.daily["histories__direct|matched|diagonal"][0],
+        panel.daily["histories__pca16|matched|diagonal"][0],
+    )

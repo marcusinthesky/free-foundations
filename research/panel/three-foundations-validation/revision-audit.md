@@ -1,105 +1,158 @@
-# Review-response audit
+# Reduced-study revision and reproduction record
 
-The reviewed baseline is f405e987373f6b5aa48718b4bcf93b1aa31f7ad1. The revision
-retains the six-section argument and the four principal pretrained models.
+Revision date: 20 October 2026. The source tree was revised from commit
+`55aff9664eda629afa4f30af8cf402315965bf81`, including the author's existing
+uncommitted changes. This is a working-tree revision, not a claim that the
+completed work has been committed.
 
-| Review point | Resolution and evidence |
-| --- | --- |
-| Specification-level claims | Abstract, results and conclusion identify matched bandwidths and fitted innovation variances; common-marginal reversals enter the main discussion. |
-| Calibration uncertainty | Existing paired intervals are now presented; they did not require new estimation. Both block lengths are retained. |
-| Native-direct comparison | Additional paired contrasts use the recorded daily scores and the existing bootstrap. TabPFN's 63-day interval includes zero. |
-| Coordinate versus normalization changes | A declared crossed metric comparison separates native and exposure coordinates from Euclidean versus chord distance; the original direct benchmark remains separately labeled. |
-| Kumo fold-induced geometry | A cross-fitted intercept-only control checks all three reset encoders against the training-group target means. |
-| Fold sensitivity | Four additional fixed balanced assignments refit the readouts and spatial coefficients; every assignment is retained. |
-| Theory interpretation | The main bound states its empirical-fitting and uniform-risk assumptions; direct inputs supply the information benchmark, while the restricted readout defines accessibility. |
-| Sample-size interpretation | The curves describe encoder-context and financial-calibration sensitivity; they do not identify a pretraining-specific learning rate. |
-| Target scope and score scale | Counts include dates and firm-days; commonality and a normalized joint-score contrast are generated from numerical artifacts. |
-| Benchmark label and figures | The auxiliary-task neural network is labeled by its valuation target; the PGF figure caption explains different calibration endpoints. |
-| IV intervals | The supplement distinguishes unconstrained IV bootstrap inference from constrained spatial-error estimation. |
-| Checkpoint identity | Expected hashes were checked independently against public metadata at each pinned revision, including configuration files and Fast weights. Altered bytes and contradictory provenance are rejected. |
-| Embedding reuse | Cache contracts bind extraction source, runtimes, checkpoint bytes, ordered inputs and payload integrity; legacy entries are not relabeled. |
-| Availability | The manuscript states reviewer access on request to the private frozen archive. |
+## Retained argument and empirical scope
 
-The numerical diagnostic stage records daily and annual scores, explicit paired
-contrasts, decoder fits and null checks. The publication renderer checks those
-records before generating LaTeX tables and scalar bindings. The original
-specification remains the principal analysis; added diagnostics are part of the
-retrospective development study.
+The paper develops task information, target recovery and geometry, restricted
+readout estimation, and financial use. The empirical application retains the
+four frozen pretrained models, direct/PCA/valuation-task controls, exposure
+calibration, sample-size comparisons, learned-weight controls, and the decisive
+variance, normalization and fold checks. Strong return-based covariance
+benchmarks remain in the comparison. Removing exploratory procedures neither
+creates a new holdout nor changes the retrospective interpretation.
 
-## Reproduction status
+The Fernández support retains common-four and common-three cohorts, robust MM
+betas, spatial lag IV and spatial-error ML, generated-beta inference, self-link
+sensitivity, and the published-calibration VaR audit. The paper states the
+partial replication's scope and the original table's unresolved VaR discrepancy.
 
-After the existing archive upload completed, an empty-cache checkout restored
-all 57 DVC-managed publication inputs at the reviewed baseline. This verifies
-availability of the recorded baseline, separately from reproduction of the
-revised experiment. The Python suite passed 126 tests, with two optional model
-integration tests also passing separately; the Lean project and manuscript
-declaration checks passed. An intermediate comparison of 168 freshly extracted
-state files against their corresponding legacy arrays found exact equality;
-this comparison does not substitute for the final score reconciliation.
+## Execution changes
 
-The isolated measurement run completed on 1,502 dates and 642,024 firm-days.
-Every overlapping daily score matched the retained principal experiment exactly.
-All 30 Kumo reset checks had zero feature spread and zero prediction error
-against the intercept-only predictor, with five distinct prediction vectors.
-Calibration gains for the four pretrained models remained positive under either
-metric with fitted innovation variances, with positive intervals at both block
-lengths; their common-marginal point estimates remained negative with intervals
-spanning zero. All fifteen fitted-variance TabPFN learned-minus-reset contrasts
-across the five partitions had positive intervals at both block lengths.
+The DVC graph has nine stages, reduced from 27. Preparation constructs shared
+annual samples and target coordinates once. Extraction saves a fixed inventory
+of 40 model contexts. Financial estimation consumes these verified states and
+produces the principal study and bounded diagnostics together. Publication only
+reads saved estimates. The auxiliary replication runs independently of model
+inference.
 
-The canonical principal experiment and independent legacy stages are being
-regenerated with verified checkpoints and newly validated embedding identities.
-The final diagnostic command also passed in the isolated working copy with its
-complete provenance record and explicit date alignment. The review publication
-build validated 1,380 score rows and produced a seven-page main paper with a
-22-page supplement; main text, headings and captions total 2,452 words, and the
-abstract has 192 words. Native PGF and the new tables were inspected in the PDF.
+Retired pilot/expanded/ladder execution branches, intermediate readouts,
+unsupported models, duplicate experiment grids and their publication machinery
+were removed. The initial source tree and retained numerical baseline were
+preserved before pruning. Raw financial snapshots and the content-addressed DVC
+object cache were retained; no cache garbage collection was performed.
 
-Canonical result reconciliation and diagnostic registration, the remaining
-pipeline stages, archive synchronization and restoration of the revised
-publication remain in progress.
+Filing audits now compare keys, missingness and values rather than populated-cell
+counts. The canonical study has no subset-run option. Representation contracts
+bind ordered contexts, source and dependency hashes, checkpoints, actual device,
+runtime and payload checksums. Network reuse preserves separately calibrated
+spatial coefficients even when current weights coincide. Matched networks record
+requested and achieved concentration, including unattainable targets.
 
-## Final narrative refinement
+## Regeneration and verification
 
-The main methodology now introduces the sufficient task-to-target alignment
-condition before discussing distance and estimation. It explains the distinct
-roles of loss and masking, retains the cash-flow/risk example, and moves the
-unchanged prediction-preserving transformation proof into the theoretical
-appendix. The introduction distinguishes self-supervision from synthetic-task
-pretraining; the conclusion returns to the economic measurement framework.
-The abstract identifies the calibrated-minus-native contrast explicitly.
+The four pinned checkpoint integrations passed. All 40 representation contexts
+were freshly extracted and verified under the retained implementation. CUDA was
+unavailable on this host, so model inference used the recorded CPU fallback.
+Financial estimation used one BLAS thread after a host-specific benchmark found
+large overhead from the default 12-thread backend. This is an execution setting,
+not a change in the estimator or a restriction imposed on other hosts.
 
-The refreshed publication renderer validated 1,380 score rows and 642,024
-firm-days; its manuscript fingerprint matches the revised source. Source-based
-TeXcount with generated numbers expanded reports 2,446 main-text words including
-headings and captions, and 193 abstract words. The seven-page main paper retains
-the native PGF figure and complete conclusion together on its final page; the
-supplement now occupies 23 pages. The moved proof preserves all formal
-declaration references. This editorial build does not change the pending
-canonical regeneration and archive-restoration status above.
+The supporting replication was regenerated with 199 valid generated-beta draws
+per procedure; one inadmissible draw was rejected before reaching that target.
+The eleven shared common-four point estimates reproduce the retained baseline
+exactly. The zero-dependence VaR bound remains approximately 16.85 dollars,
+incompatible with the published 36.27-dollar cell under the stated calibration.
 
-The final two wording edits state the framework's contribution as conditions
-for recovery and introduce the task statistic at a population optimum through
-the representation's prediction head. The updated source-based main-text count
-is 2,450 words including headings and captions; the abstract remains 193 words.
-The rebuilt PDF retains the complete conclusion on page 7 without layout
-warnings. Numerical results and formal statements are unchanged.
+The complete Python suite passed 129 tests, with two optional checkpoint
+integration tests passing separately. Strict type checking, formatting, dependency
+checks and dead-code checks passed. The Lean library and all fifteen manuscript
+declaration references passed. The revised manuscript has approximately 3,300
+main-text words including headings and captions, a 187-word abstract, two main
+tables and one figure; mathematical development precedes empirical diagnostics
+and the concise replication appendix.
 
-The subsequent frozen-representation comparison now explains in the main
-methodology how external learning narrows the financial estimation task and how
-that choice trades estimation difficulty against information and approximation
-loss. It interprets the existing bound without asserting an unproved ranking
-against joint supervised estimation. No new formal claim was introduced:
-the cited Lean declaration list is unchanged, its checker passed, and the
-bound's existing Lean proof remains applicable. The renderer again validated
-1,380 saved score rows and 642,024 firm-days. The current TeXcount is 2,476
-main-text words including headings and captions, plus 193 abstract words.
-The refreshed PDF has a complete seven-page main paper and no layout warnings.
+Fresh financial estimation completed in 117.6 seconds on 1,502 dates and
+642,024 firm-days, producing 138 principal and 180 diagnostic score columns.
+The retained date index and target-reliability estimates match the baseline.
+Fresh model outputs are not asserted to equal historical cache entries: the
+largest principal daily score difference is 47.52, and the largest full-period
+score difference is 351.50, both in random TabPFN controls. The migration record
+retains the complete discrepancies rather than suppressing changed estimates.
+A separate cache audit reproduces the archived 2020 exposure fits from the
+preserved CUDA states and the fresh fits from the current CPU states, using the
+same context and financial target. The numerical differences already reside in the extracted features, before
+financial estimation. Adapter source identities also changed during pruning,
+so this cache comparison does not isolate the effect of device alone.
+Historical GPU and fresh CPU inference are not claimed to be numerically
+interchangeable. `src/latex/build/device-audit.json`
+records the cached-state comparison without rerunning model inference.
+The four principal fitted-variance calibration gains remain positive; all four
+common-marginal point estimates remain negative with paired intervals spanning
+zero. Every main table and scalar claim is generated from the fresh results.
 
-The final clarification specifies the function class fitted from financial
-exposure labels, conditional on pretrained weights and supplied context. It
-retains the interpretation of lower estimation difficulty as a conditional
-possibility rather than a comparative theorem. The manuscript's Lean declaration
-inventory remains identical. The renderer and PDF build passed again; current
-TeXcount is 2,484 main-text words including headings and captions, with a
-193-word abstract.
+## Machine-readable evidence
+
+`src/latex/build/claims-audit.json` binds reported quantities and publication
+selectors to their numerical inputs. `src/latex/build/migration-audit.json`
+compares fresh retained results with the pre-pruning baseline, including exact
+date alignment and maximum numerical discrepancies. These are separate checks:
+artifact agreement does not independently certify the financial source data.
+
+`src/latex/build/restoration-certification.json` records the completed archive
+check and its actual outcomes: final source inventory, an independent empty DVC
+cache, restored numerical inputs, guarded model-free/offline rendering, asset
+comparison and cached manuscript compilation. Consult the record for the exact
+source hash and restoration status. It lives outside the publication stage's
+outputs so producing the certification cannot alter the source snapshot it
+certifies. An absent or failed record must not be interpreted as a successful
+restoration.
+
+## Editorial revision: 21 October 2026
+
+The later editorial revision retitles the manuscript *Pretrained Tabular Features
+and the Measurement of Financial Proximity* and organizes its main argument into
+Introduction, Framework, Empirical design, Results, and Conclusion. It targets
+approximately 3,800 main-text words, with a 4,000-word ceiling including headings
+and captions, and a 180–220-word abstract. Exact task–target alignment and
+calibrated-risk propositions move to the mathematical appendix with their proofs
+and declaration tags; the fixed-parameter restrictions on covariance stability
+remain explicit.
+
+The revision brings the return-based benchmarks into a separate panel of the
+principal comparison, places exposure-prediction R² first, and gives the
+fitted-innovation and common-marginal contrasts separate panels with both 21-day
+and 63-day bootstrap intervals. These presentation changes use saved numerical
+inputs. They do not rerun extraction or financial estimation, alter the analysis
+chronology, or create a new holdout.
+
+Editorial verification is complete. TeXcount reports 3,249 main-text prose
+words, 39 heading words and 203 caption words: 3,491 in total, below the
+4,000-word ceiling. The abstract contains 181 words. The revised source is
+identified by SHA-256
+`d1593ef4b68ceca22fe53eba99aadd99dd6b2938a24b156c5058ee8c58baf313`.
+
+The publication build and Lean blueprint declaration checks pass. Comparison
+with the saved pre-edit working source preserves all three exact proposition
+statements, 21 labels and 11 declaration tags. All 49 existing numerical claims
+and the recorded numerical input hashes are unchanged. The claims audit binds
+the final manuscript and renderer sources. The four targeted publication tests,
+renderer lint and formatting checks, and focused repository gates pass.
+
+The rendered 21-page PDF was inspected on main-text pages 1–9 and affected
+appendix pages 10–13 and 19–20. Tables and the figure are legible, with complete
+paragraphs around the main exhibits. Compilation reports no warnings, overfull
+boxes or undefined references. An independent editorial and claim-scope review
+found no unresolved correctness findings; it checked the saved evidence rather
+than independently re-estimating the study or verifying external literature.
+
+The two added table panels are declared in the publication stage and recorded
+in the DVC lock. Only `dvc repro --single-item publication` was run for pipeline
+closure; model extraction and financial estimation were not rerun. The 20 October
+execution and reproduction results above describe that earlier analysis run.
+The existing restoration certification remains tied to its recorded source hash
+and does not certify the later editorial source.
+
+## Authorship follow-up: 21 October 2026
+
+Added Chun-Sung Huang after Marcus Gawronsky in the author block, retaining
+Marcus's correspondence address. The PDF was rebuilt and its title page
+visually checked; the LaTeX lint check passes. The publication-only DVC stage
+was refreshed to bind the author change, with no empirical re-estimation.
+The manuscript source SHA-256 after this metadata change is
+`e9e1adc19e2e11e3299efe7d1c3a918fc5588d37df2de63ef5edffe89691678a`.
+The preceding editorial source hash identifies the version before this
+authorship update.

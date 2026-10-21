@@ -7,9 +7,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from free_foundations.expanded import foundations
-from free_foundations.expanded.encoding import Prepared
-from free_foundations.expanded.setup import local_checkpoint
+from free_foundations.representations import foundations
+from free_foundations.representations.encoding import Prepared
+from free_foundations.representations.setup import local_checkpoint
 
 pytestmark = pytest.mark.skipif(
     os.environ.get("RUN_FOUNDATION_INTEGRATION") != "1",
@@ -61,7 +61,11 @@ def test_native_head_fidelity_frozen_weights_and_batch_consistency(
     handle.remove()
     assert len(observed) == 1
     with torch.inference_mode():
-        reconstructed = head(torch.tensor(whole["late"], dtype=torch.float32)[None])
+        reconstructed = head(
+            torch.tensor(
+                whole["late"], dtype=torch.float32, device=next(model.parameters()).device
+            )[None]
+        )
     torch.testing.assert_close(reconstructed.reshape_as(observed[0]), observed[0])
     split = foundations.states(data, path, metadata["revision"], name, batch_size=2)
     for key, values in whole.items():

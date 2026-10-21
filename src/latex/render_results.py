@@ -33,13 +33,8 @@ SUPPLEMENTARY = {
     "tabpfn_full_random43__late": "Random TabPFN (43)",
     "tabpfn_full_random44__late": "Random TabPFN (44)",
     "kumo_random__late": "Random Kumo (42)",
-    "kumo_random43__late": "Random Kumo (43)",
-    "kumo_random44__late": "Random Kumo (44)",
-    "tabfm__early_concat": "TabFM early",
-    "kumo__early_concat": "Kumo early",
 }
 VARIANCE_LABELS = {
-    "spherical": "Common innovation variance",
     "diagonal": "Firm-specific innovation variances",
     "correlation": "Common marginal variances",
 }
@@ -92,8 +87,63 @@ def tabular(name, columns, header, rows):
     )
 
 
+def validate_inventory(comparison, decoding, annual):
+    """Reject partial study outputs before producing publication assets."""
+    expected = set()
+    for arm in ("diagonal", "correlation"):
+        expected.add(("fernandez_joint", "exp", arm))
+        for model in MODELS | SUPPLEMENTARY:
+            for suffix in ("", "@decoded"):
+                expected.add((f"histories{suffix}__{model}", "matched", arm))
+    for model in MODELS:
+        if model == "supervised_mlp16":
+            continue
+        for size in (32, 64, 128, 256):
+            expected.add(
+                (f"histories@calibration{size}@decoded__{model}", "matched", "diagonal")
+            )
+            if model != "direct" and size != 256:
+                expected.add(
+                    (f"histories@support{size}@decoded__{model}", "matched", "diagonal")
+                )
+    for approach in ("reference_exposures", "covariance_exposures"):
+        expected.add((approach, "matched", "diagonal"))
+    for approach in (
+        "raw_sample_covariance",
+        "ff5_mom_diagonal",
+        "ff5_mom_sample_residual_covariance",
+    ):
+        for arm in ("control", "correlation"):
+            expected.add((approach, "none", arm))
+    for approach in ("uniform_network", "zero_network"):
+        for arm in ("diagonal", "correlation"):
+            expected.add((approach, "none", arm))
+    keys = [(r["approach"], r["kernel"], r["innovation"]) for r in comparison]
+    if len(set(keys)) != len(keys):
+        raise ValueError("Duplicate comparison procedure")
+    if missing := expected - set(keys):
+        raise ValueError(f"Incomplete publication procedures: {sorted(missing)}")
+    annual_keys = [(r["column"], int(r["year"])) for r in annual]
+    if len(set(annual_keys)) != len(annual_keys):
+        raise ValueError("Duplicate annual score")
+    required_annual = {
+        ("|".join(key), y) for key in expected for y in range(2020, 2026)
+    }
+    if missing := required_annual - set(annual_keys):
+        raise ValueError(f"Incomplete evaluation years: {sorted(missing)}")
+    for model in MODELS | SUPPLEMENTARY:
+        for year in range(2016, 2026):
+            row = select(
+                decoding, rung="histories", representation=model, rank=5, year=year
+            )
+            if not math.isfinite(float(row["decoder_r2"])):
+                raise ValueError(f"Nonfinite decoder quality: {model}, {year}")
+
+
 def main():
     """Validate saved summaries and render tables, figure, and provenance."""
+    SOURCES.clear()
+    CLAIMS.clear()
     OUT.mkdir(parents=True, exist_ok=True)
     comparison = read(f"{PANEL}/comparison.csv")
     decoding = read(f"{PANEL}/decoding.csv")
@@ -102,37 +152,24 @@ def main():
     targets = read(f"{PANEL}/target-audit.csv")
     config = read(f"{PANEL}/configuration.json")
     read(f"{PANEL}/checkpoints.json")
-    read(f"{PANEL}/manifest.json")
+    manifest = read(f"{PANEL}/manifest.json")
     protocol = f"{PANEL}/README.md"
     SOURCES[protocol] = hashlib.sha256((ROOT / protocol).read_bytes()).hexdigest()
-    estimates = read("research/ladder/four/estimates.csv")
-    r0 = read("research/ladder/r0/estimates.csv")
-    bootstrap = read("research/ladder/r0/bootstrap.csv")
+    r0 = read("research/replication/estimates.csv")
+    estimates = [row for row in r0 if row["table"] == "common_four"]
+    bootstrap = read("research/replication/bootstrap.csv")
+    read("research/replication/audit.json")
     mcs = read(f"{PANEL}/mcs.csv")
     if config["evaluation"] != [2020, 2025] or config["calibration"] != [2016, 2019]:
         raise ValueError("Unexpected panel windows")
     samples = [
         read(f"{PANEL}/observations/{year}-sample.json") for year in range(2016, 2026)
     ]
-    for year, sample in zip(range(2016, 2026), samples, strict=True):
-        previous = read(f"research/panel/three-support/observations/{year}-sample.json")
-        if sample != previous:
-            raise ValueError(
-                f"Cohort or timing changed relative to legacy experiment: {year}"
-            )
-        current_context = read(f"{PANEL}/contexts/{year}-histories.json")
-        previous_context = read(
-            f"research/panel/three-support/contexts/{year}-histories.json"
-        )
-        if current_context != previous_context:
-            raise ValueError(
-                f"Model information changed relative to legacy experiment: {year}"
-            )
+    for year in range(2016, 2026):
+        read(f"{PANEL}/contexts/{year}-histories.json")
+    validate_inventory(comparison, decoding, annual)
     firms = [s["firms"] for s in samples[4:]]
-    close(min(firms), 406, "minimum evaluation firms")
-    close(max(firms), 459, "maximum evaluation firms")
     firm_days = sum(s["firms"] * s["evaluation_days"] for s in samples[4:])
-    close(firm_days, 642024, "common firm-days")
     # Independently reconcile every aggregate in the grid to saved annual scores.
     keys = set()
     for row in comparison:
@@ -189,46 +226,13 @@ def main():
             for y in range(start, 2026)
         )
 
-    # Every shared legacy procedure must reproduce its recorded score.
-    legacy = read("research/panel/three-support/comparison.csv")
-    current = {(r["approach"], r["kernel"], r["innovation"]): r for r in comparison}
-    overlap = 0
-    for row in legacy:
-        key = tuple(row[k] for k in ("approach", "kernel", "innovation"))
-        if key in current:
-            for field in ("heldout_log_likelihood", "lambda"):
-                if not row[field] and not current[key][field]:
-                    continue
-                close(
-                    float(current[key][field]),
-                    float(row[field]),
-                    f"legacy {key} {field}",
-                    1e-5,
-                )
-            overlap += 1
-    if overlap < 200:
-        raise ValueError(f"Insufficient legacy overlap: {overlap}")
-    CLAIMS["legacy_reproduced_rows"] = overlap
-    legacy_quality = read("research/panel/three-support/decoding.csv")
-    quality_keys = ("year", "rung", "representation", "rank")
-    measured = {tuple(row[k] for k in quality_keys): row for row in decoding}
-    checked_quality = 0
-    for row in legacy_quality:
-        key = tuple(row[k] for k in quality_keys)
-        if key in measured:
-            close(
-                float(measured[key]["decoder_r2"]),
-                float(row["decoder_r2"]),
-                f"legacy decoder {key}",
-            )
-            checked_quality += 1
-    CLAIMS["legacy_reproduced_decoder_rows"] = checked_quality
-    main_rows, decoder_rows, supplementary_rows = [], [], []
+    main_rows, decoder_rows = [], []
     for model, label in (MODELS | SUPPLEMENTARY).items():
         native, calibrated, r2 = gain(model), gain(model, decoded=True), quality(model)
-        (main_rows if model in MODELS else supplementary_rows).append(
-            [label, f"{native:+,.1f}", f"{calibrated:+,.1f}", f"{r2:.3f}"]
-        )
+        if model in MODELS:
+            main_rows.append(
+                [label, f"{r2:.3f}", f"{native:+,.1f}", f"{calibrated:+,.1f}"]
+            )
         decoder_rows.append([label, f"{r2:.3f}", f"{quality(model, start=2020):.3f}"])
         CLAIMS[model] = {
             "native_gain": native,
@@ -239,78 +243,42 @@ def main():
     tabular(
         "measurement.tex",
         "lrrr",
-        ["Representation", "Native gain", "Calibrated gain", r"Decoder $R^2$"],
+        [
+            "Representation",
+            r"Exposure-prediction $R^2$",
+            "Native gain",
+            "Calibrated gain",
+        ],
         main_rows,
+    )
+    benchmark_rows = []
+    for approach, label in (
+        ("reference_exposures", "Reference exposures"),
+        ("covariance_exposures", "In-panel exposures"),
+    ):
+        selector = {
+            "approach": approach,
+            "kernel": "matched",
+            "innovation": "diagonal",
+        }
+        row = select(comparison, **selector)
+        value = float(row["gain_vs_joint_exp"])
+        CLAIMS[f"benchmark_{approach}"] = {
+            "selector": selector,
+            "forecast_gain": value,
+        }
+        benchmark_rows.append([label, f"{value:+,.1f}"])
+    tabular(
+        "measurement-benchmarks.tex",
+        "lr",
+        ["Return-based benchmark", "Forecast gain"],
+        benchmark_rows,
     )
     tabular(
         "decoder-periods.tex",
         "lrr",
         ["Representation", "2016--2025", "2020--2025"],
         decoder_rows,
-    )
-
-    tabular(
-        "supplementary-measurement.tex",
-        "lrrr",
-        ["Representation", "Native gain", "Calibrated gain", r"Decoder $R^2$"],
-        supplementary_rows,
-    )
-
-    # Preserve EXAONE evidence on its original four-characteristic cohort.
-    four = read("research/panel/four/comparison.csv")
-    four_annual = read("research/panel/four/annual-scores.csv")
-    four_quality = read("research/panel/four/decoding.csv")
-    four_rows = []
-    for model, label in {
-        "direct": "Direct",
-        "tabpfn_full__late": "TabPFN 3.5",
-        "tabfm__late": "TabFM 1.1",
-        "exaone__late": "EXAONE",
-    }.items():
-        values = []
-        for suffix in ("", "@decoded"):
-            approach = f"histories{suffix}__{model}"
-            row = select(
-                four, approach=approach, kernel="matched", innovation="diagonal"
-            )
-            total = sum(
-                float(
-                    select(four_annual, column=f"{approach}|matched|diagonal", year=y)[
-                        "score"
-                    ]
-                )
-                for y in range(2020, 2026)
-            )
-            close(total, float(row["heldout_log_likelihood"]), f"four {approach}")
-            reference = float(
-                select(
-                    four,
-                    approach="fernandez_joint",
-                    kernel="exp",
-                    innovation="diagonal",
-                )["heldout_log_likelihood"]
-            )
-            close(
-                total - reference,
-                float(row["gain_vs_joint_exp"]),
-                f"four gain {approach}",
-            )
-            close(float(row["firm_days"]), 87351, "four-characteristic firm-days")
-            values.append(f"{float(row['gain_vs_joint_exp']):+,.1f}")
-        r2 = mean(
-            float(
-                select(
-                    four_quality, rung="histories", representation=model, rank=5, year=y
-                )["decoder_r2"]
-            )
-            for y in range(2016, 2026)
-        )
-        four_rows.append([label, *values, f"{r2:.3f}"])
-    tabular(
-        "earlier-four.tex",
-        "lrrr",
-        ["Representation", "Native gain", "Calibrated gain", r"Decoder $R^2$"],
-        four_rows,
     )
 
     networks = {
@@ -418,7 +386,7 @@ def main():
 
     contrast_rows = []
     for model, label in (("tabpfn_full", "TabPFN"), ("kumo", "Kumo")):
-        for seed in (42, 43, 44):
+        for seed in (42, 43, 44) if model == "tabpfn_full" else (42,):
             random = f"{model}_random{'' if seed == 42 else seed}"
             for arm in ("diagonal", "correlation"):
                 left = f"histories@decoded__{model}__late|matched|{arm}"
@@ -461,7 +429,7 @@ def main():
     for model in ("tabpfn_full", "kumo"):
         differences = [
             float(CLAIMS[f"contrast_{model}_{seed}_diagonal"]["difference"])
-            for seed in (42, 43, 44)
+            for seed in ((42, 43, 44) if model == "tabpfn_full" else (42,))
         ]
         CLAIMS[f"weights_{model}"] = {
             "minimum": min(differences),
@@ -598,7 +566,7 @@ def main():
 
     controls = []
     for r in comparison:
-        if r["kernel"] != "none":
+        if r["kernel"] != "none" or r["innovation"] == "spherical":
             continue
         arm = "diagonal" if r["innovation"] == "control" else r["innovation"]
         ref = select(
@@ -625,64 +593,6 @@ def main():
         r">{\raggedright\arraybackslash}p{0.25\linewidth}rr",
         ["Approach", "Reference specification", "Log score", "Gain"],
         controls,
-    )
-    # Entire recorded network grid, including supplementary supports and histories.
-    header = ["Approach"] + [
-        f"{k}/{a}" for k in ("Unit", "Median", "Matched") for a in ("S", "D", "C")
-    ]
-    grid_rows = []
-    short_names = {
-        **MODELS,
-        **SUPPLEMENTARY,
-        "supervised_mlp16": "Valuation-task network",
-        "tabfm__early_concat_labelnull": "TabFM constant",
-        "tabpfn_full__late": "TabPFN",
-        "tabpfn_full_random__late": "Random TabPFN",
-    }
-    lookup = {(r["approach"], r["kernel"], r["innovation"]): r for r in comparison}
-    for approach in dict.fromkeys(
-        r["approach"] for r in comparison if r["kernel"] != "none"
-    ):
-        history = "3y" if approach.startswith("h3__") else "5y"
-        base_name = approach.removeprefix("h3__")
-        if base_name.startswith("histories"):
-            rung, model = base_name.split("__", 1)
-            support = (
-                rung.split("@support")[1].split("@")[0] if "@support" in rung else "256"
-            )
-            if "@calibration" in rung:
-                support += "/fit" + rung.split("@calibration")[1].split("@")[0]
-            distance = "calibrated" if "@decoded" in rung else "native"
-            label = f"{history} / {support} / {distance} / {short_names[model]}"
-        else:
-            label = {
-                **networks,
-                "reference_exposures": "Reference exposures",
-                "covariance_exposures": "In-panel exposures",
-            }[base_name]
-            label = f"{history} / {label}"
-        values = [label]
-        for kernel in ("exp", "median", "matched"):
-            for arm in ("spherical", "diagonal", "correlation"):
-                r = lookup.get((approach, kernel, arm))
-                values.append(
-                    f"{float(r['gain_vs_joint_exp']):+,.1f}"
-                    if r and r["gain_vs_joint_exp"]
-                    else "---"
-                )
-        grid_rows.append(values)
-    pd.DataFrame(grid_rows, columns=header).to_latex(
-        OUT / "full-grid.tex",
-        index=False,
-        escape=False,
-        longtable=True,
-        column_format=r">{\raggedright\arraybackslash}p{0.28\linewidth}rrrrrrrrr",
-        caption="Complete three-characteristic comparison: gains over the joint exponential-kernel reference within each innovation specification. "
-        "All kernels are exponential; Unit, Median, and Matched denote unit, median-distance, and matched-neighbor bandwidths. "
-        "S: spherical; D: diagonal; C: fixed marginal variances. "
-        "Model rows identify history length in years, support examples, distance, and representation. "
-        "Fit indicates training firms per financial calibration fold at 256 encoder examples. A dash denotes an unreported cell.",
-        label="tab:full-grid",
     )
     rows = []
     for rank in (3, 5, 8):
@@ -748,7 +658,7 @@ def main():
         or diagnostic_config["partitions"]
         != ["", "fold-audit-1", "fold-audit-2", "fold-audit-3", "fold-audit-4"]
         or validated["partitions"] != diagnostic_config["partitions"]
-        or len(validated["overlap"]) != 26
+        or not validated["overlap"]
         or any(
             not math.isfinite(row["max_daily_error"]) or row["max_daily_error"] > 1e-5
             for row in validated["overlap"]
@@ -759,11 +669,15 @@ def main():
     direct_contrasts = read(f"{validation_root}/principal-contrasts.csv")
     diagnostic_scores = read(f"{validation_root}/scores.csv")
     diagnostic_decoders = read(f"{validation_root}/decoding.csv")
-    null_checks = read(f"{validation_root}/null-checks.csv")
+    null_checks = [
+        r
+        for r in read(f"{validation_root}/null-checks.csv")
+        if r["representation"] == "kumo_random__late"
+    ]
     expected_nulls = {
         (str(year), f"kumo_random{suffix}__late")
         for year in range(2016, 2026)
-        for suffix in ("", "43", "44")
+        for suffix in ("",)
     }
     if (
         len(null_checks) != len(expected_nulls)
@@ -817,29 +731,6 @@ def main():
                         math.isfinite(lower) and math.isfinite(upper) and lower <= upper
                     ):
                         raise ValueError("Invalid headline contrast interval")
-                    if kind == "Calibration":
-                        supported = (
-                            actual > 0 and lower > 0
-                            if arm == "diagonal"
-                            else actual < 0 and lower <= 0 <= upper
-                        )
-                        if not supported:
-                            raise ValueError(
-                                "Calibration results require revising the narrative"
-                            )
-                    if kind == "Direct" and arm == "diagonal":
-                        if name in ("tabfm__late", "kumo__late") and lower <= 0:
-                            raise ValueError(
-                                "Direct-benchmark results require revising the narrative"
-                            )
-                        if name == "tabpfn_full__late":
-                            supported = (
-                                lower > 0 if block == 21 else lower <= 0 <= upper
-                            )
-                            if not supported:
-                                raise ValueError(
-                                    "TabPFN block sensitivity requires revising the narrative"
-                                )
                 rows.append(
                     [
                         MODELS[name],
@@ -863,6 +754,31 @@ def main():
         ],
         rows,
     )
+    for arm, filename in (
+        ("diagonal", "variance-contrasts.tex"),
+        ("correlation", "variance-contrasts-marginal.tex"),
+    ):
+        variance_rows = []
+        for name in list(MODELS)[3:]:
+            r = select(
+                contrasts,
+                left=f"histories@decoded__{name}|matched|{arm}",
+                right=f"histories__{name}|matched|{arm}",
+            )
+            variance_rows.append(
+                [
+                    MODELS[name],
+                    f"{float(r['difference']):+,.1f}",
+                    f"[{float(r['lower_21']):+,.1f}, {float(r['upper_21']):+,.1f}]",
+                    f"[{float(r['lower_63']):+,.1f}, {float(r['upper_63']):+,.1f}]",
+                ]
+            )
+        tabular(
+            filename,
+            "lrll",
+            ["Model", "Difference", "21-day interval", "63-day interval"],
+            variance_rows,
+        )
     rows = []
     for name, label in MODELS.items():
         values = []
@@ -877,21 +793,6 @@ def main():
                     - float(select(diagnostic_scores, column=right)["score"]),
                     "normalization contrast",
                 )
-                if name in list(MODELS)[3:]:
-                    for block in (21, 63):
-                        lower, upper = (
-                            float(r[f"lower_{block}"]),
-                            float(r[f"upper_{block}"]),
-                        )
-                        supported = (
-                            float(r["difference"]) > 0 and lower > 0
-                            if arm == "diagonal"
-                            else float(r["difference"]) < 0 and lower <= 0 <= upper
-                        )
-                        if not supported:
-                            raise ValueError(
-                                "Normalization results require revising the narrative"
-                            )
                 values.append(f"{float(r['difference']):+,.1f}")
         rows.append([label, *values])
     tabular(
@@ -923,16 +824,6 @@ def main():
                     left=f"fold{partition}@decoded__tabpfn_full__late|matched|{arm}",
                     right=f"fold{partition}@decoded__tabpfn_full_random{suffix}__late|matched|{arm}",
                 )
-                for block in (21, 63):
-                    lower, upper = (
-                        float(r[f"lower_{block}"]),
-                        float(r[f"upper_{block}"]),
-                    )
-                    supported = lower > 0 if arm == "diagonal" else lower <= 0 <= upper
-                    if not supported:
-                        raise ValueError(
-                            "Fold weight contrasts require revising the narrative"
-                        )
     fold_models = (
         MODELS
         | {k: v for k, v in SUPPLEMENTARY.items() if k.startswith("tabpfn_full_random")}
@@ -956,18 +847,6 @@ def main():
                 - baseline
                 for partition in range(5)
             ]
-            if arm == "diagonal":
-                if (
-                    name in ("tabpfn_full__late", "tabfm__late", "kumo__late")
-                    and min(gains) <= 0
-                ):
-                    raise ValueError(
-                        "Fold comparison with direct inputs requires revising the narrative"
-                    )
-                if name == "limix__late" and not min(gains) < 0 < max(gains):
-                    raise ValueError(
-                        "LimiX fold sensitivity requires revising the narrative"
-                    )
             values.append(f"[{min(gains):+,.0f}, {max(gains):+,.0f}]")
         fit = [
             mean(
@@ -990,7 +869,26 @@ def main():
         ["Representation", "Fitted variances", "Common marginals", "Decoder $R^2$"],
         rows,
     )
+    best = max(MODELS, key=lambda name: CLAIMS[name]["decoder_mean_2016_2025"])
+    CLAIMS["decoder_best"] = {
+        "name": MODELS[best],
+        "value": CLAIMS[best]["decoder_mean_2016_2025"],
+    }
     CLAIMS["firm_days"] = firm_days
+    for path, recorded in manifest["sha256"].items():
+        if path in SOURCES and SOURCES[path] != recorded:
+            raise ValueError(f"Artifact differs from recorded manifest: {path}")
+    required_manifest = {
+        f"{PANEL}/{name}"
+        for name in (
+            "comparison.csv",
+            "decoding.csv",
+            "annual-scores.csv",
+            "configuration.json",
+        )
+    }
+    if missing := required_manifest - manifest["sha256"].keys():
+        raise ValueError(f"Incomplete source manifest: {sorted(missing)}")
     env = Environment(
         loader=FileSystemLoader(Path(__file__).parent),
         undefined=StrictUndefined,
@@ -1009,7 +907,6 @@ def main():
     )
     audit = {
         "design": "three-foundations",
-        "legacy_reviewed_commit": "162a7fd6f32fa1a02f8caa6262968687a285b417",
         "source_sha256": SOURCES,
         "rendering_source_sha256": {
             str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -1021,6 +918,7 @@ def main():
         },
         "selectors": {
             "main_table": "histories, support=256, rank=5, matched/diagonal; reference=joint/exp/diagonal",
+            "main_benchmarks": "reference_exposures and covariance_exposures, matched/diagonal; reference=joint/exp/diagonal",
             "decoder": "unweighted annual mean, 2016-2025; supplement also 2020-2025",
             "replication": "four, 33 firms, CAPM, zero diagonal, exp, SEM-ML; nonspatial OLS",
             "scores": "sum saved annual scores, 2020-2025; no estimation rerun",

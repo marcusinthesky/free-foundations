@@ -1,11 +1,8 @@
-"""Protect data ownership and restoration guarantees of the research DAG."""
+"""Protect frozen sources, numerical ownership and inference-free publication."""
 
 from pathlib import Path
 
-import pytest
 import yaml
-
-from free_foundations.panel.report import audit_checkpoints
 
 ROOT = Path(__file__).resolve().parents[3]
 PIPELINE = yaml.safe_load((ROOT / "dvc.yaml").read_text())["stages"]
@@ -25,63 +22,65 @@ def test_each_output_has_one_owner_without_directory_overlap() -> None:
             assert other not in path.parents, detail
 
 
-def test_numerical_stages_can_use_the_run_cache() -> None:
-    names = {
-        "expanded_run",
-        "fernandez_run",
-        "fernandez_simulate",
-        "fernandez_combined",
-        "panel_prepare",
-        "panel_audit",
-        "ladder_run",
+def test_pipeline_contains_only_one_study_and_supporting_replication() -> None:
+    assert set(PIPELINE) == {
+        "universe",
+        "pilot",
+        "market_metadata",
         "model_checkpoints",
-        "panel_validate_measurement",
-    } | {name for name in PIPELINE if name.startswith("panel_run_")}
-    for name in names:
-        for output in PIPELINE[name]["outs"]:
-            if isinstance(output, dict):
-                assert next(iter(output.values())).get("cache", True), (name, output)
+        "prepare",
+        "representations",
+        "measurement",
+        "replication",
+        "publication",
+    }
 
 
-def test_reports_depend_on_all_numerical_artifacts_they_inventory() -> None:
-    for name, stage in PIPELINE.items():
-        if name.startswith("panel_report_"):
-            producer = name.replace("panel_report_", "panel_run_")
-            assert set(outputs(producer)) <= set(stage["deps"])
-            assert "research/model-checkpoints.json" in stage["deps"]
-            assert "research/universe/cache/prices.parquet" in stage["deps"]
-            assert "research/universe/cache/factors.parquet" in stage["deps"]
-            assert "research/panel/cache/characteristics" in stage["deps"]
-    assert {
-        "research/fernandez/quarterly-returns.csv",
-        "research/fernandez/mm-betas.csv",
-        "research/fernandez/cache/characteristics.parquet",
-    } <= set(PIPELINE["fernandez_combined"]["deps"])
-    assert "research/expanded/cache/broad-audit.parquet" in PIPELINE["fernandez_run"]["deps"]
-    assert "research/universe/universe.csv" in PIPELINE["panel_prepare"]["deps"]
-
-
-def test_checkpoint_report_works_without_local_model_weights(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.chdir(tmp_path)
-    (tmp_path / "research").mkdir()
-    catalogue = tmp_path / "research/model-checkpoints.json"
-    catalogue.write_text('{"example": {"revision": "pinned", "sha256": {"weight": "verified"}}}')
-    assert audit_checkpoints()["example"]["revision"] == "pinned"
-    assert not (tmp_path / "research/expanded/cache/models").exists()
-
-
-def test_financial_sources_remain_frozen() -> None:
+def test_financial_sources_are_restored_without_running_acquisition() -> None:
     for name in ("universe", "pilot", "market_metadata"):
         assert PIPELINE[name]["frozen"] is True
+        assert PIPELINE[name]["cmd"] == "false"
+    assert outputs("pilot") == ["research/pilot/cache"]
 
 
-def test_measurement_validation_declares_its_inputs_and_cached_results() -> None:
-    stage = PIPELINE["panel_validate_measurement"]
-    assert "research/panel/three-foundations/daily-scores.parquet" in stage["deps"]
-    assert "research/panel/three-foundations-validation/README.md" in stage["deps"]
-    assert (
-        "src/python/src/free_foundations/checkpoints.json" in PIPELINE["model_checkpoints"]["deps"]
+def test_expensive_states_are_owned_separately_from_measurement() -> None:
+    assert {
+        "research/panel/representations",
+        "research/panel/representation-manifest.json",
+    } <= set(outputs("representations"))
+    assert set(outputs("representations")) <= set(PIPELINE["measurement"]["deps"])
+    assert "research/panel/prepared" in outputs("prepare")
+    for stage in ("representations", "measurement"):
+        assert "research/panel/prepared" in PIPELINE[stage]["deps"]
+    assert "--extra" not in PIPELINE["measurement"]["cmd"]
+
+
+def test_publication_reads_the_complete_retained_results_without_estimation() -> None:
+    assert set(outputs("measurement")) <= set(PIPELINE["publication"]["deps"])
+    assert "research/replication" in PIPELINE["publication"]["deps"]
+    assert PIPELINE["publication"]["cmd"] == "${ff} panel report"
+    assert all(path.startswith("src/latex/build/") for path in outputs("publication"))
+    assert "src/latex/build/main.pdf" not in outputs("publication")
+    assert not any("cache/models" in path for path in PIPELINE["publication"]["deps"])
+
+
+def test_replication_has_no_model_or_discarded_experiment_dependency() -> None:
+    dependencies = PIPELINE["replication"]["deps"]
+    assert "research/panel/cache/four.parquet" in dependencies
+    assert not any(
+        "expanded" in path or "ladder" in path or "model-checkpoints" in path
+        for path in dependencies
     )
-    assert all(isinstance(output, str) for output in stage["outs"])
+    assert "--extra" not in PIPELINE["replication"]["cmd"]
+
+
+def test_numerical_outputs_can_be_restored_from_the_dvc_cache() -> None:
+    # This inexpensive audit is versioned with the source rather than in DVC.
+    source_reports = {"research/panel/disclosure-audit.json"}
+    uncached = set()
+    for name in ("model_checkpoints", "prepare", "representations", "measurement", "replication"):
+        for output in PIPELINE[name]["outs"]:
+            if isinstance(output, dict) and not next(iter(output.values())).get("cache", True):
+                uncached.add(next(iter(output)))
+    assert uncached == source_reports
+    assert all((ROOT / path).is_file() for path in source_reports)

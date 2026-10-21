@@ -23,29 +23,33 @@ path = "free_foundations"
 depends_on = ["free_foundations.contracts", "free_foundations.pooling", "free_foundations.registry", "free_foundations.encoding"]
 
 [[modules]]
-path = "free_foundations.pilot"
-depends_on = ["free_foundations"]
+path = "free_foundations.data"
+depends_on = []
 
 [[modules]]
-path = "free_foundations.expanded"
-depends_on = ["free_foundations", "free_foundations.pilot"]
+path = "free_foundations.filings"
+depends_on = []
+
+[[modules]]
+path = "free_foundations.runtime"
+depends_on = []
+
+[[modules]]
+path = "free_foundations.representations"
+depends_on = ["free_foundations", "free_foundations.data", "free_foundations.runtime"]
 
 [[modules]]
 path = "free_foundations.fernandez"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded"]
+depends_on = ["free_foundations.data"]
 
 [[modules]]
 path = "free_foundations.universe"
-depends_on = ["free_foundations.pilot", "free_foundations.fernandez"]
+depends_on = ["free_foundations.data", "free_foundations.fernandez"]
 
 [[modules]]
 path = "free_foundations.panel"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe"]
-
-[[modules]]
-path = "free_foundations.ladder"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.panel"]
+depends_on = ["free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.filings"]
 
 [[modules]]
 path = "free_foundations.cli"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel", "free_foundations.ladder"]
+depends_on = ["free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel"]

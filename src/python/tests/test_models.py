@@ -8,7 +8,6 @@ from libpysal.weights import full2W
 from numpy.testing import assert_allclose
 from scipy.stats import multivariate_normal
 from spreg.ml_error import BaseML_Error
-from spreg.ml_lag import BaseML_Lag
 from spreg.ols import BaseOLS
 from spreg.twosls import BaseTSLS
 
@@ -17,7 +16,6 @@ from free_foundations.fernandez.models import (
     CrossSection,
     error_ml,
     lag_iv,
-    lag_ml,
     ols,
     paper_weights,
     rank_distance,
@@ -62,16 +60,6 @@ def test_error_ml_matches_spreg_coefficients_likelihood_and_covariance() -> None
     assert_allclose(ours.premiums, reference.betas[:-1, 0], rtol=1e-6)
     assert_allclose(likelihood(ours), float(reference.logll), rtol=1e-9)
     assert_allclose(ours.covariance, reference.vm, rtol=1e-5)
-
-
-def test_lag_ml_matches_spreg() -> None:
-    y, x, weights = design(9, 0.5, lag=True)
-    ours = lag_ml(y, x, weights)
-    reference = BaseML_Lag(y[:, None], x, full2W(weights))
-    assert_allclose(ours.intensity, float(reference.rho), atol=1e-6)
-    assert_allclose(ours.premiums, reference.betas[:-1, 0], rtol=1e-6)
-    assert_allclose(likelihood(ours), float(reference.logll), rtol=1e-9)
-    assert_allclose(ours.covariance, reference.vm, rtol=1e-4)
 
 
 @pytest.mark.parametrize("self_links", [False, True])
