@@ -38,7 +38,12 @@
     tectonic
     # Blueprint dependency graphs: pygraphviz builds against this graphviz.
     graphviz
-    (rWrapper.override { packages = with rPackages; [ robustbase ]; })
+    (rWrapper.override {
+      packages = with rPackages; [
+        robustbase
+        robust
+      ];
+    })
   ];
   env = {
     # The Hugging Face S3 gateway (DVC remote) does not parse the trailing checksums

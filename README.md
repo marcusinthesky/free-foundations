@@ -46,6 +46,12 @@ result; it is part of the central evidence. The main text develops this argument
 through the introduction, framework, empirical design, results, and conclusion;
 exact propositions and proofs appear in the mathematical appendix.
 
+The [direct-geometry extension](research/panel/geometry/README.md) compares signed
+Gram covariances with spatial covariances on the same financial geometry, leading
+with common marginal variances. Rank-five principal coordinates provide
+descriptive characteristic portfolios. The replication appendix also crosses
+calendar timing with two documented MM software implementations.
+
 The [study protocol](research/panel/three-foundations/README.md) fixes financial
 histories, four pretrained models, conventional and reset controls, and a separate
 cross-fitted exposure readout. The retained checks address metric choice,

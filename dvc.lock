@@ -149,16 +149,16 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/fernandez/run.json
       hash: md5
-      md5: 66dc05dfa455ef6ac66651fff8c3132d
-      size: 37801
+      md5: 355c28e8cc475d81d4a77ae0b2306bb6
+      size: 39303
     - path: devenv.lock
       hash: md5
       md5: 20abce58e5a43047224523d1d234c430
       size: 1143
     - path: devenv.nix
       hash: md5
-      md5: 296dfe5cddc324c8a4aee8e3ea6482c7
-      size: 1305
+      md5: c962de0bb248a212a964ef0daf6cc27c
+      size: 1344
     - path: research/panel/cache/four.parquet
       hash: md5
       md5: b471d0e03a12a0d35b6e268ee33924f3
@@ -173,8 +173,8 @@ stages:
       size: 25603107
     - path: src/python/src/free_foundations/fernandez/betas.R
       hash: md5
-      md5: f7d99ee30855e95c9404de1a1cc2a03d
-      size: 3090
+      md5: 9ac1b87e1cc1bb760ee16b53ce35d7e0
+      size: 6243
     - path: src/python/uv.lock
       hash: md5
       md5: db675cff4063b2f91ab6af882b332f3e
@@ -182,9 +182,9 @@ stages:
     outs:
     - path: research/replication
       hash: md5
-      md5: b79187a50ead08fd4073acac6c34091e.dir
-      size: 5133751
-      nfiles: 18
+      md5: 85aa5939908fec3f7e4e6a3a7914034c.dir
+      size: 11107679
+      nfiles: 33
   representations:
     cmd: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra
       tabpfn --extra tabfm --extra kumo --extra limix free-foundations panel 
@@ -234,8 +234,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/panel/run.json
       hash: md5
-      md5: b13dacfcfad34d3baaa22d4c289f7728
-      size: 60255
+      md5: fead4c0b95d1bc5a9b3ce4f5de55d1b0
+      size: 75575
     - path: research/model-checkpoints.json
       hash: md5
       md5: 8cc4452cdbad191a2c457b7759760202
@@ -248,6 +248,10 @@ stages:
       hash: md5
       md5: b471d0e03a12a0d35b6e268ee33924f3
       size: 305007
+    - path: research/panel/geometry/README.md
+      hash: md5
+      md5: 0e6e3ecc296957943d8fa852656732c5
+      size: 3577
     - path: research/panel/prepared
       hash: md5
       md5: 83a2839e4921aea0a403a0c36dc507ca.dir
@@ -275,6 +279,66 @@ stages:
       md5: db675cff4063b2f91ab6af882b332f3e
       size: 304842
     outs:
+    - path: research/panel/geometry/annual-scores.csv
+      hash: md5
+      md5: 14ccc814f9d72b04ed44ba40df6fc395
+      size: 51589
+    - path: research/panel/geometry/characteristic-associations.csv
+      hash: md5
+      md5: 06380ef6f0339fe376fed06760c8f478
+      size: 296061
+    - path: research/panel/geometry/comparison.csv
+      hash: md5
+      md5: 3878ec4415c3cd95ab2a04af8bbb57df
+      size: 22629
+    - path: research/panel/geometry/component-covariance.csv
+      hash: md5
+      md5: b9df57c48caf2040ae5694c05de38022
+      size: 542437
+    - path: research/panel/geometry/component-returns.parquet
+      hash: md5
+      md5: 1628e4987197c7d21fda329c0201b8c6
+      size: 5816485
+    - path: research/panel/geometry/configuration.json
+      hash: md5
+      md5: a7e7e5860843dfe776de3d92f3919852
+      size: 8258
+    - path: research/panel/geometry/contrasts.csv
+      hash: md5
+      md5: f09ad403edc1b76c92414814756220af
+      size: 103405
+    - path: research/panel/geometry/coordinates.parquet
+      hash: md5
+      md5: bcf918b9b8376eee561dff7c9496e4a6
+      size: 4860897
+    - path: research/panel/geometry/daily-scores.parquet
+      hash: md5
+      md5: 4e22834a09f7ae38c43b9ac7ea10f3e3
+      size: 1864616
+    - path: research/panel/geometry/extremes.csv
+      hash: md5
+      md5: e0f775a29b9473eb310969e2885b7441
+      size: 911211
+    - path: research/panel/geometry/manifest.json
+      hash: md5
+      md5: f3e001f2b38388554b3b74ea67392dd4
+      size: 4156
+    - path: research/panel/geometry/pcoa-summary.csv
+      hash: md5
+      md5: 7bb886bb221dc5b3c5acdaf2a92f0304
+      size: 42130
+    - path: research/panel/geometry/spectrum.csv
+      hash: md5
+      md5: 0b5ac1d9583ee2fc69b06caf9b2f71af
+      size: 10056545
+    - path: research/panel/geometry/stability.csv
+      hash: md5
+      md5: 4081d82582f689b9c7a86e79f064a268
+      size: 23375
+    - path: research/panel/geometry/weights.parquet
+      hash: md5
+      md5: a2dbecc64a9495e08c4a68c849878a4b
+      size: 4850765
     - path: research/panel/three-foundations-validation/annual-scores.csv
       hash: md5
       md5: 4403242311c9d4654f3e5053fc67ce04
@@ -359,8 +423,8 @@ stages:
       size: 294639
     - path: research/panel/three-foundations/manifest.json
       hash: md5
-      md5: 6fffe2bb162fa52386a064314648f050
-      size: 22523
+      md5: 6d2516b89462d4793cb585febd7f8ded
+      size: 22777
     - path: research/panel/three-foundations/mcs.csv
       hash: md5
       md5: dc42285de9b385914f823f35611f5e04
@@ -385,6 +449,70 @@ stages:
       hash: md5
       md5: 13ffc8bdc9a62cdfecb1d39ea7035f5a
       size: 260
+    - path: research/panel/geometry/README.md
+      hash: md5
+      md5: 0e6e3ecc296957943d8fa852656732c5
+      size: 3577
+    - path: research/panel/geometry/annual-scores.csv
+      hash: md5
+      md5: 14ccc814f9d72b04ed44ba40df6fc395
+      size: 51589
+    - path: research/panel/geometry/characteristic-associations.csv
+      hash: md5
+      md5: 06380ef6f0339fe376fed06760c8f478
+      size: 296061
+    - path: research/panel/geometry/comparison.csv
+      hash: md5
+      md5: 3878ec4415c3cd95ab2a04af8bbb57df
+      size: 22629
+    - path: research/panel/geometry/component-covariance.csv
+      hash: md5
+      md5: b9df57c48caf2040ae5694c05de38022
+      size: 542437
+    - path: research/panel/geometry/component-returns.parquet
+      hash: md5
+      md5: 1628e4987197c7d21fda329c0201b8c6
+      size: 5816485
+    - path: research/panel/geometry/configuration.json
+      hash: md5
+      md5: a7e7e5860843dfe776de3d92f3919852
+      size: 8258
+    - path: research/panel/geometry/contrasts.csv
+      hash: md5
+      md5: f09ad403edc1b76c92414814756220af
+      size: 103405
+    - path: research/panel/geometry/coordinates.parquet
+      hash: md5
+      md5: bcf918b9b8376eee561dff7c9496e4a6
+      size: 4860897
+    - path: research/panel/geometry/daily-scores.parquet
+      hash: md5
+      md5: 4e22834a09f7ae38c43b9ac7ea10f3e3
+      size: 1864616
+    - path: research/panel/geometry/extremes.csv
+      hash: md5
+      md5: e0f775a29b9473eb310969e2885b7441
+      size: 911211
+    - path: research/panel/geometry/manifest.json
+      hash: md5
+      md5: f3e001f2b38388554b3b74ea67392dd4
+      size: 4156
+    - path: research/panel/geometry/pcoa-summary.csv
+      hash: md5
+      md5: 7bb886bb221dc5b3c5acdaf2a92f0304
+      size: 42130
+    - path: research/panel/geometry/spectrum.csv
+      hash: md5
+      md5: 0b5ac1d9583ee2fc69b06caf9b2f71af
+      size: 10056545
+    - path: research/panel/geometry/stability.csv
+      hash: md5
+      md5: 4081d82582f689b9c7a86e79f064a268
+      size: 23375
+    - path: research/panel/geometry/weights.parquet
+      hash: md5
+      md5: a2dbecc64a9495e08c4a68c849878a4b
+      size: 4850765
     - path: research/panel/representation-manifest.json
       hash: md5
       md5: 5804fec07607e5b2ff12d8fb6d2fe59c
@@ -481,8 +609,8 @@ stages:
       size: 294639
     - path: research/panel/three-foundations/manifest.json
       hash: md5
-      md5: 6fffe2bb162fa52386a064314648f050
-      size: 22523
+      md5: 6d2516b89462d4793cb585febd7f8ded
+      size: 22777
     - path: research/panel/three-foundations/mcs.csv
       hash: md5
       md5: dc42285de9b385914f823f35611f5e04
@@ -498,21 +626,21 @@ stages:
       size: 7307
     - path: research/replication
       hash: md5
-      md5: b79187a50ead08fd4073acac6c34091e.dir
-      size: 5133751
-      nfiles: 18
+      md5: 85aa5939908fec3f7e4e6a3a7914034c.dir
+      size: 11107679
+      nfiles: 33
     - path: src/latex/main.tex
       hash: md5
-      md5: 521db57617db31324149833d2a320496
-      size: 65787
+      md5: 6f63de1eb897e6cecf9a8732ff16a7a7
+      size: 77993
     - path: src/latex/numbers.tex.j2
       hash: md5
-      md5: 8b50f405297bd25afcbd819010c523ea
-      size: 6156
+      md5: 24cd17a7f3c5367a6594b438c135d811
+      size: 6364
     - path: src/latex/render_results.py
       hash: md5
-      md5: 533a8589f2ee08b59cd07322d06e16d1
-      size: 34821
+      md5: e6860507e1722b16edb3304af03c7c6a
+      size: 58402
     - path: src/python/uv.lock
       hash: md5
       md5: db675cff4063b2f91ab6af882b332f3e
@@ -520,8 +648,8 @@ stages:
     outs:
     - path: src/latex/build/claims-audit.json
       hash: md5
-      md5: cdfc09062257424a131f1a9249f90178
-      size: 22075
+      md5: c2aa6ab30f3bb9846385ab245cc48e5f
+      size: 106683
     - path: src/latex/build/cohorts.tex
       hash: md5
       md5: d9086ad88938491c665198df49104fc3
@@ -542,6 +670,26 @@ stages:
       hash: md5
       md5: 9abdf54b867a00d2404df1227d0dc426
       size: 905
+    - path: src/latex/build/geometry-contrasts-correlation.tex
+      hash: md5
+      md5: 8fd517f210c8c5c6db6aea03445df126
+      size: 2703
+    - path: src/latex/build/geometry-contrasts-full.tex
+      hash: md5
+      md5: c03016e426dd800c807308f0946f3973
+      size: 2740
+    - path: src/latex/build/geometry-main.tex
+      hash: md5
+      md5: 975798baea5904df27219142efe6d95c
+      size: 788
+    - path: src/latex/build/geometry-scores.tex
+      hash: md5
+      md5: ebe7000685654b664472f9eda6e6da64
+      size: 2680
+    - path: src/latex/build/geometry-scree.pgf
+      hash: md5
+      md5: 3b6996a9b25fa1f764d91e480796fe3d
+      size: 68800
     - path: src/latex/build/measurement-benchmarks.tex
       hash: md5
       md5: a5a9a9320676bbf58ad6394f0fc81f1e
@@ -560,12 +708,28 @@ stages:
       size: 607
     - path: src/latex/build/numbers.tex
       hash: md5
-      md5: 1ed232e8d09f0334314a11b9958419d6
-      size: 3932
+      md5: 79817f534e382fd15b0f8c0cb6d3b702
+      size: 4063
+    - path: src/latex/build/pcoa-summary.tex
+      hash: md5
+      md5: c698b58cac946b587ddc45a1ac57b96c
+      size: 2147
+    - path: src/latex/build/replication-diagnostics.tex
+      hash: md5
+      md5: 0ff313de08b9b8b096075713f9ae3f8e
+      size: 412
     - path: src/latex/build/replication-iv.tex
       hash: md5
       md5: 73a5c6d2596144c96cc29e3fc7374aaf
       size: 364
+    - path: src/latex/build/replication-sensitivity-cohorts.tex
+      hash: md5
+      md5: 82252b8ed972b3b8988aae3b010dcc0f
+      size: 313
+    - path: src/latex/build/replication-sensitivity.tex
+      hash: md5
+      md5: 363e293937dd4fa83b0798bb20a3f91b
+      size: 765
     - path: src/latex/build/replication.tex
       hash: md5
       md5: eabaf96348370624c5cadc02215b0e82

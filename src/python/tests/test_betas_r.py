@@ -1,13 +1,19 @@
 """The MM stage-one script ships with the package and behaves as documented."""
 
 import shutil
+import subprocess
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from free_foundations.fernandez.evaluation import SCRIPT, exposure_table, robust_betas
+from free_foundations.fernandez.evaluation import (
+    SCRIPT,
+    exposure_table,
+    robust_betas,
+    runtime_record,
+)
 
 needs_r = pytest.mark.skipif(shutil.which("Rscript") is None, reason="devenv supplies Rscript")
 
@@ -30,6 +36,7 @@ def quarters(seed: int = 1) -> pd.DataFrame:
 def test_betas_script_is_present() -> None:
     assert SCRIPT.is_file()
     assert "robustbase::lmrob" in SCRIPT.read_text()
+    assert "robust::lmRob" in SCRIPT.read_text()
 
 
 @needs_r
@@ -40,6 +47,9 @@ def test_mm_recovers_beta_despite_outliers_and_ignores_firm_order(tmp_path: Path
     shuffled = sample.sample(frac=1, random_state=3)
     reordered = exposure_table(robust_betas(shuffled.loc[shuffled["ticker"] != "A"], tmp_path))
     np.testing.assert_allclose(reordered.loc[["B", "C"]], estimates.loc[["B", "C"]])
+    runtime = runtime_record(tmp_path)
+    assert all(isinstance(value, str) for value in runtime.values())
+    assert runtime["backend"] == "robustbase"
 
 
 @needs_r
@@ -52,3 +62,35 @@ def test_identity_bootstrap_replicate_equals_original_and_terms_extend(tmp_path:
     np.testing.assert_allclose(exposure_table(replicated, replicate=1), original)
     two = robust_betas(sample, tmp_path, terms=("market", "smb"), tag="two")
     assert set(two["term"]) == {"intercept", "market", "smb"}
+
+
+@needs_r
+def test_software_lineage_backend_is_seeded_and_records_its_actual_controls(tmp_path: Path) -> None:
+    executable = shutil.which("Rscript")
+    assert executable is not None
+    available = subprocess.run(  # noqa: S603 -- installed Rscript and fixed diagnostic expression.
+        [executable, "-e", 'quit(status=!requireNamespace("robust", quietly=TRUE))'],
+        check=False,
+        capture_output=True,
+    )
+    if available.returncode:
+        pytest.skip("Updated devenv supplies robust")
+    sample = quarters()
+    rows = robust_betas(sample, tmp_path, backend="robust")
+    assert rows["converged"].all()
+    assert rows["backend"].eq("robust").all()
+    assert {"warning_messages", "iteration_refinement", "iteration_final"} <= set(rows)
+    expected = exposure_table(rows)
+    np.testing.assert_allclose(expected["market"].loc[["A", "B", "C"]], [0.5, 1.2, 0.9], atol=0.05)
+    reordered = exposure_table(
+        robust_betas(sample.loc[sample["ticker"].ne("A")], tmp_path, backend="robust")
+    )
+    np.testing.assert_allclose(reordered.loc[["B", "C"]], expected.loc[["B", "C"]])
+    runtime = runtime_record(tmp_path, backend="robust")
+    assert runtime["backend"] == "robust"
+    assert runtime["control.estim"].lower() == "final"
+    assert runtime["control.final.alg"].lower() == "mm"
+    assert float(runtime["control.efficiency"]) == 0.9
+    assert runtime["control.weight"].lower() == "optimal;optimal"
+    assert runtime["control.seed"] == "42"
+    assert (tmp_path / "cache/mm-robust-capm-output.csv").is_file()

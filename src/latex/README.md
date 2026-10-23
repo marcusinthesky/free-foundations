@@ -29,7 +29,7 @@ Matplotlib cache stay in the ignored `build/` directory.
 
 ## Publication assets and evidence
 
-The main text has two tables and one figure:
+The main text has three tables and one figure:
 
 - `measurement.tex` compares direct inputs, PCA, the valuation-task network and
   all four pretrained models, with exposure-prediction R² preceding native and
@@ -48,6 +48,11 @@ The main text has two tables and one figure:
   per readout fold. The context experiment uses all available calibration firms,
   whereas the calibration-size experiment limits their number, so the endpoints
   need not coincide.
+- `geometry-main.tex` compares direct Gram and spatial covariance on identical
+  unit-chord geometries with common marginal variances. Both native and decoded
+  principal geometries and the joint characteristic control are shown. The
+  displayed differences are Gram minus spatial scores; adverse results are
+  retained and the count of negative contrasts is bound to saved estimates.
 
 Decoder means are unweighted annual averages over **2016–2025**; forecast scores
 cover **2020–2025**. The appendix also reports decoder means over forecast years.
@@ -60,9 +65,24 @@ fold sensitivity, learned-weight controls, common-marginal results and historica
 return-based benchmarks. Kumo's three fresh initializations reproduce one
 intercept-only cross-fitted null, displayed once; the null diagnostic checks all
 three draws in every year.
-The replication tables report the common-four CAPM exercise with zero
-self-links. The complete model landscape, earlier extraction stages and cohorts,
-and exhaustive experiment grid are not publication dependencies.
+The direct-geometry appendix retains all 31 geometries in both covariance
+models and variance treatments, including six resets and the decoded
+intercept-only control. It reports both bootstrap block lengths, full spectra,
+rank-five descriptive projection summaries, and a PGF scree plot for the fixed
+latest year, 2025. Signed Gram similarities retain their diagonal and are never
+row-normalized. Empirical Gram residual scales and profiled spatial innovation
+scales differ; common-marginal results lead the comparison. Component portfolios
+and their reconstruction shares are descriptive, with all weights and component
+returns retained in the saved geometry artifacts.
+
+The replication tables report the primary common-four CAPM exercise with zero
+self-links, supported explicitly by the 2007 working paper. Timing windows are
+crossed with both MM packages on natural and intersection cohorts. The appendix
+displays the intersection contrasts and cohort sizes and separates raw Moran
+I from its standardized z statistic, conditional SEM fit from its reduced-form
+mean, and information-matrix inference from the original score covariance.
+The generated-beta bootstrap remains on the primary result. The complete model
+landscape and earlier extraction stages are not publication dependencies.
 
 ## Rendering and claims audit
 
@@ -79,6 +99,15 @@ paired contrasts to their inputs, and numerical claims to the reported
 confidence sets and replication estimates. Exposure-prediction extrema are
 computed from the selected current results rather than assigned to a named
 model in prose.
+
+Geometry validation requires the full 124-procedure grid, all 744 annual scores,
+310 PCoA summaries and complete spectra. Every recorded contrast is reconciled
+to annual differences, and every geometry artifact is checked against its source
+manifest, including the binary coordinate, weight and return files. Replication
+sensitivity validation requires all 160 conditional estimates, both software
+runtime records in both windows, and unchanged intersection firm identities.
+Publication generation atomically replaces restored output files so it does
+not write through DVC cache hard links.
 
 The audit checks consistency among recorded artifacts. It does not independently
 certify the source data or regenerate financial estimates. Historical overlap

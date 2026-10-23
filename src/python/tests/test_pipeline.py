@@ -74,6 +74,19 @@ def test_replication_has_no_model_or_discarded_experiment_dependency() -> None:
     assert "--extra" not in PIPELINE["replication"]["cmd"]
 
 
+def test_geometry_is_a_saved_result_extension_of_the_measurement_stage() -> None:
+    owned = set(outputs("measurement"))
+    expected = {
+        "research/panel/geometry/daily-scores.parquet",
+        "research/panel/geometry/weights.parquet",
+        "research/panel/geometry/component-returns.parquet",
+        "research/panel/geometry/manifest.json",
+    }
+    assert expected <= owned
+    assert expected <= set(PIPELINE["publication"]["deps"])
+    assert "research/panel/geometry/README.md" in PIPELINE["measurement"]["deps"]
+
+
 def test_numerical_outputs_can_be_restored_from_the_dvc_cache() -> None:
     # This inexpensive audit is versioned with the source rather than in DVC.
     source_reports = {"research/panel/disclosure-audit.json"}

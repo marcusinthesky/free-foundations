@@ -5,10 +5,12 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 
 SCRIPT = Path(__file__).with_name("betas.R")
+type MMBackend = Literal["robustbase", "robust"]
 
 
 FACTOR_NAMES = {
@@ -64,26 +66,36 @@ def robust_betas(  # noqa: PLR0913 -- keyword-only R runtime options.
     indices: pd.DataFrame | None = None,
     cores: int = 1,
     tag: str = "capm",
+    backend: MMBackend = "robustbase",
 ) -> pd.DataFrame:
     """Call the established MM implementation rather than relabel OLS or Huber estimates.
 
     Returns long estimates with one row per replicate, firm and term. Replicate 0 is the
     original sample; ``indices`` lists resampled quarters for bootstrap replicates.
     """
+    if backend not in ("robustbase", "robust"):
+        message = f"Unknown MM backend: {backend}."
+        raise ValueError(message)
     executable = shutil.which("Rscript")
     if executable is None:
-        message = "Run inside devenv shell: robustbase's Rscript runtime is required."
+        message = "Run inside devenv shell: the pinned robustbase and robust R runtime is required."
         raise RuntimeError(message)
     cache = output / "cache"
     cache.mkdir(parents=True, exist_ok=True)
-    source, destination = cache / f"mm-{tag}-input.csv", cache / f"mm-{tag}-output.csv"
+    # Preserve the primary backend's cache names, including the existing bootstrap.
+    identity = tag if backend == "robustbase" else f"{backend}-{tag}"
+    source = cache / f"mm-{identity}-input.csv"
+    destination = cache / f"mm-{identity}-output.csv"
     frame = quarters[["date", "ticker", "excess", *terms]].rename(columns={"date": "quarter"})
     frame.assign(quarter=frame["quarter"].astype(str).str[:10]).to_csv(source, index=False)
     arguments = [executable, str(SCRIPT), str(source), str(destination), ",".join(terms)]
     if indices is not None:
-        path = cache / f"mm-{tag}-indices.csv"
+        path = cache / f"mm-{identity}-indices.csv"
         indices.assign(quarter=indices["quarter"].astype(str).str[:10]).to_csv(path, index=False)
         arguments += [str(path), str(cores)]
+    else:
+        arguments += ["", str(cores)]
+    arguments.append(backend)
     subprocess.run(arguments, check=True)  # noqa: S603 -- fixed local R script and generated paths.
     result = pd.read_csv(destination)
     original = result.loc[result["replicate"].eq(0)]
@@ -93,10 +105,13 @@ def robust_betas(  # noqa: PLR0913 -- keyword-only R runtime options.
     return result
 
 
-def runtime_record(output: Path, tag: str = "capm") -> dict[str, str]:
-    """R, robustbase and lmrob.control settings recorded by the last MM call."""
-    path = output / "cache" / f"mm-{tag}-output-runtime.csv"
-    frame = pd.read_csv(path, dtype=str)
+def runtime_record(
+    output: Path, tag: str = "capm", *, backend: MMBackend = "robustbase"
+) -> dict[str, str]:
+    """R, package version, controls and completion rules recorded by the last MM call."""
+    identity = tag if backend == "robustbase" else f"{backend}-{tag}"
+    path = output / "cache" / f"mm-{identity}-output-runtime.csv"
+    frame = pd.read_csv(path, dtype=str, keep_default_na=False)
     return dict(zip(frame["name"], frame["value"], strict=True))
 
 

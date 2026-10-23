@@ -45,6 +45,15 @@ def summarize(fit: CrossSection, y: FloatArray, terms: tuple[str, ...]) -> Row:
         "parameters": np.nan if fit.parameters is None else fit.parameters,
         "pseudo_r2_structural": pseudo_r2(y, fit.fitted),
         "pseudo_r2_reduced": pseudo_r2(y, fit.reduced),
+        "fit_interpretation": "conditional in-sample fit; corr(actual, fitted)^2",
+        "inference": "conditional on estimated betas, network and cohort",
+        "covariance_estimator": (
+            "Gaussian information matrix"
+            if fit.estimator == "spatial_error_ml"
+            else "S2SLS equation (2)"
+            if fit.estimator == "spatial_lag_iv"
+            else "OLS"
+        ),
         "shapiro_p": float(shapiro(fit.innovations).pvalue),
     }
     for index, term in enumerate(terms):
@@ -82,9 +91,11 @@ def spatial(
     moran = residual_moran(ols(y, x).innovations, x, weights)
     shared: Row = {
         "ols_moran": moran.statistic,
+        "ols_moran_i": moran.statistic,
         "ols_moran_expectation": moran.expectation,
         "ols_moran_z": moran.z,
         "ols_moran_p": moran.p_value,
+        "moran_moments": "design-conditional Cliff-Ord regression-residual moments",
         "lag_first_stage_f": first_stage_f(y, x, weights),
     }
     fits = {

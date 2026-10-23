@@ -496,6 +496,9 @@ def main() -> None:  # noqa: PLR0915 -- one explicit financial estimation workfl
         },
     )
     LOGGER.info("Completed retained study: %s scored procedures", len(daily.columns))
+    from free_foundations.panel import geometry_run  # noqa: PLC0415 -- consume completed scores.
+
+    geometry_run.main()
 
 
 def pair_distance(values: FloatArray) -> FloatArray:

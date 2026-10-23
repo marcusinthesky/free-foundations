@@ -24,7 +24,14 @@ REPORTED = (
     ("returns", "Forty quarterly returns and ten annual characteristic snapshots", "§3.1-3.2"),
 )
 CONVENTIONS = (
-    ("diagonal", "Zero self-links primary; literal positive diagonal reported", "Eq. (10) silent"),
+    (
+        "diagonal",
+        "Zero self-links primary; literal positive diagonal reported as sensitivity",
+        (
+            "Working paper §2.1, printed p. 3 explicitly specifies zero main diagonal: "
+            "https://www.tcd.ie/triss/assets/PDFs/iiis/iiisdp234.pdf; published Eq. (10) silent"
+        ),
+    ),
     ("ties", "Average ranks for tied history values", "Spearman"),
     (
         "bounds",
@@ -51,7 +58,10 @@ CONVENTIONS = (
     ),
     (
         "timing",
-        "Snapshots 2015-2024 available by each year end; returns 2016Q1-2025Q4",
+        (
+            "Snapshots 2015-2024 available by each year end; primary returns 2016Q1-2025Q4; "
+            "contemporaneous sensitivity returns 2015Q1-2024Q4"
+        ),
         "Paper uses 1997-2006 for both",
     ),
     ("mm_seed", "robustbase lmrob MM, seed 42 before each firm fit", "S-Plus tuning unknown"),
@@ -59,6 +69,32 @@ CONVENTIONS = (
         "mm_retry",
         "Non-converged fits refitted once with larger iteration limits (recorded)",
         "Default k.max=200 fails for a few firms",
+    ),
+    (
+        "mm_software_sensitivity",
+        (
+            "robust::lmRob: Final MM, 90% efficiency, Optimal weights, seed 42; "
+            "crossed with both windows, natural and intersection cohorts"
+        ),
+        "S-PLUS library lineage sensitivity; original function and tuning unknown",
+    ),
+    (
+        "fit_labels",
+        "Structural pseudo-R^2 is conditional in-sample fit; reduced-form fit shown separately",
+        "Published fitted-value convention is not fully recoverable",
+    ),
+    (
+        "moran_labels",
+        "Raw Moran I and standardized z reported separately",
+        "Published table appears to report standardized statistics",
+    ),
+    (
+        "sensitivity_inference",
+        (
+            "New timing/software cells use conditional second-stage inference only; "
+            "generated-beta bootstrap retained for the existing primary benchmark"
+        ),
+        "Bounded retrospective comparison; no forecasting or trading claim",
     ),
 )
 SUBSTITUTIONS = (
@@ -71,7 +107,7 @@ SUBSTITUTIONS = (
     ("risk_free", "10-year US Treasury", "French one-month RF"),
     ("currency", "Local returns converted to USD", "USD"),
     ("inflation", "Inflation-adjusted ratios", "No inflation adjustment"),
-    ("estimator_software", "S-Plus 7.0", "R robustbase and Python (NumPy/SciPy)"),
+    ("estimator_software", "S-Plus 7.0", "R robustbase (primary), robust (sensitivity), Python"),
     (
         "standard_errors",
         "Outer product of first derivatives",

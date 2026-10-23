@@ -100,6 +100,7 @@ stages:
     - research/model-checkpoints.json
     - research/panel/three-foundations/README.md
     - research/panel/three-foundations-validation/README.md
+    - research/panel/geometry/README.md
     outs:
     - research/panel/three-foundations/daily-scores.parquet
     - research/panel/three-foundations/annual-scores.csv
@@ -125,6 +126,21 @@ stages:
     - research/panel/three-foundations-validation/configuration.json
     - research/panel/three-foundations-validation/validation.json
     - research/panel/three-foundations-validation/observations
+    - research/panel/geometry/daily-scores.parquet
+    - research/panel/geometry/annual-scores.csv
+    - research/panel/geometry/comparison.csv
+    - research/panel/geometry/contrasts.csv
+    - research/panel/geometry/spectrum.csv
+    - research/panel/geometry/pcoa-summary.csv
+    - research/panel/geometry/coordinates.parquet
+    - research/panel/geometry/weights.parquet
+    - research/panel/geometry/component-returns.parquet
+    - research/panel/geometry/component-covariance.csv
+    - research/panel/geometry/characteristic-associations.csv
+    - research/panel/geometry/extremes.csv
+    - research/panel/geometry/stability.csv
+    - research/panel/geometry/configuration.json
+    - research/panel/geometry/manifest.json
   replication:
     desc: Core CAPM common-cohort replication, generated-beta inference and VaR audit.
     cmd: ${ff} fernandez run
@@ -150,6 +166,7 @@ stages:
     - src/latex/main.tex
     - research/panel/three-foundations/README.md
     - research/panel/three-foundations-validation/README.md
+    - research/panel/geometry/README.md
     - research/panel/representation-manifest.json
     - research/replication
     - research/panel/disclosure-audit.json
@@ -177,6 +194,21 @@ stages:
     - research/panel/three-foundations-validation/configuration.json
     - research/panel/three-foundations-validation/validation.json
     - research/panel/three-foundations-validation/observations
+    - research/panel/geometry/daily-scores.parquet
+    - research/panel/geometry/annual-scores.csv
+    - research/panel/geometry/comparison.csv
+    - research/panel/geometry/contrasts.csv
+    - research/panel/geometry/spectrum.csv
+    - research/panel/geometry/pcoa-summary.csv
+    - research/panel/geometry/coordinates.parquet
+    - research/panel/geometry/weights.parquet
+    - research/panel/geometry/component-returns.parquet
+    - research/panel/geometry/component-covariance.csv
+    - research/panel/geometry/characteristic-associations.csv
+    - research/panel/geometry/extremes.csv
+    - research/panel/geometry/stability.csv
+    - research/panel/geometry/configuration.json
+    - research/panel/geometry/manifest.json
     outs:
     - src/latex/build/measurement.tex
     - src/latex/build/measurement-benchmarks.tex
@@ -194,5 +226,14 @@ stages:
     - src/latex/build/variance-contrasts-marginal.tex
     - src/latex/build/normalization.tex
     - src/latex/build/fold-sensitivity.tex
+    - src/latex/build/geometry-main.tex
+    - src/latex/build/geometry-scores.tex
+    - src/latex/build/geometry-contrasts-full.tex
+    - src/latex/build/geometry-contrasts-correlation.tex
+    - src/latex/build/pcoa-summary.tex
+    - src/latex/build/geometry-scree.pgf
+    - src/latex/build/replication-sensitivity.tex
+    - src/latex/build/replication-sensitivity-cohorts.tex
+    - src/latex/build/replication-diagnostics.tex
     - src/latex/build/numbers.tex
     - src/latex/build/claims-audit.json

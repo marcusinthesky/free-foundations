@@ -17,6 +17,10 @@ HISTORY = 10
 QUARTERS = 40
 TERMS = ("market",)
 ARMS = {"four": CHARACTERISTICS, "three": CHARACTERISTICS[:3]}
+WINDOWS = {
+    "shifted": ("2016-01-01", "2025-12-31"),
+    "contemporaneous": ("2015-01-01", "2024-12-31"),
+}
 
 
 @dataclass(frozen=True)
@@ -26,17 +30,28 @@ class Inputs:
     four: pd.DataFrame
     quarters: pd.DataFrame
     complete: tuple[str, ...]
+    timing: str = "shifted"
 
 
-def load() -> Inputs:
+def load(*, timing: str = "shifted") -> Inputs:
     """Reuse the panel's point-in-time characteristics and the universe return cache."""
+    if timing not in WINDOWS:
+        message = f"Unknown return window: {timing}."
+        raise ValueError(message)
     four = pd.read_parquet("research/panel/cache/four.parquet")
     prices = pd.read_parquet(SOURCE / "prices.parquet")
     factors = pd.read_parquet(SOURCE / "factors.parquet")
-    quarters = quarterly_data(prices, factors)
-    counts = quarters.groupby("ticker").size()
-    complete = tuple(sorted(counts.index[counts == QUARTERS]))
-    return Inputs(four, quarters.loc[quarters["ticker"].isin(complete)], complete)
+    start, end = WINDOWS[timing]
+    quarters = quarterly_data(prices, factors, start=start, end=end)
+    expected = pd.date_range(start, end, freq="QE")
+    complete = tuple(
+        sorted(
+            str(ticker)
+            for ticker, frame in quarters.groupby("ticker")
+            if len(frame) == QUARTERS and pd.DatetimeIndex(frame["date"]).equals(expected)
+        )
+    )
+    return Inputs(four, quarters.loc[quarters["ticker"].isin(complete)], complete, timing)
 
 
 def cohort(inputs: Inputs, characteristics: tuple[str, ...]) -> tuple[str, ...]:

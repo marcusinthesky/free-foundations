@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "src/latex/build"
 PANEL = "research/panel/three-foundations"
+GEOMETRY = "research/panel/geometry"
 MODELS = {
     "direct": "Direct",
     "pca16": "PCA",
@@ -41,15 +42,45 @@ VARIANCE_LABELS = {
 SOURCES = {}
 CLAIMS = {}
 
+GEOMETRY_MODELS = (
+    MODELS
+    | SUPPLEMENTARY
+    | {
+        "kumo_random43__late": "Random Kumo (43)",
+        "kumo_random44__late": "Random Kumo (44)",
+    }
+)
+CHARACTERISTICS = {
+    "fernandez_market_cap_assets": "Market cap/assets",
+    "fernandez_market_to_book": "Market-to-book",
+    "fernandez_dividend_yield": "Dividend yield",
+    "fernandez_joint": "Joint characteristics",
+}
+GEOMETRY_APPROACHES = (
+    CHARACTERISTICS
+    | {
+        f"histories{suffix}__{model}": label + (" (decoded)" if suffix else " (native)")
+        for model, label in GEOMETRY_MODELS.items()
+        for suffix in ("", "@decoded")
+    }
+    | {"histories@decoded__intercept_only": "Intercept only (decoded)"}
+)
 
-def read(relative):
-    """Read an existing artifact and record its exact content hash."""
+
+def record(relative):
+    """Require an artifact and record its content hash without interpreting it."""
     path = ROOT / relative
     if not path.is_file():
         raise ValueError(
             f"Missing recorded artifact: {relative}; restore it with DVC, not estimation"
         )
     SOURCES[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return path
+
+
+def read(relative):
+    """Read an existing artifact and record its exact content hash."""
+    path = record(relative)
     if path.suffix == ".json":
         return json.loads(path.read_text())
     with path.open(newline="") as stream:
@@ -73,18 +104,30 @@ def close(actual, expected, label, tolerance=1e-6):
 
 
 def write(name, lines):
-    (OUT / name).write_text("\n".join(lines) + "\n")
+    """Atomically replace generated files, including restored DVC hard links."""
+    target = OUT / name
+    temporary = target.with_name(f".{target.name}.tmp")
+    temporary.write_text("\n".join(lines) + "\n")
+    temporary.replace(target)
+
+
+def save_figure(figure, name):
+    """Render PGF without writing through a restored cache hard link."""
+    target = OUT / name
+    temporary = target.with_name(f".{target.stem}.tmp.pgf")
+    figure.savefig(temporary)
+    temporary.replace(target)
 
 
 def tabular(name, columns, header, rows):
     """Let pandas own LaTeX table markup, including booktabs rules."""
-    pd.DataFrame(rows, columns=header).to_latex(
-        OUT / name,
+    latex = pd.DataFrame(rows, columns=header).to_latex(
         index=False,
         escape=False,
         column_format=columns,
         multicolumn_format="c",
     )
+    write(name, [latex.rstrip()])
 
 
 def validate_inventory(comparison, decoding, annual):
@@ -138,6 +181,555 @@ def validate_inventory(comparison, decoding, annual):
             )
             if not math.isfinite(float(row["decoder_r2"])):
                 raise ValueError(f"Nonfinite decoder quality: {model}, {year}")
+
+
+def validate_geometry_inventory(comparison, annual, summary, spectrum):
+    """Require the full matched geometry grid and reconcile all saved summaries."""
+    expected = {
+        (approach, model, variance)
+        for approach in GEOMETRY_APPROACHES
+        for model in ("gram", "spatial")
+        for variance in ("full", "correlation")
+    }
+    keys = [(r["approach"], r["model"], r["variance"]) for r in comparison]
+    if len(set(keys)) != len(keys):
+        raise ValueError("Duplicate geometry comparison procedure")
+    if set(keys) != expected:
+        raise ValueError("Incomplete geometry comparison inventory")
+    annual_keys = [(r["column"], int(r["year"])) for r in annual]
+    expected_annual = {
+        ("|".join(key), year) for key in expected for year in range(2020, 2026)
+    }
+    if len(set(annual_keys)) != len(annual_keys) or set(annual_keys) != expected_annual:
+        raise ValueError("Incomplete or duplicate geometry evaluation years")
+    for row in comparison:
+        key = "|".join(row[k] for k in ("approach", "model", "variance"))
+        if row["column"] != key:
+            raise ValueError("Inconsistent geometry column identifier")
+        total = sum(
+            float(select(annual, column=key, year=y)["score"])
+            for y in range(2020, 2026)
+        )
+        close(float(row["heldout_log_likelihood"]), total, "geometry annual score")
+        firm_days = float(row["firm_days"])
+        if not math.isfinite(firm_days) or firm_days <= 0:
+            raise ValueError("Invalid geometry firm-days")
+        close(
+            float(row["score_per_firm_day"]),
+            total / firm_days,
+            "geometry normalized score",
+        )
+        parameter = float(row["theta"] if row["model"] == "gram" else row["lambda"])
+        if not math.isfinite(parameter):
+            raise ValueError("Nonfinite geometry parameter")
+        if row["model"] == "gram" and not 0 <= parameter <= 1 - 1e-6:
+            raise ValueError("Invalid direct covariance parameter")
+    summary_keys = [(r["approach"], int(r["year"])) for r in summary]
+    expected_summary = {(a, y) for a in GEOMETRY_APPROACHES for y in range(2016, 2026)}
+    if (
+        len(set(summary_keys)) != len(summary_keys)
+        or set(summary_keys) != expected_summary
+    ):
+        raise ValueError("Incomplete or duplicate PCoA summaries")
+    spectrum_keys = [
+        (r["approach"], int(r["year"]), int(r["component"])) for r in spectrum
+    ]
+    if len(set(spectrum_keys)) != len(spectrum_keys):
+        raise ValueError("Duplicate PCoA eigenvalue")
+    spectral_rows = dict(zip(spectrum_keys, spectrum, strict=True))
+    expected_spectrum = set()
+    for row in summary:
+        approach, year = row["approach"], int(row["year"])
+        firms, rank = int(row["firms"]), int(row["rank"])
+        if int(row["requested_rank"]) != 5 or rank < 0 or rank > 5 or rank > firms - 1:
+            raise ValueError("Invalid retained PCoA rank")
+        if row["rank_shortfall"] not in (str(rank < 5), str(rank < 5).lower()):
+            raise ValueError("Inconsistent PCoA rank shortfall")
+        try:
+            eigenvalues = [
+                spectral_rows[(approach, year, k)] for k in range(1, firms + 1)
+            ]
+        except KeyError as error:
+            raise ValueError("Incomplete PCoA spectrum inventory") from error
+        expected_spectrum.update((approach, year, k) for k in range(1, firms + 1))
+        if any(not math.isfinite(float(r["eigenvalue"])) for r in eigenvalues):
+            raise ValueError("Nonfinite PCoA spectrum")
+        tolerance = float(row["tolerance"])
+        if any(float(r["eigenvalue"]) < -tolerance for r in eigenvalues):
+            raise ValueError("Materially negative PCoA eigenvalue")
+        positive_rank = sum(float(r["eigenvalue"]) > tolerance for r in eigenvalues)
+        if int(row["positive_rank"]) != positive_rank or rank != min(5, positive_rank):
+            raise ValueError("Inconsistent positive PCoA rank")
+        share = sum(float(r["variance_share"]) for r in eigenvalues[:rank])
+        close(float(row["variance_share"]), share, "PCoA retained variance")
+        for field in (
+            "variance_share",
+            "raw_reconstruction_share",
+            "residual_reconstruction_share",
+        ):
+            value = float(row[field])
+            if not math.isfinite(value) or not -1e-8 <= value <= 1 + 1e-8:
+                raise ValueError(f"Invalid descriptive PCoA {field}")
+        gross = float(row["max_gross_weight"])
+        if not math.isfinite(gross) or gross < 0:
+            raise ValueError("Invalid PCoA gross portfolio weight")
+    if set(spectrum_keys) != expected_spectrum:
+        raise ValueError("Incomplete PCoA spectrum inventory")
+
+
+def render_geometry(firm_days):
+    """Render the complete direct-geometry comparison from recorded results."""
+    comparison = read(f"{GEOMETRY}/comparison.csv")
+    annual = read(f"{GEOMETRY}/annual-scores.csv")
+    contrasts = read(f"{GEOMETRY}/contrasts.csv")
+    summary = read(f"{GEOMETRY}/pcoa-summary.csv")
+    spectrum = read(f"{GEOMETRY}/spectrum.csv")
+    config = read(f"{GEOMETRY}/configuration.json")
+    manifest = read(f"{GEOMETRY}/manifest.json")
+    for name in (
+        "daily-scores.parquet",
+        "coordinates.parquet",
+        "weights.parquet",
+        "component-returns.parquet",
+        "characteristic-associations.csv",
+        "extremes.csv",
+        "stability.csv",
+        "component-covariance.csv",
+    ):
+        record(f"{GEOMETRY}/{name}")
+    if (
+        config["evaluation"] != [2020, 2025]
+        or config["calibration"] != [2016, 2019]
+        or config["encoder_support"] != 256
+        or config["decoded_rank"] != 5
+        or config["pcoa_rank"] != 5
+    ):
+        raise ValueError("Unexpected geometry windows")
+    validate_geometry_inventory(comparison, annual, summary, spectrum)
+    required = {
+        path
+        for path in SOURCES
+        if path.startswith(GEOMETRY + "/") and not path.endswith("manifest.json")
+    }
+    if missing := required - manifest["sha256"].keys():
+        raise ValueError(f"Incomplete geometry source manifest: {sorted(missing)}")
+    for path in required:
+        if SOURCES[path] != manifest["sha256"][path]:
+            raise ValueError(
+                f"Geometry artifact differs from recorded manifest: {path}"
+            )
+    protocol = f"{GEOMETRY}/README.md"
+    record(protocol)
+    if SOURCES[protocol] != manifest["protocol_sha256"]:
+        raise ValueError("Geometry protocol differs from recorded manifest")
+    for row in comparison:
+        close(float(row["firm_days"]), firm_days, "geometry common firm-days")
+    contrast_pairs = [(r["left"], r["right"]) for r in contrasts]
+    if len(set(contrast_pairs)) != len(contrast_pairs):
+        raise ValueError("Duplicate geometry contrast")
+    for row in contrasts:
+        total = 0
+        for year in range(2020, 2026):
+            difference = float(
+                select(annual, column=row["left"], year=year)["score"]
+            ) - float(select(annual, column=row["right"], year=year)["score"])
+            close(float(row[f"year_{year}"]), difference, "geometry annual contrast")
+            total += difference
+        close(float(row["difference"]), total, "geometry paired contrast")
+        for block in (21, 63):
+            lower, upper = float(row[f"lower_{block}"]), float(row[f"upper_{block}"])
+            if not (math.isfinite(lower) and math.isfinite(upper) and lower <= upper):
+                raise ValueError("Invalid geometry contrast interval")
+    rows, full_rows, interval_rows, pcoa_rows = [], [], [], []
+    principal = {"fernandez_joint": "Joint characteristics"} | {
+        f"histories__{name}": label for name, label in MODELS.items()
+    }
+    for approach, label in GEOMETRY_APPROACHES.items():
+        differences = {}
+        for variance in ("full", "correlation"):
+            gram = f"{approach}|gram|{variance}"
+            spatial = f"{approach}|spatial|{variance}"
+            contrast = select(contrasts, left=gram, right=spatial)
+            differences[variance] = contrast
+            interval_rows.append(
+                [
+                    label,
+                    "Full" if variance == "full" else "Marginal",
+                    f"{float(contrast['difference']):+,.1f}",
+                    *[
+                        f"[{float(contrast[f'lower_{b}']):+,.1f}, {float(contrast[f'upper_{b}']):+,.1f}]"
+                        for b in (21, 63)
+                    ],
+                ]
+            )
+        scores = [
+            float(
+                select(comparison, approach=approach, model=m, variance=v)[
+                    "heldout_log_likelihood"
+                ]
+            )
+            for v in ("full", "correlation")
+            for m in ("gram", "spatial")
+        ]
+        full_rows.append([label, *[f"{v:,.1f}" for v in scores]])
+        selected = [
+            select(summary, approach=approach, year=y) for y in range(2016, 2026)
+        ]
+        ranks = [int(r["rank"]) for r in selected]
+        pcoa_rows.append(
+            [
+                label,
+                f"{min(ranks)}--{max(ranks)}",
+                *[
+                    f"{mean(float(r[field]) for r in selected):.3f}"
+                    for field in (
+                        "variance_share",
+                        "raw_reconstruction_share",
+                        "residual_reconstruction_share",
+                    )
+                ],
+                f"{max(float(r['max_gross_weight']) for r in selected):.2f}",
+            ]
+        )
+        if approach in principal:
+            values = []
+            for candidate in (
+                approach,
+                approach.replace("histories__", "histories@decoded__")
+                if approach.startswith("histories__")
+                else None,
+            ):
+                if candidate is None:
+                    values.extend(["---", "---"])
+                    continue
+                contrast = select(
+                    contrasts,
+                    left=f"{candidate}|gram|correlation",
+                    right=f"{candidate}|spatial|correlation",
+                )
+                values.extend(
+                    [
+                        f"{float(contrast['difference']):+,.1f}",
+                        f"[{float(contrast['lower_21']):+,.1f}, {float(contrast['upper_21']):+,.1f}]",
+                    ]
+                )
+            rows.append([principal[approach], *values])
+    tabular(
+        "geometry-main.tex",
+        "lrlrl",
+        ["Geometry", "Native", "21-date interval", "Decoded", "21-date interval"],
+        rows,
+    )
+    tabular(
+        "geometry-scores.tex",
+        "lrrrr",
+        [
+            "Geometry",
+            "Gram: full",
+            "Spatial: full",
+            "Gram: marginal",
+            "Spatial: marginal",
+        ],
+        full_rows,
+    )
+    for variance, label in (("full", "Full"), ("correlation", "Marginal")):
+        tabular(
+            f"geometry-contrasts-{variance}.tex",
+            "lrll",
+            ["Geometry", "Difference", "21-date interval", "63-date interval"],
+            [[r[0], *r[2:]] for r in interval_rows if r[1] == label],
+        )
+    tabular(
+        "pcoa-summary.tex",
+        "lrrrrr",
+        [
+            "Geometry",
+            "Rank range",
+            "Geometry share",
+            "Raw share",
+            "Residual share",
+            "Max. gross",
+        ],
+        pcoa_rows,
+    )
+    fig, ax = plt.subplots(figsize=(6.5, 3.5), layout="constrained")
+    for approach, label in principal.items():
+        values = [
+            select(spectrum, approach=approach, year=2025, component=k)
+            for k in range(1, 11)
+        ]
+        ax.plot(
+            range(1, 11),
+            [float(r["variance_share"]) for r in values],
+            marker="o",
+            markersize=3,
+            linewidth=1,
+            label=label,
+        )
+    ax.set(
+        xlabel="Principal coordinate",
+        ylabel="Share of centered geometry",
+        xticks=range(1, 11),
+    )
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(ncol=2, frameon=False, fontsize=8)
+    save_figure(fig, "geometry-scree.pgf")
+    plt.close(fig)
+    CLAIMS["geometry"] = {
+        "procedures": len(comparison),
+        "approaches": len(GEOMETRY_APPROACHES),
+        "pcoa_summaries": len(summary),
+        "scree_year": 2025,
+        "common_marginal_negative": sum(
+            float(
+                select(
+                    contrasts,
+                    left=f"{approach}|gram|correlation",
+                    right=f"{approach}|spatial|correlation",
+                )["difference"]
+            )
+            < 0
+            for approach in GEOMETRY_APPROACHES
+        ),
+        "same_geometry_contrasts": [
+            r
+            for r in contrasts
+            if r["left"].replace("|gram|", "|spatial|") == r["right"]
+        ],
+    }
+
+
+def validate_replication_sensitivity(rows, cohorts):
+    """Reject missing timing/software cells or comparisons that change firms."""
+    expected = set()
+    for timing in ("shifted", "contemporaneous"):
+        for backend in ("robustbase", "robust"):
+            for sample in ("natural", "intersection"):
+                for table in ("common_four", "common_three"):
+                    expected.add((timing, backend, sample, table, "nonspatial", "ols"))
+                    networks = set(CHARACTERISTICS)
+                    if table == "common_four":
+                        networks.add("fernandez_debt_maturity")
+                    for network in networks:
+                        for estimator in ("spatial_lag_iv", "spatial_error_ml"):
+                            expected.add(
+                                (timing, backend, sample, table, network, estimator)
+                            )
+    fields = ("timing", "backend", "sample", "table", "network", "estimator")
+    keys = [tuple(r[k] for k in fields) for r in rows]
+    if len(set(keys)) != len(keys) or set(keys) != expected:
+        raise ValueError("Incomplete or duplicate replication sensitivity inventory")
+    for row in rows:
+        timing, sample, table = row["timing"], row["sample"], row["table"]
+        cohort = cohorts[timing][f"{table}|{sample}"]
+        tickers = cohort["tickers"]
+        if cohort["firms"] != len(tickers) or len(set(tickers)) != len(tickers):
+            raise ValueError("Invalid replication sensitivity cohort")
+        close(float(row["firms"]), len(tickers), "sensitivity cohort size")
+        expected_id = (
+            f"{table}:intersection"
+            if sample == "intersection"
+            else f"{table}:{timing}:natural"
+        )
+        if row["sample_id"] != expected_id or row["self_links"] != "False":
+            raise ValueError("Inconsistent replication sensitivity identity")
+        start, end = (2016, 2025) if timing == "shifted" else (2015, 2024)
+        if (
+            row["return_start"] != f"{start}-01-01"
+            or row["return_end"] != f"{end}-12-31"
+            or int(row["characteristic_start"]) != 2015
+            or int(row["characteristic_end"]) != 2024
+        ):
+            raise ValueError("Unexpected replication sensitivity windows")
+        for field in (
+            "premium_market",
+            "se_market",
+            "intensity",
+            "intensity_se",
+            "pseudo_r2_structural",
+            "pseudo_r2_reduced",
+        ):
+            if not math.isfinite(float(row[field])):
+                raise ValueError(f"Nonfinite replication sensitivity {field}")
+    for table in ("common_four", "common_three"):
+        left = cohorts["shifted"][f"{table}|intersection"]["tickers"]
+        right = cohorts["contemporaneous"][f"{table}|intersection"]["tickers"]
+        if left != right:
+            raise ValueError("Replication timing comparison changes firms")
+
+
+def render_replication_sensitivity(primary):
+    """Render timing and software contrasts while preserving primary estimates."""
+    root = "research/replication"
+    rows = read(f"{root}/sensitivity-estimates.csv")
+    cohorts = read(f"{root}/sensitivity-cohorts.json")
+    runtime = read(f"{root}/sensitivity-mm-runtime.json")
+    contrasts = read(f"{root}/sensitivity-contrasts.csv")
+    for name in ("sensitivity-quarterly-returns.csv", "sensitivity-mm-betas.csv"):
+        record(f"{root}/{name}")
+    validate_replication_sensitivity(rows, cohorts)
+    if set(runtime) != {
+        f"{t}|{b}"
+        for t in ("shifted", "contemporaneous")
+        for b in ("robustbase", "robust")
+    }:
+        raise ValueError("Incomplete MM software runtime records")
+    for row in rows:
+        if (
+            row["timing"] == "shifted"
+            and row["backend"] == "robustbase"
+            and row["sample"] == "natural"
+        ):
+            baseline = select(
+                primary,
+                **{k: row[k] for k in ("table", "network", "estimator", "self_links")},
+            )
+            for field in (
+                "premium_market",
+                "se_market",
+                "intensity",
+                "intensity_se",
+                "pseudo_r2_structural",
+                "pseudo_r2_reduced",
+            ):
+                close(
+                    float(row[field]),
+                    float(baseline[field]),
+                    f"preserved primary {field}",
+                )
+    for row in contrasts:
+        identity = {
+            k: row[k] for k in ("table", "sample", "sample_id", "network", "estimator")
+        }
+        left = select(
+            rows, **identity, timing=row["left_timing"], backend=row["left_backend"]
+        )
+        right = select(
+            rows, **identity, timing=row["right_timing"], backend=row["right_backend"]
+        )
+        for field in (
+            "premium_market",
+            "intensity",
+            "pseudo_r2_structural",
+            "pseudo_r2_reduced",
+        ):
+            close(
+                float(row[f"delta_{field}"]),
+                float(right[field]) - float(left[field]),
+                "matched replication contrast",
+            )
+    table_rows, cohort_rows = [], []
+    for table, label in (
+        ("common_four", "Four characteristics"),
+        ("common_three", "Three characteristics"),
+    ):
+        for timing in ("shifted", "contemporaneous"):
+            cohort_rows.append(
+                [
+                    label,
+                    timing.title(),
+                    cohorts[timing][f"{table}|natural"]["firms"],
+                    cohorts[timing][f"{table}|intersection"]["firms"],
+                ]
+            )
+            for backend in ("robustbase", "robust"):
+                identity = {
+                    "table": table,
+                    "sample": "intersection",
+                    "timing": timing,
+                    "backend": backend,
+                }
+                ols = select(rows, **identity, network="nonspatial", estimator="ols")
+                sem = select(
+                    rows,
+                    **identity,
+                    network="fernandez_joint",
+                    estimator="spatial_error_ml",
+                )
+                table_rows.append(
+                    [
+                        "Four" if table == "common_four" else "Three",
+                        timing.title(),
+                        backend,
+                        ols["firms"],
+                        f"{100 * float(ols['premium_market']):.2f} ({100 * float(ols['se_market']):.2f})",
+                        f"{100 * float(sem['premium_market']):.2f} ({100 * float(sem['se_market']):.2f})",
+                        f"{float(sem['intensity']):.3f}",
+                    ]
+                )
+    tabular(
+        "replication-sensitivity.tex",
+        "lllrrrr",
+        [
+            "Histories",
+            "Returns",
+            "MM package",
+            "$N$",
+            "OLS slope (SE)",
+            "Joint SEM slope (SE)",
+            r"$\lambda$",
+        ],
+        table_rows,
+    )
+    tabular(
+        "replication-sensitivity-cohorts.tex",
+        "llrr",
+        ["Histories", "Returns", "Eligible", "Intersection"],
+        cohort_rows,
+    )
+    diagnostic_rows = []
+    for network, label in CHARACTERISTICS.items():
+        row = select(
+            primary,
+            table="common_four",
+            network=network,
+            estimator="spatial_error_ml",
+            self_links="False",
+        )
+        diagnostic_rows.append(
+            [
+                label,
+                f"{float(row['ols_moran']):.4f}",
+                f"{float(row['ols_moran_z']):.3f}",
+                f"{float(row['pseudo_r2_structural']):.3f}",
+                f"{float(row['pseudo_r2_reduced']):.3f}",
+            ]
+        )
+    debt = select(
+        primary,
+        table="common_four",
+        network="fernandez_debt_maturity",
+        estimator="spatial_error_ml",
+        self_links="False",
+    )
+    diagnostic_rows.insert(
+        -1,
+        [
+            "Debt maturity",
+            f"{float(debt['ols_moran']):.4f}",
+            f"{float(debt['ols_moran_z']):.3f}",
+            f"{float(debt['pseudo_r2_structural']):.3f}",
+            f"{float(debt['pseudo_r2_reduced']):.3f}",
+        ],
+    )
+    tabular(
+        "replication-diagnostics.tex",
+        "lrrrr",
+        [
+            "Network",
+            r"Raw Moran $I$",
+            r"Moran $z$",
+            r"Conditional fit $R^2$",
+            r"Mean fit $R^2$",
+        ],
+        diagnostic_rows,
+    )
+    CLAIMS["replication_sensitivity"] = {
+        "cells": len(rows),
+        "contrasts": len(contrasts),
+        "cohorts": cohorts,
+        "displayed_rows": table_rows,
+    }
 
 
 def main():
@@ -561,7 +1153,7 @@ def main():
     axes[1, 0].set_ylabel("Mean decoder $R^2$")
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="outside lower center", ncol=3, frameon=False)
-    fig.savefig(OUT / "support.pgf")
+    save_figure(fig, "support.pgf")
     plt.close(fig)
 
     controls = []
@@ -889,6 +1481,8 @@ def main():
     }
     if missing := required_manifest - manifest["sha256"].keys():
         raise ValueError(f"Incomplete source manifest: {sorted(missing)}")
+    render_geometry(firm_days)
+    render_replication_sensitivity(r0)
     env = Environment(
         loader=FileSystemLoader(Path(__file__).parent),
         undefined=StrictUndefined,
@@ -902,9 +1496,7 @@ def main():
         "firms_max": max(firms),
         "figure_sizes": sizes,
     }
-    (OUT / "numbers.tex").write_text(
-        env.get_template("numbers.tex.j2").render(**values)
-    )
+    write("numbers.tex", [env.get_template("numbers.tex.j2").render(**values).rstrip()])
     audit = {
         "design": "three-foundations",
         "source_sha256": SOURCES,
@@ -921,6 +1513,9 @@ def main():
             "main_benchmarks": "reference_exposures and covariance_exposures, matched/diagonal; reference=joint/exp/diagonal",
             "decoder": "unweighted annual mean, 2016-2025; supplement also 2020-2025",
             "replication": "four, 33 firms, CAPM, zero diagonal, exp, SEM-ML; nonspatial OLS",
+            "replication_sensitivity": "both timing windows x both MM packages x both cohorts x natural/intersection; main table uses intersection",
+            "geometry": "31 geometries x gram/spatial x full/correlation; all saved annual totals and paired intervals reconciled",
+            "pcoa": "rank at most 5; annual 2016-2025 descriptive means; scree fixed to native geometries in 2025",
             "scores": "sum saved annual scores, 2020-2025; no estimation rerun",
             "normalization": "rank=5, support=256, original folds; calibration minus native within metric",
             "fold_sensitivity": "five fixed assignments; range of scores versus published native direct; mean decoder fit 2016-2025",

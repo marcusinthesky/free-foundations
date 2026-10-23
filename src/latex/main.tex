@@ -33,7 +33,9 @@
   forecasts when each procedure fits its own innovation variances. When full
   forecasts are rescaled to common marginal variances, the corresponding
   calibration differences have negative point estimates and confidence intervals
-  spanning zero. Exposure prediction improves more with additional financial
+  spanning zero. A direct shared-exposure covariance also trails the spatial
+  specification across the retained common-marginal point comparisons.
+  Exposure prediction improves more with additional financial
   calibration firms than with additional encoder examples over the ranges
   examined. These results locate the contribution of pretrained features in
   target-specific estimation and illustrate why covariance performance requires
@@ -326,6 +328,22 @@ variances, leaving their implied correlations to differ. This assesses whether
 the calibration benefit persists under that variance treatment, without causally
 attributing the principal gain to volatility estimation.
 
+A second specification uses financial geometry directly, without converting it
+to spatial weights. For unit-normalized vectors $q_i$, let $C_{ij}=q_i'q_j$.
+Normalized rank histories give Spearman similarities, and averaging their Gram
+matrices gives the joint characteristic control. We fit
+\begin{equation}\label{eq:gram-covariance}
+  \Sigma_{u,t}=S_t[(1-\theta)I+\theta C_t]S_t,
+  \qquad 0\leq\theta\leq1-10^{-6},
+\end{equation}
+where $S_t$ contains prior residual root-mean-square scales. This positive
+definite covariance allows signed similarities and retains each marginal
+residual variance. One pooled dependence parameter is fitted over 2016--2019;
+the factor covariance and evaluation outcomes remain common. Matched spatial
+controls use the identical chord geometry. Their innovation-scale estimates
+differ, so common-marginal scores lead this model comparison. The direct model
+expresses shared shock exposures rather than propagation through neighbors.
+
 Two sample-size exercises distinguish the information entering each stage.
 Nested encoder contexts contain 32--256 valuation examples. Separately, we fix
 context at 256 and vary financial training firms from 32 to 256 per
@@ -427,6 +445,39 @@ show why calibration needs empirical evaluation even with a declared target.
 The fitted regression changes both coordinates and neighborhoods, whose value
 depends on estimation accuracy and the covariance procedure using them.
 
+\subsection{Direct geometry and shared exposures}
+Table~\ref{tab:geometry} compares the direct Gram covariance with the spatial
+model while keeping each representation's chord geometry fixed. Positive
+differences favor the direct covariance; negative differences favor spatial
+covariance. These comparisons use common marginal variances and therefore
+assess different uses of similarity after standardizing forecast scales.
+The classical characteristic geometry remains a control within both models.
+Of \GramComparisons{} retained geometries, \GramNegative{} have negative point
+differences. The direct shared-exposure specification therefore does not improve
+this comparison. Interval uncertainty varies across geometries and block
+lengths; predictive performance does not identify a propagation mechanism.
+Appendix~\ref{sec:geometry} reports both variance treatments and all reset and
+intercept-only controls, including adverse comparisons.
+
+\begin{table}[htbp]
+  \centering\footnotesize\setlength{\tabcolsep}{4pt}
+  \input{build/geometry-main}
+  \caption{Direct Gram minus spatial log scores on common marginal variances,
+    2020--2025. Native and decoded columns use identical unit-chord geometry
+    within each contrast. Brackets give conditional 95\% stationary-bootstrap
+    intervals with expected blocks of 21 dates; the appendix also reports
+    63-date intervals and full-covariance scores. Decoded exposures are
+    normalized specifically for this comparison. The joint row uses the
+  average characteristic Gram matrix.}\label{tab:geometry}
+\end{table}
+
+The covariance and spatial specifications impose different restrictions on
+dependence. A Gram coefficient measures the strength of shared geometry;
+it is not a spillover coefficient. Principal coordinates provide a separate
+descriptive view of the same geometry. Their component portfolios reconstruct
+returns by projection, so reconstruction shares describe an in-sample
+decomposition rather than independent forecasting evidence.
+
 \subsection{Where additional observations help}
 Because the exposure regression must be fitted from financial observations,
 we next examine how prediction changes with that sample.
@@ -520,7 +571,10 @@ benefit depends on specification and the return-based benchmarks remain
 stronger. Common-marginal point estimates provide no corresponding positive
 calibration gain. An exposure target makes the intended relationship explicit;
 forecast evaluation determines how well the estimated relationship serves the
-chosen risk model.
+chosen risk model. The direct Gram specification gives \GramNegative{} negative
+point differences across \GramComparisons{} common-marginal comparisons with
+spatial covariance. This adverse finding concerns the tested covariance
+restriction rather than the value of financial representations in general.
 % MAIN-TEXT-END
 \clearpage
 %TC:ignore
@@ -1007,6 +1061,108 @@ exploratory configurations were examined on evaluation years. The retained
 study and diagnostics do not create a new holdout or erase that development
 history.
 
+\section{Direct financial geometry and principal
+coordinates}\label{sec:geometry}
+The direct covariance comparison crosses 31 geometries with Gram and spatial
+dependence and both full and common-marginal scoring. It includes the seven
+principal representations and their decoded versions, all six reset controls,
+the decoded intercept-only control, and three individual characteristic
+histories plus their joint geometry. The encoder context remains 256; financial
+inputs and feature states are frozen. Every same-geometry comparison holds
+firms, dates, financial factors and return centering fixed. Spatial controls
+retain the characteristic exponential kernel or feature concentration-matched
+kernel. Gram scales are empirical residual root-mean-square estimates; spatial
+innovation scales are profiled under the existing estimator. Full-covariance
+differences consequently include these scale-estimation differences.
+
+The Gram construction keeps its unit diagonal, signed similarities and symmetry.
+It neither zeros the diagonal nor row-normalizes. For unit-chord distances,
+$C=\mathbf1\mathbf1'-D^{\circ2}/2$; the joint RMS distance gives the arithmetic
+mean of characteristic Gram matrices. The fitted $\theta$ is common across
+calibration years, with each year's realized residual RMS scales held fixed
+inside that likelihood. Evaluation uses the existing prior residual window.
+The zero-dependence endpoint is checked explicitly, and unidentified dependence
+is assigned zero. Recorded boundary diagnostics distinguish such fits from
+interior estimates. Paired contrasts use 9,999 stationary-bootstrap draws with
+seed 42 and expected blocks of 21 and 63 dates. These new contrasts remain
+outside the earlier model confidence-set family.
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/geometry-scores}
+  \caption{Complete direct-geometry score grid, 2020--2025. Higher summed
+    Gaussian log scores are better. Full scores include model-specific scale
+    estimates; marginal scores rescale the complete covariance to the common
+    prior raw-return variances. Native and decoded geometries are both
+  unit-normalized for this comparison.}
+\end{table}
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/geometry-contrasts-full}
+  \caption{Direct Gram minus spatial scores with full covariances. Brackets
+    give conditional 95\% stationary-bootstrap intervals. All prescribed
+  geometries and controls are retained.}
+\end{table}
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/geometry-contrasts-correlation}
+  \caption{Direct Gram minus spatial scores with common marginal variances.
+    Brackets give conditional 95\% stationary-bootstrap intervals. Positive
+  differences favor shared-exposure covariance on the identical geometry.}
+\end{table}
+
+For interpretation, double centering gives $G=JCJ$, where
+$J=I-\mathbf1\mathbf1'/N$. With leading positive eigenpairs,
+$Z=V_K\Lambda_K^{1/2}$ contains principal coordinates and
+$A=Z{(Z'Z)}^{-1}$ defines characteristic-mimicking portfolios. Then $A'Z=I$
+and $\mathbf1'A=0$. We target five components and retain the available positive
+rank when it is lower. Eigenvalues below
+$10^{-10}\max(1,\lambda_{\max})$ are treated as roundoff; materially negative
+eigenvalues fail validation. Axis signs put the largest absolute coordinate
+positive, with ticker order breaking ties. Repeated eigenvalues can still
+rotate their eigenspaces, so principal angles on overlapping firms describe
+annual subspace stability. Annual component identities are not pooled.
+
+Component returns are $A'r_t^e$, with residual component returns reported
+separately. Their reconstructed return vectors are projections onto $Z$.
+Reconstruction shares therefore rise mechanically when the retained space
+expands. Characteristic variance shares, return reconstruction shares and
+forecast scores describe different quantities. Large gross weights can also
+make unit-exposure normalization unsuitable as an investment strategy.
+The saved artifacts include all firm coordinates and weights, component returns
+and covariances, original-characteristic associations, firms at both extremes
+of each axis, and annual subspace stability. These are descriptive portfolios;
+no trading-performance claim follows from their construction.
+The decoded Kumo resets and intercept-only control have rank four because five
+held-out groups receive different training-sample target means. Their complete
+rank-four geometry share and potentially large gross weights describe this
+fold construction, not recovered economic factors. Native constant Kumo resets
+have rank-zero centered geometry, while their uncentered Gram covariance still
+permits a common equicorrelation component.
+
+\begin{figure}[p]
+  \centering
+  \input{build/geometry-scree.pgf}
+  \caption{Latest-year principal-coordinate spectrum, 2025, for native
+    principal representations and the joint characteristic control. Shares
+    refer to centered characteristic geometry, not return covariance.
+    The displayed year is a fixed descriptive choice, not a selected
+  forecasting result.}
+\end{figure}
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/pcoa-summary}
+  \caption{Descriptive principal-coordinate summaries, 2016--2025. Rank range
+    is the retained annual rank, capped at five. Geometry, raw-return and
+    residual-return shares are unweighted annual means. Maximum gross is the
+    largest annual gross component-portfolio weight. Return shares describe
+  projection on the same return vectors and are not forecasting evidence.}
+\end{table}
+
+\clearpage
 \section{Fern\'andez core replication and risk audit}\label{sec:replication}
 The characteristic-history benchmark follows Fern\'andez's spatial approach.
 This appendix reports the accompanying methodological replication and audits
@@ -1024,8 +1180,10 @@ Four characteristic networks use market capitalization/assets, market-to-book,
 dividend yield and debt maturity. History distances are
 $\sqrt{2(1-\rho_{\rm Spearman})}$ with average ranks for ties, exponential
 weights and row normalization. Zero self-links are primary; an alternative
-retains positive self-links because the original kernel expression leaves the
-diagonal convention open. The joint network combines characteristic distances
+retains positive self-links as a sensitivity. The 2007 working paper explicitly
+specifies a zero main diagonal~\cite{fernandezworking}; the final published
+article remains the controlling specification for the full replication.
+The joint network combines characteristic distances
 by their root mean square and is an extension to the original comparison.
 The common-four cohort has 33 firms; dropping debt maturity yields 395.
 Likelihood comparisons remain within common cohorts.
@@ -1038,7 +1196,10 @@ components remain missing and ratios use nominal values. The
 Fama--French % chktex 8
 market factor and one-month risk-free series replace the original market and
 Treasury proxies. These substitutions and modern MM implementation prevent an
-exact numerical reproduction of the original study.
+exact numerical reproduction of the original study. Primary characteristic
+snapshots cover 2015--2024, while returns cover 2016--2025. Filing-availability
+rules are retained in a contemporaneous 2015--2024 return sensitivity; neither
+window is presented as a fully prospective cross-sectional design.
 
 \begin{table}[htbp]
   \centering\small
@@ -1063,14 +1224,22 @@ also limit comparisons of economic magnitudes.
 Spatial-lag two-stage least squares uses $[X,WX]$ as instruments, where $X$ is
 the estimated-beta regressor. Spatial-error ML concentrates the Gaussian
 likelihood over coefficients in $(-0.99,0.99)$. Conditional uncertainty treats
-betas and networks as fixed; ML uses the information matrix because the spatial
-log determinant has no unique observation-level allocation. The generated-beta
+betas and networks as fixed. ML uses Gaussian information-matrix covariance,
+an adaptation from the paper's outer-product-of-scores covariance.
+The generated-beta
 bootstrap jointly resamples quarters of returns and factors, recomputes MM
 betas and medians, and holds networks fixed. Reported intervals use 199 valid
 draws with expected blocks of four quarters; rejected draws are recorded.
 Lag-IV bootstrap intervals are unconstrained and can extend beyond the stability
-region. Residual Moran moments, normality and boundary diagnostics, self-links,
-and common-cohort comparisons accompany the result records.
+region. Raw residual Moran $I$ and its standardized $z$ statistic are distinct
+reported diagnostics. Residual moments condition on the regression design,
+following the dedicated regression-residual test rather than the paper's
+printed raw-observation formula. Squared correlation between actual and fitted
+outcomes measures
+conditional in-sample fit: the spatial-error fitted value includes the observed
+residual spatial lag. Reduced-form fit instead uses the regression mean.
+Normality and boundary diagnostics, self-links, and common-cohort comparisons
+accompany the result records.
 
 \begin{table}[htbp]
   \centering\small
@@ -1080,6 +1249,45 @@ and common-cohort comparisons accompany the result records.
     intervals recompute first-stage estimates and can cross the
     stability bounds.
   Networks remain fixed during resampling.}
+\end{table}
+
+\begin{table}[htbp]
+  \centering\footnotesize
+  \input{build/replication-sensitivity}
+  \caption{Timing and MM software sensitivities on intersection cohorts.
+    Each timing window is crossed with both MM packages; beta slopes and
+    standard errors are percentage points. All networks are recomputed on the
+    reported cohort. Inference is conditional on estimated betas and networks;
+    the generated-beta bootstrap remains attached to the primary
+  benchmark.}\label{tab:replication-sensitivity}
+\end{table}
+
+Both timing windows are crossed with \texttt{robustbase::lmrob} and
+\texttt{robust::lmRob}. The latter supplies a software-lineage sensitivity to
+the S-PLUS Robust Library~\cite{robustpackage}, not identification of
+Fern\'andez's original function
+or tuning. Its final MM stage uses 90\% efficiency and Optimal weighting;
+package versions, controls, seeds, warnings and retries are recorded for both
+implementations. Eligible cohorts and their intersection are retained
+separately, preventing changes in firms from being attributed to timing or
+software. Neither package establishes exact S-Plus numerical equivalence.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/replication-sensitivity-cohorts}
+  \caption{Eligible and intersection cohorts for both return windows. The
+    intersection holds firm identities fixed across timing comparisons;
+  full eligible-sample estimates remain in the saved sensitivity results.}
+\end{table}
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/replication-diagnostics}
+  \caption{Primary common-four residual diagnostics and fitted-value
+    conventions. Raw Moran $I$ and standardized $z$ refer to OLS residuals.
+    Conditional SEM fit includes the observed residual spatial lag; mean fit
+    uses $X\widehat b$. Both fit columns are squared correlations between actual
+  and fitted outcomes, rather than forecasting measures.}
 \end{table}
 
 The risk audit implements the original spatial-lag and spatial-error portfolio
@@ -1107,6 +1315,16 @@ equations and calibration.
   Spatial linkages in international financial markets.
   \emph{Quantitative Finance}, 11(2), 237--245.
   \url{https://doi.org/10.1080/14697680903127403}.
+  \bibitem{fernandezworking}
+  Fern\'andez, V. (2007).
+  Spatial Linkages in International Financial Markets.
+  IIIS Discussion Paper No.~234, November.
+  \url{https://www.tcd.ie/triss/assets/PDFs/iiis/iiisdp234.pdf}.
+  \bibitem{robustpackage}
+  Wang, J. et al. (2024).
+  \texttt{robust}: Port of the S+ Robust Library. R package version
+  0.7-5. % chktex 8
+  \url{https://CRAN.R-project.org/package=robust}.
   \bibitem{assetembeddings}
   Gabaix, X., Koijen, R. S. J., Richmond, R. J., and Yogo, M. (2025).
   Asset Embeddings. BFI Working Paper 2025-51, April version. % chktex 8

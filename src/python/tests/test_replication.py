@@ -12,8 +12,13 @@ from free_foundations.fernandez.bootstrap import REPLICATES, SPARE, network_draw
 from free_foundations.fernandez.estimates import nonspatial, spatial
 from free_foundations.fernandez.evaluation import quarterly_data
 from free_foundations.fernandez.models import paper_weights, rank_distance
-from free_foundations.fernandez.replication import audit, distances
-from free_foundations.fernandez.replication_data import Inputs, cohort
+from free_foundations.fernandez.replication import (
+    audit,
+    distances,
+    sensitivity_cohorts,
+    sensitivity_contrasts,
+)
+from free_foundations.fernandez.replication_data import WINDOWS, Inputs, cohort
 
 
 def test_market_column_is_unchanged_by_extra_factors() -> None:
@@ -74,6 +79,7 @@ def test_manifest_sections_are_complete(tmp_path: Path) -> None:
     record = json.loads((tmp_path / "replication-manifest.json").read_text())
     assert all(record[key] for key in ("reported", "conventions", "substitutions"))
     assert "Information matrix" in (tmp_path / "replication-manifest.md").read_text()
+    assert "iiisdp234.pdf" in (tmp_path / "replication-manifest.md").read_text()
 
 
 def test_common_cohorts_and_joint_distance_keep_the_declared_information() -> None:
@@ -94,6 +100,55 @@ def test_common_cohorts_and_joint_distance_keep_the_declared_information() -> No
         built["fernandez_joint"] ** 2,
         np.mean([built[f"fernandez_{name}"] ** 2 for name in names[:3]], axis=0),
     )
+    matched = sensitivity_cohorts(
+        {
+            "shifted": inputs,
+            "contemporaneous": Inputs(frame, pd.DataFrame(), ("A", "C"), "contemporaneous"),
+        }
+    )
+    assert matched["shifted"]["common_four|natural"] == ("A", "B")
+    assert matched["contemporaneous"]["common_four|natural"] == ("A",)
+    assert matched["shifted"]["common_four|intersection"] == ("A",)
+    assert matched["shifted"]["common_three|intersection"] == ("A", "C")
+    assert matched["contemporaneous"]["common_three|intersection"] == ("A", "C")
+
+
+def test_timing_and_software_contrasts_are_right_minus_left_on_matched_samples() -> None:
+    rows = [
+        {
+            "table": "common_four",
+            "sample": "intersection",
+            "sample_id": "common_four:intersection",
+            "network": "fernandez_joint",
+            "estimator": "spatial_error_ml",
+            "firms": 32,
+            "timing": timing,
+            "backend": backend,
+            "premium_market": value,
+            "intensity": value,
+            "pseudo_r2_structural": value,
+            "pseudo_r2_reduced": value,
+        }
+        for timing, offset in (("shifted", 0), ("contemporaneous", 10))
+        for backend, value in (("robustbase", offset + 1), ("robust", offset + 3))
+    ]
+    contrasts = sensitivity_contrasts(pd.DataFrame(rows))
+    assert len(contrasts) == 4
+    assert contrasts.loc[contrasts["contrast"].eq("timing"), "delta_premium_market"].eq(10).all()
+    assert contrasts.loc[contrasts["contrast"].eq("software"), "delta_premium_market"].eq(2).all()
+    assert contrasts["sample_id"].eq("common_four:intersection").all()
+
+
+def test_quarterly_windows_include_forty_distinct_calendar_quarters() -> None:
+    dates = pd.bdate_range("2014-12-31", "2025-12-31")
+    prices = pd.DataFrame({"A": np.exp(np.arange(len(dates)) * 0.0001)}, index=dates)
+    factors = pd.DataFrame({"RF": 0.0001, "Mkt-RF": 0.0003}, index=dates)
+    for start, end in WINDOWS.values():
+        data = quarterly_data(prices, factors, start=start, end=end)
+        assert len(data) == 40
+        assert data["date"].is_unique
+        assert data["date"].min().year == int(start[:4])
+        assert data["date"].max().year == int(end[:4])
 
 
 def test_var_audit_preserves_the_unreconciled_published_result(tmp_path: Path) -> None:
