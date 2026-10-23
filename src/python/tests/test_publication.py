@@ -71,7 +71,7 @@ def geometry_records() -> tuple[list[Row], list[Row], list[Row], list[Row]]:
                 {
                     "approach": approach,
                     "year": str(year),
-                    "firms": "6",
+                    "firms": "7",
                     "requested_rank": "5",
                     "rank": "5",
                     "positive_rank": "5",
@@ -80,9 +80,31 @@ def geometry_records() -> tuple[list[Row], list[Row], list[Row], list[Row]]:
                     "variance_share": "1",
                     "raw_reconstruction_share": "0.4",
                     "residual_reconstruction_share": "0.3",
+                    "random_relative_expectation": str(5 / 6),
+                    "cutoff_applicable": "False",
+                    "cutoff_gap": "",
+                    "cutoff_relative_gap": "",
+                    "cutoff_tied": "False",
+                    "cutoff_near_tied": "False",
+                    "subspace_unique": "True",
                     "max_gross_weight": "2",
                 }
             )
+            for prefix, projected in (("raw", 40), ("residual", 30)):
+                summary[-1].update(
+                    {
+                        f"{prefix}_total_energy": "100",
+                        f"{prefix}_relative_energy": "50",
+                        f"{prefix}_projected_energy": str(projected),
+                        f"{prefix}_energy_defined": "True",
+                        f"{prefix}_relative_defined": "True",
+                        f"{prefix}_relative_reconstruction_share": str(projected / 50),
+                        f"{prefix}_relative_energy_share": "0.5",
+                        f"{prefix}_random_relative_mean": "0.8",
+                        f"{prefix}_random_relative_lower": "0.7",
+                        f"{prefix}_random_relative_upper": "0.9",
+                    }
+                )
             spectrum.extend(
                 {
                     "approach": approach,
@@ -91,7 +113,7 @@ def geometry_records() -> tuple[list[Row], list[Row], list[Row], list[Row]]:
                     "eigenvalue": "1" if component <= 5 else "0",
                     "variance_share": "0.2" if component <= 5 else "0",
                 }
-                for component in range(1, 7)
+                for component in range(1, 8)
             )
     return comparison, annual, summary, spectrum
 
@@ -130,6 +152,82 @@ def test_pcoa_rank_and_variance_claims_must_match_recorded_spectrum() -> None:
     records[2][0]["variance_share"] = "0.9"
     with pytest.raises(ValueError, match="PCoA retained variance"):
         RENDER["validate_geometry_inventory"](*records)
+
+
+def test_energy_diagnostics_reconcile_each_annual_projection_and_random_reference() -> None:
+    row = geometry_records()[2][0]
+    RENDER["validate_pcoa_energy"](row)
+    row["raw_relative_reconstruction_share"] = "0.9"
+    with pytest.raises(ValueError, match="PCoA energy identity"):
+        RENDER["validate_pcoa_energy"](row)
+    row["raw_relative_reconstruction_share"] = "0.8"
+    row["random_relative_expectation"] = "0.5"
+    with pytest.raises(ValueError, match="random subspace expectation"):
+        RENDER["validate_pcoa_energy"](row)
+
+
+@pytest.mark.parametrize("total", [0, 100])
+def test_undefined_relative_return_energy_is_missing_instead_of_zero(total: int) -> None:
+    row = geometry_records()[2][0]
+    row.update(
+        {
+            "raw_total_energy": str(total),
+            "raw_relative_energy": "0",
+            "raw_projected_energy": "0",
+            "raw_energy_defined": str(total > 0),
+            "raw_relative_defined": "False",
+            "raw_reconstruction_share": "0" if total else "",
+            "raw_relative_energy_share": "0" if total else "",
+            "raw_relative_reconstruction_share": "",
+            **{f"raw_random_relative_{field}": "" for field in ("mean", "lower", "upper")},
+        }
+    )
+    RENDER["validate_pcoa_energy"](row)
+    row["raw_relative_reconstruction_share"] = "0"
+    with pytest.raises(ValueError, match="Undefined PCoA energy ratio"):
+        RENDER["validate_pcoa_energy"](row)
+
+
+def test_rank_five_numerical_cutoff_ties_are_retained_and_marked_nonunique() -> None:
+    _, _, summaries, _ = geometry_records()
+    row = summaries[0]
+    row.update(
+        {
+            "positive_rank": "6",
+            "cutoff_applicable": "True",
+            "cutoff_gap": "0",
+            "cutoff_relative_gap": "0",
+            "cutoff_tied": "True",
+            "cutoff_near_tied": "True",
+            "subspace_unique": "False",
+        }
+    )
+    eigenvalues = [{"eigenvalue": "1"}] * 6 + [{"eigenvalue": "0"}]
+    RENDER["validate_pcoa_cutoff"](row, eigenvalues)
+    assert row["rank"] == "5"
+    row["subspace_unique"] = "True"
+    with pytest.raises(ValueError, match="marked nonunique"):
+        RENDER["validate_pcoa_cutoff"](row, eigenvalues)
+
+
+def test_near_cutoff_diagnostics_are_distinct_from_numerical_ties() -> None:
+    row = geometry_records()[2][0]
+    row.update(
+        {
+            "positive_rank": "6",
+            "cutoff_applicable": "True",
+            "cutoff_gap": str(1 - 0.9995),
+            "cutoff_relative_gap": str(1 - 0.9995),
+            "cutoff_tied": "False",
+            "cutoff_near_tied": "True",
+            "subspace_unique": "True",
+        }
+    )
+    eigenvalues = [{"eigenvalue": "1"}] * 5 + [{"eigenvalue": "0.9995"}]
+    RENDER["validate_pcoa_cutoff"](row, eigenvalues)
+    row["cutoff_tied"] = "True"
+    with pytest.raises(ValueError, match="cutoff tie diagnostic"):
+        RENDER["validate_pcoa_cutoff"](row, eigenvalues)
 
 
 def sensitivity_records() -> tuple[list[Row], Cohorts]:

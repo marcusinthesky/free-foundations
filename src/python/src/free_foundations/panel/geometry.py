@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 THETA_MAX = 1 - 1e-6
 EIGEN_TOLERANCE = 1e-10
+CUTOFF_NEAR_TIE_RELATIVE_TOLERANCE = 1e-3
 
 
 def _square(values: FloatArray, label: str) -> FloatArray:
@@ -218,6 +219,43 @@ class PCoA:
         """Retained share of positive characteristic variation, zero for rank zero."""
         positive = self.eigenvalues[self.eigenvalues > self.tolerance]
         return float(positive[: self.components].sum() / positive.sum()) if len(positive) else 0.0
+
+    @property
+    def cutoff_applicable(self) -> bool:
+        """Whether the retained cap splits the positive eigenspectrum."""
+        return 0 < self.components < self.rank
+
+    @property
+    def cutoff_gap(self) -> float:
+        """Retained-minus-omitted boundary eigenvalue gap, NaN without truncation."""
+        if not self.cutoff_applicable:
+            return float("nan")
+        return float(self.eigenvalues[self.components - 1] - self.eigenvalues[self.components])
+
+    @property
+    def cutoff_relative_gap(self) -> float:
+        """Boundary gap divided by its larger eigenvalue, NaN without truncation."""
+        if not self.cutoff_applicable:
+            return float("nan")
+        return self.cutoff_gap / float(self.eigenvalues[self.components - 1])
+
+    @property
+    def cutoff_tied(self) -> bool:
+        """Whether a numerical boundary tie makes the prescribed subspace non-unique."""
+        return self.cutoff_applicable and self.cutoff_gap <= self.tolerance
+
+    @property
+    def cutoff_near_tied(self) -> bool:
+        """Whether the boundary relative gap is at most the declared diagnostic threshold."""
+        return (
+            self.cutoff_applicable
+            and self.cutoff_relative_gap <= CUTOFF_NEAR_TIE_RELATIVE_TOLERANCE
+        )
+
+    @property
+    def subspace_unique(self) -> bool:
+        """Whether the prescribed retained subspace is identified at numerical precision."""
+        return not self.cutoff_tied
 
 
 def pcoa(gram: FloatArray, *, tickers: tuple[str, ...] | None = None, components: int = 5) -> PCoA:

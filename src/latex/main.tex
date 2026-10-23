@@ -473,10 +473,14 @@ intercept-only controls, including adverse comparisons.
 
 The covariance and spatial specifications impose different restrictions on
 dependence. A Gram coefficient measures the strength of shared geometry;
-it is not a spillover coefficient. Principal coordinates provide a separate
+it is not a spillover coefficient. This comparison uses the full uncentered
+Gram matrix, rather than estimating a factor covariance $Z\Phi Z'+D$.
+Principal coordinates provide a separate
 descriptive view of the same geometry. Their component portfolios reconstruct
 returns by projection, so reconstruction shares describe an in-sample
-decomposition rather than independent forecasting evidence.
+decomposition rather than independent forecasting evidence. Centered portfolios
+exclude the uniform cross-sectional direction; their uncentered return-energy
+shares do not assess the economic value of characteristic-mimicking factors.
 
 \subsection{Where additional observations help}
 Because the exposure regression must be fitted from financial observations,
@@ -1086,6 +1090,11 @@ is assigned zero. Recorded boundary diagnostics distinguish such fits from
 interior estimates. Paired contrasts use 9,999 stationary-bootstrap draws with
 seed 42 and expected blocks of 21 and 63 dates. These new contrasts remain
 outside the earlier model confidence-set family.
+This specification uses the full uncentered $C$, with its original marginal
+residual scales. It does not fit a low-rank covariance $Z\Phi Z'+D$ with
+estimated component covariance $\Phi$ and idiosyncratic covariance $D$.
+Its comparison with spatial covariance therefore leaves that factor-model
+direction open.
 
 \begin{table}[p]
   \centering\scriptsize\setlength{\tabcolsep}{4pt}
@@ -1124,17 +1133,60 @@ eigenvalues fail validation. Axis signs put the largest absolute coordinate
 positive, with ticker order breaking ties. Repeated eigenvalues can still
 rotate their eigenspaces, so principal angles on overlapping firms describe
 annual subspace stability. Annual component identities are not pooled.
+When the retained rank truncates the positive spectrum, the cutoff gap is
+$\lambda_K-\lambda_{K+1}$. A gap no larger than the numerical eigenvalue
+tolerance flags a nonunique retained subspace; a relative gap
+${(\lambda_K-\lambda_{K+1})}/\lambda_K\leq10^{-3}$ flags a near cutoff.
+We keep the prescribed rank and mark these diagnostics instead of choosing
+components using returns. A numerical tie means another basis at that boundary
+can give a different projection; sign orientation alone does not identify it.
+The saved annual diagnostics contain \PcoaCutoffTies{} numerical cutoff ties
+and \PcoaCutoffNear{} cases satisfying the near-cutoff threshold.
 
 Component returns are $A'r_t^e$, with residual component returns reported
 separately. Their reconstructed return vectors are projections onto $Z$.
-Reconstruction shares therefore rise mechanically when the retained space
-expands. Characteristic variance shares, return reconstruction shares and
-forecast scores describe different quantities. Large gross weights can also
+For a date-by-firm excess-return matrix $R$, let
+$P_Z=Z{(Z'Z)}^{-1}Z'$. The original statistic is the uncentered return-energy
+share
+\[
+  q_{\mathrm{raw}}=\frac{\norm{RP_Z}_F^2}{\norm{R}_F^2}.
+\]
+Because $\mathbf1'Z=0$, this projection excludes the uniform cross-sectional
+direction, which remains in the denominator. We therefore also report
+\[
+  q_{\mathrm{relative}}=
+  \frac{\norm{RP_Z}_F^2}{\norm{RJ}_F^2},\qquad
+  e_{\mathrm{relative}}=\frac{\norm{RJ}_F^2}{\norm{R}_F^2},\qquad
+  q_{\mathrm{raw}}=q_{\mathrm{relative}}e_{\mathrm{relative}}.
+\]
+Here ``relative'' means cross-sectionally centered returns, not returns in
+excess of a financial factor. The original raw statistic and the corresponding
+residual-return energy share are retained. These are uncentered sums of squares,
+not time-series variance shares or standard regression $R^2$ values.
+Reconstruction shares rise mechanically when the retained space expands;
+rank-matched random centered subspaces provide a descriptive reference.
+The reference uses 199 Gaussian-QR subspaces with seed 42, shared across
+geometries of the same annual cohort and rank. These directions are independent
+of returns. The expected relative-energy share is $K/(N-1)$; the reported
+2.5th--97.5th percentile ranges describe random directions, not confidence
+intervals for the characteristic portfolios. Undefined ratios remain missing,
+with valid annual counts shown. The energy identity is verified within each
+annual observation, not by multiplying separately averaged ratios.
+For \PcoaNativeAboveRandom{} of the \PcoaNativeCount{} native principal
+geometries, the mean relative-energy share exceeds its mean random-direction
+reference. This describes in-sample alignment and supplies neither a
+return-factor test nor out-of-sample evidence.
+Characteristic variance shares, return-energy shares and forecast scores
+describe different quantities. Small raw energy shares do not rule out useful
+characteristic-mimicking factor portfolios. Large gross weights can also
 make unit-exposure normalization unsuitable as an investment strategy.
 The saved artifacts include all firm coordinates and weights, component returns
 and covariances, original-characteristic associations, firms at both extremes
 of each axis, and annual subspace stability. These are descriptive portfolios;
 no trading-performance claim follows from their construction.
+Each year's PCoA is fitted separately to that year's full cohort. The saved
+coordinates are an annual descriptive basis, not a reusable out-of-sample
+transformation for a new firm.
 The decoded Kumo resets and intercept-only control have rank four because five
 held-out groups receive different training-sample target means. Their complete
 rank-four geometry share and potentially large gross weights describe this
@@ -1156,10 +1208,35 @@ permits a common equicorrelation component.
   \centering\scriptsize\setlength{\tabcolsep}{4pt}
   \input{build/pcoa-summary}
   \caption{Descriptive principal-coordinate summaries, 2016--2025. Rank range
-    is the retained annual rank, capped at five. Geometry, raw-return and
-    residual-return shares are unweighted annual means. Maximum gross is the
-    largest annual gross component-portfolio weight. Return shares describe
-  projection on the same return vectors and are not forecasting evidence.}
+    is the retained annual rank, capped at five. Geometry share refers to
+    characteristic variation. The $q_{\rm raw}$ and $q_{\rm residual}$ columns
+    are uncentered return-energy shares; their denominators include the uniform
+    cross-sectional direction excluded by the coordinates. Means use defined
+    annual observations; Valid R/E reports raw/residual counts. Maximum gross
+  is the largest annual gross component-portfolio weight.}
+\end{table}
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/pcoa-energy}
+  \caption{Cross-sectionally relative return energy, 2016--2025. Columns
+    report unweighted means of the relative-energy fraction, the characteristic
+    projection share of relative energy, and its rank-matched random-direction
+    reference. The reference range averages annual 2.5th and 97.5th percentiles;
+    it is not a confidence interval for an annual or mean characteristic share.
+    Years counts defined relative-energy ratios. Residual counterparts and
+  exact annual energy totals remain in the saved summaries.}
+\end{table}
+
+\begin{table}[p]
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \input{build/pcoa-cutoff}
+  \caption{Principal-coordinate cutoff diagnostics, 2016--2025. Truncated
+    years counts annual fits where rank five splits the positive spectrum;
+    minimum gaps use only those years. Nonunique counts numerical boundary
+    ties. Near only counts relative gaps at most $10^{-3}$ excluding numerical
+    ties. Missing gaps indicate no truncation. These flags preserve the
+  prescribed rank rather than selecting another rank from return outcomes.}
 \end{table}
 
 \clearpage
@@ -1215,8 +1292,10 @@ window is presented as a fully prospective cross-sectional design.
 The quarterly beta slope falls from \ReplicationOlsSlope\% without spatial
 dependence to \ReplicationJointSlope\% under the joint network, with conditional
 standard errors of \ReplicationOlsSe{} and \ReplicationJointSe{} percentage
-points. The original study instead reports an increase in the estimated premium
-and improved precision after allowing spatial dependence. Positive spatial
+points. In the original pooled application, several spatial specifications
+instead report higher market premia and stronger conventional statistical
+significance. This does not establish uniformly smaller standard errors.
+Positive spatial
 coefficients in the US comparison therefore do not reproduce the original
 market-premium conclusion. The smaller common-four sample and data substitutions
 also limit comparisons of economic magnitudes.

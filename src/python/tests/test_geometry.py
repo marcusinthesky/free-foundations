@@ -3,10 +3,12 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
+from scipy.linalg import hadamard
 from scipy.stats import multivariate_normal
 
 from free_foundations.fernandez.models import rank_distance
 from free_foundations.panel.geometry import (
+    CUTOFF_NEAR_TIE_RELATIVE_TOLERANCE,
     THETA_MAX,
     block,
     chord_gram,
@@ -157,12 +159,59 @@ def test_pcoa_component_cap_deficient_rank_and_zero_rank() -> None:
     assert full.rank == 8
     assert full.components == 5
     assert 0 < full.variance_share < 1
+    assert full.cutoff_applicable
+    assert full.cutoff_gap > full.tolerance
+    assert full.cutoff_relative_gap > CUTOFF_NEAR_TIE_RELATIVE_TOLERANCE
+    assert not full.cutoff_tied
+    assert not full.cutoff_near_tied
+    assert full.subspace_unique
     deficient = pcoa(unit_gram(rng.normal(size=(8, 2))))
     assert deficient.rank == deficient.components == 2
     empty = pcoa(np.ones((6, 6)))
     assert empty.rank == empty.components == 0
     assert empty.coordinates.shape == empty.weights.shape == (6, 0)
     assert empty.variance_share == 0
+    uncapped = pcoa(np.eye(12), components=12)
+    assert uncapped.rank == uncapped.components == 11
+    for result in (deficient, empty, uncapped):
+        assert not result.cutoff_applicable
+        assert np.isnan(result.cutoff_gap)
+        assert np.isnan(result.cutoff_relative_gap)
+        assert not result.cutoff_tied
+        assert not result.cutoff_near_tied
+        assert result.subspace_unique
+
+
+def test_pcoa_flags_non_unique_subspace_when_a_tie_crosses_the_component_cap() -> None:
+    result = pcoa(np.eye(12))
+    assert result.rank == 11
+    assert result.components == 5
+    assert result.cutoff_applicable
+    assert result.cutoff_gap <= result.tolerance
+    assert result.cutoff_tied
+    assert result.cutoff_near_tied
+    assert not result.subspace_unique
+    # The diagnostic preserves the prescribed representation and its portfolio identities.
+    assert result.coordinates.shape == (12, 5)
+    assert_allclose(result.weights.T @ result.coordinates, np.eye(5), atol=1e-14)
+
+
+def test_pcoa_flags_near_cutoff_ties_in_a_valid_unit_gram() -> None:
+    # Equal squared entries keep every Gram diagonal at one while prescribing its spectrum.
+    vectors = hadamard(8) / np.sqrt(8)
+    spectrum = np.array([0, 2, 1.7, 1.5, 1.2, 0.8004, 0.8, 0], dtype=float)
+    spectrum *= 8 / spectrum.sum()
+    gram = (vectors * spectrum) @ vectors.T
+    assert_allclose(np.diag(gram), 1)
+    result = pcoa(gram)
+    assert result.rank == 6
+    assert result.components == 5
+    assert result.cutoff_gap == pytest.approx(spectrum[5] - spectrum[6])
+    assert result.cutoff_relative_gap == pytest.approx((0.8004 - 0.8) / 0.8004)
+    assert result.cutoff_gap > result.tolerance
+    assert not result.cutoff_tied
+    assert result.cutoff_near_tied
+    assert result.subspace_unique
 
 
 def test_pcoa_orientation_uses_lexical_ticker_ties() -> None:
@@ -176,10 +225,15 @@ def test_pcoa_orientation_uses_lexical_ticker_ties() -> None:
 
 def test_pcoa_spectrum_and_projection_are_equivariant_to_firm_permutation() -> None:
     rng = np.random.default_rng(7)
-    gram = unit_gram(rng.normal(size=(9, 4)))
-    tickers = tuple("ABCDEFGHI")
+    gram = unit_gram(rng.normal(size=(12, 8)))
+    tickers = tuple("ABCDEFGHIJKL")
     first = pcoa(gram, tickers=tickers)
-    order = rng.permutation(9)
+    order = rng.permutation(12)
     second = pcoa(gram[np.ix_(order, order)], tickers=tuple(tickers[index] for index in order))
     assert_allclose(first.eigenvalues, second.eigenvalues, atol=1e-14)
     assert_allclose(first.coordinates[order], second.coordinates, atol=1e-14)
+    assert first.cutoff_applicable
+    assert first.subspace_unique
+    assert not first.cutoff_near_tied
+    assert first.cutoff_gap == pytest.approx(second.cutoff_gap)
+    assert first.cutoff_relative_gap == pytest.approx(second.cutoff_relative_gap)

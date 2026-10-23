@@ -183,6 +183,132 @@ def validate_inventory(comparison, decoding, annual):
                 raise ValueError(f"Nonfinite decoder quality: {model}, {year}")
 
 
+def boolean(value):
+    """Parse a recorded boolean without treating the string False as true."""
+    if str(value).lower() not in ("true", "false"):
+        raise ValueError(f"Invalid recorded boolean: {value}")
+    return str(value).lower() == "true"
+
+
+def optional_float(value):
+    """CSV represents an undefined numerical diagnostic by an empty field."""
+    return float(value) if value not in ("", None) else math.nan
+
+
+def numerical_mean(rows, field):
+    """Average only defined annual diagnostics."""
+    values = [optional_float(row[field]) for row in rows]
+    defined = [value for value in values if math.isfinite(value)]
+    return mean(defined) if defined else math.nan
+
+
+def diagnostic_mean(rows, field):
+    """Display missing annual diagnostic means explicitly."""
+    value = numerical_mean(rows, field)
+    return f"{value:.3f}" if math.isfinite(value) else "---"
+
+
+def validate_pcoa_energy(row):
+    """Reconcile centered projection shares to saved annual energy totals."""
+    rank, firms = int(row["rank"]), int(row["firms"])
+    close(
+        float(row["random_relative_expectation"]),
+        rank / (firms - 1),
+        "random subspace expectation",
+    )
+    for prefix, original in (
+        ("raw", "raw_reconstruction_share"),
+        ("residual", "residual_reconstruction_share"),
+    ):
+        total, relative, projected = (
+            float(row[f"{prefix}_{name}_energy"])
+            for name in ("total", "relative", "projected")
+        )
+        if not all(math.isfinite(v) and v >= 0 for v in (total, relative, projected)):
+            raise ValueError("Invalid PCoA return-energy total")
+        tolerance = 1e-10 * max(1, total)
+        if projected > relative + tolerance or relative > total + tolerance:
+            raise ValueError("PCoA projection exceeds available return energy")
+        energy_defined = boolean(row[f"{prefix}_energy_defined"])
+        relative_defined = boolean(row[f"{prefix}_relative_defined"])
+        if energy_defined != (total > 0) or relative_defined != (
+            relative > 1e-24 * total and energy_defined
+        ):
+            raise ValueError("Inconsistent PCoA energy denominator flags")
+        for field, defined, expected in (
+            (
+                original,
+                energy_defined,
+                projected / total if energy_defined else math.nan,
+            ),
+            (
+                f"{prefix}_relative_energy_share",
+                energy_defined,
+                relative / total if energy_defined else math.nan,
+            ),
+            (
+                f"{prefix}_relative_reconstruction_share",
+                relative_defined,
+                projected / relative if relative_defined else math.nan,
+            ),
+        ):
+            value = optional_float(row[field])
+            if defined:
+                if not -1e-8 <= value <= 1 + 1e-8:
+                    raise ValueError(f"Invalid descriptive PCoA {field}")
+                close(value, expected, f"PCoA energy identity {field}")
+            elif not math.isnan(value):
+                raise ValueError("Undefined PCoA energy ratio must remain missing")
+        if relative_defined:
+            close(
+                float(row[original]),
+                float(row[f"{prefix}_relative_reconstruction_share"])
+                * float(row[f"{prefix}_relative_energy_share"]),
+                "PCoA raw-relative energy identity",
+            )
+        reference = [
+            optional_float(row[f"{prefix}_random_relative_{name}"])
+            for name in ("mean", "lower", "upper")
+        ]
+        if relative_defined:
+            if (
+                any(not math.isfinite(v) or not 0 <= v <= 1 for v in reference)
+                or reference[1] > reference[2]
+            ):
+                raise ValueError("Invalid random-subspace diagnostic distribution")
+        elif any(not math.isnan(v) for v in reference):
+            raise ValueError("Undefined random-subspace ratios must remain missing")
+
+
+def validate_pcoa_cutoff(row, eigenvalues):
+    """Separate numerical cutoff ties from the declared near-cutoff diagnostic."""
+    rank, positive = int(row["rank"]), int(row["positive_rank"])
+    applicable = 0 < rank < positive
+    if boolean(row["cutoff_applicable"]) != applicable:
+        raise ValueError("Inconsistent PCoA cutoff applicability")
+    if applicable:
+        retained, omitted = (
+            float(eigenvalues[k]["eigenvalue"]) for k in (rank - 1, rank)
+        )
+        gap, relative_gap = retained - omitted, (retained - omitted) / retained
+        close(float(row["cutoff_gap"]), gap, "PCoA cutoff gap")
+        close(
+            float(row["cutoff_relative_gap"]), relative_gap, "PCoA relative cutoff gap"
+        )
+        tied, near = gap <= float(row["tolerance"]), relative_gap <= 1e-3
+    else:
+        if any(
+            not math.isnan(optional_float(row[field]))
+            for field in ("cutoff_gap", "cutoff_relative_gap")
+        ):
+            raise ValueError("Untruncated PCoA spectrum has no cutoff gap")
+        tied, near = False, False
+    if boolean(row["cutoff_tied"]) != tied or boolean(row["cutoff_near_tied"]) != near:
+        raise ValueError("Inconsistent PCoA cutoff tie diagnostic")
+    if boolean(row["subspace_unique"]) != (not tied):
+        raise ValueError("Numerically tied PCoA cutoff must be marked nonunique")
+
+
 def validate_geometry_inventory(comparison, annual, summary, spectrum):
     """Require the full matched geometry grid and reconcile all saved summaries."""
     expected = {
@@ -262,14 +388,12 @@ def validate_geometry_inventory(comparison, annual, summary, spectrum):
             raise ValueError("Inconsistent positive PCoA rank")
         share = sum(float(r["variance_share"]) for r in eigenvalues[:rank])
         close(float(row["variance_share"]), share, "PCoA retained variance")
-        for field in (
-            "variance_share",
-            "raw_reconstruction_share",
-            "residual_reconstruction_share",
-        ):
+        for field in ("variance_share",):
             value = float(row[field])
             if not math.isfinite(value) or not -1e-8 <= value <= 1 + 1e-8:
                 raise ValueError(f"Invalid descriptive PCoA {field}")
+        validate_pcoa_energy(row)
+        validate_pcoa_cutoff(row, eigenvalues)
         gross = float(row["max_gross_weight"])
         if not math.isfinite(gross) or gross < 0:
             raise ValueError("Invalid PCoA gross portfolio weight")
@@ -303,6 +427,11 @@ def render_geometry(firm_days):
         or config["encoder_support"] != 256
         or config["decoded_rank"] != 5
         or config["pcoa_rank"] != 5
+        or config["pcoa_cutoff"]["near_tie_relative_tolerance"] != 1e-3
+        or config["energy_diagnostics"]["relative_energy_tolerance"] != 1e-24
+        or config["energy_diagnostics"]["random_subspace_draws"] != 199
+        or config["energy_diagnostics"]["random_subspace_seed"] != 42
+        or config["energy_diagnostics"]["random_subspace_quantiles"] != [0.025, 0.975]
     ):
         raise ValueError("Unexpected geometry windows")
     validate_geometry_inventory(comparison, annual, summary, spectrum)
@@ -340,7 +469,14 @@ def render_geometry(firm_days):
             lower, upper = float(row[f"lower_{block}"]), float(row[f"upper_{block}"])
             if not (math.isfinite(lower) and math.isfinite(upper) and lower <= upper):
                 raise ValueError("Invalid geometry contrast interval")
-    rows, full_rows, interval_rows, pcoa_rows = [], [], [], []
+    rows, full_rows, interval_rows, pcoa_rows, energy_rows, cutoff_rows = (
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
     principal = {"fernandez_joint": "Joint characteristics"} | {
         f"histories__{name}": label for name, label in MODELS.items()
     }
@@ -381,14 +517,46 @@ def render_geometry(firm_days):
                 label,
                 f"{min(ranks)}--{max(ranks)}",
                 *[
-                    f"{mean(float(r[field]) for r in selected):.3f}"
+                    diagnostic_mean(selected, field)
                     for field in (
                         "variance_share",
                         "raw_reconstruction_share",
                         "residual_reconstruction_share",
                     )
                 ],
+                "/".join(
+                    str(sum(boolean(r[f"{prefix}_energy_defined"]) for r in selected))
+                    for prefix in ("raw", "residual")
+                ),
                 f"{max(float(r['max_gross_weight']) for r in selected):.2f}",
+            ]
+        )
+        energy_rows.append(
+            [
+                label,
+                diagnostic_mean(selected, "raw_relative_energy_share"),
+                diagnostic_mean(selected, "raw_relative_reconstruction_share"),
+                diagnostic_mean(selected, "raw_random_relative_mean"),
+                f"[{diagnostic_mean(selected, 'raw_random_relative_lower')}, {diagnostic_mean(selected, 'raw_random_relative_upper')}]",
+                str(sum(boolean(r["raw_relative_defined"]) for r in selected)),
+            ]
+        )
+        truncated = [r for r in selected if boolean(r["cutoff_applicable"])]
+        cutoff_rows.append(
+            [
+                label,
+                len(truncated),
+                f"{min(float(r['cutoff_gap']) for r in truncated):.3g}"
+                if truncated
+                else "---",
+                f"{min(float(r['cutoff_relative_gap']) for r in truncated):.3g}"
+                if truncated
+                else "---",
+                sum(boolean(r["cutoff_tied"]) for r in selected),
+                sum(
+                    boolean(r["cutoff_near_tied"]) and not boolean(r["cutoff_tied"])
+                    for r in selected
+                ),
             ]
         )
         if approach in principal:
@@ -441,16 +609,43 @@ def render_geometry(firm_days):
         )
     tabular(
         "pcoa-summary.tex",
-        "lrrrrr",
+        "lrrrrrr",
         [
             "Geometry",
             "Rank range",
             "Geometry share",
-            "Raw share",
-            "Residual share",
+            r"$q_{\rm raw}$",
+            r"$q_{\rm residual}$",
+            "Valid R/E",
             "Max. gross",
         ],
         pcoa_rows,
+    )
+    tabular(
+        "pcoa-energy.tex",
+        "lrrrrr",
+        [
+            "Geometry",
+            r"$e_{\rm relative}$",
+            r"$q_{\rm relative}$",
+            "Random mean",
+            "Random reference range",
+            "Years",
+        ],
+        energy_rows,
+    )
+    tabular(
+        "pcoa-cutoff.tex",
+        "lrrrrr",
+        [
+            "Geometry",
+            "Truncated years",
+            "Min. gap",
+            "Min. rel. gap",
+            "Nonunique",
+            "Near only",
+        ],
+        cutoff_rows,
     )
     fig, ax = plt.subplots(figsize=(6.5, 3.5), layout="constrained")
     for approach, label in principal.items():
@@ -480,6 +675,21 @@ def render_geometry(firm_days):
         "approaches": len(GEOMETRY_APPROACHES),
         "pcoa_summaries": len(summary),
         "scree_year": 2025,
+        "pcoa_cutoff_ties": sum(boolean(row["cutoff_tied"]) for row in summary),
+        "pcoa_cutoff_near": sum(boolean(row["cutoff_near_tied"]) for row in summary),
+        "pcoa_native_above_random": sum(
+            numerical_mean(
+                [row for row in summary if row["approach"] == f"histories__{model}"],
+                "raw_relative_reconstruction_share",
+            )
+            > numerical_mean(
+                [row for row in summary if row["approach"] == f"histories__{model}"],
+                "raw_random_relative_mean",
+            )
+            for model in MODELS
+        ),
+        "pcoa_native_principal_count": len(MODELS),
+        "energy_reporting": "unweighted annual means over defined ratios; random bands are mean annual quantiles, not confidence intervals",
         "common_marginal_negative": sum(
             float(
                 select(

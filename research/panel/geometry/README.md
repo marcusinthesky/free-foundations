@@ -41,12 +41,38 @@ shortfalls and rank-zero geometries. Orient axes by their largest absolute
 coordinate, resolving ties by ticker. Report coordinates, latest-characteristic
 Spearman associations, five firms at each extreme, and common-firm principal
 angles between consecutive years. Annual component identities are not pooled.
+Record the retained-versus-next eigenvalue gap where truncation occurs. A gap
+within the numerical eigenvalue tolerance marks a non-unique retained subspace;
+retain the prescribed rank rather than invent a uniquely identified basis.
+A relative gap at most `1e-3` is a near-tie diagnostic. A stability comparison
+flags either year's non-unique cutoff, separately from arbitrary internal axes.
 
 Portfolio weights are `A = Z (Z' Z)^-1`, retaining unit characteristic exposure
 and zero net investment. Archive gross weights, excess and factor-residual
 component returns, component-return covariance and reconstruction shares.
+The original reconstruction statistic is the uncentered total-return-energy
+share, not a conventional fraction of covariance explained. Centered PCoA
+loadings exclude the uniform cross-firm return direction, which remains in its
+denominator. Retain that statistic and additionally record projected energy
+relative to cross-sectionally demeaned return energy, and the latter's share
+of total energy, for both raw and factor-residual returns. Archive the energies
+themselves. Relative denominators no greater than `1e-24` of total energy are
+undefined; report undefined ratios explicitly.
+
+These additional diagnostics were declared after the 23 October implementation
+review, before inspecting their financial results. Compare each actual retained
+rank to 199 fixed, return-independent random centered Gaussian-QR subspaces,
+seed 42. Use nested rank columns and identical draws across geometries on the
+same annual cohort and for raw and residual outcomes. Their expected relative
+energy share is exactly `rank / (firms - 1)`. The empirical mean and 2.5%/97.5%
+quantiles are random-direction reference bands, not confidence intervals. No
+old result is replaced or selected based on these diagnostics.
+
 Reconstruction is descriptive projection, not independent evidence of factor
-validity or trading performance. The publication's scree display uses the latest
+validity or trading performance. Neither it nor the scored full Gram covariance
+tests a separate PCoA factor covariance `Z Phi Z' + D`. No frozen out-of-sample
+coordinate transform or time-continuous factor encoder is fitted here.
+The publication's scree display uses the latest
 year, 2025, for the seven principal native geometries and joint characteristic
 control; all years, controls and adverse outcomes remain in the archive.
 

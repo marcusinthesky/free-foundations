@@ -72,8 +72,24 @@ rank-five descriptive projection summaries, and a PGF scree plot for the fixed
 latest year, 2025. Signed Gram similarities retain their diagonal and are never
 row-normalized. Empirical Gram residual scales and profiled spatial innovation
 scales differ; common-marginal results lead the comparison. Component portfolios
-and their reconstruction shares are descriptive, with all weights and component
-returns retained in the saved geometry artifacts.
+and their projection shares are descriptive, with all weights and component
+returns retained in the saved geometry artifacts. The original raw statistic is
+an uncentered return-energy share; centered coordinates exclude the uniform
+cross-sectional direction while that statistic's denominator retains it. The
+companion relative-return share uses cross-sectionally centered energy in its
+denominator and is compared with rank-matched random centered subspaces. These
+statistics are neither standard regression R² nor time-series variance shares.
+The direct Gram covariance uses the full uncentered similarity matrix. It does
+not test an estimated component-factor covariance, and low raw energy shares
+do not rule out characteristic-mimicking factors. Annual PCoA coordinates do not
+provide a reusable transform for new firms.
+`pcoa-energy.tex` gives relative-return energy shares and rank-matched random
+centered-subspace references. Reference bands summarize random directions, not
+confidence intervals; undefined denominators remain missing and valid annual
+counts are shown. `pcoa-cutoff.tex` separates numerical ties at the retained
+boundary from relative gaps at most 0.001. The prescribed rank remains fixed;
+numerical boundary ties flag a nonunique subspace rather than prompting a rank
+chosen using returns.
 
 The replication tables report the primary common-four CAPM exercise with zero
 self-links, supported explicitly by the 2007 working paper. Timing windows are
@@ -103,8 +119,10 @@ model in prose.
 Geometry validation requires the full 124-procedure grid, all 744 annual scores,
 310 PCoA summaries and complete spectra. Every recorded contrast is reconciled
 to annual differences, and every geometry artifact is checked against its source
-manifest, including the binary coordinate, weight and return files. Replication
-sensitivity validation requires all 160 conditional estimates, both software
+manifest, including the binary coordinate, weight and return files. Annual
+projection ratios are reconciled to total, relative and projected energy;
+cutoff flags are checked against the saved eigenvalues. Replication sensitivity
+validation requires all 160 conditional estimates, both software
 runtime records in both windows, and unchanged intersection firm identities.
 Publication generation atomically replaces restored output files so it does
 not write through DVC cache hard links.

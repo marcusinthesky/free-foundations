@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 OUTPUT = Path("research/panel/geometry")
+ENERGY_RELATIVE_TOLERANCE = 1e-24
+RANDOM_SUBSPACE_DRAWS, RANDOM_SUBSPACE_SEED = 199, 42
 CLASSICAL = (*(f"fernandez_{name}" for name in STUDY.characteristics), "fernandez_joint")
 APPROACHES = (
     *CLASSICAL,
@@ -56,6 +58,20 @@ def configuration() -> Row:
         "encoder_support": 256,
         "decoded_rank": FACTORS,
         "pcoa_rank": 5,
+        "pcoa_cutoff": {
+            "near_tie_relative_tolerance": geometry.CUTOFF_NEAR_TIE_RELATIVE_TOLERANCE,
+            "tie_tolerance": "existing numerical eigenvalue tolerance",
+            "tie_policy": "retain prescribed rank and flag nonunique subspace",
+        },
+        "energy_diagnostics": {
+            "denominator": "uncentered total energy and cross-sectionally demeaned energy",
+            "relative_energy_tolerance": ENERGY_RELATIVE_TOLERANCE,
+            "random_subspace_draws": RANDOM_SUBSPACE_DRAWS,
+            "random_subspace_seed": RANDOM_SUBSPACE_SEED,
+            "random_subspace_quantiles": [0.025, 0.975],
+            "random_subspace": "rank matched, centered Gaussian QR; return independent",
+            "status": "additional declared diagnostics; original reconstruction shares retained",
+        },
         "decoded_geometry": "unit-normalized exposures, distinct from principal Euclidean geometry",
         "native_direct": "original appended unit coordinate before row normalization",
         "theta_bounds": [0, geometry.THETA_MAX],
@@ -148,6 +164,88 @@ def declared_pairs() -> list[tuple[str, str, str]]:
     return pairs
 
 
+def energy_diagnostics(values: FloatArray, projected: FloatArray) -> dict[str, float | bool]:
+    """Separate total return energy from cross-sectionally relative return energy.
+
+    The retained centered characteristic space excludes uniform cross-sectional
+    loadings. Neither projection ratio is a conventional factor-covariance R-squared.
+    """
+    total = float(np.sum(values**2))
+    relative = values - values.mean(axis=1, keepdims=True)
+    centered = float(np.sum(relative**2))
+    explained = float(np.sum(projected**2))
+    total_defined = total > 0
+    relative_defined = total_defined and centered > ENERGY_RELATIVE_TOLERANCE * total
+    return {
+        "total_energy": total,
+        "relative_energy": centered,
+        "projected_energy": explained,
+        "energy_defined": total_defined,
+        "relative_defined": relative_defined,
+        "reconstruction_share": 1 - float(np.sum((values - projected) ** 2)) / total
+        if total_defined
+        else np.nan,
+        "relative_reconstruction_share": explained / centered if relative_defined else np.nan,
+        "relative_energy_share": centered / total if total_defined else np.nan,
+    }
+
+
+def random_reference(annual: Annual, rank: int) -> dict[str, float]:
+    """Reference bands from fixed return-independent centered orthonormal subspaces.
+
+    Raw and residual blocks share frames, as do all geometries with the same
+    cohort and retained rank. Ranks use nested columns of each random frame.
+    The quantiles describe random directions, not sampling uncertainty of PCoA.
+    """
+    firms = len(annual.tickers)
+    if not 0 <= rank <= min(5, firms - 1):
+        message = "Random reference rank must fit the retained centered ambient space."
+        raise ValueError(message)
+    order = np.argsort(np.asarray(annual.tickers))
+    raw = annual.raw_realized[:, order]
+    residual = annual.realized[:, order]
+    centered = [values - values.mean(axis=1, keepdims=True) for values in (raw, residual)]
+    rng = np.random.default_rng(RANDOM_SUBSPACE_SEED)
+    frames: list[FloatArray] = []
+    if rank:
+        for _ in range(RANDOM_SUBSPACE_DRAWS):
+            gaussian = rng.normal(size=(firms, min(5, firms - 1)))
+            gaussian -= gaussian.mean(axis=0)
+            frame, _ = np.linalg.qr(gaussian, mode="reduced")
+            frames.append(frame[:, :rank])
+    result = {"random_relative_expectation": rank / (firms - 1) if firms > 1 else np.nan}
+    for prefix, values, original in zip(
+        ("raw", "residual"), centered, (raw, residual), strict=True
+    ):
+        energy = float(np.sum(values**2))
+        total = float(np.sum(original**2))
+        if energy <= ENERGY_RELATIVE_TOLERANCE * total:
+            mean, lower, upper = np.nan, np.nan, np.nan
+        elif rank:
+            scores = (
+                np.sum(
+                    (values @ np.column_stack(frames)).reshape(
+                        len(values), RANDOM_SUBSPACE_DRAWS, rank
+                    )
+                    ** 2,
+                    axis=(0, 2),
+                )
+                / energy
+            )
+            mean = float(scores.mean())
+            lower, upper = map(float, np.percentile(scores, [2.5, 97.5]))
+        else:
+            mean, lower, upper = 0.0, 0.0, 0.0
+        result.update(
+            {
+                f"{prefix}_random_relative_mean": mean,
+                f"{prefix}_random_relative_lower": lower,
+                f"{prefix}_random_relative_upper": upper,
+            }
+        )
+    return result
+
+
 def describe(  # noqa: PLR0913, PLR0917 -- paired geometry, sample and archive metadata.
     gram: FloatArray,
     annual: Annual,
@@ -155,6 +253,8 @@ def describe(  # noqa: PLR0913, PLR0917 -- paired geometry, sample and archive m
     year: int,
     approach: str,
     records: dict[str, list[Row]],
+    *,
+    references: dict[int, dict[str, float]] | None = None,
 ) -> tuple[tuple[str, ...], FloatArray]:
     """Archive spectral coordinates, unit-exposure portfolios, and interpretation."""
     fitted = geometry.pcoa(gram, tickers=annual.tickers)
@@ -177,11 +277,17 @@ def describe(  # noqa: PLR0913, PLR0917 -- paired geometry, sample and archive m
     raw = annual.raw_realized @ weights
     residual = annual.realized @ weights
     projected = (raw @ coordinates.T, residual @ coordinates.T)
-    shares = [
-        1 - float(np.sum((values - estimate) ** 2) / np.sum(values**2))
-        for values, estimate in zip((annual.raw_realized, annual.realized), projected, strict=True)
-    ]
+    energies = {
+        f"{prefix}_{key}": value
+        for prefix, values, estimate in zip(
+            ("raw", "residual"), (annual.raw_realized, annual.realized), projected, strict=True
+        )
+        for key, value in energy_diagnostics(values, estimate).items()
+    }
     retained = coordinates.shape[1]
+    references = {} if references is None else references
+    if retained not in references:
+        references[retained] = random_reference(annual, retained)
     records["pcoa-summary"].append(
         common
         | {
@@ -192,8 +298,14 @@ def describe(  # noqa: PLR0913, PLR0917 -- paired geometry, sample and archive m
             "rank_shortfall": retained < 5,
             "tolerance": fitted.tolerance,
             "variance_share": fitted.variance_share,
-            "raw_reconstruction_share": shares[0],
-            "residual_reconstruction_share": shares[1],
+            **energies,
+            **references[retained],
+            "cutoff_applicable": fitted.cutoff_applicable,
+            "cutoff_gap": fitted.cutoff_gap,
+            "cutoff_relative_gap": fitted.cutoff_relative_gap,
+            "cutoff_tied": fitted.cutoff_tied,
+            "cutoff_near_tied": fitted.cutoff_near_tied,
+            "subspace_unique": fitted.subspace_unique,
             "max_gross_weight": float(np.abs(weights).sum(axis=0).max()) if retained else 0,
         }
     )
@@ -348,18 +460,29 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915 -- one bounded saved-state e
         )
     }
     previous: dict[str, tuple[tuple[str, ...], FloatArray]] = {}
+    previous_unique: dict[str, bool] = {}
     firm_days = 0
     for year in (*CALIBRATION, *EVALUATION):
         annual, calibration = prepared(year)
         grams, distances = construct(four, year, annual.tickers, load_states(year), calibration)
         update(spatial, year, annual, distances)
+        references: dict[int, dict[str, float]] = {}
         for approach, gram in grams.items():
-            coordinates = describe(gram, annual, four, year, approach, records)
+            coordinates = describe(
+                gram, annual, four, year, approach, records, references=references
+            )
+            unique = bool(records["pcoa-summary"][-1]["subspace_unique"])
             if approach in previous:
                 records["stability"].append(
                     stability(previous[approach], coordinates, year, approach)
+                    | {
+                        "previous_subspace_unique": previous_unique[approach],
+                        "current_subspace_unique": unique,
+                        "identified_subspaces": previous_unique[approach] and unique,
+                    }
                 )
             previous[approach] = coordinates
+            previous_unique[approach] = unique
             if year in CALIBRATION:
                 blocks[approach].append(geometry.block(annual.realized, gram))
             else:

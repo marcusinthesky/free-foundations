@@ -231,6 +231,8 @@ stages:
     - src/latex/build/geometry-contrasts-full.tex
     - src/latex/build/geometry-contrasts-correlation.tex
     - src/latex/build/pcoa-summary.tex
+    - src/latex/build/pcoa-energy.tex
+    - src/latex/build/pcoa-cutoff.tex
     - src/latex/build/geometry-scree.pgf
     - src/latex/build/replication-sensitivity.tex
     - src/latex/build/replication-sensitivity-cohorts.tex
