@@ -33,7 +33,9 @@ Python dependencies and the typed model registry live in `src/python`; see
 environment with `uv sync --project src/python --frozen`. TypeScript starts as a private,
 dependency-free Bun workspace; add packages under its `apps/` or `packages/`
 directories when needed. Run `just lean-build` and `just latex-build` to build
-the starter proof library and document.
+the proof library and document. The Lean build includes frozen manuscript type
+contracts; `just proof-audit` checks every project proof source and its axiom
+dependencies. See the [Lean guide](src/lean/README.md) for coverage and assumptions.
 
 ## One measurement study
 

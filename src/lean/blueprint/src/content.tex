@@ -1,7 +1,7 @@
 % Principal formal contracts of the Lean library, with their
 % supporting declarations.
-% Shared by the web blueprint, the printed blueprint and the
-% manuscript appendix.
+% Used by the web and printed blueprint. The manuscript contains a curated
+% appendix with its own declaration tags, checked against the same library.
 % Every \lean{...} name is checked against the compiled library by
 % `just blueprint-check`; \leanok marks a statement or proof with no `sorry`.
 
@@ -1606,4 +1606,85 @@ interfaces}\label{sec:bp-comparative-extensions}
   and add its complement once. For frozen finite inputs, explicit marginal
   identities turn transfer RMS into individual moments; no independence between
   firms is used.
+\end{proof}
+
+\section{Finite laws and distributional comparisons}\label{sec:bp-finite-laws}
+
+\begin{theorem}[Finite expectation and measure]\label{thm:finite-measure-bridge}
+  \lean{FreeFoundations.FiniteProbability.integral_eq_expect,
+    FreeFoundations.FiniteProbability.rms_sq_eq_integral,
+    FreeFoundations.FiniteProbability.eLpNorm_eq_ofReal_rms,
+    FreeFoundations.FiniteProbability.toPMF_ofPMF,
+    FreeFoundations.FiniteProbability.ofPMF_toPMF,
+    FreeFoundations.FiniteProbability.toMeasure_ofMeasure,
+  FreeFoundations.FiniteProbability.ofMeasure_toMeasure}\leanok
+  A real simplex law $p$ determines a probability measure on a finite
+  measurable-singleton space. Finite expectation equals its integral for
+  complete normed real vector spaces, and finite weighted RMS equals the
+  measure-theoretic $L^2$ seminorm. PMF and probability-measure conversions are
+  inverse, including zero-mass atoms.
+\end{theorem}
+\begin{proof}\leanok
+  Use mathlib's finite PMF integral formula, then the sum of squared norms
+  defining the existing weighted RMS. Singleton masses identify the measure.
+\end{proof}
+
+\begin{theorem}[Mixtures, overlap and conditioning]\label{thm:finite-mixtures}
+  \lean{FreeFoundations.FiniteProbability.expect_finMixture,
+    FreeFoundations.FiniteProbability.domination_iff,
+  FreeFoundations.FiniteProbability.expect_conditionalOn}\leanok
+  Finite mixture expectation equals iterated expectation. For $\omega\ge0$,
+  $q_x\le\omega p_x$ at every atom iff
+  $q^{\mathcal M}\le\omega p^{\mathcal M}$. Conditioning requires strictly
+  positive event mass and divides the event-restricted expectation by that mass.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:finite-measure-bridge}
+  Interchange the finite sums; compare singleton masses for domination.
+  Positivity justifies division for conditioning.
+\end{proof}
+
+\begin{theorem}[Typed simulation and financial wrappers]\label{thm:finite-typed-simulation}
+  \lean{FreeFoundations.FiniteProbability.stochastic_iff_rows_simplex,
+    FreeFoundations.FiniteProbability.approximate_decoder,
+    FreeFoundations.FiniteProbability.approximate_sufficiency,
+    FreeFoundations.FiniteProbability.approximate_decoder_uniform,
+    FreeFoundations.FiniteProbability.marginalRisk_eq_mixture,
+    FreeFoundations.FiniteProbability.source_target_recovery,
+  FreeFoundations.FiniteProbability.transfer_failure_probability}\leanok
+  Finite kernels are functions into simplex laws and compose by finite mixture.
+  Under a probability prior and losses in $[0,L]$, reverse simulation within
+  prior-averaged half-L1 TV error $\varepsilon$ implies
+  $R_Z^\star-R_X^\star\le L\varepsilon$. A forward garbling supplies the lower
+  bound zero. Uniform statewise TV bounds imply the prior-averaged premise.
+  Equal-weight block expected risk is risk under the uniform mixture of its
+  finite marginals; typed recovery and financial statements instantiate the
+  existing raw interfaces.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:finite-mixtures,thm:decision-sufficiency,thm:transfer-recovery,
+  thm:statistical-finance}
+  Apply the raw simulation and finite transfer results. Center loss at $L/2$;
+  handle $L=0$ directly. No sampling independence is needed for the risk identity.
+\end{proof}
+
+\begin{theorem}[Fixed-cost bandwidth stochastic order]\label{thm:bandwidth-stochastic-order}
+  \lean{FreeFoundations.Bandwidth.likelihoodRatio_cross_le,
+    FreeFoundations.Bandwidth.monotone_cost_expectation,
+    FreeFoundations.Bandwidth.upperTail_monotoneOn,
+    FreeFoundations.Bandwidth.closedUpperTail_monotoneOn,
+    FreeFoundations.Bandwidth.cdf_antitoneOn,
+  FreeFoundations.FiniteProbability.exponentialLaw_expect_monotone}\leanok
+  Fix a nonempty support and real costs. For $0<h_1\le h_2$ and $d_i\le d_j$,
+  $p_{h_2,i}p_{h_1,j}\le p_{h_1,i}p_{h_2,j}$. Consequently every increasing
+  function of cost has nondecreasing expectation. Strict and closed upper-tail
+  mass rise and the cost CDF falls. Tied costs retain multiplicity.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:bandwidth-effects,thm:finite-measure-bridge}
+  Cancel positive partition sums for the cross-product inequality. Expand
+  twice the expectation difference as the nonnegative double sum of
+  cross-product differences times observable differences. Use threshold
+  indicators for the tails. The comparison holds on positive bandwidths with
+  geometry and support fixed; it does not imply monotone financial loss.
 \end{proof}

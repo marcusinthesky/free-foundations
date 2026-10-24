@@ -43,12 +43,26 @@ Lean remains `leanprover/lean4:v4.31.0`; mathlib remains
 blueprint declaration builds passed. The implementation uses an isolated
 `feat/economic-measurement-theory` worktree and changes no numerical datasets.
 
-`Audit.lean` imports the public library and prints the axioms of every public
-theorem added by this extension; it is deliberately not imported by the library.
-Run `lake env lean Audit.lean` after `lake build`. Standard foundations
-(`propext`, `Classical.choice`, `Quot.sound`) are permitted; proof placeholders
-and unsupported axioms are not. Formal signatures and empirical premises must
-also be reviewed: an axiom audit alone does not establish economic identification.
+`Audit.lean` remains a readable public-theorem inspection aid. The enforced
+project-wide checker is now `just proof-audit`: it discovers every production
+source independently of umbrella imports, freshly compiles it, and checks private
+declarations, proof bodies, discarded examples and transitive dependencies.
+Only `propext`, `Classical.choice`, and `Quot.sound` are allowed. Parser-based
+policy also rejects proof placeholders and native proof execution. Exact fixture
+and trusted-tool exclusions are reported rather than hidden by directory skips.
+
+`ApiStability` is a default Lake target containing complete, frozen type contracts.
+`just lean-build` additionally verifies that every manuscript/blueprint tag has a
+successfully elaborated contract. It queries the compiled environment extension,
+so a commented-out command cannot satisfy coverage. Contracts compare types,
+universe arity and correspondence, and explicit/implicit binder metadata; they
+do not apply a theorem to a weaker example. They protect interfaces rather than
+the semantics of dependency definitions or the empirical economic premises.
+
+The [MathEconLib compatibility trial](compatibility/README.md) retained Lean 4.31.
+The 4.35 trial compiled the selected upstream probability modules but exposed a
+proved counterexample to an unchanged RMS theorem under the new `eLpNorm`
+semantics. No theorem assumption or dependency pin was changed to adopt it.
 
 ## 1. Economic target (`Exposure`, `Score.response_sq`)
 
@@ -266,6 +280,57 @@ Principal manuscript labels use the same compiled declarations:
 | `eq:block-concentration` | `Selection.finite_family` | Predetermined candidates, nonempty blocks, bounded loss, nonnegative threshold |
 | `thm:statistical-finance` (blueprint) | `StatisticalFinancial.finite_transfer_failure_probability` | Fixed predictor/decoder, declared finite input marginals, structural controls and local domain |
 
+## 11. Finite probability compatibility and stochastic order
+
+All four modules use namespace `FreeFoundations.FiniteProbability`. The facade
+uses the pinned mathlib's real simplex and PMF APIs, following the reviewed
+MathEconLib finite-law conventions with source attribution and a scoped
+[Apache license](FreeFoundations/FiniteProbability.LICENSE). There is no new
+MathEconLib dependency. Raw weighted and restricted-measure APIs remain intact.
+
+| Blueprint/manuscript label | Compiled interface | Assumptions and meaning |
+| --- | --- | --- |
+| `thm:finite-measure-bridge`, `app:finite-probability` | `integral_eq_expect`, `rms_sq_eq_integral`, `eLpNorm_eq_ofReal_rms` | Finite simplex law, measurable singletons; complete normed real target for vector integration |
+| `thm:finite-mixtures` | `expect_finMixture`, `expect_conditionalOn`, `domination_iff` | Normalized mixture probabilities; positive conditioning mass; nonnegative overlap factor |
+| `thm:finite-typed-simulation` | `approximate_decoder`, `approximate_sufficiency`, `approximate_decoder_uniform` | Probability prior; finite signals/actions; bounded loss in `[0,L]`, including `L=0`; half-L1 TV |
+| `thm:finite-typed-simulation` | `marginalRisk_eq_mixture`, `source_target_recovery`, `transfer_failure_probability` | Exact finite marginal/pushforward laws; existing alignment, overlap, sampling and financial controls |
+| `thm:bandwidth-stochastic-order`, `app:comparatives` | `Bandwidth.likelihoodRatio_cross_le`, `monotone_cost_expectation`, `upperTail_monotoneOn`, `closedUpperTail_monotoneOn`, `cdf_antitoneOn` | Fixed nonempty support and real costs, positive ordered bandwidths; cost ties retained |
+| `thm:bandwidth-stochastic-order` | `exponentialLaw_expect_monotone` | Typed finite law wrapper around the existing exponential row |
+
+Each row is proved, compiled and integrated. Task precisions are not normalized
+probabilities without a retained precision budget. Finite candidate families do
+not make observations finite. A reverse decoder alone supplies only the upper
+risk gap; a forward garbling is needed for its nonnegative lower bound.
+
+The bandwidth theorem orders every increasing observable and threshold tail of
+the fixed cost distribution. It does not order portfolio loss, and it excludes
+the totalized expression at bandwidth zero. Fixed-feature and economic
+identification qualifications from the preceding sections continue to apply.
+
+## 12. Verification tooling
+
+| Command | Enforced check |
+| --- | --- |
+| `just lean-build` | Core library, `ApiStability`, and compiled contract coverage |
+| `just proof-audit` | Fresh source discovery/build and declaration/example integrity |
+| `just proof-audit-test` | Positive and negative integrity/API fixtures using stdlib unittest |
+
+The audit writes [`.lake/build/proof-integrity.json`](.lake/build/proof-integrity.json).
+It records the revision and dirty state, toolchain, manifest and actual dependency
+revisions, source/checker hashes, exclusions, coverage, and each declaration's
+axioms. Files changed, added or removed during a run invalidate the report.
+The two explicitly trusted implementation files are `ApiStability/Check.lean`
+and `tools/CheckProofIntegrity.lean`; both are compiled. The expected contracts
+and ordinary audit file are fully audited. Production imports of excluded
+negative fixtures are rejected.
+
+The test suite checks orphan sources, private and opaque placeholders, repeated
+anonymous examples, disabled warnings, interpolated proof terms, imported axioms,
+native reflection and syntax quotations, source drift, and exact exclusions.
+Contract tests reject changed hypotheses, constants, norms, universes and binder
+visibility while accepting harmless renaming and definitional aliases. Changes
+to these tools rerun the regression hook; Lean changes rerun the integrity hook.
+
 ## Blueprint
 
 [`blueprint/src/content.tex`](blueprint/src/content.tex) restates the principal public
@@ -292,20 +357,23 @@ Mathlib files: `cd src/lean && lake exe cache get` (about 6–7 GB).
 
 ## Verification outcome (24 October 2026)
 
-- `just lean-build`: passed with the pinned dependencies (3160 build jobs).
-- `lake env lean Audit.lean`: all 265 new public theorems use only
-  `propext`, `Classical.choice`, and `Quot.sound`; no unsupported axioms.
+- `just lean-build`: passed with the pinned dependencies (3169 build jobs),
+  including all 241 manuscript/blueprint type contracts and compiled coverage.
+- `just proof-audit`: 38 production sources freshly compiled, including 36
+  strictly audited files and two explicitly trusted checker implementations;
+  785 declarations, including 12 private declarations, use no unsupported axioms.
+  The 18 exact fixture exclusions are separately tested.
+- `just proof-audit-test`: all 26 integrity and API regression tests passed.
 - `just blueprint-check`, manuscript format/lint and `just latex-build`: passed.
-  The 40-page PDF has no unresolved references or overflowing equations/tables;
-  representative main-theorem, appendix, traceability and bibliography pages were inspected.
-- Main text: 3871 words including headings/captions and excluding title/abstract;
+  The 41-page PDF has no unresolved references or overflowing equations/tables;
+  the finite-law, bandwidth, decision, traceability and bibliography pages were inspected.
+- Main text: 3897 words including headings/captions and excluding title/abstract;
   abstract: 199 words, under the documented TeXcount convention.
 - Repository language, Python test/type/boundary/dead-code, DVC and semflow checks
   passed. The complete gate still reports two existing SEC URLs returning HTTP 403.
-  The unchanged baseline `src/python/uv.lock` also fails Tombi's formatting check;
-  its automatic rewrite was reverted, and the final broad rerun skipped that
-  formatter to preserve the generated lockfile. Neither issue changes the Lean
-  or manuscript build result.
+  The unchanged baseline `src/python/uv.lock` also fails Tombi's read-only
+  formatting check; the broad gate skips that formatter to preserve the lockfile.
+  Neither issue changes the Lean or manuscript build result.
 
 The isolated checkout uses saved research artifacts without rerunning empirical
 estimation. No data, dependency pins or numerical results are part of this change.

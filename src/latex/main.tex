@@ -251,6 +251,11 @@ The bound separates network, fitted-parameter, and spatial-approximation error;
 none is certified by a model ranking. Estimated bandwidth and
 population-to-panel
 sampling require the additional bounds in the appendix.
+At fixed geometry and support, wider bandwidth shifts neighbor costs upward in
+stochastic order (Appendix~\ref{app:comparatives}). Finite
+probability interfaces
+and proof checks are documented in Appendices~\ref{app:finite-probability}
+and~\ref{app:traceability}.
 
 \section{Empirical design}\label{sec:chronology}
 The study uses a current-survivor US equity universe, frozen SEC filings and
@@ -1090,6 +1095,47 @@ additional sampling premise. The measure bounds apply to outer probabilities
 unless event measurability is supplied.
 \lean{FreeFoundations.StatisticalFinancial.failure_probability_with_learning}\leanok{}
 
+\subsection{Finite probability and measure
+interfaces}\label{app:finite-probability}
+A finite law $p$ is a real simplex vector: $p_x\ge0$ and $\sum_x p_x=1$.
+Its expectation and associated discrete probability measure $p^{\mathcal M}$
+agree, including for complete normed real vector spaces:
+\[
+  \mathbb{E}_p[f]=\sum_x p_x f(x)=\int f\,dp^{\mathcal M},\qquad
+  {\operatorname{RMS}_p(f)}^2=\int\norm{f(x)}^2\,dp^{\mathcal M}.
+\]
+\lean{FreeFoundations.FiniteProbability.integral_eq_expect,
+  FreeFoundations.FiniteProbability.rms_sq_eq_integral,
+FreeFoundations.FiniteProbability.eLpNorm_eq_ofReal_rms}\leanok{}
+The PMF and finite probability-measure conversions are inverse. Finite-mixture
+expectation satisfies
+\[
+  \mathbb{E}_{\sum_i\pi_i p_i}[f]=\sum_i\pi_i\mathbb{E}_{p_i}[f].
+\]
+\lean{FreeFoundations.FiniteProbability.toPMF_ofPMF,
+  FreeFoundations.FiniteProbability.ofPMF_toPMF,
+  FreeFoundations.FiniteProbability.toMeasure_ofMeasure,
+  FreeFoundations.FiniteProbability.ofMeasure_toMeasure,
+FreeFoundations.FiniteProbability.expect_finMixture}\leanok{}
+These identities follow from finite sum interchange and mathlib's PMF integral
+formula. Conditioning requires strictly positive event mass. For $\omega\ge0$,
+pointwise $q_x\le\omega p_x$ is equivalent to
+$q^{\mathcal M}\le\omega p^{\mathcal M}$.
+\lean{FreeFoundations.FiniteProbability.expect_conditionalOn,
+FreeFoundations.FiniteProbability.domination_iff}\leanok{}
+Typed transfer and financial wrappers invoke the existing error-propagation
+theorems. Equal-weight block risk is exactly risk under the uniform mixture of
+block marginals, with no independence assumption needed for this identity.
+\lean{FreeFoundations.FiniteProbability.source_target_recovery,
+  FreeFoundations.FiniteProbability.marginalRisk_eq_mixture,
+FreeFoundations.FiniteProbability.transfer_failure_probability}\leanok{}
+Unrestricted task precisions and unnormalized good-event restrictions retain
+their original interfaces. A finite candidate family does not require finite
+observations. The compatibility facade follows MathEconLib's finite-law
+design~\cite{matheconlib}, using the pinned mathlib directly; it adds
+no MathEconLib
+runtime dependency.
+
 \subsection{Design comparative statics and research
 limits}\label{app:comparatives}
 For fixed row distances and $h>0$, with $\bar d=\sum_j p_j d_j$,
@@ -1107,6 +1153,34 @@ variance identity proves the signs. Equal-distance rows are constant and
 nearest ties determine the lower limiting neighbor count. A heterogeneous
 noise-weighted concentration penalty need not fall. Matching mean effective
 neighbors does not equalize mean Herfindahl concentration.
+
+There is also a distributional comparison. Fix a nonempty support, arbitrary
+real costs $d_j$, and $0<h_1\le h_2$. For $d_i\le d_j$,
+\[
+  p_{h_2}(i)p_{h_1}(j)\le p_{h_1}(i)p_{h_2}(j).
+\]
+The normalizers are positive; canceling them reduces the inequality to
+$(d_j-d_i)(h_1^{-1}-h_2^{-1})\ge0$. Thus every increasing $\phi$ satisfies
+\[
+  \sum_j p_{h_1}(j)\phi(d_j)\le\sum_j p_{h_2}(j)\phi(d_j).
+\]
+\lean{FreeFoundations.Bandwidth.likelihoodRatio_cross_le,
+  FreeFoundations.Bandwidth.monotone_cost_expectation,
+FreeFoundations.FiniteProbability.exponentialLaw_expect_monotone}\leanok{}
+To prove the expectation inequality, expand twice the difference as
+\[
+  \sum_{i,j}(p_{h_2,i}p_{h_1,j}-p_{h_1,i}p_{h_2,j})
+  (\phi(d_i)-\phi(d_j)).
+\]
+Every term is nonnegative. Threshold indicators
+give increasing strict and closed upper-tail mass and decreasing cost CDFs.
+\lean{FreeFoundations.Bandwidth.upperTail_monotoneOn,
+  FreeFoundations.Bandwidth.closedUpperTail_monotoneOn,
+FreeFoundations.Bandwidth.cdf_antitoneOn}\leanok{}
+Cost ties retain their multiplicities; equal bandwidths permit equality.
+Geometry and support are held fixed. The result does not order financial loss.
+The totalized expression at $h=0$ is uniform, so the order theorem is restricted
+to positive bandwidths.
 
 For symmetric nonnegative kernel $K$ with positive degrees $s_i$, row
 normalization satisfies detailed balance $s_i W_{ij}=s_j W_{ji}$. Jensen and
@@ -1129,15 +1203,18 @@ they move oppositely, disproving general Loewner risk monotonicity.
   FreeFoundations.ComparativeStatics.swap_covariance_spread,
 FreeFoundations.ComparativeStatics.swap_covariance_not_ge_identity}\leanok{}
 
-For finite state, signal, and action spaces, nonnegative prior weights, and
-losses in $[0,1]$, a representation obtained by garbling information cannot
-lower optimal risk. If decoding its signal reconstructs the original experiment
-within prior-averaged TV error $\varepsilon$, then
-$0\le R_Z^\star-R_X^\star\le\varepsilon$.
+For finite state, signal, and action spaces, a probability prior, and
+losses in $[0,L]$, $L\ge0$, reverse simulation within prior-averaged TV error
+$\varepsilon$ gives $R_Z^\star-R_X^\star\le L\varepsilon$.
+A forward garbling additionally gives
+$0\le R_Z^\star-R_X^\star\le L\varepsilon$.
 \lean{FreeFoundations.Decision.garbling_risk,
-FreeFoundations.Decision.approximate_sufficiency}\leanok{}
-Simulation proves the first inequality. Centering a bounded loss at $1/2$
-bounds expectation differences by half the L1 distance, proving the second.
+  FreeFoundations.FiniteProbability.approximate_decoder,
+  FreeFoundations.FiniteProbability.approximate_sufficiency,
+FreeFoundations.FiniteProbability.approximate_decoder_uniform}\leanok{}
+Kernel composition is finite mixture. Simulation proves the information
+comparison; centering a bounded loss at $L/2$ bounds expectation differences
+by $L$ times half the L1 distance. The zero-loss case is included.
 This is sufficiency for the stated finite decision problem, rather than
 structural latent recovery.
 
@@ -1190,11 +1267,20 @@ hierarchical PAC-Bayes, and positive causal identification remain research
 extensions, rather than completed consequences of these bounds.
 
 \subsection{Formal traceability}\label{app:traceability}
-Declaration tags are checked by \texttt{just blueprint-check}. The
-complete theorem ledger and
-proof dependency graph are maintained with the Lean library. Compilation checks
-the formal statement; mathematical review checks its correspondence
-to the paper.
+Declaration tags are checked by \texttt{just blueprint-check}. The default
+Lean build also checks their complete frozen types, including universe arity,
+binder visibility, hypotheses and norm instances. The project-wide
+\texttt{just proof-audit} discovers sources independently of umbrella imports,
+re-elaborates private declarations and anonymous examples, and rejects proof
+holes and unsupported transitive axioms. Only \texttt{propext},
+\texttt{Classical.choice}, and \texttt{Quot.sound} are allowed. Its
+source-hashed
+report records the toolchain, dependency revisions, exclusions and coverage;
+negative fixtures test rejection. The checker implementation is an explicit
+trusted tool. These practices follow MathEconLib~\cite{matheconlib}; the
+implementation is adapted to Lean 4.31. Complete types do not freeze the
+semantics of definitions, so pinned dependencies, mathematical review and
+empirical validation remain separate requirements.
 \begin{center}\small
   \begin{tabular}{@{}p{0.29\linewidth}p{0.67\linewidth}@{}}
     \toprule
@@ -1209,6 +1295,8 @@ to the paper.
     Equation~\eqref{eq:block-concentration} &
     \texttt{Selection.finite\_family}\\
     Local score regret & \texttt{ScoreStability.loss\_gap\_le\_of\_norm\_sub}\\
+    Finite RMS bridge & \texttt{FiniteProbability.rms\_sq\_eq\_integral}\\
+    Bandwidth cost order & \texttt{Bandwidth.monotone\_cost\_expectation}\\
     \bottomrule
   \end{tabular}
 \end{center}
@@ -1994,6 +2082,11 @@ equations and calibration.
   Beyond IID\@:  How General Are Tabular Foundation Models, Really?
   \emph{arXiv preprint}, arXiv:2606.30410.
   \url{https://arxiv.org/abs/2606.30410}.
+  \bibitem{matheconlib}
+  MathEconLib contributors (2026).
+  MathEconLib: Machine-checked mathematical economics in Lean 4.
+  Software, reviewed revision \texttt{6c0e61e}.
+  \url{https://github.com/matheconlib/matheconlib/tree/6c0e61ed4c95252e2c985ccc456e2c53617fb941}.
 \end{thebibliography}
 %TC:endignore
 \end{document}

@@ -9,6 +9,11 @@ appendices contain the exact mathematical statements and proofs, empirical
 construction and decisive diagnostics, then the Fernández core replication and
 VaR audit.
 
+The mathematical supplement also connects finite laws to measure-theoretic RMS,
+states bounded-loss decision simulation and fixed-cost bandwidth stochastic
+ordering, and documents exact theorem contracts and project-wide proof auditing.
+The [Lean guide](../lean/README.md) records their assumptions and compiled names.
+
 Run the publication commands from the repository root in the development environment:
 
 ```sh
