@@ -27,3 +27,7 @@ import FreeFoundations.Dynamics
 import FreeFoundations.GeneratedTarget
 import FreeFoundations.ReadoutStability
 import FreeFoundations.StatisticalFinancial
+import FreeFoundations.FiniteProbability
+import FreeFoundations.FiniteProbabilityDecision
+import FreeFoundations.FiniteProbabilityFinancial
+import FreeFoundations.FiniteProbabilityOrder

@@ -488,4 +488,192 @@ theorem heterogeneous_noise_can_increase :
     norm_num
   norm_num [herfindahl, noisePenalty, Kernel.expRow, Fin.sum_univ_two, h1, h2]
 
+/-! ## Likelihood-ratio and stochastic ordering at fixed costs -/
+
+/-- Increasing positive bandwidth gives an increasing likelihood ratio in the fixed cost.
+The division-free form avoids assigning an order to firm indices. -/
+theorem likelihoodRatio_cross_le (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ)
+    {h₁ h₂ : ℝ} (hh₁ : 0 < h₁) (h₁₂ : h₁ ≤ h₂) (i j : ι) (hd : d i ≤ d j) :
+    Kernel.expRow s d h₂ i * Kernel.expRow s d h₁ j ≤
+      Kernel.expRow s d h₁ i * Kernel.expRow s d h₂ j := by
+  have hh₂ : 0 < h₂ := hh₁.trans_le h₁₂
+  have hZ₁ : 0 < ∑ k ∈ s, Real.exp (-d k / h₁) := sum_pos (fun _ _ => Real.exp_pos _) hs
+  have hZ₂ : 0 < ∑ k ∈ s, Real.exp (-d k / h₂) := sum_pos (fun _ _ => Real.exp_pos _) hs
+  have hinv : h₂⁻¹ ≤ h₁⁻¹ := inv_anti₀ hh₁ h₁₂
+  have hexp : Real.exp (-d i / h₂) * Real.exp (-d j / h₁) ≤
+      Real.exp (-d i / h₁) * Real.exp (-d j / h₂) := by
+    rw [← Real.exp_add, ← Real.exp_add, Real.exp_le_exp]
+    simp only [div_eq_mul_inv]
+    nlinarith [mul_nonneg (sub_nonneg.mpr hd) (sub_nonneg.mpr hinv)]
+  unfold Kernel.expRow
+  rw [div_mul_div_comm, div_mul_div_comm,
+    mul_comm (∑ k ∈ s, Real.exp (-d k / h₂)) (∑ k ∈ s, Real.exp (-d k / h₁))]
+  exact div_le_div_of_nonneg_right hexp (mul_pos hZ₁ hZ₂).le
+
+/-- At tied costs the likelihood-ratio cross-products are equal. -/
+theorem likelihoodRatio_cross_eq_of_cost_eq (s : Finset ι) (d : ι → ℝ)
+    (h₁ h₂ : ℝ) {i j : ι} (hd : d i = d j) :
+    Kernel.expRow s d h₂ i * Kernel.expRow s d h₁ j =
+      Kernel.expRow s d h₁ i * Kernel.expRow s d h₂ j := by
+  rw [equal_distance_weights s d h₂ hd, equal_distance_weights s d h₁ hd]
+  exact mul_comm _ _
+
+/-- Pairwise concordance of cross-products orders expectations of unit-mass arrays.
+The identity is finite algebra; probability interpretations additionally require nonnegativity. -/
+theorem sum_expectation_le_of_cross (s : Finset ι) (p q g : ι → ℝ)
+    (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1)
+    (hcross : ∀ i ∈ s, ∀ j ∈ s, 0 ≤ (q i * p j - p i * q j) * (g i - g j)) :
+    ∑ i ∈ s, p i * g i ≤ ∑ i ∈ s, q i * g i := by
+  have hdouble : 0 ≤ ∑ i ∈ s, ∑ j ∈ s,
+      (q i * p j - p i * q j) * (g i - g j) :=
+    sum_nonneg fun i hi => sum_nonneg fun j hj => hcross i hi j hj
+  have heq : ∀ i j, (q i * p j - p i * q j) * (g i - g j) =
+      (q i * g i) * p j + p i * (q j * g j) -
+        q i * (p j * g j) - (p i * g i) * q j := by
+    intro i j
+    ring
+  simp_rw [heq, sum_sub_distrib, sum_add_distrib, ← mul_sum, hp, hq, mul_one] at hdouble
+  rw [← sum_mul, ← sum_mul, hp, hq] at hdouble
+  linarith
+
+/-- A fixed observable of cost, averaged under the exponential row. -/
+noncomputable def observableMean (s : Finset ι) (d φ : ι → ℝ) (h : ℝ) : ℝ :=
+  ∑ j ∈ s, Kernel.expRow s d h j * φ j
+
+/-- Every observable increasing in fixed cost has increasing expectation with bandwidth.
+Only ordering on the finite support is needed; no order is imposed on the indices. -/
+theorem observableMean_monotoneOn (s : Finset ι) (hs : s.Nonempty) (d φ : ι → ℝ)
+    (hφ : ∀ i ∈ s, ∀ j ∈ s, d i ≤ d j → φ i ≤ φ j) :
+    MonotoneOn (observableMean s d φ) (Set.Ioi 0) := by
+  intro h₁ hh₁ h₂ hh₂ h₁₂
+  apply sum_expectation_le_of_cross s (Kernel.expRow s d h₁) (Kernel.expRow s d h₂) φ
+    (Kernel.expRow_sum s hs d h₁) (Kernel.expRow_sum s hs d h₂)
+  intro i hi j hj
+  by_cases hd : d i ≤ d j
+  · exact mul_nonneg_of_nonpos_of_nonpos
+      (sub_nonpos.mpr (likelihoodRatio_cross_le s hs d hh₁ h₁₂ i j hd))
+      (sub_nonpos.mpr (hφ i hi j hj hd))
+  · have hji : d j ≤ d i := le_of_not_ge hd
+    have hcross := likelihoodRatio_cross_le s hs d hh₁ h₁₂ j i hji
+    apply mul_nonneg
+    · nlinarith
+    · exact sub_nonneg.mpr (hφ j hj i hi hji)
+
+/-- The usual real-valued monotone-test-function formulation of stochastic ordering. -/
+theorem monotone_cost_expectation (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ)
+    (φ : ℝ → ℝ) (hφ : Monotone φ) :
+    MonotoneOn (fun h => ∑ j ∈ s, Kernel.expRow s d h j * φ (d j)) (Set.Ioi 0) :=
+  observableMean_monotoneOn s hs d (φ ∘ d) (fun _ _ _ _ hij => hφ hij)
+
+/-- Mass strictly above a fixed cost threshold. -/
+noncomputable def upperTail (s : Finset ι) (d : ι → ℝ) (t h : ℝ) : ℝ :=
+  ∑ j ∈ s.filter (fun j => t < d j), Kernel.expRow s d h j
+
+/-- Mass at or above a fixed cost threshold, retaining threshold ties. -/
+noncomputable def closedUpperTail (s : Finset ι) (d : ι → ℝ) (t h : ℝ) : ℝ :=
+  ∑ j ∈ s.filter (fun j => t ≤ d j), Kernel.expRow s d h j
+
+/-- The cost CDF, with all mass tied at the threshold included. -/
+noncomputable def cdf (s : Finset ι) (d : ι → ℝ) (t h : ℝ) : ℝ :=
+  ∑ j ∈ s.filter (fun j => d j ≤ t), Kernel.expRow s d h j
+
+/-- Strict upper tails are nondecreasing with positive bandwidth. -/
+theorem upperTail_monotoneOn (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t : ℝ) :
+    MonotoneOn (upperTail s d t) (Set.Ioi 0) := by
+  have htest : ∀ i ∈ s, ∀ j ∈ s, d i ≤ d j →
+      (if t < d i then (1 : ℝ) else 0) ≤ (if t < d j then (1 : ℝ) else 0) := by
+    intro i hi j hj hij
+    by_cases hti : t < d i
+    · simp [hti, hti.trans_le hij]
+    · split_ifs <;> norm_num
+  have hm := observableMean_monotoneOn s hs d (fun j => if t < d j then 1 else 0) htest
+  intro h₁ hh₁ h₂ hh₂ h₁₂
+  simpa only [observableMean, upperTail, sum_filter, mul_ite, mul_one, mul_zero] using
+    hm hh₁ hh₂ h₁₂
+
+/-- Closed upper tails are nondecreasing as well, including every cost tie. -/
+theorem closedUpperTail_monotoneOn (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t : ℝ) :
+    MonotoneOn (closedUpperTail s d t) (Set.Ioi 0) := by
+  have htest : ∀ i ∈ s, ∀ j ∈ s, d i ≤ d j →
+      (if t ≤ d i then (1 : ℝ) else 0) ≤ (if t ≤ d j then (1 : ℝ) else 0) := by
+    intro i hi j hj hij
+    by_cases hti : t ≤ d i
+    · simp [hti, hti.trans hij]
+    · split_ifs <;> norm_num
+  have hm := observableMean_monotoneOn s hs d (fun j => if t ≤ d j then 1 else 0) htest
+  intro h₁ hh₁ h₂ hh₂ h₁₂
+  simpa only [observableMean, closedUpperTail, sum_filter, mul_ite, mul_one, mul_zero] using
+    hm hh₁ hh₂ h₁₂
+
+/-- Strict upper-tail mass and the closed lower tail partition unit mass. -/
+theorem upperTail_add_cdf (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t h : ℝ) :
+    upperTail s d t h + cdf s d t h = 1 := by
+  have hsum := sum_filter_add_sum_filter_not s (fun j => t < d j) (fun j => Kernel.expRow s d h j)
+  simpa only [upperTail, cdf, not_lt, Kernel.expRow_sum s hs d h] using hsum
+
+/-- The cost CDF decreases with positive bandwidth: first-order stochastic dominance. -/
+theorem cdf_antitoneOn (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t : ℝ) :
+    AntitoneOn (cdf s d t) (Set.Ioi 0) := by
+  intro h₁ hh₁ h₂ hh₂ h₁₂
+  have htail := upperTail_monotoneOn s hs d t hh₁ hh₂ h₁₂
+  linarith [upperTail_add_cdf s hs d t h₁, upperTail_add_cdf s hs d t h₂]
+
+/-- A singleton support has the same observable expectation at every bandwidth. -/
+@[simp] theorem observableMean_singleton (i : ι) (d φ : ι → ℝ) (h : ℝ) :
+    observableMean {i} d φ h = φ i := by
+  simp [observableMean, Kernel.expRow_singleton]
+
+/-- A constant cost row has constant cost-observable expectations, including tied costs. -/
+theorem constant_cost_expectation (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ)
+    (φ : ℝ → ℝ) (c h : ℝ) (hd : ∀ j ∈ s, d j = c) :
+    (∑ j ∈ s, Kernel.expRow s d h j * φ (d j)) = φ c := by
+  calc _ = ∑ j ∈ s, φ c * Kernel.expRow s d h j :=
+          sum_congr rfl (fun j hj => by rw [hd j hj]; ring)
+    _ = _ := by rw [← mul_sum, Kernel.expRow_sum s hs d h, mul_one]
+
+/-- Above the whole cost range the strict upper tail is zero. -/
+theorem upperTail_eq_zero (s : Finset ι) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, d j ≤ t) : upperTail s d t h = 0 := by
+  have hfilter : s.filter (fun j => t < d j) = ∅ :=
+    filter_eq_empty_iff.mpr fun j hj => not_lt.mpr (hd j hj)
+  simp [upperTail, hfilter]
+
+/-- Below the whole cost range the strict upper tail is one. -/
+theorem upperTail_eq_one (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, t < d j) : upperTail s d t h = 1 := by
+  rw [upperTail, filter_eq_self.mpr hd]
+  exact Kernel.expRow_sum s hs d h
+
+/-- A closed upper threshold strictly above all costs has zero mass. -/
+theorem closedUpperTail_eq_zero (s : Finset ι) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, d j < t) : closedUpperTail s d t h = 0 := by
+  have hfilter : s.filter (fun j => t ≤ d j) = ∅ :=
+    filter_eq_empty_iff.mpr fun j hj => not_le.mpr (hd j hj)
+  simp [closedUpperTail, hfilter]
+
+/-- A closed upper threshold at or below all costs has unit mass. -/
+theorem closedUpperTail_eq_one (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, t ≤ d j) : closedUpperTail s d t h = 1 := by
+  rw [closedUpperTail, filter_eq_self.mpr hd]
+  exact Kernel.expRow_sum s hs d h
+
+/-- Below the whole cost range the cost CDF is zero. -/
+theorem cdf_eq_zero (s : Finset ι) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, t < d j) : cdf s d t h = 0 := by
+  have hfilter : s.filter (fun j => d j ≤ t) = ∅ :=
+    filter_eq_empty_iff.mpr fun j hj => not_le.mpr (hd j hj)
+  simp [cdf, hfilter]
+
+/-- At or above the whole cost range the cost CDF is one. -/
+theorem cdf_eq_one (s : Finset ι) (hs : s.Nonempty) (d : ι → ℝ) (t h : ℝ)
+    (hd : ∀ j ∈ s, d j ≤ t) : cdf s d t h = 1 := by
+  rw [cdf, filter_eq_self.mpr hd]
+  exact Kernel.expRow_sum s hs d h
+
+/-- The totalized zero-bandwidth expression is uniform; it is not the positive-bandwidth
+limit at zero. Order results therefore use the open positive domain. -/
+@[simp] theorem expRow_zero_bandwidth (s : Finset ι) (d : ι → ℝ) (i : ι) :
+    Kernel.expRow s d 0 i = 1 / (s.card : ℝ) := by
+  simp [Kernel.expRow]
+
 end FreeFoundations.Bandwidth
