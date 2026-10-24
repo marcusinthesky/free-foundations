@@ -39,6 +39,92 @@ def test_nonfinite_or_unreconciled_scores_are_rejected() -> None:
             RENDER["close"](actual, 1.0, "saved score")
 
 
+def test_recovered_replication_cohorts_determine_displayed_sample_sizes() -> None:
+    cohorts = {
+        f"common_{arm}": {
+            "firms": firms,
+            "tickers": [f"F{index}" for index in range(firms)],
+            "characteristics": [f"C{index}" for index in range(characteristics)],
+        }
+        for arm, firms, characteristics in (("four", 36, 4), ("three", 429, 3))
+    }
+    estimates = [{"table": name, "firms": str(cohort["firms"])} for name, cohort in cohorts.items()]
+    assert RENDER["replication_cohort_counts"](cohorts, estimates) == {
+        "common_four": 36,
+        "common_three": 429,
+    }
+    estimates[0]["firms"] = "33"
+    with pytest.raises(ValueError, match="replication cohort common_four"):
+        RENDER["replication_cohort_counts"](cohorts, estimates)
+
+
+def test_replication_cohort_counts_reject_duplicate_firm_ids() -> None:
+    cohorts = {
+        f"common_{arm}": {
+            "firms": 4,
+            "tickers": ["A", "B", "C", "C"],
+            "characteristics": [f"C{index}" for index in range(characteristics)],
+        }
+        for arm, characteristics in (("four", 4), ("three", 3))
+    }
+    with pytest.raises(ValueError, match="Invalid replication cohort"):
+        RENDER["replication_cohort_counts"](cohorts, [])
+
+
+@pytest.fixture
+def source_recovery() -> Row:
+    characteristics = ("market_cap_assets", "market_to_book", "dividend_yield", "debt_maturity")
+    return {
+        "source_years": [2009, 2010],
+        "contract": {"years": [2009, 2010], "maximum_age_days": 550},
+        "preserve_complete_annual_first_three": True,
+        "annual_forms": ["10-K", "10-K/A"],
+        "fallback_forms": ["10-K", "10-K/A", "10-Q", "10-Q/A"],
+        "quarterly_facts": "instant only; no quarterly duration facts",
+        "snapshot_rows": 10,
+        "aligned_quarterly_debt_recovered_snapshots": 2,
+        "source_policy_counts": {"annual": 4, "quarterly_recovery": 2, "annual_incomplete": 4},
+        "by_year": {
+            str(year): {
+                "snapshots": 5,
+                "complete_first_three": 3,
+                "annual_complete_first_three": 2,
+                "quarterly_recovered_snapshots": 1,
+                "aligned_quarterly_debt_recovered_snapshots": 1,
+                "available_by_characteristic": dict.fromkeys(characteristics, 3),
+                "missing_by_characteristic": dict.fromkeys(characteristics, 2),
+            }
+            for year in (2009, 2010)
+        },
+    }
+
+
+def test_source_recovery_counts_reconcile_to_observed_snapshots(source_recovery: Row) -> None:
+    assert RENDER["validate_source_recovery"](source_recovery) == {
+        "first_year": 2009,
+        "last_year": 2010,
+        "years": 2,
+        "snapshot_rows": 10,
+        "quarterly_recovered_snapshots": 2,
+        "aligned_quarterly_debt_recovered_snapshots": 2,
+    }
+    source_recovery["by_year"]["2009"]["missing_by_characteristic"]["dividend_yield"] = 1
+    with pytest.raises(ValueError, match="Observed and missing"):
+        RENDER["validate_source_recovery"](source_recovery)
+
+
+def test_source_coverage_cannot_count_recovery_as_new_issuers(source_recovery: Row) -> None:
+    source_recovery["by_year"]["2009"]["complete_first_three"] = 4
+    with pytest.raises(ValueError, match="Annual and recovered"):
+        RENDER["validate_source_recovery"](source_recovery)
+
+
+def test_source_recovery_rejects_a_changed_quarterly_duration_policy(source_recovery: Row) -> None:
+    source_recovery["quarterly_facts"] = "include quarterly duration facts"
+    with pytest.raises(ValueError, match="recovery policy"):
+        RENDER["validate_source_recovery"](source_recovery)
+
+
 def geometry_records() -> tuple[list[Row], list[Row], list[Row], list[Row]]:
     """A complete small-cohort grid with independently reconcilable spectra."""
     comparison: list[Row] = []
@@ -152,6 +238,47 @@ def test_pcoa_rank_and_variance_claims_must_match_recorded_spectrum() -> None:
     records[2][0]["variance_share"] = "0.9"
     with pytest.raises(ValueError, match="PCoA retained variance"):
         RENDER["validate_geometry_inventory"](*records)
+
+
+def decay_records() -> list[Row]:
+    """Different annual spectra and scales distinguish yearly averaging from pooling."""
+    rows = []
+    for year in range(2016, 2026):
+        shares = [0.5, 0.3, 0.2] if year < 2021 else [0.4, 0.35, 0.25]
+        shares += [0] * 17
+        scale = 100 if year < 2021 else 1
+        rows.extend(
+            {
+                "approach": "example",
+                "year": str(year),
+                "component": str(component),
+                "eigenvalue": str(share * scale),
+                "variance_share": str(share),
+                "cumulative_variance_share": str(sum(shares[:component])),
+            }
+            for component, share in enumerate(shares, 1)
+        )
+    return rows
+
+
+def test_decay_averages_normalized_annual_spectra_instead_of_pooling_eigenvalues() -> None:
+    result = RENDER["pcoa_decay"](decay_records(), {"example": "Example"})["example"]
+    assert result["years"] == 10
+    assert result["shares"] == pytest.approx([0.45, 0.325, 0.225, 0, 0])
+    assert result["cumulative"]["2"] == pytest.approx(0.775)
+    assert result["cumulative"]["5"] == pytest.approx(1)
+    assert result["cumulative"]["20"] == pytest.approx(1)
+
+
+def test_decay_rejects_partial_duplicate_or_unreconciled_spectra() -> None:
+    rows = decay_records()
+    with pytest.raises(ValueError, match="Incomplete annual PCoA decay"):
+        RENDER["pcoa_decay"](rows[:-1], {"example": "Example"})
+    with pytest.raises(ValueError, match="Duplicate PCoA decay"):
+        RENDER["pcoa_decay"]([*rows, rows[0]], {"example": "Example"})
+    rows[0]["cumulative_variance_share"] = "0.6"
+    with pytest.raises(ValueError, match="PCoA cumulative decay"):
+        RENDER["pcoa_decay"](rows, {"example": "Example"})
 
 
 def test_energy_diagnostics_reconcile_each_annual_projection_and_random_reference() -> None:

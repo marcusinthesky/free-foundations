@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:fernandez_replication",
-  "digest": "sha256:7faf44d0533bec299f8030d6f918aa51e71e6bf4959d261207ac0d48ebb94065",
+  "digest": "sha256:6ceef6858bd3e1bcad40c4ca0a26663b04eb56480e3da66cd9966e2c4c12351c",
   "entrypoint": "free-foundations fernandez run",
   "fallbacks": [
   ],
@@ -74,7 +74,7 @@
     {"digest":"sha256:6334010e39579415118454a4f93078df7c74ff934a22e2b310eba8fab268e509","kind":"function","path":"src/python/src/free_foundations/fernandez/evaluation.py","symbol":"free_foundations.fernandez.evaluation:runtime_record"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:52d9525cb0efc8f5ca89096074d5a2ea2f9148b37177c7be11fa418aa76d8795","kind":"binding","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:<binding:write_json=free_foundations.data:write_json>"},
-    {"digest":"sha256:1856f9055fe60b2ce01dc3269109dbb599bd2a0afec3ed8f7766489e30d216b8","kind":"global","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:CONVENTIONS"},
+    {"digest":"sha256:755567bb2337a8b9c06f2bff33e33953a85e343f6658ec7d248587262a3f51e6","kind":"global","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:CONVENTIONS"},
     {"digest":"sha256:1a539aa420b7583e9e29357a9cda95f9f1a8c855c695e93d482cf7d24a8c4e67","kind":"global","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:REPORTED"},
     {"digest":"sha256:3ca00e1168ca5074188903b03f52f6737142a017f138259790224280281712cb","kind":"global","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:SUBSTITUTIONS"},
     {"digest":"sha256:276f88ecd69caf92d6e3c4bf36a9772599a88f5a8e28b79d1d29d5ae3aeb21cb","kind":"function","path":"src/python/src/free_foundations/fernandez/manifest.py","symbol":"free_foundations.fernandez.manifest:write"},

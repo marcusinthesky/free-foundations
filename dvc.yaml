@@ -66,8 +66,10 @@ stages:
     - research/panel/cache/four.parquet
     - research/panel/cache/broad.parquet
     - research/panel/cache/characteristic-audit.parquet
+    - research/panel/cache/characteristic-contract.json
     - research/panel/cache/characteristics
     - research/panel/characteristic-coverage.csv
+    - research/panel/source-recovery.json
     - research/panel/price-audit.csv
     - research/panel/disclosure-audit.json:
         cache: false
@@ -170,6 +172,7 @@ stages:
     - research/panel/representation-manifest.json
     - research/replication
     - research/panel/disclosure-audit.json
+    - research/panel/source-recovery.json
     - research/panel/three-foundations/daily-scores.parquet
     - research/panel/three-foundations/annual-scores.csv
     - research/panel/three-foundations/comparison.csv
@@ -215,12 +218,14 @@ stages:
     - src/latex/build/decoder-periods.tex
     - src/latex/build/replication.tex
     - src/latex/build/replication-iv.tex
+    - src/latex/build/replication-premiums.tex
     - src/latex/build/weight-contrasts.tex
     - src/latex/build/confidence-set.tex
     - src/latex/build/support.pgf
     - src/latex/build/covariance-controls.tex
     - src/latex/build/target-reliability.tex
     - src/latex/build/cohorts.tex
+    - src/latex/build/source-coverage.tex
     - src/latex/build/measurement-contrasts.tex
     - src/latex/build/variance-contrasts.tex
     - src/latex/build/variance-contrasts-marginal.tex
@@ -233,6 +238,8 @@ stages:
     - src/latex/build/pcoa-summary.tex
     - src/latex/build/pcoa-energy.tex
     - src/latex/build/pcoa-cutoff.tex
+    - src/latex/build/pcoa-decay.tex
+    - src/latex/build/pcoa-decay-decoded.tex
     - src/latex/build/geometry-scree.pgf
     - src/latex/build/replication-sensitivity.tex
     - src/latex/build/replication-sensitivity-cohorts.tex

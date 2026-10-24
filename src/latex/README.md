@@ -90,6 +90,21 @@ counts are shown. `pcoa-cutoff.tex` separates numerical ties at the retained
 boundary from relative gaps at most 0.001. The prescribed rank remains fixed;
 numerical boundary ties flag a nonunique subspace rather than prompting a rank
 chosen using returns.
+`pcoa-decay.tex` reports PC1--PC5 and cumulative first-five and first-ten shares
+for the eight principal native geometries. `pcoa-decay-decoded.tex` reports the
+five individual shares for decoded pretrained geometries. Both tables average
+the separately fitted annual percentages without weighting over 2016–2025;
+they do not fit one pooled PCoA. These are shares of centered characteristic
+geometry, not return variation. The 2025 scree figure remains a distinct
+latest-year view. The decoded five-component total follows from the
+five-dimensional exposure construction.
+
+`source-coverage.tex` reports observed ratios at the 2009–2025 source cutoffs,
+separately from the annual estimation cohorts. Its audited source summary
+distinguishes complete quarterly snapshot recovery from debt-only completion
+at an unchanged annual balance-sheet date. The main 2016–2025 windows and
+complete, nonconstant-history rules remain unchanged. Numerical claims also
+record the intersection of the annual eligible cohorts.
 
 The replication tables report the primary common-four CAPM exercise with zero
 self-links, supported explicitly by the 2007 working paper. Timing windows are
@@ -97,7 +112,9 @@ crossed with both MM packages on natural and intersection cohorts. The appendix
 displays the intersection contrasts and cohort sizes and separates raw Moran
 I from its standardized z statistic, conditional SEM fit from its reduced-form
 mean, and information-matrix inference from the original score covariance.
-The generated-beta bootstrap remains on the primary result. The complete model
+`replication-premiums.tex` displays OLS and joint spatial-premium estimates,
+conditional standard errors and generated-beta intervals for both primary
+cohorts. The generated-beta bootstrap remains on the primary result. The complete model
 landscape and earlier extraction stages are not publication dependencies.
 
 ## Rendering and claims audit

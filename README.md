@@ -81,6 +81,23 @@ weights. Numerical stages reject missing frozen inputs rather than refetching
 them. Original pilot data remain a raw source snapshot; no pilot forecasting
 command remains.
 
+Characteristic recovery covers the 2009–2025 year-end snapshots using public
+disclosures available by each cutoff.
+Keep a complete annual snapshot; when its three main characteristics are
+incomplete, use a complete quarterly-disclosure snapshot as one replacement.
+Preserve filing cutoffs, balance-sheet alignment, split checks and component
+provenance. Separately, complete missing debt maturity from quarterly facts
+only at the unchanged annual balance-sheet date, preserving the first three
+ratios and their dates. Conservative accounting-tag fallbacks recover disclosed
+values; missing debt components and prelisting returns remain missing. The
+[study protocol](research/panel/three-foundations/README.md) records this source
+adaptation separately from numerical imputation or relaxed sample rules.
+All methods share firms and return dates within each annual comparison. Annual
+cohorts may change, and the strict four-characteristic replication has its own
+eligibility requirements. The measurement years remain 2016–2025: their encoder
+support histories reach back to 2009. No pre-2009 accounting acquisition is part
+of this recovery.
+
 ```sh
 just data-pull                 # restore recorded results and financial sources
 just python-panel              # reproduce the retained measurement stage

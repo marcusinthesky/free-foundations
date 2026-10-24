@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import math
+from itertools import pairwise
 from pathlib import Path
 from statistics import mean
 
@@ -93,6 +94,233 @@ def select(rows, **filters):
     if len(found) != 1:
         raise ValueError(f"Expected one row for {filters}; found {len(found)}")
     return found[0]
+
+
+def replication_cohort_counts(cohorts, estimates):
+    """Bind displayed sample sizes to the saved firms and every fitted specification."""
+    counts = {}
+    for arm, characteristics in (("four", 4), ("three", 3)):
+        key = f"common_{arm}"
+        cohort = cohorts[key]
+        tickers = cohort["tickers"]
+        count = cohort["firms"]
+        if (
+            not isinstance(count, int)
+            or count < 4
+            or len(tickers) != count
+            or len(set(tickers)) != count
+            or len(cohort["characteristics"]) != characteristics
+        ):
+            raise ValueError(f"Invalid replication cohort: {key}")
+        selected = [row for row in estimates if row["table"] == key]
+        if not selected:
+            raise ValueError(f"Missing replication estimates: {key}")
+        for row in selected:
+            close(float(row["firms"]), count, f"replication cohort {key}")
+        counts[key] = count
+    return counts
+
+
+def render_replication_premiums(estimates, bootstrap, cohorts):
+    """Separate conditional premium errors from generated-beta percentile intervals."""
+    counts = replication_cohort_counts(cohorts, estimates)
+    claims, rows = [], []
+    procedures = (
+        ("OLS", "ols", "nonspatial", "none", "ols_premium"),
+        ("Joint lag IV", "spatial_lag_iv", "fernandez_joint", "exp", "iv_premium"),
+        ("Joint error ML", "spatial_error_ml", "fernandez_joint", "exp", "sem_premium"),
+    )
+    for arm in ("four", "three"):
+        table = f"common_{arm}"
+        for label, estimator, network, kernel, parameter in procedures:
+            point = select(
+                estimates,
+                table=table,
+                factors="capm",
+                network=network,
+                kernel=kernel,
+                estimator=estimator,
+                self_links="False",
+            )
+            interval = select(
+                bootstrap,
+                table=table,
+                factors="capm",
+                network="fernandez_joint",
+                parameter=parameter,
+            )
+            premium = float(point["premium_market"])
+            error = float(point["se_market"])
+            lower, upper = float(interval["lower"]), float(interval["upper"])
+            draws = float(interval["replicates"])
+            if (
+                not all(
+                    math.isfinite(value)
+                    for value in (premium, error, lower, upper, draws)
+                )
+                or error < 0
+                or lower > upper
+                or draws != 199
+            ):
+                raise ValueError(
+                    f"Invalid generated-beta premium summary: {table}/{estimator}"
+                )
+            claim = {
+                "cohort": table,
+                "firms": counts[table],
+                "estimator": estimator,
+                "premium_percent": 100 * premium,
+                "conditional_se_percentage_points": 100 * error,
+                "generated_beta_lower_percent": 100 * lower,
+                "generated_beta_upper_percent": 100 * upper,
+                "valid_draws": int(draws),
+            }
+            claims.append(claim)
+            rows.append(
+                [
+                    arm.capitalize(),
+                    str(counts[table]),
+                    label,
+                    f"{claim['premium_percent']:.2f}",
+                    f"{claim['conditional_se_percentage_points']:.2f}",
+                    (
+                        f"[{claim['generated_beta_lower_percent']:.2f}, "
+                        f"{claim['generated_beta_upper_percent']:.2f}]"
+                    ),
+                    str(claim["valid_draws"]),
+                ]
+            )
+    CLAIMS["replication_premium_uncertainty"] = claims
+    tabular(
+        "replication-premiums.tex",
+        "lrlrrcr",
+        [
+            "Cohort",
+            "$N$",
+            "Estimator",
+            "Premium",
+            "Cond. SE",
+            r"Bootstrap 95\% interval",
+            "Draws",
+        ],
+        rows,
+    )
+
+
+def validate_source_recovery(summary):
+    """Reconcile observed characteristic coverage and the declared recovery policy."""
+    years = summary["source_years"]
+    if (
+        not years
+        or years[0] != 2009
+        or years != list(range(years[0], years[-1] + 1))
+        or summary["contract"]["years"] != years
+        or summary["contract"]["maximum_age_days"] != 550
+        or not summary["preserve_complete_annual_first_three"]
+        or set(summary["annual_forms"]) != {"10-K", "10-K/A"}
+        or set(summary["fallback_forms"]) != {"10-K", "10-K/A", "10-Q", "10-Q/A"}
+        or summary["quarterly_facts"] != "instant only; no quarterly duration facts"
+    ):
+        raise ValueError("Unexpected observed-data recovery policy")
+    characteristics = (
+        "market_cap_assets",
+        "market_to_book",
+        "dividend_yield",
+        "debt_maturity",
+    )
+    snapshots = recovered = annual = aligned_debt = 0
+    for year in years:
+        row = summary["by_year"][str(year)]
+        size = row["snapshots"]
+        available = row["available_by_characteristic"]
+        missing = row["missing_by_characteristic"]
+        if set(available) != set(characteristics) or set(missing) != set(
+            characteristics
+        ):
+            raise ValueError("Incomplete characteristic coverage inventory")
+        counts = [
+            size,
+            row["complete_first_three"],
+            row["annual_complete_first_three"],
+            row["quarterly_recovered_snapshots"],
+            row["aligned_quarterly_debt_recovered_snapshots"],
+            *available.values(),
+            *missing.values(),
+        ]
+        if (
+            any(not isinstance(value, int) or value < 0 for value in counts)
+            or size == 0
+        ):
+            raise ValueError("Invalid characteristic coverage counts")
+        for name in characteristics:
+            if available[name] + missing[name] != size:
+                raise ValueError("Observed and missing characteristic counts disagree")
+        complete = row["complete_first_three"]
+        if complete != row["annual_complete_first_three"] + row[
+            "quarterly_recovered_snapshots"
+        ] or complete > min(available[name] for name in characteristics[:3]):
+            raise ValueError("Annual and recovered snapshot counts disagree")
+        debt_fills = row["aligned_quarterly_debt_recovered_snapshots"]
+        if debt_fills > min(
+            row["annual_complete_first_three"], available["debt_maturity"]
+        ):
+            raise ValueError("Aligned debt recoveries exceed eligible annual snapshots")
+        snapshots += size
+        recovered += row["quarterly_recovered_snapshots"]
+        annual += row["annual_complete_first_three"]
+        aligned_debt += debt_fills
+    policies = summary["source_policy_counts"]
+    if (
+        summary["snapshot_rows"] != snapshots
+        or sum(policies.values()) != snapshots
+        or policies.get("quarterly_recovery", 0) != recovered
+        or policies.get("annual", 0) != annual
+        or summary["aligned_quarterly_debt_recovered_snapshots"] != aligned_debt
+    ):
+        raise ValueError("Recovery policy totals disagree with annual coverage")
+    return {
+        "first_year": years[0],
+        "last_year": years[-1],
+        "years": len(years),
+        "snapshot_rows": snapshots,
+        "quarterly_recovered_snapshots": recovered,
+        "aligned_quarterly_debt_recovered_snapshots": aligned_debt,
+    }
+
+
+def render_source_recovery(summary, samples):
+    """Display observed source coverage separately from annual estimation eligibility."""
+    claims = validate_source_recovery(summary)
+    claims["fixed_annual_cohort"] = len(
+        set.intersection(*(set(row["tickers"]) for row in samples))
+    )
+    CLAIMS["source_recovery"] = claims
+    tabular(
+        "source-coverage.tex",
+        "rrrrrr",
+        [
+            "Year",
+            "Cap/assets",
+            "Market/book",
+            "Dividend yield",
+            "Debt maturity",
+            "Quarterly recoveries",
+        ],
+        [
+            [str(year)]
+            + [
+                str(summary["by_year"][str(year)]["available_by_characteristic"][name])
+                for name in (
+                    "market_cap_assets",
+                    "market_to_book",
+                    "dividend_yield",
+                    "debt_maturity",
+                )
+            ]
+            + [str(summary["by_year"][str(year)]["quarterly_recovered_snapshots"])]
+            for year in summary["source_years"]
+        ],
+    )
 
 
 def close(actual, expected, label, tolerance=1e-6):
@@ -401,6 +629,115 @@ def validate_geometry_inventory(comparison, annual, summary, spectrum):
         raise ValueError("Incomplete PCoA spectrum inventory")
 
 
+def pcoa_decay(spectrum, approaches):
+    """Average annual component shares, preserving equal weight for each year's fit."""
+    indexed = {}
+    for row in spectrum:
+        if row["approach"] not in approaches:
+            continue
+        key = row["approach"], int(row["year"]), int(row["component"])
+        if key in indexed:
+            raise ValueError("Duplicate PCoA decay component")
+        indexed[key] = row
+    result = {}
+    for approach in approaches:
+        annual = []
+        for year in range(2016, 2026):
+            try:
+                rows = [
+                    indexed[approach, year, component] for component in range(1, 21)
+                ]
+            except KeyError as error:
+                raise ValueError("Incomplete annual PCoA decay spectrum") from error
+            shares = [float(row["variance_share"]) for row in rows]
+            if any(not math.isfinite(value) or not 0 <= value <= 1 for value in shares):
+                raise ValueError("Invalid PCoA decay share")
+            if any(right > left + 1e-10 for left, right in pairwise(shares)):
+                raise ValueError("Unordered PCoA decay spectrum")
+            if sum(shares) > 1 + 1e-8:
+                raise ValueError("Invalid cumulative PCoA decay share")
+            for component, row in enumerate(rows, 1):
+                close(
+                    sum(shares[:component]),
+                    float(row["cumulative_variance_share"]),
+                    "PCoA cumulative decay share",
+                )
+            annual.append(shares)
+        result[approach] = {
+            "shares": [mean(values[k] for values in annual) for k in range(5)],
+            "cumulative": {
+                str(k): mean(sum(values[:k]) for values in annual)
+                for k in (2, 3, 5, 10, 20)
+            },
+            "years": 10,
+        }
+    return result
+
+
+def render_pcoa_decay(spectrum):
+    """Component-by-component appendix tables and audited interpretation bindings."""
+    native = {"fernandez_joint": "Joint characteristics"} | {
+        f"histories__{name}": label for name, label in MODELS.items()
+    }
+    pretrained = ("tabpfn_full__late", "tabfm__late", "kumo__late", "limix__late")
+    decoded = {f"histories@decoded__{name}": MODELS[name] for name in pretrained}
+    values = pcoa_decay(spectrum, native | decoded)
+
+    def percentage(value):
+        return r"$>99.9$" if 0.999 < value < 1 - 1e-10 else f"{100 * value:.1f}"
+
+    tabular(
+        "pcoa-decay.tex",
+        "lrrrrrrr",
+        ["Native geometry", "PC1", "PC2", "PC3", "PC4", "PC5", "First 5", "First 10"],
+        [
+            [
+                label,
+                *[percentage(value) for value in values[approach]["shares"]],
+                *[percentage(values[approach]["cumulative"][str(k)]) for k in (5, 10)],
+            ]
+            for approach, label in native.items()
+        ],
+    )
+    tabular(
+        "pcoa-decay-decoded.tex",
+        "lrrrrr",
+        ["Decoded geometry", "PC1", "PC2", "PC3", "PC4", "PC5"],
+        [
+            [label, *[percentage(value) for value in values[approach]["shares"]]]
+            for approach, label in decoded.items()
+        ],
+    )
+    native_values = [values[f"histories__{name}"] for name in pretrained]
+    ranges = {
+        f"Native{label}{extreme}": 100
+        * function(item["cumulative"][str(k)] for item in native_values)
+        for label, k in (("Two", 2), ("Five", 5))
+        for extreme, function in (("Min", min), ("Max", max))
+    }
+    ranges.update(
+        {
+            f"Decoded{label}{extreme}": 100
+            * function(values[name]["shares"][k] for name in decoded)
+            for k, label in enumerate(("One", "Two", "Three", "Four", "Five"))
+            for extreme, function in (("Min", min), ("Max", max))
+        }
+    )
+    ranges.update(
+        {
+            "TabfmTwenty": 100 * values["histories__tabfm__late"]["cumulative"]["20"],
+            "KumoTwenty": 100 * values["histories__kumo__late"]["cumulative"]["20"],
+        }
+    )
+    CLAIMS["pcoa_decay"] = {
+        "annual_fits": [2016, 2025],
+        "averaging": "unweighted mean annual shares; no pooled eigendecomposition",
+        "variance": "centered characteristic geometry",
+        "approaches": values,
+        "ranges_percent": ranges,
+    }
+
+
 def render_geometry(firm_days):
     """Render the complete direct-geometry comparison from recorded results."""
     comparison = read(f"{GEOMETRY}/comparison.csv")
@@ -670,6 +1007,7 @@ def render_geometry(firm_days):
     ax.legend(ncol=2, frameon=False, fontsize=8)
     save_figure(fig, "geometry-scree.pgf")
     plt.close(fig)
+    render_pcoa_decay(spectrum)
     CLAIMS["geometry"] = {
         "procedures": len(comparison),
         "approaches": len(GEOMETRY_APPROACHES),
@@ -958,6 +1296,8 @@ def main():
     protocol = f"{PANEL}/README.md"
     SOURCES[protocol] = hashlib.sha256((ROOT / protocol).read_bytes()).hexdigest()
     r0 = read("research/replication/estimates.csv")
+    replication_cohorts = read("research/replication/cohorts.json")
+    CLAIMS["replication_cohorts"] = replication_cohort_counts(replication_cohorts, r0)
     estimates = [row for row in r0 if row["table"] == "common_four"]
     bootstrap = read("research/replication/bootstrap.csv")
     read("research/replication/audit.json")
@@ -967,6 +1307,7 @@ def main():
     samples = [
         read(f"{PANEL}/observations/{year}-sample.json") for year in range(2016, 2026)
     ]
+    render_source_recovery(read("research/panel/source-recovery.json"), samples)
     for year in range(2016, 2026):
         read(f"{PANEL}/contexts/{year}-histories.json")
     validate_inventory(comparison, decoding, annual)
@@ -1113,7 +1454,11 @@ def main():
                 self_links="False",
             )
         )
-        close(float(r["firms"]), 33, "replication cohort")
+        close(
+            float(r["firms"]),
+            CLAIMS["replication_cohorts"]["common_four"],
+            "replication cohort",
+        )
         close(
             float(r["aic"]),
             2 * float(r["parameters"]) - 2 * float(r["log_likelihood"]),
@@ -1185,6 +1530,7 @@ def main():
         ["Network", r"$\rho$", "Conditional $p$", "Bootstrap interval", "Draws"],
         rows,
     )
+    render_replication_premiums(r0, bootstrap, replication_cohorts)
 
     contrast_rows = []
     for model, label in (("tabpfn_full", "TabPFN"), ("kumo", "Kumo")):
@@ -1722,7 +2068,10 @@ def main():
             "main_table": "histories, support=256, rank=5, matched/diagonal; reference=joint/exp/diagonal",
             "main_benchmarks": "reference_exposures and covariance_exposures, matched/diagonal; reference=joint/exp/diagonal",
             "decoder": "unweighted annual mean, 2016-2025; supplement also 2020-2025",
-            "replication": "four, 33 firms, CAPM, zero diagonal, exp, SEM-ML; nonspatial OLS",
+            "replication": (
+                f"four, {CLAIMS['replication_cohorts']['common_four']} firms, "
+                "CAPM, zero diagonal, exp, SEM-ML; nonspatial OLS"
+            ),
             "replication_sensitivity": "both timing windows x both MM packages x both cohorts x natural/intersection; main table uses intersection",
             "geometry": "31 geometries x gram/spatial x full/correlation; all saved annual totals and paired intervals reconciled",
             "pcoa": "rank at most 5; annual 2016-2025 descriptive means; scree fixed to native geometries in 2025",

@@ -3,6 +3,15 @@
 Declared on 23 October 2026 as a bounded retrospective extension of the retained
 measurement study. This adds no new holdout or configuration-selection claim.
 Financial sources, feature states, annual cohorts and return dates remain fixed.
+The companion [study protocol](../three-foundations/README.md) governs observed
+disclosure recovery from 2009 onward. When recovery changes the shared
+characteristics or cohorts, regenerate feature states and dependent geometry
+results together. Completing missing debt at the unchanged annual balance-sheet
+date affects the separate four-characteristic replication; it leaves the first
+three characteristics and their dates unchanged. Spatial and Gram
+procedures and descriptive PCoA continue to use the same firms and dates in
+each year; the all-year cohort intersection is a coverage diagnostic rather
+than an additional selection rule.
 
 ## Fixed comparison
 

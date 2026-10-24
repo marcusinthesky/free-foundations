@@ -95,7 +95,8 @@ principal-component distances. Estimating exposure coordinates improves all four
 pretrained forecasts when each procedure fits its own innovation variances.
 With common marginal variances, the corresponding differences have negative
 point estimates and intervals spanning zero. Historical return-based procedures
-also remain the strongest retained benchmarks. The evidence places the feature
+remain the strongest point benchmarks under fitted innovation
+variances. The evidence places the feature
 advantage in target-specific estimation and makes its forecasting value
 conditional on the covariance construction.
 
@@ -404,9 +405,10 @@ pretrained forecasts under fitted innovation variances. Their
 calibrated score gains range from \LimixCalibrated{} to
 \KumoCalibrated{} relative to the joint characteristic reference. The
 within-model calibrated-minus-native contrasts have positive paired
-intervals at both examined block lengths. TabPFN, TabFM, and Kumo then exceed
-native direct distance in point estimates; TabFM and Kumo retain positive
-intervals at both lengths, whereas TabPFN's 63-day interval spans zero.
+intervals at both examined block lengths. All four then exceed
+native direct distance in point estimates. TabPFN, TabFM, and Kumo
+retain positive
+intervals at both lengths, whereas LimiX's intervals span zero.
 TabPFN's advantage is \PfnDirectNormalized{} joint log-score units per firm-day,
 a normalization of the aggregate score rather than a return or welfare measure.
 
@@ -439,8 +441,8 @@ exposure-prediction result.
   contrasts.}\label{tab:variance-contrasts}
 \end{table}
 
-Calibration also worsens direct and principal-component forecasts, and LimiX
-remains below native direct distance in the principal comparison. These findings
+Calibration also worsens direct and principal-component forecasts.
+These findings
 show why calibration needs empirical evaluation even with a declared target.
 The fitted regression changes both coordinates and neighborhoods, whose value
 depends on estimation accuracy and the covariance procedure using them.
@@ -524,11 +526,12 @@ covariance use. Calibration improves all four pretrained procedures under either
 Euclidean or chord distance with fitted innovation variances, while
 common-marginal point differences remain negative. Alternative five-fold
 assignments preserve positive fitted-variance point differences from native
-direct distance for TabPFN, TabFM, and Kumo, but change their ranking. LimiX's
-difference crosses zero across assignments.
+direct distance for all four pretrained models, but change their ranking.
 
 Learned-weight controls require a separate interpretation. TabPFN exceeds each
-of its three specified resets under every assignment, while common-marginal
+of its three specified resets in point estimates under every assignment.
+The paired intervals depend on the assignment and block length, while
+common-marginal
 weight intervals span zero. Kumo's fresh initializations produce constant
 features and reproduce an intercept-only cross-fitted control: different
 held-out groups receive different training-sample target means. That control
@@ -540,8 +543,10 @@ Historical returns remain the demanding financial benchmark.
 Table~\ref{tab:measurement}
 places the reference-exposure and in-panel-exposure procedures beside the
 feature-based forecasts. Both construct neighborhoods directly from prior
-returns and achieve substantially larger principal point gains. The 10\% model
-confidence set retains these two procedures. Pretrained features do not displace
+returns and achieve substantially larger principal point gains under fitted
+innovation variances. The 10\% principal model
+confidence set retains only the in-panel-exposure procedure.
+Pretrained features do not displace
 them in this study; their demonstrated value is estimating a historical
 exposure proxy from financial characteristic histories through a common
 restricted regression.
@@ -555,8 +560,8 @@ procedures predict exposures from characteristics. A feature-based score gain
 answers whether those inputs help the chosen forecast; it does not make the
 same information claim as observing the target's historical returns.
 The confidence set summarizes comparisons within the declared
-family and common evaluation dates; its retention of the two return-based
-procedures does not imply that one is universally optimal.
+family and common evaluation dates; its retention of the in-panel-exposure
+procedure does not imply that it is universally optimal.
 
 \section{Conclusion}
 Pretrained tabular features improve estimation of a historical exposure proxy
@@ -572,7 +577,8 @@ For financial measurement, the practical contribution is to carry evaluation
 through each of those questions. The pretrained features help the restricted
 exposure regression in this retrospective application, while the covariance
 benefit depends on specification and the return-based benchmarks remain
-stronger. Common-marginal point estimates provide no corresponding positive
+stronger under fitted innovation variances. Common-marginal point
+estimates provide no corresponding positive
 calibration gain. An exposure target makes the intended relationship explicit;
 forecast evaluation determines how well the estimated relationship serves the
 chosen risk model. The direct Gram specification gives \GramNegative{} negative
@@ -869,6 +875,47 @@ constitute different inputs. The disclosure audit checks future filings,
 observation periods, duplicate keys and agreement of selected filing facts with
 the characteristic snapshots.
 
+The source panel contains \SourceYears{} annual cutoffs,
+\FirstSourceYear--\LastSourceYear. A complete annual-filing snapshot
+of the first
+three characteristics takes priority. If it is incomplete, a complete snapshot
+from annual and quarterly instantaneous disclosures can replace it as a whole.
+When the first three annual ratios are complete but debt maturity is missing,
+quarterly debt facts can complete that ratio only at the same annual
+balance-sheet date, preserving the other ratios and their dates.
+Balance-sheet amounts share the asset period; outstanding-share and market-price
+dates are recorded separately under the existing convention. Quarterly
+duration observations do not enter the annual disclosure predictors. Explicit
+same-period consolidated equity less noncontrolling interests can supply missing
+parent equity; lease-inclusive debt aggregates can supply missing debt
+components. Missing components are never assigned zero, and reported
+nonpositive parent equity remains ineligible for market-to-book. Separate
+component records retain filing accessions, dates and arithmetic coefficients.
+These filing-source and availability rules are documented adaptations to the
+US data.
+
+\begin{table}[htbp]
+  \centering\small
+  \input{build/source-coverage}
+  \caption{Observed characteristic coverage among the 1,000 issuers at each
+    year-end cutoff. Quarterly recoveries count complete snapshots supplied by
+    the fallback policy. These counts precede history and return eligibility
+    requirements. The final source snapshot supports coverage reporting;
+  the 2025 return analysis uses information through 2024.}
+\end{table}
+
+There are \RecoveredSnapshots{} quarterly snapshot recoveries across the source
+panel and \RecoveredDebtSnapshots{} additional debt-maturity completions from
+quarterly filings at the selected annual balance-sheet date. The main experiment
+retains its complete, nonconstant three- and
+five-year histories and unchanged calibration and evaluation windows. All
+methods use the same firms within each annual comparison;
+\FixedCohortFirms{} firms are eligible in every year from 2016 through 2025.
+No accounting data are acquired for cutoffs before 2009, and no characteristic
+histories are imputed. The strict four-characteristic replication
+retains its separate
+ten-year completeness requirement.
+
 \begin{table}[htbp]
   \centering\small
   \input{build/cohorts}
@@ -1002,10 +1049,12 @@ weights.
 
 Four additional balanced assignments retain reference coordinates, encoder
 states and evaluation observations, while refitting the readouts and spatial
-coefficients. TabPFN, TabFM and Kumo retain positive fitted-variance point
-differences from direct distance, but their ranking changes; LimiX's difference
-crosses zero. TabPFN exceeds each reset under every assignment with positive
-intervals at both lengths. Common-marginal weight intervals span zero.
+coefficients. All four pretrained models retain positive fitted-variance point
+differences from direct distance, but their ranking changes. TabPFN exceeds each
+reset in point estimates under every assignment. Its paired intervals are
+positive at both lengths under the principal assignment; some alternative
+assignments' intervals include zero, particularly with longer blocks.
+Common-marginal weight intervals span zero.
 Partition ranges and conditional date-block intervals address different
 sources of sensitivity.
 
@@ -1194,6 +1243,50 @@ fold construction, not recovered economic factors. Native constant Kumo resets
 have rank-zero centered geometry, while their uncentered Gram covariance still
 permits a common equicorrelation component.
 
+Tables~\ref{tab:pcoa-decay} and~\ref{tab:pcoa-decay-decoded} summarize the
+spectral decay over all ten annual geometries. The native pretrained spectra
+fall steeply at first: two coordinates account for
+\PcoaNativeTwoMin--\PcoaNativeTwoMax\% of centered characteristic variation,
+and five account for \PcoaNativeFiveMin--\PcoaNativeFiveMax\%.
+TabPFN and LimiX have two dominant directions. TabFM has the largest first
+component among the pretrained models, but, like Kumo, retains a longer tail:
+twenty coordinates account for \PcoaTabfmTwenty\% and \PcoaKumoTwenty\%,
+respectively. A concentrated first few coordinates therefore coexist with
+remaining characteristic variation beyond rank five.
+
+\begin{table}[p]
+  \centering\small\setlength{\tabcolsep}{4pt}
+  \input{build/pcoa-decay}
+  \caption{Native principal-coordinate spectral decay. Entries are percentages
+    of centered characteristic-geometry variation, averaged without weighting
+    across the separately fitted annual PCoAs for 2016--2025. PC1--PC5 give
+    individual shares; First 5 and First 10 give cumulative shares. These are
+    neither a spectrum fitted to pooled years nor shares of return
+  variation.}\label{tab:pcoa-decay}
+\end{table}
+
+The decoded spectra are more balanced. Their first five individual shares range
+across the pretrained models from \PcoaDecodedOneMin--\PcoaDecodedOneMax\%,
+\PcoaDecodedTwoMin--\PcoaDecodedTwoMax\%,
+\PcoaDecodedThreeMin--\PcoaDecodedThreeMax\%,
+\PcoaDecodedFourMin--\PcoaDecodedFourMax\%, and
+\PcoaDecodedFiveMin--\PcoaDecodedFiveMax\%, respectively.
+These geometries come from five-dimensional predicted exposure vectors;
+capturing their full positive variation in five coordinates follows from that
+rank constraint. It does not establish five newly identified return factors.
+
+\begin{table}[p]
+  \centering\small
+  \input{build/pcoa-decay-decoded}
+  \caption{Decoded pretrained principal-coordinate spectral decay. Entries
+    are unweighted mean annual percentages for 2016--2025, with PCoA fitted
+    separately each year. Five components exhaust the positive
+    characteristic-geometry spectrum by the five-dimensional construction.
+    They measure variation in decoded exposure geometry, not explained return
+    variation or evidence from a single pooled
+  PCoA.}\label{tab:pcoa-decay-decoded}
+\end{table}
+
 \begin{figure}[p]
   \centering
   \input{build/geometry-scree.pgf}
@@ -1262,14 +1355,16 @@ specifies a zero main diagonal~\cite{fernandezworking}; the final published
 article remains the controlling specification for the full replication.
 The joint network combines characteristic distances
 by their root mean square and is an extension to the original comparison.
-The common-four cohort has 33 firms; dropping debt maturity yields 395.
+The common-four cohort has \ReplicationFourFirms{} firms; dropping debt maturity
+yields \ReplicationThreeFirms{}.
 Likelihood comparisons remain within common cohorts.
 
 SEC disclosures and Yahoo prices replace Economatica. Total assets
 operationalize
 size; lease-inclusive noncurrent debt divided by total debt measures maturity;
 trailing 365-day cash dividends divided by price measure yield. Missing debt
-components remain missing and ratios use nominal values. The
+components remain missing and ratios use nominal values. Observed quarterly
+debt facts complete gaps only at the unchanged annual balance-sheet date. The
 Fama--French % chktex 8
 market factor and one-month risk-free series replace the original market and
 Treasury proxies. These substitutions and modern MM implementation prevent an
@@ -1281,7 +1376,8 @@ window is presented as a fully prospective cross-sectional design.
 \begin{table}[htbp]
   \centering\small
   \input{build/replication}
-  \caption{Common-four characteristic-history replication, 33 firms. Beta slopes
+  \caption{Common-four characteristic-history replication,
+    \ReplicationFourFirms{} firms. Beta slopes
     are percentages, with conditional standard errors in parentheses.
     Spatial-error ML uses zero self-links and unit-bandwidth
     exponential weights.
@@ -1329,6 +1425,27 @@ accompany the result records.
     stability bounds.
   Networks remain fixed during resampling.}
 \end{table}
+
+\begin{table}[htbp]
+  \centering\footnotesize
+  \input{build/replication-premiums}
+  \caption{Market-premium uncertainty in both primary replication cohorts.
+    Four and Three denote the numbers of required characteristics. Premiums
+    and percentile-interval endpoints are percentages; conditional standard
+    errors are percentage points. The spatial specifications use the joint
+    characteristic network with zero self-links. Bootstrap intervals jointly
+    resample quarters and re-estimate MM betas and median outcomes, holding
+  each cohort and network fixed.}\label{tab:replication-premiums}
+\end{table}
+
+Table~\ref{tab:replication-premiums} separates conditional second-stage errors
+from generated-beta uncertainty. Neither conditional test rejects a zero
+joint-network premium at the 5\% level in the four-characteristic cohort.
+In both cohorts, the OLS generated-beta interval remains positive, while
+both joint spatial-premium intervals include zero.
+The smaller spatial point estimates therefore accompany substantial uncertainty
+once first-stage beta estimation is included. These intervals remain
+conditional on the chosen cohorts, networks and quarterly resampling design.
 
 \begin{table}[htbp]
   \centering\footnotesize

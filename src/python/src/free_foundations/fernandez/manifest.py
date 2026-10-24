@@ -64,6 +64,17 @@ CONVENTIONS = (
         ),
         "Paper uses 1997-2006 for both",
     ),
+    (
+        "observed_source_recovery",
+        (
+            "Preserve complete annual first-three-characteristic snapshots; otherwise use "
+            "one complete aligned snapshot from annual and quarterly instant disclosures. "
+            "Fill missing annual debt maturity only from explicit quarterly facts at that "
+            "same balance-sheet period. Explicit same-period equity and lease-inclusive "
+            "debt aliases; no imputation"
+        ),
+        "Documented US data adaptation; filing cutoff and 550-day age bound retained",
+    ),
     ("mm_seed", "robustbase lmrob MM, seed 42 before each firm fit", "S-Plus tuning unknown"),
     (
         "mm_retry",

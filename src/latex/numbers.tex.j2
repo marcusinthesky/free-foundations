@@ -57,6 +57,10 @@
 \newcommand{\CorrelationLower}{((* '{:+,.1f}'.format(claims.contrast_correlation.lower_21 | float).replace(',', '{,}') *))}
 %TC:macrocount \CorrelationUpper 1
 \newcommand{\CorrelationUpper}{((* '{:+,.1f}'.format(claims.contrast_correlation.upper_21 | float).replace(',', '{,}') *))}
+%TC:macrocount \ReplicationFourFirms 1
+\newcommand{\ReplicationFourFirms}{((* claims.replication_cohorts.common_four *))}
+%TC:macrocount \ReplicationThreeFirms 1
+\newcommand{\ReplicationThreeFirms}{((* claims.replication_cohorts.common_three *))}
 %TC:macrocount \ReplicationOlsSlope 1
 \newcommand{\ReplicationOlsSlope}{((* '{:.2f}'.format(claims.replication_nonspatial.slope_percent) *))}
 %TC:macrocount \ReplicationJointSlope 1
@@ -105,3 +109,17 @@
 
 \newcommand{\DecoderBest}{((* '{:.3f}'.format(claims.decoder_best.value) *))}
 \newcommand{\DecoderBestName}{((* claims.decoder_best.name *))}
+%TC:macrocount \SourceYears 1
+\newcommand{\SourceYears}{((* claims.source_recovery.years *))}
+\newcommand{\FirstSourceYear}{((* claims.source_recovery.first_year *))}
+\newcommand{\LastSourceYear}{((* claims.source_recovery.last_year *))}
+%TC:macrocount \RecoveredSnapshots 1
+\newcommand{\RecoveredSnapshots}{((* '{:,}'.format(claims.source_recovery.quarterly_recovered_snapshots) *))}
+%TC:macrocount \RecoveredDebtSnapshots 1
+\newcommand{\RecoveredDebtSnapshots}{((* '{:,}'.format(claims.source_recovery.aligned_quarterly_debt_recovered_snapshots) *))}
+%TC:macrocount \FixedCohortFirms 1
+\newcommand{\FixedCohortFirms}{((* claims.source_recovery.fixed_annual_cohort *))}
+{% for name, value in claims.pcoa_decay.ranges_percent.items() %}
+%TC:macrocount \Pcoa((* name *)) 1
+\newcommand{\Pcoa((* name *))}{((* '{:.1f}'.format(value) *))}
+{% endfor %}
