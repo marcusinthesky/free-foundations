@@ -15,8 +15,9 @@ near the unit root. The quadratic term of the Gaussian loss moves by at most
 `‖u‖² ‖Σ⁻¹‖ ‖Σ̃⁻¹‖ ‖Σ − Σ̃‖`, and a covariance error `e` costs a minimum-variance
 portfolio with `‖w‖ ≤ B` at most `2B²e` of avoidable variance.
 
-These bound the *measurement* term. The spatial approximation error `Σ(W*) − Σ_true` and
-the error from re-estimating `λ` and `V` are separate terms and are not bounded here.
+The joint perturbation theorem also controls estimated spatial coefficients and innovation
+covariances. A separate triangle-inequality corollary retains the spatial approximation error
+`Σ(W*) − Σ_true`; that term requires an economic-model assumption or independent evidence.
 -/
 
 namespace FreeFoundations.Stability
@@ -78,6 +79,39 @@ theorem covariance_sub_le {W W' P P' V : R} {c M : ℝ} (hP : P * (1 - c • W) 
     _ ≤ 2 * M * ‖V‖ * (|c| * M ^ 2 * ‖W - W'‖) := by gcongr
     _ = 2 * ‖V‖ * |c| * M ^ 3 * ‖W - W'‖ := by ring
 
+/-- Joint perturbation of the spatial operator and innovation covariance. The spatial
+operator `H` is the product `λ • W`, so coefficient estimation is included. -/
+theorem covariance_joint_sub_le {H H' P P' D D' : R} {M V : ℝ}
+    (hP : P * (1 - H) = 1) (hP' : (1 - H') * P' = 1)
+    (hM : ‖P‖ ≤ M) (hM' : ‖P'‖ ≤ M) (hV : ‖D‖ ≤ V) :
+    ‖P * D * star P - P' * D' * star P'‖ ≤
+      2 * V * M ^ 3 * ‖H - H'‖ + M ^ 2 * ‖D - D'‖ := by
+  have hM0 : 0 ≤ M := (norm_nonneg _).trans hM
+  have hV0 : 0 ≤ V := (norm_nonneg _).trans hV
+  have hcommon := covariance_sub_le (c := 1) (W := H) (W' := H')
+    (by simpa using hP) (by simpa using hP') hM hM' (V := D)
+  simp only [abs_one, mul_one] at hcommon
+  have hinnovation : ‖P' * D * star P' - P' * D' * star P'‖ ≤ M ^ 2 * ‖D - D'‖ := by
+    rw [← sub_mul, ← mul_sub]
+    calc ‖P' * (D - D') * star P'‖ ≤ ‖P'‖ * ‖D - D'‖ * ‖star P'‖ :=
+        (norm_mul_le _ _).trans (mul_le_mul_of_nonneg_right (norm_mul_le _ _) (norm_nonneg _))
+      _ ≤ M * ‖D - D'‖ * M := by rw [norm_star]; gcongr
+      _ = M ^ 2 * ‖D - D'‖ := by ring
+  calc ‖P * D * star P - P' * D' * star P'‖ ≤
+        ‖P * D * star P - P' * D * star P'‖ + ‖P' * D * star P' - P' * D' * star P'‖ :=
+      norm_sub_le_norm_sub_add_norm_sub _ _ _
+    _ ≤ 2 * ‖D‖ * M ^ 3 * ‖H - H'‖ + M ^ 2 * ‖D - D'‖ := add_le_add hcommon hinnovation
+    _ ≤ 2 * V * M ^ 3 * ‖H - H'‖ + M ^ 2 * ‖D - D'‖ := by gcongr
+
+omit [StarRing R] [NormedStarGroup R] in
+/-- Separate coefficient error from network error, with the estimated network norm. -/
+theorem smul_network_sub_le (W Wh : R) (c ch : ℝ) :
+    ‖ch • Wh - c • W‖ ≤ |c| * ‖Wh - W‖ + |ch - c| * ‖Wh‖ := by
+  have hsplit : ch • Wh - c • W = c • (Wh - W) + (ch - c) • Wh := by
+    rw [smul_sub, sub_smul]; abel
+  rw [hsplit]
+  simpa only [norm_smul, Real.norm_eq_abs] using norm_add_le (c • (Wh - W)) ((ch - c) • Wh)
+
 end Ring
 
 section Matrices
@@ -96,6 +130,29 @@ theorem matrix_covariance_sub_le (W W' V : Matrix n n ℝ) {c M : ℝ}
       2 * ‖V‖ * |c| * M ^ 3 * ‖W - W'‖ := by
   have := covariance_sub_le (nonsing_inv_mul _ h) (mul_nonsing_inv _ h') hM hM' (V := V)
   simpa [star_eq_conjTranspose, conjTranspose_eq_transpose_of_trivial] using this
+
+/-- Joint matrix perturbation in the Euclidean operator norm. Only the reference
+innovation norm is needed; a common bound on both innovations also supplies this premise. -/
+theorem matrix_covariance_joint_sub_le (W Wh D Dh : Matrix n n ℝ) {c ch M V : ℝ}
+    (h : IsUnit (1 - c • W).det) (hh : IsUnit (1 - ch • Wh).det)
+    (hM : ‖(1 - c • W)⁻¹‖ ≤ M) (hMh : ‖(1 - ch • Wh)⁻¹‖ ≤ M) (hV : ‖D‖ ≤ V) :
+    ‖(1 - c • W)⁻¹ * D * ((1 - c • W)⁻¹)ᵀ -
+      (1 - ch • Wh)⁻¹ * Dh * ((1 - ch • Wh)⁻¹)ᵀ‖ ≤
+      2 * V * M ^ 3 * ‖c • W - ch • Wh‖ + M ^ 2 * ‖D - Dh‖ := by
+  have ht := covariance_joint_sub_le (nonsing_inv_mul _ h) (mul_nonsing_inv _ hh)
+    hM hMh hV (D' := Dh)
+  simpa only [star_eq_conjTranspose, conjTranspose_eq_transpose_of_trivial] using ht
+
+/-- Add approximation error against a declared true second moment. -/
+theorem matrix_covariance_target_sub_le (W Wh D Dh T : Matrix n n ℝ) {c ch M V ρ : ℝ}
+    (h : IsUnit (1 - c • W).det) (hh : IsUnit (1 - ch • Wh).det)
+    (hM : ‖(1 - c • W)⁻¹‖ ≤ M) (hMh : ‖(1 - ch • Wh)⁻¹‖ ≤ M) (hV : ‖D‖ ≤ V)
+    (hρ : ‖(1 - c • W)⁻¹ * D * ((1 - c • W)⁻¹)ᵀ - T‖ ≤ ρ) :
+    ‖(1 - ch • Wh)⁻¹ * Dh * ((1 - ch • Wh)⁻¹)ᵀ - T‖ ≤
+      2 * V * M ^ 3 * ‖c • W - ch • Wh‖ + M ^ 2 * ‖D - Dh‖ + ρ := by
+  have hb := matrix_covariance_joint_sub_le W Wh D Dh h hh hM hMh hV
+  rw [norm_sub_rev] at hb
+  exact (norm_sub_le_norm_sub_add_norm_sub _ _ _).trans (add_le_add hb hρ)
 
 end Matrices
 
@@ -144,6 +201,19 @@ theorem portfolio_regret (S Sh : E →L[ℝ] E) (K : Set E) {B : ℝ} (hB : ∀ 
   linarith [h1.1, h2.2]
 
 end Operators
+
+open scoped Matrix.Norms.L2Operator in
+/-- Matrix version of portfolio regret, using Euclidean vectors and the same spectral
+matrix norm as the covariance perturbation results. -/
+theorem matrix_portfolio_regret {n : Type*} [Fintype n] [DecidableEq n]
+    (S Sh : Matrix n n ℝ) (K : Set (EuclideanSpace ℝ n)) {B : ℝ}
+    (hB : ∀ w ∈ K, ‖w‖ ≤ B) {wh w : EuclideanSpace ℝ n} (hwh : wh ∈ K) (hw : w ∈ K)
+    (hmin : ∀ v ∈ K, inner ℝ (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) Sh wh) wh ≤
+      inner ℝ (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) Sh v) v) :
+    inner ℝ (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) S wh) wh - inner ℝ (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) S w) w ≤
+      2 * B ^ 2 * ‖Sh - S‖ := by
+  have ht := portfolio_regret (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) S) (Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) Sh) K hB hwh hw hmin
+  simpa only [← map_sub, Matrix.l2_opNorm_toEuclideanCLM] using ht
 
 /-- A long-only, fully invested portfolio has Euclidean norm at most one, so `B = 1`. -/
 theorem long_only_sq_le {ι : Type*} (s : Finset ι) (w : ι → ℝ) (hw : ∀ i ∈ s, 0 ≤ w i)

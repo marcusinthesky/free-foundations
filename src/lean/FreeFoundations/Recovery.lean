@@ -201,6 +201,17 @@ theorem excess_risk_condExp {α : Type*} {m m0 : MeasurableSpace α} {μ : Measu
   haveI : Fact (m ≤ m0) := ⟨hm⟩
   exact excess_risk (MeasureTheory.lpMeas ℝ ℝ m 2 μ) Y f f.2
 
+/-- Vector-valued task version of the conditional-mean excess-risk identity. -/
+theorem excess_risk_condExp_vector {α E : Type*} {m m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hm : m ≤ m0) (Y : MeasureTheory.Lp E 2 μ)
+    (f : MeasureTheory.lpMeas E ℝ m 2 μ) :
+    ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 -
+        ‖(MeasureTheory.condExpL2 E ℝ hm Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ hm Y‖ ^ 2 := by
+  haveI : Fact (m ≤ m0) := ⟨hm⟩
+  exact excess_risk (MeasureTheory.lpMeas E ℝ m 2 μ) Y f f.2
+
 /-! ## Economic meaning belongs to representation and readout together -/
 
 /-- If a linear readout `G` gives exposures from states `Z`, the reparametrised states `eZ`

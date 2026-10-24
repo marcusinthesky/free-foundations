@@ -163,11 +163,13 @@ prose under this convention.
 
 The main text explains task–target alignment and calibrated measurement risk.
 Their exact proposition statements, declaration tags and proofs appear with the
-supporting identities in the mathematical appendix. The conditional
-covariance-stability result keeps bandwidth, spatial coefficient and innovation
-covariance fixed; it is not a performance guarantee for re-estimated procedures.
-The portfolio-regret result remains in the complete Lean blueprint rather than
-the manuscript.
+supporting identities in the mathematical appendix. The principal conditional proposition carries exposure or anchored-Gram error through
+sharp kernel sensitivity, joint spatial-parameter perturbation, and a separate
+model-approximation term to covariance and local score regret. Its constants retain
+norm and panel dimension factors. The appendix gives finite information, transfer,
+selection and sampling interfaces, plus comparative statics and portfolio regret.
+The empirical readout and generated target still need independent economic-error
+certificates; these conditional theorems do not establish a performance ordering.
 
 `just blueprint-check` checks the declarations named in the manuscript and the
 blueprint against the compiled Lean library. Retained declaration tags are

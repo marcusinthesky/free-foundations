@@ -44,7 +44,8 @@ to estimate while their native distances remain unsuitable for a financial use.
 The common-marginal covariance comparison qualifies the principal forecasting
 result; it is part of the central evidence. The main text develops this argument
 through the introduction, framework, empirical design, results, and conclusion;
-exact propositions and proofs appear in the mathematical appendix.
+a principal conditional error bound appears in the framework, with full statements
+and proofs in the mathematical appendix.
 
 The [direct-geometry extension](research/panel/geometry/README.md) compares signed
 Gram covariances with spatial covariances on the same financial geometry, leading
