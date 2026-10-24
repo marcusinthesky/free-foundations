@@ -1,0 +1,87 @@
+import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
+import Mathlib.MeasureTheory.Measure.Dirac.Basic
+import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
+import Mathlib.Topology.MetricSpace.Lipschitz
+
+open MeasureTheory
+open scoped ENNReal
+
+namespace RmsCounterexample
+
+local instance : MeasurableSpace Bool := ⊥
+
+noncomputable def μ : Measure Bool := Measure.dirac false
+
+local instance : IsProbabilityMeasure μ := by
+  unfold μ
+  infer_instance
+
+def fhat (b : Bool) : ℝ := if b then 1 else -1
+
+def targetError (b : Bool) : ℝ := dist (fhat b) 1
+
+theorem dirac_same (b : Bool) : μ = Measure.dirac b := by
+  apply dirac_eq_dirac_iff_forall_mem_iff_mem.mpr
+  intro A hA
+  rcases MeasurableSpace.measurableSet_bot_iff.mp hA with rfl | rfl <;> simp
+
+theorem ae_pointwise {P : Bool → Prop} (h : ∀ᵐ b ∂μ, P b) : ∀ b, P b := by
+  intro b
+  have hb := h
+  rw [dirac_same b] at hb
+  by_contra hn
+  have hz := ae_iff.mp hb
+  rw [Measure.dirac_apply_of_mem hn] at hz
+  exact one_ne_zero hz
+
+theorem targetError_not_aestronglyMeasurable : ¬ AEStronglyMeasurable targetError μ := by
+  intro hm
+  obtain ⟨c, hc⟩ := stronglyMeasurable_bot_iff.mp hm.stronglyMeasurable_mk
+  have hp := ae_pointwise hm.ae_eq_mk
+  have hf := hp false
+  have ht := hp true
+  rw [hc] at hf ht
+  norm_num [targetError, fhat, Real.dist_eq] at hf ht
+  linarith
+
+theorem prediction_distance_constant : (fun b => dist (fhat b) (0 : ℝ)) = fun _ => (1 : ℝ) := by
+  funext b
+  cases b <;> norm_num [fhat, Real.dist_eq]
+
+theorem input_hypotheses :
+    AEStronglyMeasurable (fun b => dist (fhat b) (0 : ℝ)) μ ∧
+    AEStronglyMeasurable (fun _ : Bool => dist (0 : ℝ) 1) μ := by
+  rw [prediction_distance_constant]
+  exact ⟨aestronglyMeasurable_const, aestronglyMeasurable_const⟩
+
+theorem eLpNorm_counterexample :
+    ¬ eLpNorm (fun b => dist (fhat b) (1 : ℝ)) 2 μ ≤
+      eLpNorm (fun b => dist (fhat b) (0 : ℝ)) 2 μ +
+        eLpNorm (fun _ : Bool => dist (0 : ℝ) 1) 2 μ := by
+  have hleft : eLpNorm (fun b => dist (fhat b) (1 : ℝ)) 2 μ = ∞ :=
+    eLpNorm_of_not_aestronglyMeasurable targetError_not_aestronglyMeasurable
+  rw [hleft, prediction_distance_constant]
+  simp only [Real.dist_eq, zero_sub, abs_neg, abs_one]
+  have hfinite : eLpNorm (fun _ : Bool => (1 : ℝ)) 2 μ < ∞ :=
+    (memLp_const (1 : ℝ)).eLpNorm_lt_top
+  exact not_le_of_gt (ENNReal.add_lt_top.mpr ⟨hfinite, hfinite⟩)
+
+/-- The old universal RMS statement is false under the 4.35 seminorm convention,
+even though both stated scalar-distance measurability premises hold. -/
+theorem old_rms_statement_false :
+    ¬ (∀ {g : ℝ → ℝ} {K : NNReal}, LipschitzWith K g →
+      ∀ (s f fh : Bool → ℝ),
+        AEStronglyMeasurable (fun b => dist (fh b) (f b)) μ →
+        AEStronglyMeasurable (fun b => dist (g (f b)) (s b)) μ →
+        eLpNorm (fun b => dist (g (fh b)) (s b)) 2 μ ≤
+          K * eLpNorm (fun b => dist (fh b) (f b)) 2 μ +
+            eLpNorm (fun b => dist (g (f b)) (s b)) 2 μ) := by
+  intro h
+  have hid : LipschitzWith (1 : NNReal) (fun x : ℝ => x) := LipschitzWith.id
+  have hbound := h hid (fun _ => 1) (fun _ => 0) fhat input_hypotheses.1 input_hypotheses.2
+  apply eLpNorm_counterexample
+  simpa using hbound
+
+#print axioms eLpNorm_counterexample
+#print axioms old_rms_statement_false
+end RmsCounterexample
