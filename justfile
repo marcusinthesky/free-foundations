@@ -26,7 +26,16 @@ insitu-sync:
     uv run --frozen insitu sync
 
 lean-build:
+    python3 src/lean/tools/check_api_coverage.py
     cd src/lean && lake build
+
+# Every project source, including orphan modules and discarded examples.
+proof-audit: lean-build
+    python3 src/lean/tools/proof_integrity.py --project src/lean
+
+# Negative compiler fixtures verify that the checkers actually reject bad proofs/contracts.
+proof-audit-test:
+    python3 src/lean/tools/proof_integrity.py --self-test
 
 # Saved-artifact rendering only; no empirical estimation.
 latex-assets:

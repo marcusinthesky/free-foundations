@@ -1,6 +1,6 @@
 name = "free-foundations"
 version = "0.1.0"
-defaultTargets = ["FreeFoundations"]
+defaultTargets = ["FreeFoundations", "ApiStability"]
 
 [[require]]
 name = "mathlib"
@@ -14,4 +14,8 @@ git = "https://github.com/PatrickMassot/checkdecls.git"
 
 [[lean_lib]]
 name = "FreeFoundations"
+leanOptions = { autoImplicit = false }
+
+[[lean_lib]]
+name = "ApiStability"
 leanOptions = { autoImplicit = false }
