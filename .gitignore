@@ -5,6 +5,7 @@
 .lycheecache
 .ruff_cache/
 .rumdl_cache/
+.tmp/
 __pycache__/
 *.pyc
 node_modules/
