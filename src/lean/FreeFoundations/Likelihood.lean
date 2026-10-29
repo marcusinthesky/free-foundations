@@ -1,7 +1,11 @@
-import Mathlib.Algebra.Order.Chebyshev
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.LinearAlgebra.Matrix.Trace
-import FreeFoundations.Score
+module
+
+public import Mathlib.Algebra.Order.Chebyshev
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.LinearAlgebra.Matrix.Trace
+public import FreeFoundations.Score
+
+@[expose] public section
 
 /-!
 # What the Gaussian likelihood sees of a network
@@ -118,8 +122,8 @@ theorem gram_quadratic (x : n → ℝ) (a : n → E) :
 theorem diagonal_quadratic (x η : n → ℝ) :
     ∑ j, ∑ k, x j * (if j = k then η j else 0) * x k = ∑ j, x j ^ 2 * η j := by
   refine Finset.sum_congr rfl fun j _ => ?_
-  rw [Finset.sum_eq_single j (fun k _ hk => by rw [if_neg (Ne.symm hk)]; ring)
-    (fun h => absurd (Finset.mem_univ j) h), if_pos rfl]
+  rw [Finset.sum_eq_single j (fun k _ hk => by rw [ite_eq_right (Ne.symm hk)]; ring)
+    (fun h => absurd (Finset.mem_univ j) h), ite_eq_left rfl]
   ring
 
 /-- **Filtered second moment.** With a zero-diagonal network, firm `i`'s filtered residual
@@ -137,13 +141,13 @@ theorem filtered_second_moment (W : Matrix n n ℝ) (hW : ∀ i, W i i = 0) (a :
     exact Finset.sum_comm
   have hvec : ∑ j, x j • a j = a i - c • ∑ j, W i j • a j := by
     simp only [hx, sub_smul, Finset.sum_sub_distrib, ite_smul, one_smul, zero_smul,
-      Finset.sum_ite_eq, Finset.mem_univ, if_true, Finset.smul_sum, mul_smul]
+      Finset.sum_ite_eq, Finset.mem_univ, ite_true, Finset.smul_sum, mul_smul]
   have hsq : ∀ j, x j ^ 2 * η j = (if i = j then η j else 0) + c ^ 2 * (W i j ^ 2 * η j) := by
     intro j
     by_cases h : i = j
     · subst h
       simp [hx, hW]
-    · simp only [hx, if_neg h]
+    · simp only [hx, ite_eq_right h]
       ring
   rw [hentry]
   calc _ = ∑ j, ∑ k, (x j * inner ℝ (a j) (a k) * x k +
@@ -153,7 +157,7 @@ theorem filtered_second_moment (W : Matrix n n ℝ) (hW : ∀ i, W i i = 0) (a :
     _ = ‖a i - c • ∑ j, W i j • a j‖ ^ 2 + η i + c ^ 2 * ∑ j, W i j ^ 2 * η j := by
         simp_rw [Finset.sum_add_distrib]
         rw [gram_quadratic, diagonal_quadratic, hvec]
-        simp_rw [hsq, Finset.sum_add_distrib, Finset.sum_ite_eq, Finset.mem_univ, if_true,
+        simp_rw [hsq, Finset.sum_add_distrib, Finset.sum_ite_eq, Finset.mem_univ, ite_true,
           ← Finset.mul_sum]
         ring
 

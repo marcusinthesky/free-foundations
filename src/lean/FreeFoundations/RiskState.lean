@@ -1,5 +1,9 @@
-import Mathlib.Data.Setoid.Basic
-import FreeFoundations.Likelihood
+module
+
+public import Mathlib.Order.Setoid.Basic
+public import FreeFoundations.Likelihood
+
+@[expose] public section
 
 /-!
 # The state relevant to common-shock proximity

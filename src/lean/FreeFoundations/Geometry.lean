@@ -1,6 +1,10 @@
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import FreeFoundations.Alignment
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import FreeFoundations.Alignment
+
+@[expose] public section
 
 /-!
 # Information is not geometry
@@ -129,5 +133,19 @@ theorem distances_preserved_iff (G : A →ₗ[ℝ] A) :
     exact h _
 
 end Identification
+
+
+/-- A nonlinear recoding of a finite nonnegative state retains the entire state. -/
+theorem nonlinear_codes_sufficient :
+    Alignment.Sufficient (fun i : Fin 3 => (i.val : ℝ))
+      (fun i : Fin 3 => (i.val : ℝ) ^ 2) := by
+  refine ⟨Real.sqrt, funext fun i => ?_⟩
+  simp [Function.comp_apply, Real.sqrt_sq (Nat.cast_nonneg i.val)]
+
+/-- The same recoding distorts two initially equal intervals by different amounts. -/
+theorem nonlinear_codes_distort :
+    |((0 : ℝ) - 1)| = 1 ∧ |((1 : ℝ) - 2)| = 1 ∧
+      |((0 : ℝ) ^ 2 - 1 ^ 2)| = 1 ∧ |((1 : ℝ) ^ 2 - 2 ^ 2)| = 3 := by
+  norm_num
 
 end FreeFoundations.Geometry

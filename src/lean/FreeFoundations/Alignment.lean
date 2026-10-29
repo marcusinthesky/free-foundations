@@ -1,5 +1,9 @@
-import Mathlib.Logic.Function.Basic
-import Mathlib.Probability.Distributions.Uniform
+module
+
+public import Mathlib.Logic.Function.Basic
+public import Mathlib.Probability.Distributions.Uniform
+
+@[expose] public section
 
 /-!
 # A representation preserves what its target requires
@@ -64,21 +68,26 @@ theorem constant_target_loses_state (F : H → T) (state : H → S)
 /-! ## Marginal targets do not determine dependence (ANALYSIS.md §5.3) -/
 
 /-- `Y₁ = R`, `Y₂ = R xor S` for a fair coin `R` and an observed state `S`. -/
+noncomputable def fairCoin : PMF Bool :=
+  PMF.ofFintype (fun _ : Bool => ((1 / 2 : NNReal) : ENNReal)) (by
+    norm_num
+    exact ENNReal.mul_inv_cancel (by norm_num) (by norm_num))
+
 noncomputable def pair (s : Bool) : PMF (Bool × Bool) :=
-  (PMF.uniformOfFintype Bool).map fun r => (r, xor r s)
+  (fairCoin).map fun r => (r, xor r s)
 
 /-- Both marginals are fair coins whatever the state, so a state-free forecast of each
 marginal is exact. -/
 theorem marginals_free_of_state (s : Bool) :
-    (pair s).map Prod.fst = PMF.uniformOfFintype Bool ∧
-      (pair s).map Prod.snd = PMF.uniformOfFintype Bool := by
+    (pair s).map Prod.fst = fairCoin ∧
+      (pair s).map Prod.snd = fairCoin := by
   constructor <;> ext y <;> cases s <;> cases y <;>
-    simp [pair, PMF.map_apply, tsum_fintype, Fintype.sum_prod_type, PMF.uniformOfFintype_apply]
+    norm_num [pair, fairCoin, Finset.sum_filter, Fintype.sum_prod_type, Finset.filter_insert, Finset.filter_singleton, Finset.filter_empty]
 
 /-- Yet the joint law is entirely determined by the state the forecast discarded:
 `Y₁ = Y₂` surely when `S = false` and never when `S = true`. -/
 theorem joint_depends_on_state :
     (pair false) (true, true) = 1 / 2 ∧ (pair true) (true, true) = 0 := by
-  constructor <;> simp [pair, PMF.map_apply, tsum_fintype, PMF.uniformOfFintype_apply]
+  constructor <;> norm_num [pair, fairCoin, Finset.sum_filter, Fintype.sum_prod_type, Finset.filter_insert, Finset.filter_singleton, Finset.filter_empty]
 
 end FreeFoundations.Alignment

@@ -146,6 +146,18 @@ repos:
         language: system
         pass_filenames: false
         files: ^src/lean/.*(\.lean|\.toml|lean-toolchain)$
+      - id: lean-proof-integrity
+        name: Lean proof integrity
+        entry: just proof-audit
+        language: system
+        pass_filenames: false
+        files: ^src/lean/.*(\.lean|\.py|\.json|\.toml|lean-toolchain)$
+      - id: lean-audit-tests
+        name: Lean checker regression tests
+        entry: just proof-audit-test
+        language: system
+        pass_filenames: false
+        files: ^src/lean/(tools/|FreeFoundationsApi/Check\.lean)
       - id: tex-fmt
         name: LaTeX format
         entry: tex-fmt --check

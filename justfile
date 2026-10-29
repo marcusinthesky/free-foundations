@@ -26,11 +26,20 @@ insitu-sync:
     uv run --frozen insitu sync
 
 lean-build:
+    python3 src/lean/tools/check_api_coverage.py
     cd src/lean && lake build
 
-# Reject proof gaps and nonstandard axioms, including unused private declarations.
+# Every project source, including orphan modules and discarded examples.
+proof-audit: lean-build
+    python3 src/lean/tools/proof_integrity.py --project src/lean
+
+# Fast compiled-declaration summary; the source-level audit above remains authoritative.
 lean-audit: lean-build
-    cd src/lean && lake env lean Audit.lean
+    cd src/lean && lake env lean ModuleAudit.lean
+
+# Negative compiler fixtures verify that the checkers actually reject bad proofs/contracts.
+proof-audit-test:
+    python3 src/lean/tools/proof_integrity.py --self-test
 
 # Saved-artifact rendering only; no empirical estimation.
 latex-assets:

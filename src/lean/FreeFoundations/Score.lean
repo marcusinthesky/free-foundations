@@ -1,7 +1,13 @@
-import Mathlib.Analysis.Matrix.Order
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.MeasureTheory.Integral.Bochner.Basic
-import FreeFoundations.Exposure
+module
+
+public import Mathlib.Analysis.Matrix.Order
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import FreeFoundations.Exposure
+
+@[expose] public section
+
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # What the scores measure

@@ -1,5 +1,9 @@
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.Analysis.InnerProductSpace.Basic
+module
+
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.Analysis.InnerProductSpace.Basic
+
+@[expose] public section
 
 /-!
 # Observational equivalence and state-estimation risk
@@ -64,7 +68,7 @@ theorem two_state_sq_error (a b v : E) :
 omit [InnerProductSpace ℝ E] in
 private theorem integrable_sq_sub {f g : Ω → E} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     Integrable (fun ω => ‖f ω - g ω‖ ^ 2) μ :=
-  (memLp_two_iff_integrable_sq_norm (hf.sub hg).1).mp (hf.sub hg)
+  (memLp_two_iff_integrable_sq_norm (hf.sub hg).aestronglyMeasurable).mp (hf.sub hg)
 
 /-- The sum of the two expected risks is at least half the expected squared state gap. -/
 theorem risk_sum_lower_bound {a b v : Ω → E} (ha : MemLp a 2 μ) (hb : MemLp b 2 μ)

@@ -1,48 +1,269 @@
 import FreeFoundations
-import Lean
 
-/-!
-# Transitive axiom audit
+/-! Axiom audit of every public theorem added by the economic-measurement extension. -/
 
-Run `lake env lean Audit.lean` after `lake build`. Selection uses the originating module,
-not the declaration's namespace, so private helpers and declarations outside the project's
-namespace are included. Every selected declaration is checked even when it is unused.
-The only permitted dependencies are Lean's standard classical foundations.
-This file is an audit command, not an import of the mathematical library.
--/
-
-open Lean Elab Command
-
-namespace FreeFoundationsAudit
-
-/-- Check every declaration originating in one of the given module trees. -/
-def audit (roots : Array Name) : CommandElabM Unit := do
-  let env := (← getEnv).setExporting false
-  let mut count := 0
-  let mut theorems := 0
-  let mut privateCount := 0
-  let mut used : Array Name := #[]
-  let allowed := #[``propext, ``Classical.choice, ``Quot.sound]
-  for (name, info) in env.constants.toList do
-    let origin := match env.getModuleIdxFor? name with
-      | some idx => env.header.moduleNames[idx]!
-      | none => env.mainModule
-    if roots.any (·.isPrefixOf origin) then
-      count := count + 1
-      if info.isTheorem then theorems := theorems + 1
-      if isPrivateName name then privateCount := privateCount + 1
-      match info with
-      | .axiomInfo _ => throwError "Project axiom: {name} (module {origin})"
-      | _ => pure ()
-      let deps ← collectAxioms name
-      for dep in deps do
-        unless allowed.contains dep do
-          throwError "Unapproved axiom: {name} depends on {dep} (module {origin})"
-        unless used.contains dep do used := used.push dep
-  if count == 0 then throwError "No declarations found in module trees {roots}"
-  logInfo m!"Axiom audit passed: {count} declarations ({theorems} theorems, \
-    {privateCount} private declarations); dependencies {used.qsort Name.lt}"
-
-end FreeFoundationsAudit
-
-run_cmd FreeFoundationsAudit.audit #[`FreeFoundations]
+#print axioms FreeFoundations.Bandwidth.constant_distance_effectiveNeighbors
+#print axioms FreeFoundations.Bandwidth.constant_distance_herfindahl
+#print axioms FreeFoundations.Bandwidth.constant_distance_weights
+#print axioms FreeFoundations.Bandwidth.distanceVariance_eq
+#print axioms FreeFoundations.Bandwidth.distanceVariance_nonneg
+#print axioms FreeFoundations.Bandwidth.effectiveNeighbors_continuousOn
+#print axioms FreeFoundations.Bandwidth.effectiveNeighbors_monotoneOn
+#print axioms FreeFoundations.Bandwidth.effectiveNeighbors_tendsto_atTop
+#print axioms FreeFoundations.Bandwidth.effectiveNeighbors_tendsto_zero
+#print axioms FreeFoundations.Bandwidth.entropy_eq
+#print axioms FreeFoundations.Bandwidth.entropy_monotoneOn
+#print axioms FreeFoundations.Bandwidth.equal_distance_weights
+#print axioms FreeFoundations.Bandwidth.exists_matched_bandwidth
+#print axioms FreeFoundations.Bandwidth.expRow_tendsto_atTop
+#print axioms FreeFoundations.Bandwidth.expRow_tendsto_zero
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_entropy
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_expRow
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_herfindahl
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_meanDistance
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_partition
+#print axioms FreeFoundations.Bandwidth.hasDerivAt_raw
+#print axioms FreeFoundations.Bandwidth.herfindahl_antitoneOn
+#print axioms FreeFoundations.Bandwidth.herfindahl_pos
+#print axioms FreeFoundations.Bandwidth.heterogeneous_noise_can_increase
+#print axioms FreeFoundations.Bandwidth.matched_effective_not_concentration
+#print axioms FreeFoundations.Bandwidth.meanDistance_monotoneOn
+#print axioms FreeFoundations.Bandwidth.partition_mul_mean
+#print axioms FreeFoundations.Bandwidth.weight_distance_antivary
+#print axioms FreeFoundations.Bandwidth.weighted_covariance_nonpos
+#print axioms FreeFoundations.ComparativeStatics.swap_common_variance_gt_one
+#print axioms FreeFoundations.ComparativeStatics.swap_covariance_common
+#print axioms FreeFoundations.ComparativeStatics.swap_covariance_not_ge_identity
+#print axioms FreeFoundations.ComparativeStatics.swap_covariance_spread
+#print axioms FreeFoundations.ComparativeStatics.swap_inverse_common
+#print axioms FreeFoundations.ComparativeStatics.swap_inverse_spread
+#print axioms FreeFoundations.ComparativeStatics.swap_spatial_isUnit
+#print axioms FreeFoundations.ComparativeStatics.swap_spread_variance_lt_one
+#print axioms FreeFoundations.ComparativeStatics.swap_symmetric
+#print axioms FreeFoundations.Decision.approximate_sufficiency
+#print axioms FreeFoundations.Decision.bayes_le_policy
+#print axioms FreeFoundations.Decision.bayes_risk_tv
+#print axioms FreeFoundations.Decision.bestAction_le
+#print axioms FreeFoundations.Decision.bounded_expectation_tv
+#print axioms FreeFoundations.Decision.fixed_policy_tv
+#print axioms FreeFoundations.Decision.garbling_risk
+#print axioms FreeFoundations.Decision.stochastic_compose
+#print axioms FreeFoundations.Dynamics.gramian_mono
+#print axioms FreeFoundations.Dynamics.gramian_succ
+#print axioms FreeFoundations.Dynamics.observable_decoder
+#print axioms FreeFoundations.Dynamics.observation_gram
+#print axioms FreeFoundations.Dynamics.one_horizon_not_injective
+#print axioms FreeFoundations.Dynamics.two_horizons
+#print axioms FreeFoundations.Dynamics.two_horizons_distinguish
+#print axioms FreeFoundations.EndToEnd.common_component_error
+#print axioms FreeFoundations.EndToEnd.covariance_from_scaled
+#print axioms FreeFoundations.EndToEnd.empirical_rms_scaled
+#print axioms FreeFoundations.EndToEnd.exposure_scaled
+#print axioms FreeFoundations.EndToEnd.full_score_of_certificate
+#print axioms FreeFoundations.EndToEnd.gram_scaled
+#print axioms FreeFoundations.EndToEnd.kernel_spectral_bound
+#print axioms FreeFoundations.EndToEnd.kernel_spectral_common
+#print axioms FreeFoundations.EndToEnd.kernel_spectral_scaled
+#print axioms FreeFoundations.EndToEnd.measurement_to_finance
+#print axioms FreeFoundations.EndToEnd.score_of_certificate
+#print axioms FreeFoundations.EndToEnd.task_exposure_certificate
+#print axioms FreeFoundations.EndToEnd.tasks_to_finance
+#print axioms FreeFoundations.GeneratedTarget.cross_moment_error
+#print axioms FreeFoundations.GeneratedTarget.exposure_gram_error
+#print axioms FreeFoundations.GeneratedTarget.factor_gram_error
+#print axioms FreeFoundations.GeneratedTarget.generated_readout_error
+#print axioms FreeFoundations.GeneratedTarget.normal_equation_error
+#print axioms FreeFoundations.Geometry.nonlinear_codes_distort
+#print axioms FreeFoundations.Geometry.nonlinear_codes_sufficient
+#print axioms FreeFoundations.GramDistance.coordinate_difference_sq_le
+#print axioms FreeFoundations.GramDistance.distance_error
+#print axioms FreeFoundations.GramDistance.distance_error_spectral
+#print axioms FreeFoundations.GramDistance.distance_self
+#print axioms FreeFoundations.GramDistance.distance_zero
+#print axioms FreeFoundations.GramDistance.empirical_rms_to_uniform
+#print axioms FreeFoundations.GramDistance.sharpGram_distance
+#print axioms FreeFoundations.GramDistance.sharpGram_entry_bound
+#print axioms FreeFoundations.GramDistance.sharpGram_posSemidef
+#print axioms FreeFoundations.GramDistance.sharpGram_squared
+#print axioms FreeFoundations.GramDistance.sqrt_error
+#print axioms FreeFoundations.GramDistance.squared_eq_entry
+#print axioms FreeFoundations.GramDistance.squared_eq_quadratic
+#print axioms FreeFoundations.GramDistance.squared_error
+#print axioms FreeFoundations.GramDistance.squared_error_spectral
+#print axioms FreeFoundations.GramDistance.squared_nonneg
+#print axioms FreeFoundations.GramDistance.squared_self
+#print axioms FreeFoundations.GramDistance.uniform_exposure_distance
+#print axioms FreeFoundations.Information.nested_condExp
+#print axioms FreeFoundations.Information.nested_projection
+#print axioms FreeFoundations.Information.projection_risk_mono
+#print axioms FreeFoundations.Kernel.expKernel_linfty_le_sharp
+#print axioms FreeFoundations.Kernel.expKernel_nonneg
+#print axioms FreeFoundations.Kernel.expKernel_row_l1_le_scaled
+#print axioms FreeFoundations.Kernel.expKernel_row_l1_le_sharp
+#print axioms FreeFoundations.Kernel.expKernel_row_sum
+#print axioms FreeFoundations.Kernel.expRow_add_const
+#print axioms FreeFoundations.Kernel.expRow_l1_le_bandwidth
+#print axioms FreeFoundations.Kernel.expRow_l1_le_scaled
+#print axioms FreeFoundations.Kernel.expRow_l1_le_sharp
+#print axioms FreeFoundations.Kernel.expRow_pos
+#print axioms FreeFoundations.Kernel.expRow_singleton
+#print axioms FreeFoundations.Kernel.expRow_sum
+#print axioms FreeFoundations.Kernel.hasDerivAt_sensitivity
+#print axioms FreeFoundations.Kernel.normalized_l1_le_sharp
+#print axioms FreeFoundations.Kernel.normalized_two_sharp
+#print axioms FreeFoundations.Kernel.scaled_distance_error
+#print axioms FreeFoundations.Kernel.sensitivity_le_min
+#print axioms FreeFoundations.Kernel.sensitivity_le_self
+#print axioms FreeFoundations.Kernel.sensitivity_le_two
+#print axioms FreeFoundations.Kernel.sensitivity_nonneg
+#print axioms FreeFoundations.Kernel.sensitivity_zero
+#print axioms FreeFoundations.MatrixBounds.frobeniusNorm_le_sqrt_card_mul_rowSumNorm
+#print axioms FreeFoundations.MatrixBounds.frobeniusNorm_nonneg
+#print axioms FreeFoundations.MatrixBounds.frobeniusNorm_sq
+#print axioms FreeFoundations.MatrixBounds.frobeniusNorm_sq_le_card_mul_rowSumNorm_sq
+#print axioms FreeFoundations.MatrixBounds.frobeniusNorm_sq_le_card_mul_spectralNorm_sq
+#print axioms FreeFoundations.MatrixBounds.rowSumNorm_le
+#print axioms FreeFoundations.MatrixBounds.rowSumNorm_nonneg
+#print axioms FreeFoundations.MatrixBounds.row_le_rowSumNorm
+#print axioms FreeFoundations.MatrixBounds.spectralNorm_eq
+#print axioms FreeFoundations.MatrixBounds.spectralNorm_le_frobeniusNorm
+#print axioms FreeFoundations.MatrixBounds.spectralNorm_le_sqrt_card_mul_rowSumNorm
+#print axioms FreeFoundations.MatrixBounds.spectralNorm_nonneg
+#print axioms FreeFoundations.ReadoutStability.crossMoment_norm_le
+#print axioms FreeFoundations.ReadoutStability.crossMoment_sub_norm_le
+#print axioms FreeFoundations.ReadoutStability.crossOperator_apply
+#print axioms FreeFoundations.ReadoutStability.crossOperator_norm_le
+#print axioms FreeFoundations.ReadoutStability.crossOperator_sub_norm_le
+#print axioms FreeFoundations.ReadoutStability.gram_apply
+#print axioms FreeFoundations.ReadoutStability.gram_floor
+#print axioms FreeFoundations.ReadoutStability.gram_inner_symmetric
+#print axioms FreeFoundations.ReadoutStability.gram_posDef
+#print axioms FreeFoundations.ReadoutStability.gram_quadratic
+#print axioms FreeFoundations.ReadoutStability.gram_sub_norm_le
+#print axioms FreeFoundations.ReadoutStability.gram_sub_replacement
+#print axioms FreeFoundations.ReadoutStability.inverse_gram_norm_le
+#print axioms FreeFoundations.ReadoutStability.linear_readout_sub_le
+#print axioms FreeFoundations.ReadoutStability.norm_outer
+#print axioms FreeFoundations.ReadoutStability.normal_equation
+#print axioms FreeFoundations.ReadoutStability.objective_gap
+#print axioms FreeFoundations.ReadoutStability.objective_minimal
+#print axioms FreeFoundations.ReadoutStability.objective_minimizer_unique
+#print axioms FreeFoundations.ReadoutStability.objective_quadratic
+#print axioms FreeFoundations.ReadoutStability.operator_normal_equation
+#print axioms FreeFoundations.ReadoutStability.operator_objective_gap
+#print axioms FreeFoundations.ReadoutStability.operator_objective_minimal
+#print axioms FreeFoundations.ReadoutStability.operator_objective_minimizer_unique
+#print axioms FreeFoundations.ReadoutStability.outer_posSemidef
+#print axioms FreeFoundations.ReadoutStability.outer_toCLM
+#print axioms FreeFoundations.ReadoutStability.prediction_replacement_le
+#print axioms FreeFoundations.ReadoutStability.ridgeOperator_replacement_le
+#print axioms FreeFoundations.ReadoutStability.ridge_replacement_le
+#print axioms FreeFoundations.ReadoutStability.sample_card_pos
+#print axioms FreeFoundations.ReadoutStability.sum_sub_of_eq_off
+#print axioms FreeFoundations.ReadoutStability.vector_prediction_replacement_le
+#print axioms FreeFoundations.Recovery.excess_risk_condExp_vector
+#print axioms FreeFoundations.ReversibleNetwork.detailed_balance
+#print axioms FreeFoundations.ReversibleNetwork.energy_contraction
+#print axioms FreeFoundations.ReversibleNetwork.exponentialRaw_nonneg
+#print axioms FreeFoundations.ReversibleNetwork.exponentialRaw_symmetric
+#print axioms FreeFoundations.ReversibleNetwork.exponential_degree_bounds
+#print axioms FreeFoundations.ReversibleNetwork.exponential_degree_eq
+#print axioms FreeFoundations.ReversibleNetwork.exponential_resolvent_l2_bound
+#print axioms FreeFoundations.ReversibleNetwork.normalize_energy_contraction
+#print axioms FreeFoundations.ReversibleNetwork.normalize_exponentialRaw
+#print axioms FreeFoundations.ReversibleNetwork.normalize_nonneg
+#print axioms FreeFoundations.ReversibleNetwork.normalize_resolvent_l2_bound
+#print axioms FreeFoundations.ReversibleNetwork.normalize_row_sum
+#print axioms FreeFoundations.ReversibleNetwork.resolvent_l2_bound
+#print axioms FreeFoundations.ReversibleNetwork.row_square_le
+#print axioms FreeFoundations.ReversibleNetwork.spatial_isUnit
+#print axioms FreeFoundations.ReversibleNetwork.stationary_degree
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_contraction
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_eq_zero_iff
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_lower
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_nonneg
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_smul
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_sq
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_sub_le
+#print axioms FreeFoundations.ReversibleNetwork.weightedNorm_upper
+#print axioms FreeFoundations.ReversibleNetwork.weighted_resolvent_bound
+#print axioms FreeFoundations.ReversibleNetwork.weighted_resolvent_lower
+#print axioms FreeFoundations.ScoreStability.abs_eigenvalue_sub_one_le
+#print axioms FreeFoundations.ScoreStability.abs_entry_le_norm
+#print axioms FreeFoundations.ScoreStability.abs_logdet_sub_le
+#print axioms FreeFoundations.ScoreStability.abs_trace_le_card_mul_norm
+#print axioms FreeFoundations.ScoreStability.centered_eigenvalues_sq_sum
+#print axioms FreeFoundations.ScoreStability.eigenvalues_ge_of_floor
+#print axioms FreeFoundations.ScoreStability.eigenvalues_sq_sum
+#print axioms FreeFoundations.ScoreStability.entrySquares_eq_frobeniusNorm_sq
+#print axioms FreeFoundations.ScoreStability.entrySquares_eq_trace_sq
+#print axioms FreeFoundations.ScoreStability.logdet_sub_le
+#print axioms FreeFoundations.ScoreStability.loss_gap_le_of_norm_sub
+#print axioms FreeFoundations.ScoreStability.loss_gap_local
+#print axioms FreeFoundations.ScoreStability.loss_gap_local_factor
+#print axioms FreeFoundations.ScoreStability.loss_whiten_identity
+#print axioms FreeFoundations.ScoreStability.norm_inverse_factor_sq
+#print axioms FreeFoundations.ScoreStability.norm_inverse_le_of_floor
+#print axioms FreeFoundations.ScoreStability.norm_transpose
+#print axioms FreeFoundations.ScoreStability.norm_unitary_conjugate
+#print axioms FreeFoundations.ScoreStability.stein_identity_local
+#print axioms FreeFoundations.ScoreStability.sub_log_one_add_le
+#print axioms FreeFoundations.ScoreStability.trace_unitary_conjugate
+#print axioms FreeFoundations.ScoreStability.whiten_error_le
+#print axioms FreeFoundations.ScoreStability.whiten_posDef
+#print axioms FreeFoundations.ScoreStability.whiten_sub_one
+#print axioms FreeFoundations.Selection.bounded_blocks
+#print axioms FreeFoundations.Selection.coupled_finite_family
+#print axioms FreeFoundations.Selection.coupling_event
+#print axioms FreeFoundations.Selection.finite_family
+#print axioms FreeFoundations.Selection.panel_markov
+#print axioms FreeFoundations.Selection.random_panel
+#print axioms FreeFoundations.Selection.risk_discrepancy
+#print axioms FreeFoundations.Selection.source_excess
+#print axioms FreeFoundations.Selection.task_rms_of_excess
+#print axioms FreeFoundations.Stability.covariance_joint_sub_le
+#print axioms FreeFoundations.Stability.matrix_covariance_joint_sub_le
+#print axioms FreeFoundations.Stability.matrix_covariance_target_sub_le
+#print axioms FreeFoundations.Stability.matrix_portfolio_regret
+#print axioms FreeFoundations.Stability.smul_network_sub_le
+#print axioms FreeFoundations.StatisticalFinancial.certificate_of_uniform
+#print axioms FreeFoundations.StatisticalFinancial.failure_on_good
+#print axioms FreeFoundations.StatisticalFinancial.failure_probability
+#print axioms FreeFoundations.StatisticalFinancial.failure_probability_with_learning
+#print axioms FreeFoundations.StatisticalFinancial.finite_marginal_moment
+#print axioms FreeFoundations.StatisticalFinancial.finite_transfer_failure_probability
+#print axioms FreeFoundations.StatisticalFinancial.finite_transfer_moment
+#print axioms FreeFoundations.TaskCoverage.covered_error
+#print axioms FreeFoundations.TaskCoverage.covered_signal
+#print axioms FreeFoundations.TaskCoverage.predicted_task_error
+#print axioms FreeFoundations.TaskInformation.distinguishes_of_information_floor
+#print axioms FreeFoundations.TaskInformation.distinguishes_of_loewner_floor
+#print axioms FreeFoundations.TaskInformation.exists_decoder_of_information_floor
+#print axioms FreeFoundations.TaskInformation.information_increment
+#print axioms FreeFoundations.TaskInformation.information_posSemidef
+#print axioms FreeFoundations.TaskInformation.information_quadratic
+#print axioms FreeFoundations.TaskInformation.posterior_precision_mono
+#print axioms FreeFoundations.TaskInformation.posterior_precision_update
+#print axioms FreeFoundations.TaskInformation.rank_one_inverse
+#print axioms FreeFoundations.TaskInformation.rank_one_inverse_le
+#print axioms FreeFoundations.TaskInformation.taskOperator_norm_sq
+#print axioms FreeFoundations.TaskInformation.task_units_invariant
+#print axioms FreeFoundations.Transfer.change_of_weights
+#print axioms FreeFoundations.Transfer.decoder_rms
+#print axioms FreeFoundations.Transfer.density_change
+#print axioms FreeFoundations.Transfer.fitted_readout_error
+#print axioms FreeFoundations.Transfer.measure_change
+#print axioms FreeFoundations.Transfer.measure_decoder
+#print axioms FreeFoundations.Transfer.measure_recovery
+#print axioms FreeFoundations.Transfer.measure_source_target_recovery
+#print axioms FreeFoundations.Transfer.measure_task_transfer
+#print axioms FreeFoundations.Transfer.recovery_rms
+#print axioms FreeFoundations.Transfer.rms_add_le
+#print axioms FreeFoundations.Transfer.rms_const_smul
+#print axioms FreeFoundations.Transfer.rms_mono
+#print axioms FreeFoundations.Transfer.rms_nonneg
+#print axioms FreeFoundations.Transfer.rms_sq
+#print axioms FreeFoundations.Transfer.rnDeriv_change
+#print axioms FreeFoundations.Transfer.small_mass_spike
+#print axioms FreeFoundations.Transfer.source_target_recovery
+#print axioms FreeFoundations.Transfer.task_transfer

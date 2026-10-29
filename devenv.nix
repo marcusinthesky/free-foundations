@@ -1,4 +1,12 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
+let
+  # Isolate the compiler's package set; other development and inference tools keep their pin.
+  leanPkgs = import inputs.nixpkgs-lean { system = pkgs.stdenv.hostPlatform.system; };
+  leanToolchain = import ./nix/lean-toolchain.nix {
+    pkgs = leanPkgs;
+    inherit (inputs) lean4-nix;
+  };
+in
 {
   name = "free-foundations";
   packages = with pkgs; [
@@ -23,7 +31,7 @@
     bun
     typescript
     biome
-    elan
+    leanToolchain.lean-all
     tex-fmt
     (texliveInfraOnly.withPackages (ps: [
       ps.chktex

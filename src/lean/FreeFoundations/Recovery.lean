@@ -1,6 +1,10 @@
-import Mathlib.Analysis.InnerProductSpace.Projection.Basic
-import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL2
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL2
+
+@[expose] public section
 
 /-!
 # Recovering exposure distance from auxiliary tasks
@@ -198,21 +202,31 @@ theorem excess_risk_condExp {α : Type*} {m m0 : MeasurableSpace α} {μ : Measu
     ‖(f : MeasureTheory.Lp ℝ 2 μ) - Y‖ ^ 2 -
         ‖(MeasureTheory.condExpL2 ℝ ℝ hm Y : MeasureTheory.Lp ℝ 2 μ) - Y‖ ^ 2 =
       ‖(f : MeasureTheory.Lp ℝ 2 μ) - MeasureTheory.condExpL2 ℝ ℝ hm Y‖ ^ 2 := by
-  haveI : Fact (m ≤ m0) := ⟨hm⟩
+  have : Fact (m ≤ m0) := ⟨hm⟩
   exact excess_risk (MeasureTheory.lpMeas ℝ ℝ m 2 μ) Y f f.2
 
 /-- The conditional-expectation projection identity for a Hilbert-valued exposure target.
 Membership in `Lp _ 2` makes square integrability explicit; no sampling independence or
 finite-measure assumption is needed. -/
-theorem excess_risk_condExp_hilbert {α E : Type*} {m m0 : MeasurableSpace α}
+theorem excess_risk_condExp_vector {α E : Type*} {m m0 : MeasurableSpace α}
     {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [CompleteSpace E] (hm : m ≤ m0) (Y : MeasureTheory.Lp E 2 μ)
     (f : MeasureTheory.lpMeas E ℝ m 2 μ) :
     ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 -
         ‖(MeasureTheory.condExpL2 E ℝ hm Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
       ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ hm Y‖ ^ 2 := by
-  haveI : Fact (m ≤ m0) := ⟨hm⟩
+  have : Fact (m ≤ m0) := ⟨hm⟩
   exact excess_risk (MeasureTheory.lpMeas E ℝ m 2 μ) Y f f.2
+
+/-- Compatibility name for the Hilbert-valued conditional-expectation identity. -/
+theorem excess_risk_condExp_hilbert {α E : Type*} {m m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hm : m ≤ m0) (Y : MeasureTheory.Lp E 2 μ)
+    (f : MeasureTheory.lpMeas E ℝ m 2 μ) :
+    ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 -
+        ‖(MeasureTheory.condExpL2 E ℝ hm Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ hm Y‖ ^ 2 :=
+  excess_risk_condExp_vector hm Y f
 
 /-- **Nested information.** Projecting a target onto a smaller predictor space costs
 exactly the squared distance between the two Bayes predictors. -/
@@ -246,8 +260,8 @@ theorem nested_information_risk {α E : Type*} {mZ mH m0 : MeasurableSpace α}
       ‖(MeasureTheory.condExpL2 E ℝ hH Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 +
       ‖(MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y : MeasureTheory.Lp E 2 μ) -
         MeasureTheory.condExpL2 E ℝ hH Y‖ ^ 2 := by
-  haveI : Fact (mZ ≤ m0) := ⟨hZH.trans hH⟩
-  haveI : Fact (mH ≤ m0) := ⟨hH⟩
+  have : Fact (mZ ≤ m0) := ⟨hZH.trans hH⟩
+  have : Fact (mH ≤ m0) := ⟨hH⟩
   apply nested_projection_risk (MeasureTheory.lpMeas E ℝ mZ 2 μ)
     (MeasureTheory.lpMeas E ℝ mH 2 μ) _ Y
   intro f hf
@@ -318,7 +332,7 @@ theorem aggregate_merges :
 `‖C a‖² = 2‖a‖²`, so they distinguish exposures with margin `√2`. -/
 theorem diverse_distinguishes (a : Plane) :
     (a 0 + a 1) ^ 2 + (a 0 - a 1) ^ 2 = 2 * ‖a‖ ^ 2 := by
-  rw [EuclideanSpace.norm_eq, Real.sq_sqrt (by positivity), Fin.sum_univ_two]
+  rw [EuclideanSpace.norm_sq_eq, Fin.sum_univ_two]
   simp only [Real.norm_eq_abs, sq_abs]
   ring
 

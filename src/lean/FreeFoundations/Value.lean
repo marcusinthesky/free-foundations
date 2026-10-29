@@ -1,9 +1,13 @@
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Data.Real.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Algebra.BigOperators.Field
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Tactic.Ring
+
+@[expose] public section
 
 /-!
 # Where a network's value comes from

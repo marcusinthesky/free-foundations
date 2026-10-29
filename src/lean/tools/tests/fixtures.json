@@ -1,0 +1,24 @@
+{
+  "fixtures": {
+    "Passing": "pass",
+    "ModulePassing": "pass",
+    "ModulePrivate": "reject",
+    "SorryPrivate": "reject",
+    "SorryExamples": "reject",
+    "SuppressedExample": "reject",
+    "GuardedExample": "reject",
+    "LocalAxiom": "reject",
+    "OpaqueWitness": "reject",
+    "NativeExample": "reject",
+    "NativeQuotation": "reject",
+    "PlaceholderQuotation": "reject",
+    "UnsafeDefinition": "reject",
+    "InterpolatedWitness": "reject",
+    "UnfinishedGoal": "reject",
+    "DebugProof": "reject",
+    "ForeignNamespace": "reject",
+    "UntrustedSupport": "support",
+    "ImportedExample": "reject",
+    "ImportedExampleType": "reject"
+  }
+}

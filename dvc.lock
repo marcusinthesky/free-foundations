@@ -643,8 +643,8 @@ stages:
       nfiles: 33
     - path: src/latex/main.tex
       hash: md5
-      md5: df6bbc45ca301ff4e4b4c64031978c1f
-      size: 88849
+      md5: 2cd0b95287c5e72d615290f611e61c4b
+      size: 113792
     - path: src/latex/numbers.tex.j2
       hash: md5
       md5: 6c0e0a973613628336066b51e1728bac
@@ -660,7 +660,7 @@ stages:
     outs:
     - path: src/latex/build/claims-audit.json
       hash: md5
-      md5: 4a6e8978b836ca34044d2f5bc0ae6dc1
+      md5: 01cfe9c34b20baf8257048da79f1e5fc
       size: 122509
     - path: src/latex/build/cohorts.tex
       hash: md5

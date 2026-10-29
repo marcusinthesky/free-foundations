@@ -1,13 +1,19 @@
-import FreeFoundations.Recovery
-import FreeFoundations.Kernel
-import FreeFoundations.Stability
+module
+
+public import FreeFoundations.Recovery
+public import FreeFoundations.Kernel
+public import FreeFoundations.Stability
+public import FreeFoundations.MatrixBounds
+public import FreeFoundations.EndToEnd
+
+@[expose] public section
 
 /-!
 # A conditional exposure-to-covariance bound
 
 The covariance norm is the Euclidean operator (spectral) norm. The kernel result uses
 the maximum absolute row sum; `spectralNorm_le_sqrt_card_mul_rowNorm` supplies the explicit
-`√N` conversion. These norms have named wrappers so that their instances cannot be confused.
+`√N` conversion. These compatibility wrappers reuse `MatrixBounds`; the spatial map reuses `EndToEnd`.
 
 All forecasts in a comparison share bandwidth, spatial coefficient and innovation covariance.
 The result controls distance measurement error within this fixed spatial construction. It
@@ -23,51 +29,24 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- The spectral norm, defined through the operator on Euclidean space. -/
 noncomputable def spectralNorm (A : Matrix n n ℝ) : ℝ :=
-  ‖Matrix.toEuclideanCLM (𝕜 := ℝ) A‖
+  MatrixBounds.spectralNorm A
 
 /-- The maximum absolute row sum, the `ℓ∞` operator norm. -/
 noncomputable def rowNorm (A : Matrix n n ℝ) : ℝ :=
-  ((univ.sup (fun i : n => ∑ j : n, ‖A i j‖₊) : NNReal) : ℝ)
+  MatrixBounds.rowSumNorm A
 
 omit [DecidableEq n] in
-theorem rowNorm_nonneg (A : Matrix n n ℝ) : 0 ≤ rowNorm A := NNReal.coe_nonneg _
+theorem rowNorm_nonneg (A : Matrix n n ℝ) : 0 ≤ rowNorm A := MatrixBounds.rowSumNorm_nonneg A
 
 omit [DecidableEq n] in
 theorem row_sum_le_rowNorm (A : Matrix n n ℝ) (i : n) :
     ∑ j, |A i j| ≤ rowNorm A := by
-  have h := Finset.le_sup (f := fun i => ∑ j, ‖A i j‖₊) (mem_univ i)
-  have hh : ((∑ j, ‖A i j‖₊ : NNReal) : ℝ) ≤ rowNorm A := NNReal.coe_le_coe.mpr h
-  simpa only [NNReal.coe_sum, coe_nnnorm, Real.norm_eq_abs] using hh
+  exact MatrixBounds.row_le_rowSumNorm A i
 
-set_option maxHeartbeats 800000 in
-/-- An explicit conversion, valid without symmetry of the row-normalized network. -/
+/-- Reuse the canonical matrix-norm comparison, valid without network symmetry. -/
 theorem spectralNorm_le_sqrt_card_mul_rowNorm (A : Matrix n n ℝ) :
-    spectralNorm A ≤ Real.sqrt (Fintype.card n) * rowNorm A := by
-  unfold spectralNorm
-  refine (Matrix.toEuclideanCLM (𝕜 := ℝ) A).opNorm_le_bound
-    (mul_nonneg (Real.sqrt_nonneg _) (rowNorm_nonneg A)) ?_
-  intro x
-  have hi : ∀ i, ‖(Matrix.toEuclideanCLM (𝕜 := ℝ) A x).ofLp i‖ ≤ rowNorm A * ‖x‖ := by
-    intro i
-    change ‖∑ j, A i j * x.ofLp j‖ ≤ _
-    calc
-      _ ≤ ∑ j, ‖A i j * x.ofLp j‖ := norm_sum_le _ _
-      _ ≤ ∑ j, |A i j| * ‖x‖ := sum_le_sum fun j _ => by
-        rw [norm_mul, Real.norm_eq_abs]
-        exact mul_le_mul_of_nonneg_left (PiLp.norm_apply_le x j) (abs_nonneg _)
-      _ = (∑ j, |A i j|) * ‖x‖ := (sum_mul _ _ _).symm
-      _ ≤ rowNorm A * ‖x‖ := mul_le_mul_of_nonneg_right (row_sum_le_rowNorm A i) (norm_nonneg _)
-  have hs : ‖Matrix.toEuclideanCLM (𝕜 := ℝ) A x‖ ^ 2 ≤
-      (Fintype.card n : ℝ) * (rowNorm A * ‖x‖) ^ 2 := by
-    rw [EuclideanSpace.norm_sq_eq]
-    calc
-      _ ≤ ∑ _ : n, (rowNorm A * ‖x‖) ^ 2 := sum_le_sum fun i _ =>
-        pow_le_pow_left₀ (norm_nonneg _) (hi i) 2
-      _ = _ := by simp
-  have hcard := Real.sq_sqrt (show (0 : ℝ) ≤ Fintype.card n by positivity)
-  have hr := rowNorm_nonneg A
-  apply (sq_le_sq₀ (norm_nonneg _) (by positivity)).mp
-  nlinarith
+    spectralNorm A ≤ Real.sqrt (Fintype.card n) * rowNorm A :=
+  MatrixBounds.spectralNorm_le_sqrt_card_mul_rowSumNorm A
 
 attribute [local instance] Matrix.linftyOpSeminormedAddCommGroup in
 /-- The existing kernel theorem, with its row norm made explicit. -/
@@ -75,14 +54,14 @@ theorem expKernel_rowNorm_le (hn : 2 ≤ Fintype.card n) (d dh : Matrix n n ℝ)
     (hh : 0 < h) (hδ : ∀ i j, i ≠ j → |dh i j - d i j| ≤ δ) :
     rowNorm (Kernel.expKernel dh h - Kernel.expKernel d h) ≤
       min 2 (Real.exp (2 * δ / h) - 1) := by
-  simpa only [rowNorm, Matrix.linfty_opNorm_def] using
+  simpa only [rowNorm, MatrixBounds.rowSumNorm, Matrix.linfty_opNorm_def] using
     Kernel.expKernel_linfty_le hn d dh hh hδ
 
 variable {A : Type*} [NormedAddCommGroup A] [InnerProductSpace ℝ A]
 
 /-- Distances in one shared, risk-scaled exposure coordinate system. -/
 noncomputable def exposureDistances (a : n → A) : Matrix n n ℝ :=
-  Matrix.of fun i j => ‖a i - a j‖
+  EndToEnd.distances a
 
 /-- The exponential neighbor network constructed from exposures. -/
 noncomputable def exposureNetwork (a : n → A) (h : ℝ) : Matrix n n ℝ :=
@@ -90,7 +69,7 @@ noncomputable def exposureNetwork (a : n → A) (h : ℝ) : Matrix n n ℝ :=
 
 /-- The spatial residual covariance with common innovation covariance `D`. -/
 noncomputable def spatialCovariance (W D : Matrix n n ℝ) (c : ℝ) : Matrix n n ℝ :=
-  (1 - c • W)⁻¹ * D * ((1 - c • W)⁻¹)ᵀ
+  EndToEnd.spatial W c D
 
 omit [InnerProductSpace ℝ A] in
 /-- Uniform exposure error `r` produces the stated spectral network bound. -/
@@ -115,7 +94,7 @@ open scoped Matrix.Norms.L2Operator
 
 /-- The norm wrapper agrees with the explicitly selected spectral matrix instance. -/
 theorem spectralNorm_eq (B : Matrix n n ℝ) : spectralNorm B = ‖B‖ :=
-  Matrix.l2_opNorm_toEuclideanCLM B
+  MatrixBounds.spectralNorm_eq B
 
 omit [InnerProductSpace ℝ A] in
 /-- **Conditional pipeline.** No estimated scales or coefficients change in the comparison.
@@ -140,7 +119,7 @@ theorem exposure_covariance_error (hn : 2 ≤ Fintype.card n) (a ah : n → A)
   rw [spectralNorm_eq] at hnw
   calc
     _ ≤ 2 * ‖diagonal d‖ * |c| * M ^ 3 * ‖exposureNetwork ah h - exposureNetwork a h‖ := by
-      simpa only [spectralNorm_eq, spatialCovariance] using hs
+      simpa only [spectralNorm_eq, spatialCovariance, EndToEnd.spatial] using hs
     _ ≤ _ := by
       rw [spectralNorm_eq]
       calc
@@ -223,6 +202,6 @@ omit [InnerProductSpace ℝ A] in
 theorem zero_spatial_coefficient (a ah : n → A) (D : Matrix n n ℝ) (h : ℝ) :
     spectralNorm (spatialCovariance (exposureNetwork ah h) D 0 -
       spatialCovariance (exposureNetwork a h) D 0) = 0 := by
-  simp [spatialCovariance, spectralNorm]
+  simp [spatialCovariance, EndToEnd.spatial, spectralNorm, MatrixBounds.spectralNorm]
 
 end FreeFoundations.Pipeline

@@ -1,6 +1,10 @@
-import FreeFoundations.Recovery
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+module
+
+public import FreeFoundations.Recovery
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+
+@[expose] public section
 
 /-!
 # Historical proxies and latent exposures
@@ -70,15 +74,18 @@ theorem rms_error_le (prediction proxy latent : Ω → A)
     eLpNorm (fun ω => prediction ω - latent ω) 2 μ ≤
       eLpNorm (fun ω => prediction ω - proxy ω) 2 μ +
         eLpNorm (fun ω => proxy ω - latent ω) 2 μ := by
-  have h := eLpNorm_add_le (f := fun ω => prediction ω - proxy ω)
-    (g := fun ω => proxy ω - latent ω) (p := 2) (hp.sub hq).aestronglyMeasurable
-    (hq.sub ha).aestronglyMeasurable (by norm_num)
+  have hpq : AEStronglyMeasurable (fun ω => prediction ω - proxy ω) μ :=
+    (hp.sub hq).aestronglyMeasurable
+  have hqa : AEStronglyMeasurable (fun ω => proxy ω - latent ω) μ :=
+    (hq.sub ha).aestronglyMeasurable
   have hsum : (fun ω => prediction ω - proxy ω) + (fun ω => proxy ω - latent ω) =
       (fun ω => prediction ω - latent ω) := by
     funext ω
     simp only [Pi.add_apply, sub_add_sub_cancel]
-  rw [hsum] at h
-  exact h
+  rw [← hsum, eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) (hpq.add hqa),
+    eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) hpq,
+    eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) hqa]
+  simpa using eLpNorm'_add_le hpq hqa (by norm_num : (1 : ℝ) ≤ 2)
 
 /-- Integrated squared error, with finite second moments stated explicitly. -/
 theorem integral_error_sq_le (prediction proxy latent : Ω → A)
@@ -87,11 +94,11 @@ theorem integral_error_sq_le (prediction proxy latent : Ω → A)
       2 * (∫ ω, ‖prediction ω - proxy ω‖ ^ 2 ∂μ) +
         2 * (∫ ω, ‖proxy ω - latent ω‖ ^ 2 ∂μ) := by
   have hi₁ : Integrable (fun ω => ‖prediction ω - latent ω‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm (hp.sub ha).1).mp (hp.sub ha)
+    (memLp_two_iff_integrable_sq_norm (hp.sub ha).aestronglyMeasurable).mp (hp.sub ha)
   have hi₂ : Integrable (fun ω => ‖prediction ω - proxy ω‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm (hp.sub hq).1).mp (hp.sub hq)
+    (memLp_two_iff_integrable_sq_norm (hp.sub hq).aestronglyMeasurable).mp (hp.sub hq)
   have hi₃ : Integrable (fun ω => ‖proxy ω - latent ω‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm (hq.sub ha).1).mp (hq.sub ha)
+    (memLp_two_iff_integrable_sq_norm (hq.sub ha).aestronglyMeasurable).mp (hq.sub ha)
   calc _ ≤ ∫ ω, (2 * ‖prediction ω - proxy ω‖ ^ 2 +
         2 * ‖proxy ω - latent ω‖ ^ 2) ∂μ :=
       integral_mono hi₁ ((hi₂.const_mul 2).add (hi₃.const_mul 2))
@@ -116,11 +123,11 @@ theorem integral_risk_eq (prediction latent noise : Ω → A)
       (∫ ω, ‖prediction ω - latent ω‖ ^ 2 ∂μ) + ∫ ω, ‖noise ω‖ ^ 2 ∂μ := by
   have hr := hp.sub ha
   have hi₁ : Integrable (fun ω => ‖prediction ω - latent ω‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm hr.1).mp hr
+    (memLp_two_iff_integrable_sq_norm hr.aestronglyMeasurable).mp hr
   have hi₂ : Integrable (fun ω => ‖noise ω‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm hn.1).mp hn
+    (memLp_two_iff_integrable_sq_norm hn.aestronglyMeasurable).mp hn
   have hic : Integrable (fun ω => inner ℝ (prediction ω - latent ω) (noise ω)) μ :=
-    (hi₁.add hi₂).mono' (hr.1.inner hn.1) (Filter.Eventually.of_forall fun ω => by
+    (hi₁.add hi₂).mono' (hr.aestronglyMeasurable.inner hn.aestronglyMeasurable) (Filter.Eventually.of_forall fun ω => by
       refine (norm_inner_le_norm _ _).trans ?_
       change ‖prediction ω - latent ω‖ * ‖noise ω‖ ≤
         ‖prediction ω - latent ω‖ ^ 2 + ‖noise ω‖ ^ 2
