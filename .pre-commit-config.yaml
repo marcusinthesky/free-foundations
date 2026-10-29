@@ -141,8 +141,8 @@ repos:
         pass_filenames: false
         files: ^src/typescript/.*\.(ts|tsx|json)$
       - id: lean
-        name: Lean build
-        entry: just lean-build
+        name: Lean build and axiom audit
+        entry: just lean-audit
         language: system
         pass_filenames: false
         files: ^src/lean/.*(\.lean|\.toml|lean-toolchain)$

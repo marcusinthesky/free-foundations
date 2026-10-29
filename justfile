@@ -28,6 +28,10 @@ insitu-sync:
 lean-build:
     cd src/lean && lake build
 
+# Reject proof gaps and nonstandard axioms, including unused private declarations.
+lean-audit: lean-build
+    cd src/lean && lake env lean Audit.lean
+
 # Saved-artifact rendering only; no empirical estimation.
 latex-assets:
     mkdir -p src/latex/build

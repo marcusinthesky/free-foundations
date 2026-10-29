@@ -201,6 +201,94 @@ theorem excess_risk_condExp {α : Type*} {m m0 : MeasurableSpace α} {μ : Measu
   haveI : Fact (m ≤ m0) := ⟨hm⟩
   exact excess_risk (MeasureTheory.lpMeas ℝ ℝ m 2 μ) Y f f.2
 
+/-- The conditional-expectation projection identity for a Hilbert-valued exposure target.
+Membership in `Lp _ 2` makes square integrability explicit; no sampling independence or
+finite-measure assumption is needed. -/
+theorem excess_risk_condExp_hilbert {α E : Type*} {m m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hm : m ≤ m0) (Y : MeasureTheory.Lp E 2 μ)
+    (f : MeasureTheory.lpMeas E ℝ m 2 μ) :
+    ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 -
+        ‖(MeasureTheory.condExpL2 E ℝ hm Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ hm Y‖ ^ 2 := by
+  haveI : Fact (m ≤ m0) := ⟨hm⟩
+  exact excess_risk (MeasureTheory.lpMeas E ℝ m 2 μ) Y f f.2
+
+/-- **Nested information.** Projecting a target onto a smaller predictor space costs
+exactly the squared distance between the two Bayes predictors. -/
+theorem nested_projection_risk {E : Type*} [NormedAddCommGroup E]
+    [InnerProductSpace ℝ E] (K L : Submodule ℝ E) [K.HasOrthogonalProjection]
+    [L.HasOrthogonalProjection] (hKL : K ≤ L) (Y : E) :
+    ‖K.starProjection Y - Y‖ ^ 2 = ‖L.starProjection Y - Y‖ ^ 2 +
+      ‖K.starProjection Y - L.starProjection Y‖ ^ 2 := by
+  have h := excess_risk L Y (K.starProjection Y) (hKL (K.starProjection_apply_mem Y))
+  linarith
+
+/-- **Fitted risk with nested information.** The three terms are uncertainty after full
+history, information lost by the representation, and the fitted predictor's error relative
+to the representation's Bayes predictor. -/
+theorem nested_projection_fitted_risk {E : Type*} [NormedAddCommGroup E]
+    [InnerProductSpace ℝ E] (K L : Submodule ℝ E) [K.HasOrthogonalProjection]
+    [L.HasOrthogonalProjection] (hKL : K ≤ L) (Y f : E) (hf : f ∈ K) :
+    ‖f - Y‖ ^ 2 = ‖L.starProjection Y - Y‖ ^ 2 +
+      ‖K.starProjection Y - L.starProjection Y‖ ^ 2 + ‖f - K.starProjection Y‖ ^ 2 := by
+  have hfit := excess_risk K Y f hf
+  have hinfo := nested_projection_risk K L hKL Y
+  linarith
+
+/-- **History versus encoder information.** If `mZ ≤ mH`, history has no larger optimal
+squared prediction risk than its representation. The equality records the exact loss, for
+Hilbert-valued square-integrable targets as well as scalar ones. -/
+theorem nested_information_risk {α E : Type*} {mZ mH m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hZH : mZ ≤ mH) (hH : mH ≤ m0) (Y : MeasureTheory.Lp E 2 μ) :
+    ‖(MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(MeasureTheory.condExpL2 E ℝ hH Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 +
+      ‖(MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y : MeasureTheory.Lp E 2 μ) -
+        MeasureTheory.condExpL2 E ℝ hH Y‖ ^ 2 := by
+  haveI : Fact (mZ ≤ m0) := ⟨hZH.trans hH⟩
+  haveI : Fact (mH ≤ m0) := ⟨hH⟩
+  apply nested_projection_risk (MeasureTheory.lpMeas E ℝ mZ 2 μ)
+    (MeasureTheory.lpMeas E ℝ mH 2 μ) _ Y
+  intro f hf
+  exact MeasureTheory.mem_lpMeas_iff_aestronglyMeasurable.mpr
+    ((MeasureTheory.mem_lpMeas_iff_aestronglyMeasurable.mp hf).mono hZH)
+
+/-- A fitted encoder-measurable predictor has uncertainty, encoder-information-loss and
+readout-error terms. It need not be the unrestricted population minimizer. -/
+theorem nested_information_fitted_risk {α E : Type*} {mZ mH m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hZH : mZ ≤ mH) (hH : mH ≤ m0) (Y : MeasureTheory.Lp E 2 μ)
+    (f : MeasureTheory.lpMeas E ℝ mZ 2 μ) :
+    ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(MeasureTheory.condExpL2 E ℝ hH Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 +
+      ‖(MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y : MeasureTheory.Lp E 2 μ) -
+        MeasureTheory.condExpL2 E ℝ hH Y‖ ^ 2 +
+      ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y‖ ^ 2 := by
+  have hfit := excess_risk_condExp_hilbert (hZH.trans hH) Y f
+  have hinfo := nested_information_risk hZH hH Y
+  linarith
+
+/-- Processing history into a representation cannot lower its unrestricted Bayes risk.
+This does not compare restricted fitted regressions. -/
+theorem history_information_risk_le {α E : Type*} {mZ mH m0 : MeasurableSpace α}
+    {μ : MeasureTheory.Measure α} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (hZH : mZ ≤ mH) (hH : mH ≤ m0) (Y : MeasureTheory.Lp E 2 μ) :
+    ‖(MeasureTheory.condExpL2 E ℝ hH Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 ≤
+      ‖(MeasureTheory.condExpL2 E ℝ (hZH.trans hH) Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 := by
+  rw [nested_information_risk hZH hH Y]
+  exact le_add_of_nonneg_right (sq_nonneg _)
+
+/-- If the representation retains exactly the history information, the three-term fitted
+risk identity reduces to the usual two-term projection identity. -/
+example {α E : Type*} {m m0 : MeasurableSpace α} {μ : MeasureTheory.Measure α}
+    [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
+    (hm : m ≤ m0) (Y : MeasureTheory.Lp E 2 μ) (f : MeasureTheory.lpMeas E ℝ m 2 μ) :
+    ‖(f : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 =
+      ‖(MeasureTheory.condExpL2 E ℝ hm Y : MeasureTheory.Lp E 2 μ) - Y‖ ^ 2 +
+      ‖(f : MeasureTheory.Lp E 2 μ) - MeasureTheory.condExpL2 E ℝ hm Y‖ ^ 2 := by
+  simpa using nested_information_fitted_risk (le_refl m) hm Y f
+
 /-! ## Economic meaning belongs to representation and readout together -/
 
 /-- If a linear readout `G` gives exposures from states `Z`, the reparametrised states `eZ`

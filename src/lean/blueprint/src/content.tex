@@ -1,5 +1,5 @@
 % Formal results of the Lean library, one statement per declaration.
-% Shared by the web blueprint, the printed blueprint and the manuscript appendix.
+% Companion to the manuscript appendix; includes additional library results.
 % Every \lean{...} name is checked against the compiled library by
 % `just blueprint-check`; \leanok marks a statement or proof with no `sorry`.
 
@@ -917,3 +917,306 @@ $M$ be the second moment of the residuals.
   Lemma~\ref{thm:stability-quadratic}; $\sum_iw_i^2\le(\sum_iw_i)^2=1$ for
   $w\ge0$.
 \end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Risk-relevant state classes}\label{sec:bp-risk-state}
+
+The next results define the economic quantity without requiring recovery of the
+entire structural state. Let $b:S\to V$ be a structural exposure map and
+$L:V\to E$ a declared real linear map into a normed space. In the financial
+interpretation $L$ is the square root of the shock covariance. Its existence,
+estimation and identification are not established by these results.
+
+\begin{definition}[Risk-scaled exposure and equivalence]\label{def:risk-state}
+  \lean{FreeFoundations.RiskState.exposure, FreeFoundations.RiskState.distance,
+  FreeFoundations.RiskState.riskSetoid}\leanok
+  Put $a(s)=L(b(s))$, $d(s,t)=\norm{a(s)-a(t)}$, and
+  $s\sim t$ iff $a(s)=a(t)$. This is the kernel equivalence relation of $a$.
+\end{definition}
+
+\begin{lemma}[Zero distance and the scaling kernel]\label{thm:risk-kernel}
+  \lean{FreeFoundations.RiskState.equivalent_iff,
+    FreeFoundations.RiskState.distance_eq_zero_iff,
+  FreeFoundations.RiskState.distance_eq_zero_iff_mem_ker}\leanok
+  \uses{def:risk-state}
+  $d(s,t)=0$ iff $s\sim t$, equivalently $b(s)-b(t)\in\ker L$.
+\end{lemma}
+\begin{proof}\leanok
+  A norm vanishes exactly at zero; linearity gives
+  $L(b(s)-b(t))=a(s)-a(t)$.
+\end{proof}
+
+\begin{lemma}[Pseudometric and representatives]\label{thm:risk-representatives}
+  \lean{FreeFoundations.RiskState.distance_self,
+    FreeFoundations.RiskState.distance_nonneg,
+    FreeFoundations.RiskState.distance_comm,
+    FreeFoundations.RiskState.distance_triangle,
+  FreeFoundations.RiskState.distance_representatives}\leanok
+  \uses{def:risk-state}
+  The distance is zero on the diagonal, symmetric, and satisfies the triangle
+  inequality. Replacing either argument by an equivalent state leaves
+  it unchanged.
+\end{lemma}
+\begin{proof}\leanok
+  Apply the normed-space metric properties to $a(s)$ and substitute
+  equal exposures.
+\end{proof}
+
+\begin{lemma}[What the quotient identifies]\label{thm:risk-quotient}
+  \lean{FreeFoundations.RiskState.separates_states_iff,
+    FreeFoundations.RiskState.quotientExposure,
+  FreeFoundations.RiskState.quotientExposure_injective}\leanok
+  \uses{thm:risk-kernel}
+  The exposure map descends injectively to $S/{\sim}$. Distance separates
+  entire states iff $a$ is injective. This algebraic statement does not
+  establish identification from an observable distribution.
+\end{lemma}
+\begin{proof}\leanok
+  Use the kernel quotient's canonical injection and the zero-distance criterion.
+\end{proof}
+
+\begin{lemma}[Singular scaling and total risk]\label{thm:risk-boundaries}
+  \lean{FreeFoundations.RiskState.singular_scaling_example,
+    FreeFoundations.RiskState.moment_eq_iff,
+  FreeFoundations.RiskState.same_exposures_different_total_covariance}\leanok
+  \uses{thm:risk-kernel}
+  Projection to the first coordinate makes $(0,0)$ and $(0,1)$ zero distance
+  apart. For a fixed common-exposure configuration,
+  $\operatorname{moment}(a,\eta)
+  =\operatorname{moment}(a,\eta')$ iff $\eta=\eta'$. In particular, the same
+  zero common exposure with idiosyncratic variance $1$ or $4$ has different
+  total covariance. Common-risk equivalence is not full-return-law sufficiency.
+\end{lemma}
+\begin{proof}\leanok
+  Compute the projection; read the idiosyncratic variance from each
+  diagonal entry.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Proxy uncertainty and nested information}\label{sec:bp-proxy}
+
+All prediction, proxy and latent exposure vectors below use common risk-scaled
+coordinates. No unbiasedness or independence of historical proxy
+errors is implicit.
+
+\begin{lemma}[Proxy-to-latent error]\label{thm:proxy-error}
+  \lean{FreeFoundations.Proxy.error_le, FreeFoundations.Proxy.error_sq_le,
+    FreeFoundations.Proxy.sum_error_le,
+  FreeFoundations.Proxy.sum_error_sq_le}\leanok
+  For prediction $p$, proxy $\tilde a$ and latent exposure $a$,
+  \[
+    \norm{p-a}\le\norm{p-\tilde a}+\norm{\tilde a-a},\qquad
+    \norm{p-a}^2\le2\norm{p-\tilde a}^2+2\norm{\tilde a-a}^2.
+  \]
+  Both inequalities may be summed over any finite panel, without independence.
+\end{lemma}
+\begin{proof}\leanok
+  Triangle inequality and $(x+y)^2\le2x^2+2y^2$.
+\end{proof}
+
+\begin{lemma}[Integrated proxy errors]\label{thm:proxy-integrated}
+  \lean{FreeFoundations.Proxy.rms_error_le,
+  FreeFoundations.Proxy.integral_error_sq_le}\leanok
+  \uses{thm:proxy-error}
+  Under any measure, assume $p,\tilde a,a$ are square integrable. Then
+  $\norm{p-a}_{L^2}\le\norm{p-\tilde a}_{L^2}+\norm{\tilde a-a}_{L^2}$,
+  and the integrated squared inequality has coefficient two on each term.
+\end{lemma}
+\begin{proof}\leanok
+  Minkowski for $L^2$ and integration of the pointwise squared bound.
+\end{proof}
+
+\begin{theorem}[Proxy risk under orthogonal noise]\label{thm:proxy-orthogonal}
+  \lean{FreeFoundations.Proxy.integral_risk_eq,
+    FreeFoundations.Proxy.integral_risk_difference,
+  FreeFoundations.Proxy.integral_risk_le_iff}\leanok
+  Let $\tilde a=a+\eta$, with square-integrable prediction $p$, latent exposure
+  $a$ and noise $\eta$. If $\int\ip{p-a}{\eta}\,d\mu=0$, then
+  \[
+    \int\norm{p-\tilde a}^2\,d\mu
+    =\int\norm{p-a}^2\,d\mu+\int\norm\eta^2\,d\mu.
+  \]
+  For two predictors satisfying this premise with the same $a,\eta$, their
+  proxy-risk difference equals their latent-risk difference, and their rankings
+  agree. The premise is not established for the empirical historical loadings.
+\end{theorem}
+\begin{proof}\leanok
+  Expand the squared norm. Square integrability makes the cross term integrable;
+  its integral vanishes by assumption. The common noise energy
+  cancels in differences.
+\end{proof}
+
+\begin{theorem}[Hilbert-valued and nested projection
+  risk]\label{thm:recovery-nested}
+  \lean{FreeFoundations.Recovery.excess_risk_condExp_hilbert,
+    FreeFoundations.Recovery.nested_projection_risk,
+    FreeFoundations.Recovery.nested_projection_fitted_risk,
+    FreeFoundations.Recovery.nested_information_risk,
+    FreeFoundations.Recovery.nested_information_fitted_risk,
+  FreeFoundations.Recovery.history_information_risk_le}\leanok
+  For predictor subspaces $K\subseteq L$ admitting orthogonal projections,
+  \[
+    \norm{P_KY-Y}^2=\norm{P_LY-Y}^2+\norm{P_KY-P_LY}^2.
+  \]
+  For $f\in K$, add $\norm{f-P_KY}^2$ to obtain $\norm{f-Y}^2$.
+  In $L^2(\mu;E)$, for a complete real Hilbert target space and
+  $\sigma(Z)\subseteq\sigma(H)$, the projections are conditional expectations.
+  The fitted risk thus splits into uncertainty after history, information lost
+  by the representation, and fitted readout error. History has no larger Bayes
+  risk; this does not order restricted fitted regressions.
+\end{theorem}
+\begin{proof}\leanok
+  Apply the existing projection Pythagoras identity to $P_KY\in L$ and then
+  to $f\in K$. Measurability under the smaller information set
+  implies membership
+  in the larger predictor space.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Observational equivalence and state risk}\label{sec:bp-identifiability}
+
+\begin{lemma}[Exact coordinate obstruction]\label{thm:identifiability-exact}
+  \lean{FreeFoundations.Identifiability.reparameterized_observation,
+    FreeFoundations.Identifiability.not_both_exact,
+  FreeFoundations.Identifiability.sign_ambiguity_example}\leanok
+  For a bijection $e:S\to S$, $(\operatorname{obs}\circ e^{-1})(e(s))
+  =\operatorname{obs}(s)$. If $e(s)\ne s$, a common decoder cannot return the
+  correct numerical state in both descriptions. For example it cannot return
+  both $1$ and $-1$ from the same record $1$.
+\end{lemma}
+\begin{proof}\leanok
+  Cancel $e^{-1}e$; equal observations give equal decoder outputs.
+\end{proof}
+
+\begin{definition}[State-estimation risk]\label{def:identifiability-risk}
+  \lean{FreeFoundations.Identifiability.risk}\leanok
+  On a common coupling measure, $R_a(v)=\int\norm{v-a}^2\,d\mu$.
+  Every risk bound below explicitly assumes square integrability of the targets
+  and the learner output.
+\end{definition}
+
+\begin{theorem}[Two-world risk obstruction]\label{thm:identifiability-risk}
+  \lean{FreeFoundations.Identifiability.two_state_sq_error,
+    FreeFoundations.Identifiability.risk_sum_lower_bound,
+  FreeFoundations.Identifiability.two_world_risk_lower_bound}\leanok
+  \uses{def:identifiability-risk}
+  For square-integrable Hilbert-valued $a,b,v$,
+  \[
+    R_a(v)+R_b(v)\ge\tfrac12\int\norm{a-b}^2\,d\mu,\qquad
+    \max\{R_a(v),R_b(v)\}\ge\tfrac14\int\norm{a-b}^2\,d\mu.
+  \]
+  The maximum is outside the integrals.
+\end{theorem}
+\begin{proof}\leanok
+  Parallelogram gives $\norm{a-b}^2\le2(\norm{v-a}^2+\norm{v-b}^2)$
+  pointwise. Integrate and bound the sum of risks by twice their maximum.
+\end{proof}
+
+\begin{corollary}[Identical records and
+  reparameterization]\label{thm:identifiability-records}
+  \lean{FreeFoundations.Identifiability.same_observations_risk_lower_bound,
+    FreeFoundations.Identifiability.reparameterized_risk_lower_bound,
+    FreeFoundations.Identifiability.positive_risk_in_one_world,
+  FreeFoundations.Identifiability.constant_worlds_example}\leanok
+  \uses{thm:identifiability-exact, thm:identifiability-risk}
+  Almost-surely identical records give the same output from a common learner;
+  records may include training data, the query and a random seed. The preceding
+  bound applies to these two risks and to $b=e\circ a$ with the compensated
+  observation map, provided transformed targets remain square integrable.
+  A positive squared target separation forces positive risk in one world.
+  On a probability space, targets $1,-1$ and prediction $0$ attain the quarter
+  constant: both risks equal $1$.
+\end{corollary}
+\begin{proof}\leanok
+  Equal records give almost-sure equality of composed predictions. Substitute
+  into the two-world bound; compute the constant example.
+\end{proof}
+
+Both descriptions must remain admissible for this to be an identification
+obstruction in an economic model. Invariant economic functionals need not differ
+between descriptions. No claim that all exposures or covariances are
+unidentified
+follows from numerical state-coordinate ambiguity alone.
+
+% ---------------------------------------------------------------------------
+\section{The conditional exposure-to-covariance chain}\label{sec:bp-pipeline}
+
+\begin{definition}[Explicit matrix norms and financial
+  construction]\label{def:pipeline}
+  \lean{FreeFoundations.Pipeline.spectralNorm, FreeFoundations.Pipeline.rowNorm,
+    FreeFoundations.Pipeline.exposureDistances,
+    FreeFoundations.Pipeline.exposureNetwork,
+    FreeFoundations.Pipeline.spatialCovariance,
+  FreeFoundations.Pipeline.panelMeanSqError}\leanok
+  For a real square matrix $B$, write $\norm B_2$ for its Euclidean operator
+  norm and $\norm B_\infty=\max_i\sum_j\abs{B_{ij}}$.
+  Exposure distances $d_{ij}=\norm{a_i-a_j}$ generate $W(a,h)$ by the
+  zero-diagonal exponential kernel. Put $P=(I-cW)^{-1}$ and
+  $\Sigma(W,D,c)=PDP^\top$. Realized panel MSE is
+  $N^{-1}\sum_i\norm{\hat a_i-a_i}^2$.
+\end{definition}
+
+\begin{lemma}[Norm conversion and network error]\label{thm:pipeline-norm}
+  \lean{FreeFoundations.Pipeline.rowNorm_nonneg,
+    FreeFoundations.Pipeline.row_sum_le_rowNorm,
+    FreeFoundations.Pipeline.spectralNorm_le_sqrt_card_mul_rowNorm,
+    FreeFoundations.Pipeline.expKernel_rowNorm_le,
+    FreeFoundations.Pipeline.spectralNorm_eq,
+  FreeFoundations.Pipeline.exposureNetwork_error}\leanok
+  \uses{def:pipeline}
+  $\norm B_2\le\sqrt N\norm B_\infty$, without requiring symmetry.
+  For $N\ge2$, $h>0$ and $\norm{\hat a_i-a_i}\le r$ for every firm,
+  \[
+    \norm{W(\hat a,h)-W(a,h)}_2
+    \le\sqrt N\min\{2,\exp(4r/h)-1\}.
+  \]
+\end{lemma}
+\begin{proof}\leanok
+  Bound each coordinate of $Bx$ by its absolute row sum times $\norm x_2$ and
+  sum their squares. Exposure error gives distance error at most $2r$; apply
+  the existing exponential-kernel bound and the norm conversion.
+\end{proof}
+
+\begin{theorem}[Composed covariance bound]\label{thm:pipeline-covariance}
+  \lean{FreeFoundations.Pipeline.exposure_covariance_error,
+  FreeFoundations.Pipeline.proxy_covariance_error}\leanok
+  \uses{thm:pipeline-norm, thm:stability-covariance, thm:proxy-error}
+  Keep $h,c,D$ common, with positive diagonal $D$. Assume $N\ge2$, $h>0$,
+  both $I-cW$ invertible, and both inverse spectral norms at most $M$.
+  If all exposure errors are at most $r$, then
+  \[
+    \norm{\hat\Sigma-\Sigma^\star}_2
+    \le2\norm D_2\abs c M^3\sqrt N\min\{2,\exp(4r/h)-1\}.
+  \]
+  If prediction-to-proxy errors are uniformly bounded by $\varepsilon$ and
+  proxy-to-latent errors by $\eta$, substitute $r=\varepsilon+\eta$.
+\end{theorem}
+\begin{proof}\leanok
+  Substitute the spectral network bound into covariance stability. Use the
+  pointwise triangle inequality for the proxy version.
+\end{proof}
+
+\begin{corollary}[Finite-panel conversion and boundary
+  checks]\label{thm:pipeline-panel}
+  \lean{FreeFoundations.Pipeline.uniform_error_le_sqrt_sum,
+    FreeFoundations.Pipeline.covariance_error_of_sum_sq,
+    FreeFoundations.Pipeline.sqrt_sum_eq_sqrt_card_mul_mean,
+    FreeFoundations.Pipeline.zero_exposure_error,
+  FreeFoundations.Pipeline.zero_spatial_coefficient}\leanok
+  \uses{thm:pipeline-covariance}
+  The realized panel sum $S=\sum_i\norm{\hat a_i-a_i}^2$ bounds every squared
+  error, so the covariance theorem applies with $r=\sqrt
+  S=\sqrt{N\,\mathrm{MSE}}$.
+  Zero exposure error gives zero covariance error. At $c=0$, every construction
+  equals its common $D$, irrespective of exposure error.
+\end{corollary}
+\begin{proof}\leanok
+  A nonnegative summand is at most the sum; take square roots. Substitute into
+  the covariance bound, or evaluate $(I-0W)^{-1}=I$.
+\end{proof}
+
+This finite-panel bound does not turn a population mean risk into a simultaneous
+bound without additional assumptions. It holds financial parameters fixed and
+does not bound their re-estimation, spatial approximation error, the
+full Gaussian
+score, or pretraining-to-financial sampling rates.

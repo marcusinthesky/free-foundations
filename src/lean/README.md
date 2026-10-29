@@ -124,17 +124,60 @@ probabilistic rate requires a sampling model and a bound on the discrepancy.
 | `Score.pretraining_excess` | PFN pretraining loss minus Bayes loss under the task prior is the expected KL to the posterior predictive. |
 | `Score.erm_bound` | An `ε`-minimiser of a risk estimate within `g` of the population risk is within `2g + ε` of every candidate. |
 
+## 7. State classes, proxy error and the composed bound
+
+The following modules make the economic target and the limits of its recovery explicit.
+They do not establish the assumptions for the empirical PCA/OLS exposure labels or any
+pretrained checkpoint.
+
+| Module | Results and assumptions |
+| --- | --- |
+| `RiskState` | For a declared linear risk-scaling map `L` and structural exposure map `b`, distance is `‖L(b(s)) − L(b(t))‖`. Zero distance identifies a kernel class, and identifies the entire state only when `L ∘ b` is injective. Risk classes embed injectively into the exposure space. Equal common exposures still leave idiosyncratic variances unspecified. |
+| `Proxy` | Triangle, squared-error, finite-panel and L² bounds separate prediction of a historical proxy from proxy-to-latent error. Under an explicit zero integrated inner product between prediction residual and proxy noise, proxy risk equals latent risk plus noise energy. Predictor rankings agree only when this premise holds for both predictors with common noise. |
+| `Recovery` | Hilbert-valued conditional-expectation identities split fitted risk into uncertainty after history, information lost by the representation, and readout error. Nested measurable information sets give an exact Bayes-risk ordering, not an ordering of fitted ridge regressions. |
+| `Identifiability` | Under a common observation coupling, one of two expected state-estimation risks is at least one quarter of the expected squared separation between targets. Square integrability is explicit. Reparameterization is an impossibility application only when both worlds remain admissible; invariant economic targets can remain recoverable. |
+| `Pipeline` | Uniform exposure error propagates to the spatial covariance spectral norm through the exponential network. Named row-sum and spectral norms make the `√N` norm conversion explicit. Bandwidth, spatial coefficient and positive diagonal innovation covariance are common; both inverse spectral norms must be bounded. |
+
+`Pipeline.exposure_covariance_error` proves, for `N ≥ 2`, `h > 0`, and uniform
+exposure error at most `r`,
+
+```text
+‖Σ̂ − Σ*‖₂ ≤ 2‖D‖₂ |λ| M³ √N min(2, exp(4r/h) − 1).
+```
+
+`proxy_covariance_error` substitutes the sum of uniform prediction-to-proxy and
+proxy-to-latent errors. `covariance_error_of_sum_sq` uses the realized panel's
+summed squared exposure errors. Its conversion from a panel mean squared error
+is `r = √(N × MSE)`; a population mean risk is not a simultaneous panel bound.
+The theorem neither controls fitted-parameter changes nor establishes a score improvement.
+
+Boundary examples check singular scaling, distinct total variances under equal common
+exposures, perfect proxy prediction with latent error, the sharp quarter-risk constant,
+and zero exposure error or zero spatial coefficient.
+
+## Axiom audit
+
+Run `just lean-audit` from the repository root, or `lake env lean Audit.lean` after
+building in `src/lean`. The audit selects declarations by their originating module,
+including unused private helpers and declarations outside the `FreeFoundations` namespace.
+It rejects project axioms and transitive dependencies other than `propext`,
+`Classical.choice`, and `Quot.sound`; in particular, `sorryAx` fails. The audit does not
+replace reviewing theorem statements or verifying their economic assumptions.
+
 ## Blueprint
 
 [`blueprint/src/content.tex`](blueprint/src/content.tex) restates every declaration in
 ordinary notation, in the [leanblueprint](https://github.com/PatrickMassot/leanblueprint)
 format: each statement carries `\lean{...}` with the declaration it is checked against,
 `\leanok` once the proof has no `sorry`, and `\uses{...}` for the results it builds on.
-The same file is the [manuscript](../latex/main.tex)'s appendix, and the manuscript's own
-propositions carry `\lean{...}` tags, so its equations are bound to the code.
+The [manuscript](../latex/main.tex) has its own appendix with selected results and
+`\lean{...}` tags. The blueprint documents the larger library, including results beyond
+the manuscript's current claims. Declaration checks establish that referenced names exist;
+matching the prose, assumptions and formal statements remains a review task.
 
 | Command | Output |
 | --- | --- |
+| `just lean-audit` | Builds the library and checks transitive axioms of all project declarations |
 | `just blueprint-web` | HTML blueprint with the dependency graph in `blueprint/web/` (open `dep_graph_document.html`) |
 | `just blueprint-pdf` | Printable blueprint in `blueprint/print/print.pdf` |
 | `just blueprint-check` | Fails if any `\lean{...}` name in the blueprint or the manuscript is not a compiled declaration |
