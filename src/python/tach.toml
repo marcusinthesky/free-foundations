@@ -51,5 +51,9 @@ path = "free_foundations.panel"
 depends_on = ["free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.filings"]
 
 [[modules]]
+path = "free_foundations.study"
+depends_on = ["free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.panel"]
+
+[[modules]]
 path = "free_foundations.cli"
-depends_on = ["free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel"]
+depends_on = ["free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel", "free_foundations.study"]

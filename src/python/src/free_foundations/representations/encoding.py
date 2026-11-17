@@ -46,6 +46,9 @@ class Prepared:
     tickers: tuple[str, ...]
     year: int
     digest: str
+    available_at: datetime | None = None
+    preprocessing: str = "median-indicators-zscore-clip8-v1"
+    query_period: str | None = None
 
 
 def prepare(
@@ -104,18 +107,19 @@ def provenance_context(data: Prepared) -> Context:
     """Include label availability and actual support-observation identities."""
     return Context(
         identifier=data.digest,
-        available_at=datetime(data.year - 1, 12, 31, tzinfo=UTC),
+        available_at=data.available_at or datetime(data.year - 1, 12, 31, tzinfo=UTC),
         row_ids=data.support_ids,
     )
 
 
 def query_batch(data: Prepared) -> PanelBatch:
-    """Create a labeled query batch at the preceding year-end information cutoff."""
+    """Bind query identities to their quarterly or legacy annual information vintage."""
+    period = data.query_period or str(data.year - 1)
     return PanelBatch(
         data.query,
-        tuple(f"{ticker}:{data.year - 1}" for ticker in data.tickers),
+        tuple(f"{ticker}:{period}" for ticker in data.tickers),
         data.features,
-        datetime(data.year - 1, 12, 31, tzinfo=UTC),
+        data.available_at or datetime(data.year - 1, 12, 31, tzinfo=UTC),
     )
 
 
@@ -145,7 +149,7 @@ def wrap_readout(
         feature_names=data.features,
         checkpoint=checkpoint,
         readout=readout,
-        preprocessing=f"support median+indicators+zscore+clip8:{data.digest}",
+        preprocessing=f"{data.preprocessing}:{data.digest}",
         context=provenance_context(data),
         pooling=ConcatenatePooling(),
     )
@@ -194,12 +198,32 @@ def tabpfn_states(
     from tabpfn import TabPFNRegressor  # noqa: PLC0415
     from tabpfn.constants import ModelVersion  # noqa: PLC0415
 
+    options: dict[str, Any] = {}
+    if data.preprocessing.startswith("native-na"):
+        from tabpfn.preprocessing.configs import PreprocessorConfig  # noqa: PLC0415
+
+        # The wide-XBRL adapter partitions columns explicitly. Disable hidden column
+        # expansion/subsampling so one member consumes the entire declared block.
+        options["inference_config"] = {
+            "PREPROCESS_TRANSFORMS": [
+                PreprocessorConfig(
+                    "none", append_original=False, max_features_per_estimator=len(data.features)
+                )
+            ],
+            "FINGERPRINT_FEATURE": False,
+            "POLYNOMIAL_FEATURES": "no",
+            "FEATURE_SHIFT_METHOD": None,
+            "SUBSAMPLE_SAMPLES": None,
+            "OUTLIER_REMOVAL_STD": None,
+            "REGRESSION_Y_PREPROCESS_TRANSFORMS": (None,),
+        }
     model = TabPFNRegressor.create_default_for_version(
         ModelVersion.V3_5,
         model_path=path,
         n_estimators=1,
         device=inference_device(),
         random_state=42,
+        **options,
     )
     model.fit(data.support, data.targets)
     if random:
@@ -209,7 +233,7 @@ def tabpfn_states(
         model,
         feature_names=data.features,
         checkpoint=checkpoint,
-        preprocessing=f"support-only:{data.digest}",
+        preprocessing=f"{data.preprocessing}:{data.digest}",
         context=provenance_context(data),
     )
     result = encoder.encode(query_batch(data))

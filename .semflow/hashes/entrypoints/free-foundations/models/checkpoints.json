@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:models_checkpoints",
-  "digest": "sha256:26dc07090322129cd725b93c521b23c93592fe6f083c96ddac48e79108cb142f",
+  "digest": "sha256:a3076d15deb14675568dfb59cfbe9b1549cc7ce7de4d751d3d8f6ebbe26988d9",
   "entrypoint": "free-foundations models checkpoints",
   "fallbacks": [
   ],
@@ -13,7 +13,8 @@
     {"digest":"sha256:290d590c89a07b4e9241251b8bd5a05b66bb8fe6644432f9ccc33436476070cd","kind":"function","path":"src/python/src/free_foundations/cli.py","symbol":"free_foundations.cli:models_checkpoints"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/data.py","symbol":"free_foundations.data:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/src/free_foundations/data.py","symbol":"free_foundations.data:<binding:json=json>"},
-    {"digest":"sha256:c8522a7d41845000a6302c58ff4107bedde63a647eb07c4c774b6ac90e43ea08","kind":"function","path":"src/python/src/free_foundations/data.py","symbol":"free_foundations.data:write_json"},
+    {"digest":"sha256:db14cae1a81ee06a1930fa9f46771b454957916d2bbbc048661adf0613fd70de","kind":"binding","path":"src/python/src/free_foundations/data.py","symbol":"free_foundations.data:<binding:uuid=uuid>"},
+    {"digest":"sha256:9b30414938f2ecef2b4868b13a6e3510db115d17e59fa7ee2695c62f96780765","kind":"function","path":"src/python/src/free_foundations/data.py","symbol":"free_foundations.data:write_json"},
     {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/src/free_foundations/representations/checkpoints.py","symbol":"free_foundations.representations.checkpoints:<binding:Path=pathlib:Path>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/src/free_foundations/representations/checkpoints.py","symbol":"free_foundations.representations.checkpoints:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:092cb77ae0770f1627b29bf41b2732722fbcc3a0e1d77a79674801800a2721d1","kind":"binding","path":"src/python/src/free_foundations/representations/checkpoints.py","symbol":"free_foundations.representations.checkpoints:<binding:hashlib=hashlib>"},

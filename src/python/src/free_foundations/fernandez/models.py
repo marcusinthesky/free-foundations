@@ -142,8 +142,20 @@ def ols(y: FloatArray, x: FloatArray) -> CrossSection:
     )
 
 
-def lag_iv(y: FloatArray, x: FloatArray, weights: FloatArray) -> CrossSection:
-    """Equation (2): instruments [WX, X], no unmentioned W-squared instruments, s2=e'e/N."""
+def lag_iv(
+    y: FloatArray,
+    x: FloatArray,
+    weights: FloatArray,
+    *,
+    standard_errors: bool = True,
+    reduced_mean: bool = True,
+) -> CrossSection:
+    """Equation (2): instruments [WX, X], no extra W-squared instruments, s2=e'e/N.
+
+    Bootstrap refits can omit standard errors and the unused reduced-form mean;
+    their corresponding output arrays are NaN. Coefficients, innovations and
+    innovation variance use exactly the same equations in both modes.
+    """
     design = np.column_stack([weights @ y, x])
     instruments = np.column_stack([weights @ x, x])
     projected = instruments @ np.linalg.lstsq(instruments, design, rcond=None)[0]
@@ -154,9 +166,17 @@ def lag_iv(y: FloatArray, x: FloatArray, weights: FloatArray) -> CrossSection:
     fitted = design @ coefficients
     innovations = y - fitted
     variance = float(innovations @ innovations / len(y))
-    inverse = variance * np.linalg.inv(projected.T @ design)
+    inverse = (
+        variance * np.linalg.inv(projected.T @ design)
+        if standard_errors
+        else np.full((design.shape[1], design.shape[1]), np.nan)
+    )
     order = [*range(1, design.shape[1]), 0]
-    reduced = np.linalg.solve(np.eye(len(y)) - coefficients[0] * weights, x @ coefficients[1:])
+    reduced = (
+        np.linalg.solve(np.eye(len(y)) - coefficients[0] * weights, x @ coefficients[1:])
+        if reduced_mean
+        else np.full(len(y), np.nan)
+    )
     return CrossSection(
         estimator="spatial_lag_iv",
         premiums=coefficients[1:],

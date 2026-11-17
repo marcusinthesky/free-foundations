@@ -1,5 +1,8 @@
 # Direct financial geometry and descriptive coordinates
 
+> Historical current-survivor protocol. The active quarterly CRSP–SEC study is
+> documented in [research/crsp-study](../../crsp-study/README.md).
+
 Declared on 23 October 2026 as a bounded retrospective extension of the retained
 measurement study. This adds no new holdout or configuration-selection claim.
 Financial sources, feature states, annual cohorts and return dates remain fixed.

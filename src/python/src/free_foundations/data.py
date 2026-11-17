@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 from typing import TYPE_CHECKING, Any, override
 
 import pandas as pd
@@ -24,8 +25,14 @@ class FrenchReader(FamaFrenchReader):
 
 
 def write_json(path: Path, value: object) -> None:
-    """Write readable metadata, rejecting nonstandard numeric values."""
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    """Atomically replace metadata without writing through a restored DVC cache link."""
+    payload = json.dumps(value, indent=2, allow_nan=False) + "\n"
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.partial")
+    try:
+        temporary.write_text(payload)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def fact_rows(payload: Mapping[str, Any]) -> pd.DataFrame:

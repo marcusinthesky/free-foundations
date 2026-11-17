@@ -56,6 +56,14 @@ def test_only_retained_research_commands_are_exposed() -> None:
         ("panel", "encode"),
         ("panel", "run"),
         ("panel", "report"),
+        ("study", "acquire"),
+        ("study", "link"),
+        ("study", "freeze"),
+        ("study", "prepare"),
+        ("study", "encode"),
+        ("study", "run"),
+        ("study", "replicate"),
+        ("study", "report"),
     }
 
 
@@ -73,3 +81,31 @@ def test_every_stage_runs_a_registered_command() -> None:
         words = command.split()
         start = words.index("free-foundations")
         assert " ".join(words[start : start + 3]) in registered, command
+
+
+def test_source_acquisition_defaults_to_recovery_staging(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+
+    def record(*_args: object, **kwargs: object) -> None:
+        calls.append(kwargs)
+
+    monkeypatch.setattr(cli.study_run, "acquire", record)
+    result = RUNNER.invoke(cli.app, ["study", "acquire", "--offline", "--metadata-only"])
+    assert result.exit_code == 0, result.output
+    assert calls[0]["output"] == Path("research/crsp-study/recovery")
+    assert calls[0]["offline"] is True
+    assert calls[0]["metadata_only"] is True
+
+
+def test_freeze_cli_forwards_staging_and_canonical_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+
+    def record(**kwargs: object) -> None:
+        calls.append(kwargs)
+
+    monkeypatch.setattr(cli.study_run, "freeze", record)
+    result = RUNNER.invoke(
+        cli.app, ["study", "freeze", "--staging", "staged", "--output", "frozen"]
+    )
+    assert result.exit_code == 0, result.output
+    assert calls == [{"staging": Path("staged"), "output": Path("frozen")}]

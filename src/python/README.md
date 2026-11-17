@@ -21,31 +21,37 @@ CUDA is used when available, with CPU fallback.
 
 ## Research commands
 
-The supported study has no arbitrary model or design overrides:
+The active [quarterly study](../../research/crsp-study/README.md) has one versioned
+specification and one master panel:
 
 ```sh
+free-foundations study acquire    # resumable public-source recovery into staging
+free-foundations study freeze     # promote only completed, validated source recovery
 free-foundations models checkpoints
-free-foundations panel prepare
-free-foundations panel encode
-free-foundations panel run
-free-foundations panel report
-free-foundations fernandez run
+free-foundations study prepare    # offline panel and information vintages
+free-foundations study encode     # save all declared model/control states
+free-foundations study run        # matched quarterly measurement
+free-foundations study replicate  # original MM CAPM and spatial core
+free-foundations study report     # saved-result rendering only
 ```
 
 Use `dvc repro measurement`, `dvc repro replication` or `dvc repro publication`
-from the repository root to honor dependencies and restore cached results.
-`panel prepare` validates frozen financial inputs and saves shared annual data;
-`panel encode` extracts declared states once; `panel run` consumes those states
-for economic calibration and covariance evaluation. `panel report` only renders
-saved results. The replication command uses robust MM CAPM betas, original
-characteristic-history networks, S2SLS and spatial-error ML, a generated-beta
-bootstrap and the stated VaR simulation. It does not load pretrained models.
+from the repository root to honor dependencies. Acquisition is a separate frozen
+stage: routine reproduction cannot refetch or change financial inputs. The
+staged extraction script is archived as text and never executed.
 
-Retained implementation modules are `representations` (preprocessing, adapters,
-verified state caches and baseline states), `panel` (the single financial study),
-`fernandez` (spatial estimators and the supporting replication), and shared
-`data`/`runtime` utilities. The experimental pilot/expanded/ladder commands and
-model variants are removed; their history remains in Git.
+`study` implements CRSP cohorts, public SEC linkage and XBRL parsing, quarterly
+factor construction, full-column representations, pairwise moments, unbalanced
+likelihood scoring and reporting. `representations` supplies the pinned adapters;
+`fernandez` supplies original spatial estimators. Historical `panel` and
+`fernandez run` commands remain callable for old artifacts but are not active
+pipeline stages or evidence for the migrated paper.
+
+All empirical tasks verify a shared panel hash, roster hash and outcome-mask
+hash. Features use dated disclosures before each quarter's trading cutoff.
+Native missingness is preserved for tabular models; conventional controls use
+past-support medians and missingness indicators. Deterministic blocks concatenate
+states when necessary to retain every eligible feature column.
 
 ## Model catalogue
 

@@ -6,6 +6,12 @@
 .ruff_cache/
 .rumdl_cache/
 .tmp/
+research/crsp-study/sources/
+research/crsp-study/prepared/
+research/crsp-study/representations/
+research/crsp-study/measurement/
+research/crsp-study/replication/
+research/crsp-study/publication/
 __pycache__/
 *.pyc
 node_modules/
@@ -35,6 +41,8 @@ research/**/cache/*
 research/**/*.parquet
 research/**/*.npz
 research/**/embeddings/
+research/crsp-study/recovery/
+research/crsp-study/.sources.lock
 # Per-distance fingerprints: thousands of sidecars, cached by DVC with their matrices.
 research/panel/**/distances/
 # Generated blueprint outputs; the sources are src/lean/blueprint/src.

@@ -44,7 +44,7 @@ proof-audit-test:
 # Saved-artifact rendering only; no empirical estimation.
 latex-assets:
     mkdir -p src/latex/build
-    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" uv run --project src/python --frozen python src/latex/render_results.py
+    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" uv run --project src/python --frozen free-foundations study report
 
 latex-build: latex-assets
     mkdir -p src/latex/build
@@ -88,13 +88,13 @@ python-model model:
 
 # Research runs are DVC stages (dvc.yaml): each reruns only when the code its command
 # reaches (semflow fingerprint) or its inputs change, and is otherwise skipped.
-# The network-acquisition stages are frozen so routine repros never refetch them. These
-# recipes resume one deliberately: unprotect its linked cache, run the stage's command,
-# then record the result. EDGAR_IDENTITY must contain your name and email.
+# Source acquisition is frozen so routine repros never refetch it. This recipe freezes
+# the staged CSV and records SEC/factor recovery; it never executes the extraction script
+# or accesses WRDS. EDGAR_IDENTITY can provide your SEC contact name and email.
 python-universe:
-    dvc unprotect research/universe/cache
-    uv run --project src/python --frozen free-foundations universe run
-    dvc commit -f universe
+    uv run --project src/python --frozen free-foundations study acquire --output research/crsp-study/recovery
+    uv run --project src/python --frozen free-foundations study freeze
+    dvc commit -f sources
 
 # The paper has one declared study; preparation and model extraction are cached separately.
 python-panel:
@@ -103,7 +103,7 @@ python-panel:
 python-representations:
     dvc repro representations
 
-# The supporting CAPM replication and VaR audit do not load foundation models.
+# The supporting original quarterly MM CAPM and spatial core do not load models.
 python-fernandez:
     dvc repro replication
 

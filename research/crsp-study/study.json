@@ -1,0 +1,19 @@
+{
+  "version": "crsp-sec-quarterly-v1",
+  "archive_start": "2001-01-01",
+  "archive_end": "2025-12-31",
+  "feature_start": "2009-01-01",
+  "top_n": 1000,
+  "frequency": "quarterly",
+  "return_lookback_quarters": 20,
+  "characteristic_history_years": 10,
+  "min_eigenvalue": 0.000001,
+  "seed": 42,
+  "block_columns": 500,
+  "support_rows": 256,
+  "bootstrap_draws": 9999,
+  "generated_beta_draws": 999,
+  "bootstrap_blocks": [4, 2, 8],
+  "rungs": ["fernandez", "standard_xbrl", "full_xbrl"],
+  "models": ["tabpfn_full", "tabfm", "kumo", "limix"]
+}

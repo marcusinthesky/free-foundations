@@ -1,5 +1,8 @@
 # Retained pretrained measurement study
 
+> Historical current-survivor protocol. The active quarterly CRSP–SEC study is
+> documented in [research/crsp-study](../../crsp-study/README.md).
+
 This protocol, revised on 23 October 2026, retains the comparisons used in the
 theory-led paper and adds observed-data recovery from the frozen public
 disclosures. The target, information cutoffs, estimation rules and retained
