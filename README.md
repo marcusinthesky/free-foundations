@@ -24,7 +24,7 @@ models and conventional controls share each information rung.
 | `src/python` | The `free-foundations` study application in a uv workspace |
 | `src/lean` | Lean definitions, proofs, frozen type contracts and the blueprint |
 | `src/latex` | The manuscript and supplement |
-| `research` | The DVC pipeline, study contract and archived evidence |
+| `research` | The DVC pipeline, study contract and data pointers |
 | `.context` | Project plans and reference records |
 
 ## Get ready

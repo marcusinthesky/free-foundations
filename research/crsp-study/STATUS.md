@@ -1,7 +1,8 @@
 # Migration checkpoint, 30 October 2026
 
 The quarterly migration is implemented, but the new empirical study is not yet
-complete. Old numerical findings remain archived rather than carried forward.
+complete. Old numerical findings remain only in the Git history rather than
+carried forward.
 
 ## Frozen source checkpoint
 

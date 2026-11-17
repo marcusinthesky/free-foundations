@@ -25,7 +25,16 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 - Language checks run through per-language justfile modules.
 - Nix definitions moved under `infra/nix`; shell entry no longer installs tools.
 - DVC runs from the locked Python workspace rather than a separate root project.
+- `dvc.lock` records the pinned `model_checkpoints` stage.
 
 ### Removed
 
 - The unused TypeScript placeholder workspace.
+- The current-survivor study archive and the universe, panel and Fernández pipelines
+  that only served it, with their CLI commands, tests and result rendering; Git
+  history keeps them.
+
+### Fixed
+
+- The manuscript's undefined `eq:forecast` reference; the forecast covariance is
+  now stated inline.
