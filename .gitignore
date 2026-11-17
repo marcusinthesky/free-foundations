@@ -1,35 +1,47 @@
 .devenv/
 .direnv/
 .venv*/
-.insitu/
-.lycheecache
-.ruff_cache/
-.rumdl_cache/
-.tmp/
-research/crsp-study/sources/
-research/crsp-study/prepared/
-research/crsp-study/representations/
-research/crsp-study/measurement/
-research/crsp-study/replication/
-research/crsp-study/publication/
 __pycache__/
 *.pyc
+.pytest_cache/
+.ruff_cache/
+.rumdl_cache/
+.pyrefly/
+.hypothesis/
+.testmondata*
+.tach/
+*.egg-info/
+.insitu/
+.lycheecache
 node_modules/
-dist/
 .lake/
+dist/
+build/
+result
+result-*
+.env
+.env.*
+.DS_Store
+*.bak
+.tmp/
+web/
+print/
+lean_decls
+/AGENTS.md
+/CLAUDE.md
+/.claude/
+/.codex/
+*.paux
+# Conversation transcripts stay local; plans and references are tracked records.
+/.context/chat/
+
+# LaTeX intermediates.
 *.aux
 *.log
 *.out
 *.toc
 *.synctex.gz
-src/latex/build/
-.env
 
-.pytest_cache/
-.hypothesis/
-.testmondata*
-.tach/
-*.egg-info/
 # Downloads, model weights and expensive intermediates live in DVC's cache and the
 # Hugging Face bucket (dvc.yaml, *.dvc); Git keeps their pointers and DVC's own
 # .gitignore files.
@@ -41,13 +53,15 @@ research/**/cache/*
 research/**/*.parquet
 research/**/*.npz
 research/**/embeddings/
+research/crsp-study/sources/
+research/crsp-study/prepared/
+research/crsp-study/representations/
+research/crsp-study/measurement/
+research/crsp-study/replication/
+research/crsp-study/publication/
 research/crsp-study/recovery/
 research/crsp-study/.sources.lock
 # Per-distance fingerprints: thousands of sidecars, cached by DVC with their matrices.
 research/panel/**/distances/
-# Generated blueprint outputs; the sources are src/lean/blueprint/src.
-src/lean/blueprint/web/
-src/lean/blueprint/print/
-src/lean/blueprint/lean_decls
+# Generated blueprint declaration lists; the sources are src/lean/blueprint/src.
 src/lean/blueprint/manuscript_decls
-src/lean/blueprint/src/*.paux

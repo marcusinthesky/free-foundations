@@ -13,9 +13,9 @@ current-survivor manuscript and publication guide are preserved in
 are not conclusions of the new dataset.
 
 ```sh
-just latex-assets  # saved-result tables, source coverage and claims audit
-just latex-build   # render, then Tectonic compilation
-just latex-count   # render, then TeXcount to build/word-count.txt
+just latex::assets # saved-result tables, source coverage and claims audit
+just latex::paper  # render, then Tectonic compilation
+just latex::count  # render, then TeXcount to build/word-count.txt
 ```
 
 The combined manuscript is written to `src/latex/build/main.pdf`. Rendering reads
@@ -33,7 +33,7 @@ coverage and whole-issuer capitalization are not certified by the staged CRSP
 fields. Retrospective model weights and revised SEC data remain limitations.
 
 TeXcount, Tectonic and TeX packages are supplied by `devenv.nix`; generated files
-stay under ignored `build/`. `just blueprint-check` checks every retained
+stay under ignored `build/`. `just lean::blueprint-check` checks every retained
 manuscript declaration against compiled Lean names. Declaration existence is
 separate from checking that a theorem's hypotheses justify an economic claim.
 Publication does not claim that conditional theory establishes an empirical

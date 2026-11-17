@@ -1,6 +1,8 @@
-source_roots = ["src"]
-exclude = ["tests/**", ".venv/**"]
+source_roots = ["apps/free_foundations/src"]
+exclude = ["**/tests/**", "**/.venv/**", "scripts/**"]
 exact = true
+ignore_type_checking_imports = false
+forbid_circular_dependencies = true
 
 [[modules]]
 path = "free_foundations.contracts"
@@ -36,11 +38,11 @@ depends_on = []
 
 [[modules]]
 path = "free_foundations.representations"
-depends_on = ["free_foundations", "free_foundations.data", "free_foundations.runtime"]
+depends_on = ["free_foundations.contracts", "free_foundations", "free_foundations.data", "free_foundations.runtime"]
 
 [[modules]]
 path = "free_foundations.fernandez"
-depends_on = ["free_foundations.data"]
+depends_on = ["free_foundations.contracts", "free_foundations.data"]
 
 [[modules]]
 path = "free_foundations.universe"
@@ -48,11 +50,11 @@ depends_on = ["free_foundations.data", "free_foundations.fernandez"]
 
 [[modules]]
 path = "free_foundations.panel"
-depends_on = ["free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.filings"]
+depends_on = ["free_foundations.contracts", "free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.filings"]
 
 [[modules]]
 path = "free_foundations.study"
-depends_on = ["free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.panel"]
+depends_on = ["free_foundations.contracts", "free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.panel"]
 
 [[modules]]
 path = "free_foundations.cli"

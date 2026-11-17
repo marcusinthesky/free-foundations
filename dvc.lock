@@ -43,3 +43,34 @@ stages:
       hash: md5
       md5: 8cc4452cdbad191a2c457b7759760202
       size: 2534
+  semflow_refresh:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --all-packages semflow refresh --apply
+    deps:
+    - path: semflow.toml
+      hash: md5
+      md5: 693ec0d7884ec36aa9283a9327c6d7d3
+      size: 681
+    - path: src/python/apps/free_foundations/pyproject.toml
+      hash: md5
+      md5: 9dfa99363f823044d9c8999d8ddee5f9
+      size: 1259
+    - path: src/python/apps/free_foundations/src
+      hash: md5
+      md5: bd11a7ca435b585c18109915411a4d2c.dir
+      size: 602944
+      nfiles: 68
+    - path: src/python/pyproject.toml
+      hash: md5
+      md5: e87e17e14a548d5a07b011cd7635845b
+      size: 3356
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 691cd8b8b0e2041e6476f13f8f4dd7da
+      size: 413226
+    outs:
+    - path: .semflow/hashes
+      hash: md5
+      md5: ea7578cb8013cb7206ad4c5090706984.dir
+      size: 247758
+      nfiles: 6

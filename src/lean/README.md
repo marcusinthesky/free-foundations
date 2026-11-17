@@ -50,8 +50,8 @@ finite laws and their proofs; project adapters preserve the financial interfaces
 
 `Audit.lean` remains a readable public-theorem inspection aid.
 `ModuleAudit.lean` provides the fast compiled module-origin summary used by
-`just lean-audit`, including imported private project declarations. The enforced
-project-wide checker is now `just proof-audit`: it discovers every production
+`just lean::axiom-audit`, including imported private project declarations. The enforced
+project-wide checker is now `just lean::proof-audit`: it discovers every production
 source independently of umbrella imports, freshly compiles it, and checks private
 declarations, proof bodies, discarded examples and transitive dependencies.
 Only `propext`, `Classical.choice`, and `Quot.sound` are allowed. Parser-based
@@ -59,7 +59,7 @@ policy also rejects proof placeholders and native proof execution. Exact fixture
 and trusted-tool exclusions are reported rather than hidden by directory skips.
 
 `FreeFoundationsApi` is a default Lake target containing complete, frozen type contracts.
-`just lean-build` additionally verifies that every manuscript/blueprint tag has a
+`just lean::build` additionally verifies that every manuscript/blueprint tag has a
 successfully elaborated contract. It queries the compiled environment extension,
 so a commented-out command cannot satisfy coverage. Contracts compare types,
 universe arity and correspondence, and explicit/implicit binder metadata; they
@@ -363,10 +363,10 @@ and zero exposure error or zero spatial coefficient.
 
 | Command | Enforced check |
 | --- | --- |
-| `just lean-build` | Core library, `FreeFoundationsApi`, and compiled contract coverage |
-| `just proof-audit` | Fresh source discovery/build and declaration/example integrity |
-| `just lean-audit` | Fast compiled module-origin axiom summary; does not replace source auditing |
-| `just proof-audit-test` | Positive and negative integrity/API fixtures using stdlib unittest |
+| `just lean::build` | Core library, `FreeFoundationsApi`, and compiled contract coverage |
+| `just lean::proof-audit` | Fresh source discovery/build and declaration/example integrity |
+| `just lean::axiom-audit` | Fast compiled module-origin axiom summary; does not replace source auditing |
+| `just lean::proof-audit-test` | Positive and negative integrity/API fixtures using stdlib unittest |
 
 The audit writes `.lake/build/proof-integrity.json`.
 It records the revision and dirty state, toolchain, manifest and actual dependency
@@ -396,16 +396,16 @@ library; the manuscript does not include the full blueprint source.
 
 | Command | Output |
 | --- | --- |
-| `just blueprint-web` | HTML blueprint with the dependency graph in `blueprint/web/` (open `dep_graph_document.html`) |
-| `just blueprint-pdf` | Printable blueprint in `blueprint/print/print.pdf` |
-| `just blueprint-check` | Fails if any `\lean{...}` name in the blueprint or the manuscript is not a compiled declaration |
-| `just blueprint-serve` | Serves `blueprint/web/` on port 8000 |
+| `just lean::blueprint-web` | HTML blueprint with the dependency graph in `blueprint/web/` (open `dep_graph_document.html`) |
+| `just lean::blueprint-pdf` | Printable blueprint in `blueprint/print/print.pdf` |
+| `just lean::blueprint-check` | Fails if any `\lean{...}` name in the blueprint or the manuscript is not a compiled declaration |
+| `just lean::blueprint-serve` | Serves `blueprint/web/` on port 8000 |
 
 The Lean project is `src/lean`, not the repository root, so these recipes run the
 `leanblueprint` CLI's steps (`plastex`, `lake exe checkdecls`) directly. They need the
 devenv shell, which provides graphviz for the graph.
 
-Run `just lean-build` from the repository root. A fresh checkout first needs the prebuilt
+Run `just lean::build` from the repository root. A fresh checkout first needs the prebuilt
 Mathlib files: `cd src/lean && lake exe cache get` (about 6–7 GB).
 
 ## Current verification outcome (29 October 2026)
@@ -435,14 +435,14 @@ These results describe the earlier Lean 4.31 revision, before the combined
 library and corrected migration. They are retained as a historical record and do
 not substitute for current-toolchain verification.
 
-- `just lean-build`: passed with the then-pinned dependencies (3169 build jobs),
+- `just lean::build`: passed with the then-pinned dependencies (3169 build jobs),
   including all 241 manuscript/blueprint type contracts and compiled coverage.
-- `just proof-audit`: 38 production sources freshly compiled, including 36
+- `just lean::proof-audit`: 38 production sources freshly compiled, including 36
   strictly audited files and two explicitly trusted checker implementations;
   785 declarations, including 12 private declarations, use no unsupported axioms.
   The 18 exact fixture exclusions are separately tested.
-- `just proof-audit-test`: all 26 integrity and API regression tests passed.
-- `just blueprint-check`, manuscript format/lint and `just latex-build`: passed.
+- `just lean::proof-audit-test`: all 26 integrity and API regression tests passed.
+- `just lean::blueprint-check`, manuscript format/lint and `just latex::paper`: passed.
   The 41-page PDF has no unresolved references or overflowing equations/tables;
   the finite-law, bandwidth, decision, traceability and bibliography pages were inspected.
 - Main text: 3897 words including headings/captions and excluding title/abstract;

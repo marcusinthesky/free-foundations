@@ -1,10 +1,25 @@
 # One matched quarterly CRSP–SEC study; acquisition is explicit and frozen under repro.
 # Earlier current-survivor stages and hashes are inactive snapshots in research/archive.
 vars:
-- ff: uv run --project src/python --frozen free-foundations
-- models: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations
+- ff: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations
+- models: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen --package free-foundations --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations
+- semflow: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow
 
 stages:
+  semflow_refresh:
+    desc: >-
+      Refresh semantic entrypoint fingerprints after source changes. This control
+      stage owns the JSON only; instrumenting dvc.yaml stays a reviewed `just semflow-apply`.
+    cmd: ${semflow} refresh --apply
+    deps:
+    - semflow.toml
+    - src/python/pyproject.toml
+    - src/python/apps/free_foundations/pyproject.toml
+    - src/python/uv.lock
+    - src/python/apps/free_foundations/src
+    outs:
+    - .semflow/hashes:
+        cache: false
   sources:
     desc: Frozen staged CRSP extract, public SEC evidence and quarterly factor sources.
     cmd: 'false'
@@ -21,8 +36,8 @@ stages:
     deps:
     - .semflow/hashes/entrypoints/free-foundations/models/checkpoints.json
     - src/python/uv.lock
-    - src/python/pyproject.toml
-    - src/python/src/free_foundations/checkpoints.json
+    - src/python/apps/free_foundations/pyproject.toml
+    - src/python/apps/free_foundations/src/free_foundations/checkpoints.json
     outs:
     - research/model-checkpoints.json
   prepare:
@@ -41,7 +56,7 @@ stages:
     deps:
     - .semflow/hashes/entrypoints/free-foundations/study/encode.json
     - src/python/uv.lock
-    - src/python/pyproject.toml
+    - src/python/apps/free_foundations/pyproject.toml
     - research/model-checkpoints.json
     - research/crsp-study/study.json
     - research/crsp-study/prepared
@@ -66,8 +81,8 @@ stages:
     - src/python/uv.lock
     - research/crsp-study/study.json
     - research/crsp-study/prepared
-    - src/python/src/free_foundations/fernandez/betas.R
-    - devenv.nix
+    - src/python/apps/free_foundations/src/free_foundations/fernandez/betas.R
+    - infra/nix/devenv.nix
     - devenv.lock
     outs:
     - research/crsp-study/replication

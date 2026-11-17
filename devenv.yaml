@@ -1,3 +1,5 @@
+secretspec:
+  enable: false
 require_version: true
 inputs:
   devenv:

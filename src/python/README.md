@@ -6,16 +6,21 @@ never downloads weights or imports an optional model runtime.
 ## Install and check
 
 ```sh
-uv sync --project src/python --frozen
-just python-check
-just python-testmon
-just python-model tabpfn
+just python::setup         # locked workspace, model runtimes and tools (uses the network)
+just python::check         # lint, strict types, Tach, test layout, Vulture, tests, build
+just python::test-changed  # Testmon's impacted tests during development
+just python::run study prepare
 ```
 
-The default data/development environment includes scientific Python, spatial
-estimators, Arrow, `arch`, data-acquisition tools and quality checks. Optional
-model extras are `tabpfn`, `tabfm`, `kumo` and `limix`; `--all-extras` installs
-these four retained runtimes. Model versions and Git revisions are locked in
+This directory is a uv workspace. The `free-foundations` application lives in
+`apps/free_foundations`, with its tests in `apps/free_foundations/tests` mirroring
+the source modules they exercise: `study/sec.py` owns `tests/study/test_sec.py` and
+feature files such as `test_sec__parsing.py`. `just python::layout` enforces this.
+
+The environment includes scientific Python, spatial estimators, Arrow, `arch`,
+data-acquisition tools, DVC and quality checks. The model extras `tabpfn`, `tabfm`,
+`kumo` and `limix` are installed by setup so strict type checking covers their
+adapters. Model versions and Git revisions are locked in
 `uv.lock`. Actual device selection is explicit and included in state provenance;
 CUDA is used when available, with CPU fallback.
 
@@ -144,8 +149,8 @@ valid. Compare distance/network performance within each measurement system.
 The dependency direction is `contracts` → `pooling` → `encoding`, with an
 independent `registry`; Tach enforces the actual allowed imports. Ruff checks all
 rules, Pyrefly uses its strict preset, and Vulture scans production code and tests
-at 80% confidence. `just python-check` always runs the complete tests.
-`just python-testmon` is the incremental development loop. Hypothesis exercises
+at 80% confidence. `just python::check` always runs the complete tests.
+`just python::test-changed` is the incremental development loop. Hypothesis exercises
 axis permutations, singleton batches, masks, immutable outputs, and native
 ensemble reshaping; focused tests check leakage guards and explicit failures.
 These tests use small structural backends and do not validate checkpoint numerics.

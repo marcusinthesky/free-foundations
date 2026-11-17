@@ -866,10 +866,11 @@ hierarchical PAC-Bayes, and positive causal identification remain research
 extensions, rather than completed consequences of these bounds.
 
 \subsection{Formal traceability}\label{app:traceability}
-Declaration tags are checked by \texttt{just blueprint-check}. The default
+Declaration tags are checked by \texttt{just lean::blueprint-check}. The default
 Lean build also checks their complete frozen types, including universe arity,
 binder visibility, hypotheses and norm instances. The project-wide
-\texttt{just proof-audit} discovers sources independently of umbrella imports,
+\texttt{just lean::proof-audit} discovers sources independently of
+umbrella imports,
 re-elaborates private declarations and anonymous examples, and rejects proof
 holes and unsupported transitive axioms. Only \texttt{propext},
 \texttt{Classical.choice}, and \texttt{Quot.sound} are allowed. Its

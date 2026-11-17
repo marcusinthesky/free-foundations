@@ -1,6 +1,8 @@
 name = "free-foundations"
 version = "0.1.0"
 defaultTargets = ["FreeFoundations", "FreeFoundationsApi"]
+lintDriver = "batteries/runLinter"
+lintDriverArgs = ["FreeFoundations"]
 
 [[require]]
 name = "mathlib"

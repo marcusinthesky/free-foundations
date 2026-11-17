@@ -1,0 +1,49 @@
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set positional-arguments
+
+default:
+    @just --list
+
+# Install exactly the committed workspace, model runtimes and build dependencies (uses the network).
+setup:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv sync --locked --all-packages --all-extras
+
+# Run the study CLI from the repository root, for example: just python::run study prepare
+run *args:
+    cd ../.. && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations "$@"
+
+lint:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff check .
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff format --check .
+
+typecheck:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --all-packages pyrefly check
+
+# Local impacted-test selection, with a bounded number of workers.
+test-changed:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --all-packages pytest -q -n 2 --testmon
+
+# The test and CI gates never use affected-test selection.
+test:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --all-packages pytest -q -n 2 --no-testmon
+
+# Check that test paths correspond to source modules.
+layout:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --all-packages pytest-layout-enforcer check
+
+# Enforce module dependencies, reject unused declarations and forbid cycles.
+tach:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen tach check
+
+# Report unused code with high confidence.
+vulture:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen vulture
+
+build:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv build --python .venv/bin/python --offline --no-build-isolation --all-packages
+
+check: lint typecheck tach layout vulture test build
+
+fmt:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff check --fix .
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff format .

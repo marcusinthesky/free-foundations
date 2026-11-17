@@ -1,130 +1,157 @@
-set shell := ["bash", "-euc"]
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set positional-arguments
 
+mod python 'src/python/justfile'
+mod lean 'src/lean/justfile'
+mod latex 'src/latex/justfile'
+mod agents '.agents/justfile'
+
+workflow := "env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --script src/python/scripts/workflow/script.py"
+
+# Discover this project's commands.
 default:
     @just --list
 
-# Include untracked scaffold files as well as tracked source files.
-check:
-    git ls-files --cached --others --exclude-standard -z | xargs -0 -r prek run --files
+# Prepare locked dependencies and Git hooks (uses the network).
+setup:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --frozen --script src/python/scripts/workflow/script.py prepare
+    just python::setup
+    just lean::setup
+    just latex::setup
+    just agents::apply
+    prek install
 
+# Check source, views and selected languages without repairing files.
+check:
+    bash infra/nix/check.sh
+    {{ workflow }} check
+    just python::check
+    just lean::check
+    just latex::check
+    just data-check
+    just semflow-check
+    just changelog-check
+    just skills-check
+    just agents::check
+
+# Run the selected language tests.
+test:
+    just python::test
+    just lean::test
+    just latex::test
+
+# Explicitly format sources.
 fmt:
-    nixfmt devenv.nix
+    git ls-files -z --cached --others --exclude-standard | while IFS= read -r -d '' file; do case "$file" in justfile|*/justfile) just --justfile "$file" --fmt --unstable ;; esac; done
+    nixfmt devenv.nix infra/nix/devenv.nix infra/nix/pkgs/schematter.nix infra/nix/pkgs/lean-toolchain.nix infra/nix/pkgs/agentsync.nix
     tombi format --offline
     rumdl fmt .
-    uv run --project src/python --frozen ruff format src/python
-    biome format --write src/typescript
-    tex-fmt src/latex/main.tex
+    # DVC's YAML emitter can leave trailing spaces when wrapping scalar values.
+    if [[ -f dvc.lock ]]; then sed -i 's/[[:blank:]]*$//' dvc.lock; fi
+    just python::fmt
+    just lean::fmt
+    just latex::fmt
 
+# Refresh generated planning and reference views.
 sync:
-    uv sync --frozen
-    uv sync --project src/python --frozen
+    {{ workflow }} sync
 
-insitu-check:
-    uv run --frozen insitu check
+# Validate document schemas, links and generated views.
+context-check:
+    {{ workflow }} check
 
-insitu-sync:
-    uv run --frozen insitu sync
+# Create a plan without overwriting existing content.
+plan-new slug title:
+    {{ workflow }} plan-new "$1" --title "$2"
 
-lean-build:
-    python3 src/lean/tools/check_api_coverage.py
-    cd src/lean && lake build
+# Create a task inside an existing plan or task.
+task-new parent slug title:
+    {{ workflow }} task-new "$1" "$2" --title "$3"
 
-# Every project source, including orphan modules and discarded examples.
-proof-audit: lean-build
-    python3 src/lean/tools/proof_integrity.py --project src/lean
+# Create a citation record with its directory as citation key.
+reference-new key title:
+    {{ workflow }} reference-new "$1" --title "$2"
 
-# Fast compiled-declaration summary; the source-level audit above remains authoritative.
-lean-audit: lean-build
-    cd src/lean && lake env lean ModuleAudit.lean
+# Check external links online.
+links:
+    git ls-files -z '*.md' | xargs -0 -r lychee --config lychee.toml --no-progress
 
-# Negative compiler fixtures verify that the checkers actually reject bad proofs/contracts.
-proof-audit-test:
-    python3 src/lean/tools/proof_integrity.py --self-test
+# Validate the repository changelog structure and change categories.
+changelog-check:
+    schematter validate --schema infra/schemas/documents/changelog.document-schema.yaml CHANGELOG.md
 
-# Saved-artifact rendering only; no empirical estimation.
-latex-assets:
-    mkdir -p src/latex/build
-    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" uv run --project src/python --frozen free-foundations study report
+# Validate repository-owned skill documents and their directory names.
+skills-check:
+    git ls-files -z --cached --others --exclude-standard -- ':(glob)**/SKILL.md' 'SKILL.md' | while IFS= read -r -d '' file; do [[ -f "$file" ]] || continue; schematter validate --schema infra/schemas/documents/skill.document-schema.yaml "$file"; awk 'END { if (NR > 500) { print FILENAME ": exceeds 500 lines" > "/dev/stderr"; exit 1 } }' "$file"; env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen python -c 'import pathlib, re, sys, yaml; p = pathlib.Path(sys.argv[1]); frontmatter = re.split(r"(?m)^---[ \t]*\r?$", p.read_text(), maxsplit=2)[1]; name = yaml.safe_load(frontmatter)["name"]; sys.exit(0 if name == p.parent.name else f"{p}: name {name!r} must match parent directory {p.parent.name!r}")' "$file"; done
 
-latex-build: latex-assets
-    mkdir -p src/latex/build
-    tectonic --keep-logs -o src/latex/build src/latex/main.tex
-
-# Main text, abstract and captions; TeXcount directives exclude the supplement.
-latex-count: latex-assets
-    cd src/latex && texcount -merge -sub=section main.tex > build/word-count.txt
-    cat src/latex/build/word-count.txt
-
-# Lean blueprint (leanblueprint/plasTeX). The Lean project is src/lean, not the git root,
-# so these recipes run the leanblueprint CLI's steps directly.
-blueprint-web:
-    cd src/lean/blueprint/src && uv run --frozen plastex -c plastex.cfg web.tex
-
-blueprint-pdf:
-    mkdir -p src/lean/blueprint/print
-    tectonic -o src/lean/blueprint/print src/lean/blueprint/src/print.tex
-
-# Every \lean{...} name in the blueprint and the manuscript must be a compiled declaration.
-blueprint-check: blueprint-web lean-build
-    python3 src/lean/blueprint/manuscript_decls.py src/latex/main.tex > src/lean/blueprint/manuscript_decls
-    cd src/lean && lake exe checkdecls blueprint/lean_decls && lake exe checkdecls blueprint/manuscript_decls
-
-blueprint-serve:
-    cd src/lean/blueprint/web && python -m http.server 8000
-
-# Full verification; testmon is an explicit fast development loop below.
-python-check:
-    cd src/python && env -u PYTHONPATH uv run --frozen pyrefly check
-    cd src/python && uv run --frozen tach check
-    cd src/python && uv run --frozen vulture
-    cd src/python && uv run --frozen pytest
-
-python-testmon:
-    cd src/python && uv run --frozen pytest --testmon
-
-# Example: just python-model tabpfn
-python-model model:
-    uv sync --project src/python --frozen --extra {{ model }}
-
+# ── Data pipeline ──────────────────────────────────────────────────────────────
 # Research runs are DVC stages (dvc.yaml): each reruns only when the code its command
 # reaches (semflow fingerprint) or its inputs change, and is otherwise skipped.
-# Source acquisition is frozen so routine repros never refetch it. This recipe freezes
-# the staged CSV and records SEC/factor recovery; it never executes the extraction script
-# or accesses WRDS. EDGAR_IDENTITY can provide your SEC contact name and email.
-python-universe:
-    uv run --project src/python --frozen free-foundations study acquire --output research/crsp-study/recovery
-    uv run --project src/python --frozen free-foundations study freeze
-    dvc commit -f sources
 
-# The paper has one declared study; preparation and model extraction are cached separately.
-python-panel:
-    dvc repro measurement
+# Run root-level DVC using the locked Python environment.
+dvc *args:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen dvc "$@"
 
-python-representations:
-    dvc repro representations
+# Validate DVC metadata without fetching data.
+data-check:
+    just dvc status
+    just dvc dag
 
-# The supporting original quarterly MM CAPM and spatial core do not load models.
-python-fernandez:
-    dvc repro replication
+# Check that semantic fingerprints match the code each DVC stage reaches.
+semflow-check:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow check
 
-python-publication:
-    dvc repro publication
+# Preview the semantic dependency changes before applying them.
+semflow-patch:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow patch
+
+# Apply reviewed DVC and semantic fingerprint changes.
+semflow-apply:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow patch --apply
+
+# Refresh existing semantic fingerprints without editing the DVC graph.
+semflow-refresh:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow refresh --apply
 
 # Recheck code fingerprints, then rebuild every stale stage.
-build:
-    uv run --project src/python --frozen semflow check
-    dvc repro
-
-# Refresh fingerprints after a code change; patch first if dvc.yaml's commands changed.
-semflow-refresh:
-    uv run --project src/python --frozen semflow refresh --apply
+build: semflow-check
+    just dvc repro
 
 pipeline-graph:
-    dvc dag --mermaid
+    just dvc dag --mermaid
 
 # The bucket is private: set S3 credentials in .dvc/config.local first (README).
 data-pull *targets:
-    dvc pull {{ targets }}
+    just dvc pull "$@"
 
 data-push:
-    dvc push
+    just dvc push
+
+# Source acquisition is frozen so routine repros never refetch it. This recipe never
+# executes the extraction script or accesses WRDS. EDGAR_IDENTITY can provide your SEC
+# contact name and email.
+
+# Freeze the staged CRSP extract and record SEC and factor recovery (uses the network).
+python-universe:
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study acquire --output research/crsp-study/recovery
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study freeze
+    just dvc commit -f sources
+
+# The paper has one declared study; preparation and model extraction are cached separately.
+python-panel:
+    just dvc repro measurement
+
+python-representations:
+    just dvc repro representations
+
+# The supporting original quarterly MM CAPM and spatial core do not load models.
+python-fernandez:
+    just dvc repro replication
+
+python-publication:
+    just dvc repro publication
+
+# Render saved study results for the manuscript without running DVC stages.
+latex-assets:
+    mkdir -p src/latex/build
+    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study report

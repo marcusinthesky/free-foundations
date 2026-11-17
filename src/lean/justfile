@@ -1,0 +1,68 @@
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set positional-arguments
+
+bundle := "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
+
+default:
+    @just --list
+
+# Explicit network step: provision locked sources, their compiled cache and blueprint tools.
+setup: cache
+    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV CFLAGS="$LEAN_BLUEPRINT_CFLAGS" LDFLAGS="$LEAN_BLUEPRINT_LDFLAGS" uv sync --project blueprint --frozen
+    mkdir -p blueprint/print
+    cd blueprint/src && bash ../../../../infra/nix/retry-tex-setup.sh tectonic --untrusted --bundle "{{ bundle }}" --keep-logs --outdir ../print print.tex
+
+cache *modules:
+    python3 check_setup.py --toolchain-only
+    lake exe cache get "$@"
+
+# Every manuscript/blueprint tag has a frozen type contract; the build checks those contracts.
+build:
+    python3 check_setup.py
+    python3 tools/check_api_coverage.py
+    lake build
+
+test: build
+
+# Every project source, including orphan modules and discarded examples.
+proof-audit: build
+    python3 tools/proof_integrity.py --project .
+
+# Fast compiled-declaration summary; the source-level audit above remains authoritative.
+axiom-audit: build
+    lake env lean ModuleAudit.lean
+
+# Negative compiler fixtures verify that the checkers actually reject bad proofs/contracts.
+proof-audit-test:
+    python3 tools/proof_integrity.py --self-test
+
+blueprint-web: build
+    mkdir -p blueprint/web
+    cd blueprint/src && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project .. --offline --frozen plastex -c plastex.cfg web.tex 2>&1 | tee ../web/build.log
+    if rg -n 'WARNING: (File not found|unrecognized command)|WARNING: Using default renderer for inputlean' blueprint/web/build.log; then echo 'Invalid blueprint input' >&2; exit 1; fi
+
+blueprint-pdf: blueprint-web
+    mkdir -p blueprint/print
+    cd blueprint/src && tectonic --untrusted --only-cached --bundle "{{ bundle }}" --keep-logs --outdir ../print print.tex
+    if rg -n 'Reference.+undefined|There were undefined|multiply-defined|Multiply defined' blueprint/print/print.log; then echo 'Unresolved blueprint references' >&2; exit 1; fi
+
+# Every \lean{...} name in the blueprint and the manuscript must be a compiled declaration.
+blueprint-check: blueprint-web
+    python3 blueprint/manuscript_decls.py ../latex/main.tex > blueprint/manuscript_decls
+    lake exe checkdecls blueprint/lean_decls
+    lake exe checkdecls blueprint/manuscript_decls
+
+blueprint-serve: blueprint-web
+    cd blueprint/web && python3 -m http.server 8000
+
+# Existing findings are recorded in scripts/nolints.json; new findings fail.
+lint:
+    lake lint
+
+check: blueprint-pdf blueprint-check proof-audit axiom-audit proof-audit-test
+    just lint
+    git diff --check -- .
+
+# Lean follows Mathlib style; no automatic formatter is installed.
+fmt:
+    git diff --check -- .
