@@ -8,9 +8,8 @@ compiled declarations and integrity checks.
 
 The empirical section now consumes the
 [quarterly CRSP–SEC study](../../research/crsp-study/README.md). The previous
-current-survivor manuscript and publication guide are preserved in
-[the archive](../../research/archive/current-survivor). Their numerical findings
-are not conclusions of the new dataset.
+current-survivor manuscript and publication guide remain in the Git history. Their
+numerical findings are not conclusions of the new dataset.
 
 ```sh
 just latex::assets # saved-result tables, source coverage and claims audit

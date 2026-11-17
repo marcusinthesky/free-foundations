@@ -48,9 +48,8 @@ staged extraction script is archived as text and never executed.
 `study` implements CRSP cohorts, public SEC linkage and XBRL parsing, quarterly
 factor construction, full-column representations, pairwise moments, unbalanced
 likelihood scoring and reporting. `representations` supplies the pinned adapters;
-`fernandez` supplies original spatial estimators. Historical `panel` and
-`fernandez run` commands remain callable for old artifacts but are not active
-pipeline stages or evidence for the migrated paper.
+`fernandez` supplies original spatial estimators, and `panel` keeps the
+cross-fitted decoding and PCoA geometry the study reuses.
 
 All empirical tasks verify a shared panel hash, roster hash and outcome-mask
 hash. Features use dated disclosures before each quarter's trading cutoff.

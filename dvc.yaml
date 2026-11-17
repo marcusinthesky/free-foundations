@@ -1,5 +1,5 @@
 # One matched quarterly CRSP–SEC study; acquisition is explicit and frozen under repro.
-# Earlier current-survivor stages and hashes are inactive snapshots in research/archive.
+# Earlier current-survivor stages remain only in the Git history.
 vars:
 - ff: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations
 - models: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen --package free-foundations --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations

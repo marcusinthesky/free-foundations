@@ -8,21 +8,9 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / "dvc.yaml").is_f
 PIPELINE = yaml.safe_load((ROOT / "dvc.yaml").read_text())["stages"]
 STUDY = "research/crsp-study"
 SPEC = f"{STUDY}/study.json"
-ARCHIVE = ROOT / "research/archive/current-survivor"
 PACKAGE = "src/python/apps/free_foundations/src/free_foundations"
 # Git-tracked fingerprint JSON is a control output, not a numerical result.
 CONTROL = {"semflow_refresh"}
-# The uv workspace move relocated these files without changing their contents.
-MOVED = {
-    "src/python/pyproject.toml": "src/python/apps/free_foundations/pyproject.toml",
-    "src/python/src/free_foundations/checkpoints.json": f"{PACKAGE}/checkpoints.json",
-}
-
-
-def relocated(stage: dict[str, object]) -> dict[str, object]:
-    deps = stage["deps"]
-    assert isinstance(deps, list)
-    return {**stage, "deps": [MOVED.get(path, path) for path in deps]}
 
 
 def outputs(name: str) -> list[str]:
@@ -141,18 +129,6 @@ def test_all_study_stages_bind_the_same_spec_and_command_fingerprints() -> None:
     legacy = ("research/universe/", "research/panel/", "research/replication/")
     for stage in PIPELINE.values():
         assert not any(path.startswith(legacy) for path in stage.get("deps", []))
-
-
-def test_legacy_pipeline_is_archived_without_changing_checkpoint_pins() -> None:
-    previous = yaml.safe_load((ARCHIVE / "pipeline.yaml.snapshot").read_text())["stages"]
-    locked = yaml.safe_load((ARCHIVE / "pipeline.lock.snapshot").read_text())["stages"]
-    assert len(previous) == 9
-    assert set(previous) == set(locked)
-    assert {"universe", "pilot", "market_metadata"} <= set(previous)
-    assert PIPELINE["model_checkpoints"] == relocated(previous["model_checkpoints"])
-    assert not (ARCHIVE / "dvc.yaml").exists()
-    assert not (ARCHIVE / "dvc.lock").exists()
-    assert (ARCHIVE / "README.md").is_file()
 
 
 def test_user_recipes_use_the_active_study_without_executing_wrds_script() -> None:

@@ -6,8 +6,7 @@ description: The DVC research pipeline, artifact storage and restoration.
 
 The [study contract](crsp-study/README.md) and
 [versioned specification](crsp-study/study.json) govern every active empirical
-stage. Earlier current-survivor results are archived in
-[archive/current-survivor](archive/current-survivor).
+stage. Earlier current-survivor results remain only in the Git history.
 
 ## Data and pipeline
 

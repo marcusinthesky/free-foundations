@@ -1,6 +1,5 @@
 """Metric invariants, label preservation and past-only feature/target preparation."""
 
-import hashlib
 from dataclasses import replace
 from pathlib import Path
 
@@ -11,12 +10,10 @@ from hypothesis import given
 from numpy.testing import assert_allclose
 
 from free_foundations.contracts import FloatArray
-from free_foundations.representations import representations
 from free_foundations.representations.baselines import supervised_states
 from free_foundations.representations.distance import pairwise_distance, save_distance
 from free_foundations.representations.encoding import (
     Prepared,
-    cap_support,
     prepare,
 )
 from tests._strategies import token_arrays
@@ -90,20 +87,6 @@ def _prepared(seed: int = 0) -> Prepared:
     return prepare(view, labels, tuple("ABCDEF"), 2020, "income")
 
 
-def test_support_cap_keeps_the_original_panel_digest_rule() -> None:
-    data = _prepared()
-    capped = cap_support(data, rows=5)
-    order = sorted(
-        range(len(data.support_ids)),
-        key=lambda i: hashlib.sha256(data.support_ids[i].encode()).hexdigest(),
-    )[:5]
-    expected = hashlib.sha256((data.digest + repr(order) + "panel-support256-v1").encode())
-    assert capped.digest == expected.hexdigest()
-    assert capped.support_ids == tuple(data.support_ids[i] for i in order)
-    redraw = cap_support(data, rows=5, salt="audit")
-    assert redraw.digest != capped.digest
-
-
 def test_supervised_states_use_support_rows_only() -> None:
     data = _prepared(1)
     first = supervised_states(data)
@@ -112,35 +95,3 @@ def test_supervised_states_use_support_rows_only() -> None:
     # Training sees support rows only: re-encoding a query subset gives the same rows.
     subset = replace(data, query=data.query[[3, 1]], tickers=("D", "B"))
     assert_allclose(supervised_states(subset), first[[3, 1]], atol=1e-6)
-
-
-def test_only_declared_states_are_constructed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    data = _prepared()
-    calls: list[str] = []
-
-    import torch  # noqa: PLC0415 -- detect accidental autoencoder training.
-
-    def forbidden_optimizer(*_args: object, **_kwargs: object) -> None:
-        pytest.fail("Representation extraction trained an undeclared autoencoder")
-
-    def supervised(_data: Prepared) -> FloatArray:
-        return np.ones((len(data.query), 16))
-
-    def foundation(
-        _data: Prepared, model: str, _cache: Path, _source: Path
-    ) -> dict[str, FloatArray]:
-        calls.append(model)
-        # Unexpected internal states must not become publication representations.
-        return {"late": np.ones((len(data.query), 4)), "early": np.zeros((len(data.query), 8))}
-
-    monkeypatch.setattr(torch.optim, "AdamW", forbidden_optimizer)
-    monkeypatch.setattr(representations, "supervised_states", supervised)
-    monkeypatch.setattr(representations, "foundation_states", foundation)
-    states = representations.representation_states(
-        data, cache=tmp_path, source=tmp_path, models=("tabfm", "limix")
-    )
-    assert calls == ["tabfm", "limix"]
-    assert set(states) == {"direct", "pca16", "supervised_mlp16", "tabfm__late", "limix__late"}
-    assert_allclose(states["direct"], data.query)

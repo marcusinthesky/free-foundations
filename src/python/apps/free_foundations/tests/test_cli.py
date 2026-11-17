@@ -1,4 +1,4 @@
-"""The small publication CLI rejects undeclared experiment overrides."""
+"""The study CLI exposes only the retained research commands."""
 
 from pathlib import Path
 
@@ -8,7 +8,6 @@ from typer.main import get_command
 from typer.testing import CliRunner
 
 from free_foundations import cli
-from free_foundations.panel import run as panel_run
 
 RUNNER = CliRunner()
 PIPELINE = (
@@ -28,36 +27,9 @@ def test_every_command_resolves(group: str, name: str) -> None:
     assert result.exit_code == 0, result.output
 
 
-def test_panel_run_uses_the_fixed_study(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls = []
-    monkeypatch.setattr(panel_run, "main", lambda: calls.append("study"))
-    result = RUNNER.invoke(cli.app, ["panel", "run"])
-    assert result.exit_code == 0, result.output
-    assert calls == ["study"]
-
-
-@pytest.mark.parametrize("option", ["--design", "--model"])
-def test_arbitrary_overrides_are_rejected_before_work(
-    option: str, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def refuse() -> None:
-        pytest.fail("ran an undeclared experiment")
-
-    monkeypatch.setattr(panel_run, "main", refuse)
-    result = RUNNER.invoke(cli.app, ["panel", "run", option, "other"])
-    assert result.exit_code == 2
-    assert "No such option" in result.output
-
-
 def test_only_retained_research_commands_are_exposed() -> None:
     assert set(commands()) == {
-        ("universe", "run"),
         ("models", "checkpoints"),
-        ("fernandez", "run"),
-        ("panel", "prepare"),
-        ("panel", "encode"),
-        ("panel", "run"),
-        ("panel", "report"),
         ("study", "acquire"),
         ("study", "link"),
         ("study", "freeze"),

@@ -8,8 +8,6 @@ __pycache__/
 *.pyc
 
 # Model weights are refetched at pinned revisions, never redistributed from the bucket.
-research/pilot/cache/*.safetensors
-research/pilot/cache/checkpoint/
 research/expanded/cache/models/
 
 # Run logs.

@@ -29,10 +29,6 @@ path = "free_foundations.data"
 depends_on = []
 
 [[modules]]
-path = "free_foundations.filings"
-depends_on = []
-
-[[modules]]
 path = "free_foundations.runtime"
 depends_on = []
 
@@ -42,15 +38,11 @@ depends_on = ["free_foundations.contracts", "free_foundations", "free_foundation
 
 [[modules]]
 path = "free_foundations.fernandez"
-depends_on = ["free_foundations.contracts", "free_foundations.data"]
-
-[[modules]]
-path = "free_foundations.universe"
-depends_on = ["free_foundations.data", "free_foundations.fernandez"]
+depends_on = ["free_foundations.contracts"]
 
 [[modules]]
 path = "free_foundations.panel"
-depends_on = ["free_foundations.contracts", "free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.filings"]
+depends_on = ["free_foundations.contracts", "free_foundations.representations"]
 
 [[modules]]
 path = "free_foundations.study"
@@ -58,4 +50,4 @@ depends_on = ["free_foundations.contracts", "free_foundations.data", "free_found
 
 [[modules]]
 path = "free_foundations.cli"
-depends_on = ["free_foundations.representations", "free_foundations.fernandez", "free_foundations.universe", "free_foundations.panel", "free_foundations.study"]
+depends_on = ["free_foundations.representations", "free_foundations.study"]

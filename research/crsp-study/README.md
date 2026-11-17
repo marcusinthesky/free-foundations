@@ -1,8 +1,8 @@
 # Quarterly CRSP–SEC study
 
-This is the active empirical contract. The previous current-survivor study is
-[archived](../archive/current-survivor). Its source snapshots, code and results
-remain historical evidence; they do not supply findings for this migration.
+This is the active empirical contract. The previous current-survivor study, its
+code and results remain in the Git history as provenance; they do not supply
+findings for this migration.
 
 ## Population and returns
 

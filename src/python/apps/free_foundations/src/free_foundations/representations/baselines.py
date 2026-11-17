@@ -5,18 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from sklearn.decomposition import PCA
 
 if TYPE_CHECKING:
     from free_foundations.contracts import FloatArray
     from free_foundations.representations.encoding import Prepared
-
-
-def compression_states(data: Prepared) -> dict[str, FloatArray]:
-    """Fit the declared PCA control on past support rows only."""
-    pca = PCA(n_components=min(16, data.support.shape[1], len(data.support)), random_state=42)
-    pca.fit(data.support)
-    return {"pca16": np.asarray(pca.transform(data.query), dtype=np.float64)}
 
 
 def supervised_states(data: Prepared) -> FloatArray:

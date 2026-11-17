@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -80,27 +80,6 @@ def prepare(
         ).encode()
     )
     return Prepared(x_support, x_query, y, names, support_ids, tickers, year, digest.hexdigest())
-
-
-def cap_support(
-    data: Prepared, rows: int = 256, tag: str = "panel-support256-v1", salt: str = ""
-) -> Prepared:
-    """Deterministic, outcome-independent support cap shared by every encoder in a rung.
-
-    A nonempty ``salt`` draws a different, equally outcome-independent support set.
-    """
-    order = sorted(
-        range(len(data.support_ids)),
-        key=lambda i: hashlib.sha256((salt + data.support_ids[i]).encode()).hexdigest(),
-    )[:rows]
-    digest = hashlib.sha256((data.digest + repr(order) + tag + salt).encode()).hexdigest()
-    return replace(
-        data,
-        support=data.support[order],
-        targets=data.targets[order],
-        support_ids=tuple(data.support_ids[i] for i in order),
-        digest=digest,
-    )
 
 
 def provenance_context(data: Prepared) -> Context:

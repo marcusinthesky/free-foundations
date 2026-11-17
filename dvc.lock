@@ -18,26 +18,28 @@ stages:
       size: 6659889202
       nfiles: 45105
   model_checkpoints:
-    cmd: TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --frozen --extra
-      tabpfn --extra tabfm --extra kumo --extra limix free-foundations models 
-      checkpoints
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations models checkpoints
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/models/checkpoints.json
       hash: md5
-      md5: c599d0c5493ea37116bc0c4fdaca8b3b
-      size: 7721
-    - path: src/python/pyproject.toml
+      md5: 07817cc5febead39b65b97c33f2bd9d6
+      size: 8381
+    - path: src/python/apps/free_foundations/pyproject.toml
       hash: md5
-      md5: 2e1c7fece3a5faa2e9929bf78731fa04
-      size: 3039
-    - path: src/python/src/free_foundations/checkpoints.json
+      md5: 9dfa99363f823044d9c8999d8ddee5f9
+      size: 1259
+    - path: 
+        src/python/apps/free_foundations/src/free_foundations/checkpoints.json
       hash: md5
       md5: 306e2e3f3af2107bbfeeb89ab1657b96
       size: 2157
     - path: src/python/uv.lock
       hash: md5
-      md5: db675cff4063b2f91ab6af882b332f3e
-      size: 304842
+      md5: 691cd8b8b0e2041e6476f13f8f4dd7da
+      size: 413226
     outs:
     - path: research/model-checkpoints.json
       hash: md5
@@ -57,9 +59,9 @@ stages:
       size: 1259
     - path: src/python/apps/free_foundations/src
       hash: md5
-      md5: bd11a7ca435b585c18109915411a4d2c.dir
-      size: 602944
-      nfiles: 68
+      md5: c0d48261deb475509b4f5d949ea96cb3.dir
+      size: 411226
+      nfiles: 44
     - path: src/python/pyproject.toml
       hash: md5
       md5: e87e17e14a548d5a07b011cd7635845b
@@ -71,6 +73,6 @@ stages:
     outs:
     - path: .semflow/hashes
       hash: md5
-      md5: ea7578cb8013cb7206ad4c5090706984.dir
+      md5: e8aa42390ae00f16fdc3d4c346bbbbef.dir
       size: 247758
       nfiles: 6

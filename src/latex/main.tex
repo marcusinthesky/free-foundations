@@ -445,8 +445,9 @@ $L(\Sigma,M_u)$ gives
 \end{equation}
 \lean{FreeFoundations.Likelihood.spatial_loss}\leanok{}
 This residual identity explains the joint role of the network and innovation
-scales. The empirical score evaluates the full forecast in
-equation~\eqref{eq:forecast} before observing outcome-year factors.
+scales. The empirical score evaluates the full forecast
+$C_t=B_t\widehat{\operatorname{Var}}(f_t)B_t'+P_t D_t P_t'$, with
+$P_t={(I-\lambda W_t)}^{-1}$, before observing outcome-year factors.
 
 \subsection{Joint measurement and financial stability}\label{app:network}
 Use Euclidean vector norms, spectral matrix norm $\norm{\cdot}_2$, Frobenius
@@ -921,7 +922,8 @@ requires a covariance matrix. Neutral links identify the disclosed completion of
 an otherwise undefined characteristic correlation.
 
 The historical current-survivor manuscript and its DVC specification are
-preserved in the repository archive. They establish prior research provenance,
+preserved in the repository's Git history. They establish prior
+research provenance,
 not numerical evidence for the new CRSP experiment. The saved-result report
 states whether source recovery and the prescribed comparisons are complete.
 

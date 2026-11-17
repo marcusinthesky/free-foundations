@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli:study_encode",
-  "digest": "sha256:b1b96588fb163ec6763b02e7ecad710a1a48b4589ce9f9ede076597a134bf7c4",
+  "digest": "sha256:a8d586df738ef2407310ca4a650c7e3c4bb6b8224ec18ea84f1e8706d5c50d0f",
   "entrypoint": "free-foundations study encode",
   "fallbacks": [
     {"module":"free_foundations.contracts","path":"src/python/apps/free_foundations/src/free_foundations/contracts.py","reason":"imported reference FloatArray could not resolve 'FloatArray'"}
@@ -92,7 +92,7 @@
     {"digest":"sha256:ab1db3889c8367ba79192100538348b6c1c36682d366ae2346c0357b3ecb9b4a","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:Tokens=free_foundations:Tokens>"},
     {"digest":"sha256:60840c5d7efc43df87d3f87087f40eb6bd57d46840110b3b50f65012a4353347","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:UTC=datetime:UTC>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:annotations=__future__:annotations>"},
-    {"digest":"sha256:09d7cc71a51241798e49ab497a2e95c79b0a14b0301ab2620887f0e74d159a06","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:dataclass=dataclasses:dataclass>"},
+    {"digest":"sha256:321ed2ed3afceb74be547c9905ed4c676e453b1a68fe7cb2d3e214caeac2624d","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:dataclass=dataclasses:dataclass>"},
     {"digest":"sha256:60840c5d7efc43df87d3f87087f40eb6bd57d46840110b3b50f65012a4353347","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:datetime=datetime:datetime>"},
     {"digest":"sha256:ab1db3889c8367ba79192100538348b6c1c36682d366ae2346c0357b3ecb9b4a","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:from_fitted=free_foundations:from_fitted>"},
     {"digest":"sha256:893ec45e5e209fec96e180e6e5736cfb6d4069888e88f0ca5e30b4d0cb988e1e","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/representations/encoding.py","symbol":"free_foundations.representations.encoding:<binding:inference_device=free_foundations.runtime:inference_device>"},

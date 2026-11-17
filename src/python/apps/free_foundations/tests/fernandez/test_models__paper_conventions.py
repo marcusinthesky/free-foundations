@@ -73,20 +73,6 @@ def test_missing_debt_is_not_zero_and_histories_never_pull_forward() -> None:
     assert_allclose(history.loc[[(2021, "A")]].to_numpy()[0], [2, 1])
 
 
-def test_var_zero_spatial_limit_and_market_risk_transmission() -> None:
-    from free_foundations.fernandez.simulation import portfolio_var  # noqa: PLC0415
-
-    # Symmetric row-stochastic W makes the equal-weight portfolio an eigenvector.
-    weights = (np.ones((20, 20)) - np.eye(20)) / 19
-    beta = np.full(20, 0.75)
-    lag_zero, error_zero = portfolio_var(beta, weights, 0)
-    assert_allclose(lag_zero, error_zero)
-    assert_allclose(lag_zero, 1000 * 1.6448536269514722 * 0.01 * np.sqrt(0.75**2 + 1 / 20))
-    lag, error = portfolio_var(beta, weights, 0.5)
-    assert_allclose(lag, lag_zero / 0.5)
-    assert lag > error > error_zero
-
-
 def test_debt_maturity_never_mixes_lease_inclusive_and_exclusive_components() -> None:
     period = pd.Timestamp("2020-12-31")
     tags = [

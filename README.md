@@ -8,8 +8,8 @@ The [paper](src/latex/main.tex), *Pretrained Tabular Features and the Measuremen
 Financial Proximity*, separates predictive information, economic alignment and
 exposure estimation. Its mathematical framework is checked in Lean while the
 empirical study migrates to CRSP CIZ total returns and dated SEC disclosures.
-Numerical conclusions from the earlier current-survivor experiment are archived in
-[research/archive/current-survivor](research/archive/current-survivor).
+Numerical conclusions from the earlier current-survivor experiment remain only in
+the Git history; they are not findings of this study.
 
 Annual membership selects the prior-December top 1,000 CRSP securities, then groups
 selected classes into issuer portfolios. All analyses use the same quarterly issuer

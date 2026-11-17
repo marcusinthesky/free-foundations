@@ -23,41 +23,6 @@ FACTOR_NAMES = {
 }
 
 
-def quarterly_data(
-    prices: pd.DataFrame,
-    factors: pd.DataFrame,
-    *,
-    factor_columns: tuple[str, ...] = ("Mkt-RF",),
-    start: str = "2016-01-01",
-    end: str = "2025-12-31",
-) -> pd.DataFrame:
-    """Compound daily total returns and RF separately before computing quarterly excess.
-
-    The market excess return compounds the total market return and subtracts compounded
-    RF. Long-short factors are compounded as prod(1 + f) - 1: a compounded daily-factor
-    proxy, not a quarterly payoff built from the factor's long and short legs.
-    """
-    returns = prices.pct_change(fill_method=None).reindex(factors.index)
-    quarterly = (1 + returns).resample("QE").prod(min_count=1) - 1
-    counts = returns.resample("QE").count()
-    quarterly = quarterly.where(counts.eq(returns.resample("QE").size(), axis=0))
-    risk_free = (1 + factors["RF"]).resample("QE").prod() - 1
-    quarterly = quarterly.sub(risk_free, axis=0)
-    frame = (
-        quarterly.rename_axis(index="date")
-        .reset_index()
-        .melt(id_vars="date", var_name="ticker", value_name="excess")
-        .dropna()
-    )
-    for column in factor_columns:
-        if column == "Mkt-RF":
-            values = (1 + factors["Mkt-RF"] + factors["RF"]).resample("QE").prod() - 1 - risk_free
-        else:
-            values = (1 + factors[column]).resample("QE").prod() - 1
-        frame[FACTOR_NAMES[column]] = frame["date"].map(values)
-    return frame.loc[frame["date"].between(start, end)]
-
-
 def robust_betas(  # noqa: PLR0913 -- keyword-only R runtime options.
     quarters: pd.DataFrame,
     output: Path,

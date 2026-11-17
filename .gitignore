@@ -34,6 +34,8 @@ lean_decls
 *.paux
 # Conversation transcripts stay local; plans and references are tracked records.
 /.context/chat/
+# Local scratch, including old-study outputs kept outside the research tree.
+/.context/tmp/
 
 # LaTeX intermediates.
 *.aux
