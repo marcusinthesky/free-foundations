@@ -6,15 +6,15 @@ description: "Typed measurements of firm proximity from tabular foundation model
 
 The [paper](src/latex/projects/free-foundations/src/body.tex), *Pretrained Tabular
 Features and the Measurement of Financial Proximity*, studies economic measurement
-with frozen tabular representations. Its shared outline is being developed for
-arXiv and FinFM targets. The mathematical framework is checked in Lean; the
+with frozen tabular representations. The manuscript has shared arXiv and FinFM
+targets. The mathematical framework is checked in Lean; the
 empirical study uses CRSP CIZ total returns and dated SEC CompanyFacts.
 
-Each December's top 1,000 CRSP issuers form a cohort followed through exits. The
-study replicates Fernández's characteristic-history spatial CAPM, then asks whether
-networks built directly from four pinned tabular foundation models' representations
-organize return premia and co-movement. Only the spatial coefficient is fitted to
-returns; every estimate carries an in-sample interval.
+Each December's top 1,000 CRSP common securities form issuer portfolios followed
+through the outcome window. The study reimplements Fernández's characteristic-history
+spatial CAPM in US data and examines the geometry of frozen tabular representations.
+The workshop candidate reports an audited characteristic fit and a dated
+descriptive TabPFN comparison.
 
 | Directory | Purpose |
 | --- | --- |

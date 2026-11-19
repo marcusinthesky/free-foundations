@@ -1,9 +1,9 @@
-# Pipeline layers: raw -> processed -> research (data/README.md).
+# Pipeline layers: raw -> processed -> research -> publication (data/README.md).
 #
 ## Raw: frozen sources
 # The WRDS CRSP CIZ extract, public SEC CompanyFacts and submissions, historical
 # identifier evidence and French factors, acquired explicitly into data/staging and
-# promoted by `stages raw freeze`. Pinned model weights are verified local downloads.
+# promoted by `raw freeze`. Pinned model weights are verified local downloads.
 #
 ## Processed: reusable panels
 # One quarterly issuer roster and outcome mask, December formation cohorts, as-of
@@ -13,13 +13,13 @@
 # Fernández cross-sections, quarterly spatial co-movement panels and Mantel
 # alignment, each with in-sample intervals, then the saved-result report.
 vars:
-- py: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations stages
-- models: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen --package free-foundations --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations stages
+- py: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations
+- models: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen --package free-foundations --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations
 - semflow: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow
 
 # Publication writes its metrics inside its tracked output directory.
 metrics:
-- data/research/crsp-sec/publication/metrics.json
+- data/publication/crsp-sec/free-foundations/metrics.json
 
 stages:
   semflow_refresh:
@@ -30,42 +30,36 @@ stages:
     deps:
     - semflow.toml
     - src/python/pyproject.toml
-    - src/python/apps/free_foundations/pyproject.toml
-    - src/python/uv.lock
     - src/python/apps/free_foundations/src
     outs:
     - .semflow/hashes:
         cache: false
 
-  crsp_sec_sources:
+  raw_sources:
     desc: >-
       Frozen CRSP CIZ monthly extract, SEC CompanyFacts, submissions, identifier
-      evidence and French factors. Acquisition is `stages raw acquire` then `freeze`.
+      evidence and French factors. Acquisition is `raw acquire` then `freeze`.
     cmd: 'false'
     frozen: true
-    deps:
-    - src/python/uv.lock
     outs:
     - data/raw/crsp-sec:
         persist: true
 
-  model_checkpoints:
+  raw_fetch_checkpoints:
     desc: Acquire and verify the four pinned pretrained model revisions.
-    cmd: ${models} raw checkpoints --output data/raw/models
+    cmd: ${models} raw fetch-checkpoints --output data/raw/models
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/raw/checkpoints.json
-    - src/python/uv.lock
-    - src/python/apps/free_foundations/pyproject.toml
-    - src/python/apps/free_foundations/src/free_foundations/checkpoints.json
+    - .semflow/hashes/entrypoints/free-foundations/raw/fetch-checkpoints.json
+    - src/python/apps/free_foundations/src/free_foundations/encoders/checkpoints.json
     outs:
     - data/raw/models/manifest.json
 
-  prepare:
+  processed_prepare_panel:
     desc: >-
       Quarterly issuer roster and outcome mask, December formation cohorts, CRSP-ME
       characteristics, current SIC and as-of CompanyFacts information sets.
     cmd: >-
-      ${py} processed prepare --sources data/raw/crsp-sec
+      ${py} processed prepare-panel --sources data/raw/crsp-sec
       --output data/processed/crsp-sec/panel
     params:
     - study.version
@@ -77,18 +71,35 @@ stages:
     - study.formation_years
     - study.window_quarters
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/processed/prepare.json
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-panel.json
     - data/raw/crsp-sec
-    - src/python/uv.lock
     outs:
     - data/processed/crsp-sec/panel
 
-  representations:
-    desc: Both information rungs with every pinned model and the direct control.
+  processed_prepare_contexts:
+    desc: Materialize shared dated support and query contexts.
+    cmd: ${py} processed prepare-contexts
+    params:
+    - study.panel_start
+    - study.characteristic_history_years
+    - study.standard_min_coverage
+    - study.support_rows
+    - study.rungs
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-contexts.json
+    - data/processed/crsp-sec/panel
+    outs:
+    - data/processed/crsp-sec/contexts
+
+  processed_encode:
+    matrix:
+      rung: ${study.rungs}
+      model: ${study.models}
+    desc: Extract frozen states for one model and information rung.
     cmd: >-
-      ${models} processed encode --panel data/processed/crsp-sec/panel
-      --weights data/raw/models --states data/processed/crsp-sec/state-cache
-      --output data/processed/crsp-sec/representations
+      ${models} processed encode --rung ${item.rung} --model ${item.model} --panel data/processed/crsp-sec/panel
+      --weights data/raw/models --states data/cache/crsp-sec/state-cache
+      --output data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
     params:
     - study.panel_start
     - study.characteristic_history_years
@@ -98,108 +109,182 @@ stages:
     - study.rungs
     - study.models
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/processed/encode.json
-    - data/processed/crsp-sec/panel
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode.json
+    - data/processed/crsp-sec/panel/manifest.json
+    - data/processed/crsp-sec/contexts
     - data/raw/models/manifest.json
-    - src/python/uv.lock
-    - src/python/apps/free_foundations/pyproject.toml
+    outs:
+    - data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+
+  processed_direct:
+    foreach: ${study.rungs}
+    do:
+      desc: Compute the direct control for one information rung.
+      cmd: >-
+        ${py} processed direct --rung ${item} --panel data/processed/crsp-sec/panel
+        --output data/processed/crsp-sec/state-parts/${item}/direct
+      params:
+      - study.panel_start
+      - study.characteristic_history_years
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.support_rows
+      - study.rungs
+      - study.models
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/direct.json
+      - data/processed/crsp-sec/panel/manifest.json
+      - data/processed/crsp-sec/contexts
+      outs:
+      - data/processed/crsp-sec/state-parts/${item}/direct
+
+  processed_assemble_states:
+    desc: Assemble the matched frozen readouts and direct controls.
+    cmd: ${py} processed assemble-states
+    params:
+    - study.models
+    - study.rungs
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/assemble-states.json
+    - data/processed/crsp-sec/state-parts
     outs:
     - data/processed/crsp-sec/representations
 
-  replication:
-    desc: >-
-      Fernández cross-sections for every formation and network: MM betas, OLS,
-      spatial lag (IV and ML) and error (ML), with and without an intercept.
-    cmd: >-
-      ${py} research replicate --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations
-      --output data/research/crsp-sec/replication
+  research_replicate:
+    foreach: ${study.formation_years}
+    do:
+      desc: >-
+        Fernández cross-sections for every formation and network: MM betas, OLS,
+        spatial lag (IV and ML) and error (ML), with and without an intercept.
+      cmd: >-
+        ${py} research replicate --formation ${item} --panel data/processed/crsp-sec/panel
+        --representations data/processed/crsp-sec/representations
+        --output data/research/crsp-sec/experiments/replication/formations/${item}
+      params:
+      - study.characteristic_history_years
+      - study.min_beta_quarters
+      - study.primary_formation
+      - study.generated_beta_draws
+      - study.neighbours
+      - study.neighbour_sensitivities
+      - study.seed
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/research/replicate.json
+      - data/processed/crsp-sec/panel
+      - data/processed/crsp-sec/representations
+      - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+      - infra/nix/devenv.nix
+      - devenv.lock
+      outs:
+      - data/research/crsp-sec/experiments/replication/formations/${item}
+
+  research_collect_replication:
+    desc: Collect replication tables in formation order.
+    cmd: ${py} research collect-replication
     params:
-    - study
+    - study.characteristic_history_years
+    - study.min_beta_quarters
+    - study.primary_formation
+    - study.generated_beta_draws
+    - study.neighbours
+    - study.neighbour_sensitivities
+    - study.seed
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/replicate.json
+    - .semflow/hashes/entrypoints/free-foundations/research/collect-replication.json
+    - data/research/crsp-sec/experiments/replication/formations
+    outs:
+    - data/research/crsp-sec/experiments/replication/summary
+
+  research_estimate_comovement:
+    desc: Quarterly spatial panels of excess returns with period effects, by network.
+    cmd: >-
+      ${py} research estimate-comovement --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations
+      --output data/research/crsp-sec/experiments/comovement/summary
+    params:
+    - study.panel_start
+    - study.characteristic_history_years
+    - study.min_beta_quarters
+    - study.generated_beta_draws
+    - study.likelihood_draws
+    - study.neighbours
+    - study.neighbour_sensitivities
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/estimate-comovement.json
     - data/processed/crsp-sec/panel
     - data/processed/crsp-sec/representations
-    - src/python/apps/free_foundations/src/free_foundations/fernandez/betas.R
-    - src/python/uv.lock
+    - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
     - infra/nix/devenv.nix
     - devenv.lock
     outs:
-    - data/research/crsp-sec/replication
+    - data/research/crsp-sec/experiments/comovement/summary
 
-  comovement:
-    desc: Quarterly spatial panels of excess returns with period effects, by network.
-    cmd: >-
-      ${py} research comovement --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations
-      --output data/research/crsp-sec/comovement
-    params:
-    - study
-    deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/comovement.json
-    - data/processed/crsp-sec/panel
-    - data/processed/crsp-sec/representations
-    - src/python/uv.lock
-    outs:
-    - data/research/crsp-sec/comovement
-
-  alignment:
+  research_measure_alignment:
     desc: Mantel association of network distances with realized return co-movement.
     cmd: >-
-      ${py} research alignment --panel data/processed/crsp-sec/panel
+      ${py} research measure-alignment --panel data/processed/crsp-sec/panel
       --representations data/processed/crsp-sec/representations
-      --output data/research/crsp-sec/alignment
+      --output data/research/crsp-sec/experiments/alignment/summary
     params:
-    - study
+    - study.primary_formation
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.mantel_draws
+    - study.seed
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/alignment.json
+    - .semflow/hashes/entrypoints/free-foundations/research/measure-alignment.json
     - data/processed/crsp-sec/panel
     - data/processed/crsp-sec/representations
-    - src/python/uv.lock
     outs:
-    - data/research/crsp-sec/alignment
+    - data/research/crsp-sec/experiments/alignment/summary
 
-  apt:
+  research_estimate_apt:
     desc: Out-of-sample spatial APT on characteristic, raw and calibrated foundation-model geometry.
     cmd: >-
-      ${py} research apt --panel data/processed/crsp-sec/panel
+      ${py} research estimate-apt --panel data/processed/crsp-sec/panel
       --representations data/processed/crsp-sec/representations
       --factors data/raw/crsp-sec/factors
-      --output data/research/crsp-sec/apt
+      --output data/research/crsp-sec/experiments/apt/summary
     params:
-    - study
+    - study.characteristic_history_years
     - apt
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/apt.json
+    - .semflow/hashes/entrypoints/free-foundations/research/estimate-apt.json
     - data/processed/crsp-sec/panel
     - data/processed/crsp-sec/representations
     - data/raw/crsp-sec/factors/F-F_Research_Data_5_Factors_2x3_CSV.zip
     - data/raw/crsp-sec/factors/F-F_Momentum_Factor_CSV.zip
-    - src/python/uv.lock
     outs:
-    - data/research/crsp-sec/apt
+    - data/research/crsp-sec/experiments/apt/summary
 
-  publication:
+  publication_render:
     desc: Tables, figures and the claims audit from saved results only.
     cmd: >-
-      ${py} research publish --panel data/processed/crsp-sec/panel
-      --replication data/research/crsp-sec/replication
-      --comovement data/research/crsp-sec/comovement
-      --alignment data/research/crsp-sec/alignment
-      --apt data/research/crsp-sec/apt
-      --output data/research/crsp-sec/publication
+      ${py} publication render --panel data/processed/crsp-sec/panel
+      --replication data/research/crsp-sec/experiments/replication/summary
+      --comovement data/research/crsp-sec/experiments/comovement/summary
+      --alignment data/research/crsp-sec/experiments/alignment/summary
+      --apt data/research/crsp-sec/experiments/apt/summary
+      --output data/publication/crsp-sec/free-foundations
       --generated src/latex/projects/free-foundations/src/generated
     params:
-    - study
+    - study.primary_formation
+    - study.window_quarters
+    - study.min_beta_quarters
+    - study.generated_beta_draws
+    - study.neighbours
+    - study.panel_start
+    - study.archive_end
+    - study.likelihood_draws
     deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/publish.json
+    - .semflow/hashes/entrypoints/free-foundations/publication/render.json
     - data/processed/crsp-sec/panel/manifest.json
-    - data/raw/models/manifest.json
-    - data/research/crsp-sec/replication
-    - data/research/crsp-sec/comovement
-    - data/research/crsp-sec/alignment
-    - data/research/crsp-sec/apt
-    - src/python/uv.lock
+    - data/processed/crsp-sec/panel/membership.parquet
+    - data/research/crsp-sec/experiments/replication/summary
+    - data/research/crsp-sec/experiments/comovement/summary
+    - data/research/crsp-sec/experiments/alignment/summary
+    - data/research/crsp-sec/experiments/apt/summary
     outs:
     - src/latex/projects/free-foundations/src/generated
-    - data/research/crsp-sec/publication
+    - data/publication/crsp-sec/free-foundations

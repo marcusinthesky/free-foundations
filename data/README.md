@@ -4,18 +4,19 @@ description: The layered DVC pipeline, its data directories, storage and restora
 
 # Data and pipeline
 
-[DVC](https://dvc.org) runs the study in three layers, configured by
+[DVC](https://dvc.org) runs the study in four layers, configured by
 [`params.yaml`](../params.yaml). The [study contract](research/crsp-sec/README.md)
 states every scientific choice.
 
 | Layer | Directory | Stages |
 | --- | --- | --- |
-| Raw | `data/raw/crsp-sec`, `data/raw/models` | `crsp_sec_sources` (frozen), `model_checkpoints` |
-| Processed | `data/processed/crsp-sec/{panel,representations}` | `prepare`, `representations` |
-| Research | `data/research/crsp-sec/{replication,comovement,alignment,publication}` | `replication`, `comovement`, `alignment`, `publication` |
+| Raw | `data/raw/{crsp-sec,models}` | Frozen source inventory and verified checkpoint manifest |
+| Processed | `data/processed/crsp-sec/{panel,contexts,state-parts,representations}` | Shared contexts, eight rung/model cells, two direct controls and assembled states |
+| Research | `data/research/crsp-sec/experiments/<experiment>/` | Formation-specific replications and each experiment’s summary |
+| Publication | `data/publication/crsp-sec/free-foundations/` | Metrics, claims and generated manuscript exhibits |
 
-`data/staging` holds explicit source acquisition and is never a DVC input. The
-representation state cache under `data/processed/crsp-sec/state-cache` and the model
+`data/staging` holds explicit source acquisition and stays outside DVC inputs. The
+representation state cache under `data/cache/crsp-sec/state-cache` and the model
 weights under `data/raw/models/*/` are local, verified and reproducible.
 
 ```sh
@@ -27,16 +28,22 @@ just alignment                       # Mantel alignment
 just publication                     # tables, figure and metrics from saved results
 ```
 
-Each command line is `free-foundations stages <layer> <command>` with explicit inputs
+Run one encoding cell with `just dvc repro processed_encode@fernandez-tabpfn_full`
+or a formation with `just dvc repro research_replicate@2015`. The full groups
+use the rung, model and formation lists in `params.yaml`. Each worker owns a
+separate directory. Collectors verify input identity and publish the common
+representation store and replication summary used downstream.
+
+Each command line is `free-foundations <layer> <command>` with explicit inputs
 and outputs; `just build` checks fingerprints and reruns stale stages. Every stage
 declares the `params.yaml` keys it reads. [semflow](https://github.com/marcusinthesky/semflow)
 fingerprints the code each command reaches, so documentation edits do not rerun model
 inference. After code changes run `just semflow-refresh`; after changing stage
 commands review `just semflow-patch`, then run `just semflow-apply`.
 
-Acquisition never runs the staged WRDS extraction script and is the only networked
-operation. Set `EDGAR_IDENTITY` to a contact name and email for SEC requests.
-Routine stages never access the network.
+Acquisition archives the supplied WRDS extraction script. Raw source recovery
+and checkpoint downloads use the network. Each estimator
+uses verified local inputs. Set `EDGAR_IDENTITY` to a contact name and email for SEC requests.
 
 ## Storage and restoration
 

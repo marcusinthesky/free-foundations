@@ -8,7 +8,7 @@ default:
 setup:
     env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv sync --locked --all-packages --all-extras
 
-# Run the study CLI from the repository root, for example: just python::run study prepare
+# Run the study CLI from the repository root, for example: just python::run processed prepare-panel
 run *args:
     cd ../.. && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations "$@"
 

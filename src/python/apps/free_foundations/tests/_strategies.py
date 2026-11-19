@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 from hypothesis.strategies import DrawFn, SearchStrategy
 
-from free_foundations.contracts import FloatArray, PanelBatch, Tokens
+from free_foundations.encoders.contracts import FloatArray, PanelBatch, Tokens
 from free_foundations.study.spec import StudySpec
 
 CUTOFF = datetime(2025, 1, 1, tzinfo=UTC)

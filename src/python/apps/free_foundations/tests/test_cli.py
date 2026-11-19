@@ -8,7 +8,7 @@ from typer.main import get_command
 from typer.testing import CliRunner
 
 from free_foundations import cli
-from free_foundations.stages import raw
+from free_foundations.cli import raw
 
 RUNNER = CliRunner()
 PIPELINE = (
@@ -16,22 +16,17 @@ PIPELINE = (
 )
 
 
-def commands() -> list[tuple[str, str, str]]:
+def commands() -> list[tuple[str, str]]:
     """Every registered stages/layer/command triple."""
     groups = get_command(cli.app).commands  # type: ignore[attr-defined]
-    return [
-        (group, layer, name)
-        for group, item in groups.items()
-        for layer, sub in item.commands.items()
-        for name in sub.commands
-    ]
+    return [(layer, name) for layer, sub in groups.items() for name in sub.commands]
 
 
 @pytest.mark.component
-@pytest.mark.parametrize(("group", "layer", "name"), commands())
-def test_every_command_resolves(group: str, layer: str, name: str) -> None:
+@pytest.mark.parametrize(("layer", "name"), commands())
+def test_every_command_resolves(layer: str, name: str) -> None:
     # Act
-    result = RUNNER.invoke(cli.app, [group, layer, name, "--help"])
+    result = RUNNER.invoke(cli.app, [layer, name, "--help"])
 
     # Assert
     assert result.exit_code == 0, result.output
@@ -41,17 +36,21 @@ def test_every_command_resolves(group: str, layer: str, name: str) -> None:
 def test_only_layered_pipeline_commands_are_exposed() -> None:
     # Act / Assert
     assert set(commands()) == {
-        ("stages", "raw", "acquire"),
-        ("stages", "raw", "link"),
-        ("stages", "raw", "freeze"),
-        ("stages", "raw", "checkpoints"),
-        ("stages", "processed", "prepare"),
-        ("stages", "processed", "encode"),
-        ("stages", "research", "replicate"),
-        ("stages", "research", "comovement"),
-        ("stages", "research", "alignment"),
-        ("stages", "research", "apt"),
-        ("stages", "research", "publish"),
+        ("raw", "acquire"),
+        ("raw", "link"),
+        ("raw", "freeze"),
+        ("raw", "fetch-checkpoints"),
+        ("processed", "prepare-panel"),
+        ("processed", "encode"),
+        ("processed", "direct"),
+        ("research", "replicate"),
+        ("research", "collect-replication"),
+        ("processed", "assemble-states"),
+        ("processed", "prepare-contexts"),
+        ("research", "estimate-comovement"),
+        ("research", "measure-alignment"),
+        ("research", "estimate-apt"),
+        ("publication", "render"),
     }
 
 
@@ -64,7 +63,7 @@ def test_every_stage_runs_a_registered_command() -> None:
 
     # Act / Assert
     for stage in pipeline["stages"].values():
-        command = stage["cmd"]
+        command = stage.get("do", stage)["cmd"]
         if stage.get("frozen"):
             assert command == "false"
             continue
@@ -76,7 +75,7 @@ def test_every_stage_runs_a_registered_command() -> None:
             continue
         # `--package free-foundations` names the project; the executable is the last mention.
         start = len(words) - 1 - words[::-1].index("free-foundations")
-        assert " ".join(words[start : start + 4]) in registered, command
+        assert " ".join(words[start : start + 3]) in registered, command
 
 
 @pytest.mark.component
@@ -93,7 +92,6 @@ def test_acquisition_writes_staging_and_forwards_modes(monkeypatch: pytest.Monke
     result = RUNNER.invoke(
         cli.app,
         [
-            "stages",
             "raw",
             "acquire",
             "--crsp-csv",
@@ -121,12 +119,12 @@ def test_freeze_forwards_staging_and_canonical_paths(monkeypatch: pytest.MonkeyP
     def record(**kwargs: object) -> None:
         calls.append(kwargs)
 
-    monkeypatch.setattr(raw.run, "freeze", record)
+    monkeypatch.setattr(raw.promotion, "freeze", record)
 
     # Act
     result = RUNNER.invoke(
         cli.app,
-        ["stages", "raw", "freeze", "--staging", "staged", "--canonical", "frozen"],
+        ["raw", "freeze", "--staging", "staged", "--canonical", "frozen"],
     )
 
     # Assert

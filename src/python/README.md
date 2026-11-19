@@ -9,12 +9,12 @@ never downloads weights or imports an optional model runtime.
 just python::setup         # locked workspace, model runtimes and tools (uses the network)
 just python::check         # lint, strict types, Tach, test layout, Vulture, tests, build
 just python::test-changed  # Testmon's impacted tests during development
-just python::run study prepare
+just python::run processed prepare-panel
 ```
 
 This directory is a uv workspace. The `free-foundations` application lives in
 `apps/free_foundations`, with its tests in `apps/free_foundations/tests` mirroring
-the source modules they exercise: `study/sec.py` owns `tests/study/test_sec.py` and
+the source modules they exercise: `study/sources/sec.py` owns `tests/study/sources/test_sec.py` and
 feature files such as `test_sec__parsing.py`. `just python::layout` enforces this.
 
 The environment includes scientific Python, spatial estimators, Arrow, `arch`,
@@ -31,26 +31,30 @@ The [study contract](../../data/research/crsp-sec/README.md) has one parameter f
 data layer, each with explicit inputs and outputs:
 
 ```sh
-free-foundations stages raw acquire --crsp-csv X.csv --extraction-script X.py
-free-foundations stages raw freeze        # promote completed staging
-free-foundations stages raw checkpoints   # verify the four pinned weights
-free-foundations stages processed prepare # roster, mask, cohorts, characteristics
-free-foundations stages processed encode  # both rungs, every model and control
-free-foundations stages research replicate   # Fernández cross-sections
-free-foundations stages research comovement  # quarterly spatial panels
-free-foundations stages research alignment   # Mantel alignment
-free-foundations stages research publish     # tables, figure, metrics
+free-foundations raw acquire --crsp-csv X.csv --extraction-script X.py
+free-foundations raw freeze        # promote completed staging
+free-foundations raw fetch-checkpoints   # verify the four pinned weights
+free-foundations processed prepare-panel # roster, mask, cohorts, characteristics
+free-foundations processed prepare-contexts
+free-foundations processed encode --rung fernandez --model tabpfn_full
+free-foundations processed direct --rung fernandez
+free-foundations processed assemble-states
+free-foundations research replicate --formation 2015
+free-foundations research collect-replication
+free-foundations research estimate-comovement  # quarterly spatial panels
+free-foundations research measure-alignment   # Mantel alignment
+free-foundations publication render     # tables, figure, metrics
 ```
 
 Run them through `just dvc repro <stage>` to honor dependencies. Acquisition is the
-only networked command and never executes the staged extraction script.
+raw financial-source network boundary. Missing weights are fetched by raw fetch-checkpoints.
 
-`study` owns CRSP cohorts, SEC linkage and XBRL parsing, factor construction,
-representation encoding, networks, the three research layers and publication.
-`study.spatial` is the statadic boundary; `study.spatial_ml` holds the eigenvalue
-profile likelihood used for resampling and panels, checked against statadic.
-`fernandez` holds the characteristic definitions and the R MM beta script;
-`representations` supplies the pinned adapters; `stages` is the Typer CLI.
+`cli` exposes the four layers. `study.sources` owns acquisition and source adapters,
+`study.panel` owns panel preparation and verification, and `study.representations`
+owns dated contexts, extraction and saved-state readers. `study.experiments`
+produces research results and `study.publication` renders them. Reusable fitting
+and graph methods live in `methods`, including the Fernández R estimator.
+`encoders` owns the public interfaces and pinned backend adapters.
 
 All research stages verify the shared panel, roster and outcome-mask hashes.
 Features use dated disclosures before each quarter's trading cutoff. Native

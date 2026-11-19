@@ -12,6 +12,10 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from free_foundations.artifacts.hashes import (
+    file_hash as file_hash,  # noqa: PLC0414 -- historical study API.
+)
+
 CHARACTERISTICS = (
     "market_cap_assets",
     "market_to_book",
@@ -140,6 +144,16 @@ class StudySpec:
         """Identify every scientific setting, independently of source-file identities."""
         return digest_json(self.payload())
 
+    def experiment_digest(self, fields: tuple[str, ...]) -> str:
+        """Bind the population and the settings consumed by one experiment."""
+        payload = self.payload()
+        return digest_json(
+            {
+                "population": self.population_digest,
+                "settings": {key: payload[key] for key in fields},
+            }
+        )
+
     @classmethod
     def read(cls, path: Path = PARAMS) -> StudySpec:
         """Read the ``study`` section of DVC params, refusing an undeclared version."""
@@ -157,15 +171,6 @@ def digest_json(value: object) -> str:
     """Hash a deterministic JSON representation; reject nonfinite metadata."""
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return hashlib.sha256(encoded.encode()).hexdigest()
-
-
-def file_hash(path: Path) -> str:
-    """Hash source bytes without loading large documents into memory."""
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def frame_digest(frame: pd.DataFrame) -> str:

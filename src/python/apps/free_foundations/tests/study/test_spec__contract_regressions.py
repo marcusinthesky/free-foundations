@@ -13,8 +13,9 @@ import pandas as pd
 import pytest
 import yaml
 
-from free_foundations.study import factors, features
-from free_foundations.study.factors import acquire_factors, parse_monthly, quarterly_factors
+from free_foundations.study.panel import features
+from free_foundations.study.sources import factors
+from free_foundations.study.sources.factors import acquire_factors, parse_monthly, quarterly_factors
 from free_foundations.study.spec import StudySpec, panel_contract
 from tests._strategies import compact_spec
 
