@@ -1,3 +1,3 @@
 [codespell]
-skip = uv.lock,devenv.lock,lake-manifest.json,dvc.lock,.semflow/*
+skip = uv.lock,devenv.lock,lake-manifest.json,dvc.lock,.semflow/*,src/latex/finfm/aaai2027.sty,src/latex/finfm/aaai2027.bst
 ignore-words-list = insitu,acn,statics

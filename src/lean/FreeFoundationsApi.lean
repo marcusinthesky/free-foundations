@@ -3342,3 +3342,84 @@ universe u_3 u_4
     ‖(condExpL2 E ℝ hH Y : Lp E 2 μ) - Y‖ ^ 2 ≤
       ‖(condExpL2 E ℝ (hZH.trans hH) Y : Lp E 2 μ) - Y‖ ^ 2
 end LocalTheoryContract61
+
+-- Neighbour-set contracts added for the FinFM workshop paper (2026-11-19).
+section NeighbourContract0
+universe u_1
+#assert_signature FreeFoundations.Neighbours.neighbourSet_unique [u_1] :
+  ∀ {ι : Type u_1} [inst : DecidableEq ι] {d : ι → ℝ} {i : ι} {S T : Finset ι},
+    FreeFoundations.Neighbours.IsNeighbourSet d i (S : Set ι) →
+      FreeFoundations.Neighbours.IsNeighbourSet d i (T : Set ι) →
+        i ∉ S → i ∉ T → S.card = T.card → S = T
+end NeighbourContract0
+
+section NeighbourContract1
+universe u_1
+#assert_signature FreeFoundations.Neighbours.neighbourSet_stable [u_1] :
+  ∀ {ι : Type u_1} {d d' : ι → ℝ} {i : ι} {S : Set ι} {γ ε : ℝ},
+    FreeFoundations.Neighbours.HasMargin d i S γ →
+      (∀ (j : ι), |d' j - d j| ≤ ε) →
+        2 * ε < γ → FreeFoundations.Neighbours.IsNeighbourSet d' i S
+end NeighbourContract1
+
+section NeighbourContract2
+universe u_1 u_2
+#assert_signature FreeFoundations.Neighbours.neighbourSet_of_exposures [u_1, u_2] :
+  ∀ {ι : Type u_1} {A : Type u_2} [inst : NormedAddCommGroup A] {a ah : ι → A} {δ : ι → ℝ}
+    {δmax γ : ℝ} {i : ι} {S : Set ι},
+    FreeFoundations.Neighbours.HasMargin (fun (j : ι) => ‖a i - a j‖) i S γ →
+      (∀ (j : ι), ‖ah j - a j‖ ≤ δ j) →
+        (∀ (j : ι), δ j ≤ δmax) →
+          2 * (δ i + δmax) < γ →
+            FreeFoundations.Neighbours.IsNeighbourSet (fun (j : ι) => ‖ah i - ah j‖) i S
+end NeighbourContract2
+
+section NeighbourContract3
+universe u_1 u_2
+#assert_signature FreeFoundations.Neighbours.neighbourSet_of_estimated_margin [u_1, u_2] :
+  ∀ {ι : Type u_1} {A : Type u_2} [inst : NormedAddCommGroup A] {a ah : ι → A} {δ : ι → ℝ}
+    {δmax γ : ℝ} {i : ι} {S : Set ι},
+    FreeFoundations.Neighbours.HasMargin (fun (j : ι) => ‖ah i - ah j‖) i S γ →
+      (∀ (j : ι), ‖ah j - a j‖ ≤ δ j) →
+        (∀ (j : ι), δ j ≤ δmax) →
+          2 * (δ i + δmax) < γ →
+            FreeFoundations.Neighbours.IsNeighbourSet (fun (j : ι) => ‖a i - a j‖) i S
+end NeighbourContract3
+
+section NeighbourContract4
+universe u_1 u_2
+#assert_signature FreeFoundations.Neighbours.neighbourSet_linear [u_1, u_2] :
+  ∀ {ι : Type u_1} {A : Type u_2} [inst : NormedAddCommGroup A] [inst_1 : Module ℝ A]
+    (g : A →ₗ[ℝ] A) {z : ι → A} {σmin σmax : ℝ} {i : ι} {S : Set ι},
+    (∀ (x : A), σmin * ‖x‖ ≤ ‖g x‖) →
+      (∀ (x : A), ‖g x‖ ≤ σmax * ‖x‖) →
+        (∀ j ∈ S, ∀ l ∉ S, l ≠ i → σmax * ‖z i - z j‖ < σmin * ‖z i - z l‖) →
+          FreeFoundations.Neighbours.IsNeighbourSet (fun (j : ι) => ‖g (z i) - g (z j)‖) i S
+end NeighbourContract4
+
+section NeighbourContract5
+#assert_signature FreeFoundations.Neighbours.anisotropic_flip [] :
+  ‖(!₂[(1 : ℝ), 0] : FreeFoundations.Neighbours.Plane)‖ <
+      ‖(!₂[(0 : ℝ), 2] : FreeFoundations.Neighbours.Plane)‖ ∧
+    ‖FreeFoundations.Neighbours.stretch !₂[(0 : ℝ), 2]‖ <
+      ‖FreeFoundations.Neighbours.stretch !₂[(1 : ℝ), 0]‖
+end NeighbourContract5
+
+section NeighbourContract6
+universe u_1
+#assert_signature FreeFoundations.Neighbours.IsNeighbourSet [u_1] :
+  {ι : Type u_1} → (ι → ℝ) → ι → Set ι → Prop
+end NeighbourContract6
+
+section NeighbourContract7
+universe u_1
+#assert_signature FreeFoundations.Neighbours.HasMargin [u_1] :
+  {ι : Type u_1} → (ι → ℝ) → ι → Set ι → ℝ → Prop
+end NeighbourContract7
+
+section NeighbourContract8
+#assert_signature FreeFoundations.Neighbours.neighbourSet_margin_sharp [] :
+  FreeFoundations.Neighbours.HasMargin ![(0 : ℝ), 1, 3] 0 {1} 2 ∧
+    (∀ (j : Fin 3), |![(0 : ℝ), 2, 2] j - ![(0 : ℝ), 1, 3] j| ≤ 1) ∧
+      ¬FreeFoundations.Neighbours.IsNeighbourSet ![(0 : ℝ), 2, 2] 0 {1}
+end NeighbourContract8

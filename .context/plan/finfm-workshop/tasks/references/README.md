@@ -15,7 +15,7 @@ Every cited work exists with the stated metadata; records render correctly under
 ## Acceptance
 
 - [ ] Existing records are corrected (Kumo title, Purucker venue, arXiv eprint fields).
-- [ ] New records exist for identifiability, similarity, sufficiency and finance-network work cited in the paper.
+- [x] New records exist for identifiability, similarity, sufficiency and finance-network work cited in the paper.
 - [ ] `just sync` regenerates refs.bib and `just check` passes.
 
 <!-- insitu:begin sql

@@ -65,6 +65,36 @@ in
         ps.epstopdf-pkg
         ps.underscore
         ps.lm
+        # The anonymous FinFM submission: AAAI-27 requires pdfLaTeX, BibTeX and these.
+        ps.bibtex
+        ps.iftex
+        ps.newtx
+        ps.fontaxes
+        ps.xkeyval
+        ps.xstring
+        ps.etoolbox
+        ps.kastrup
+        ps.psnfss
+        ps.helvetic
+        ps.courier
+        ps.placeins
+        ps.xcolor
+        ps.url
+        ps.natbib
+        ps.caption
+        ps.booktabs
+        ps.amsmath
+        ps.amsfonts
+        ps.amscls
+        ps.tools
+        ps.cm-super
+        ps.ec
+        ps.xpatch
+        ps.carlisle
+        ps.oberdiek
+        ps.kvoptions
+        ps.l3packages
+        ps.dvips
       ]))
       pandoc
       # The Fernández replication's robust MM betas (fernandez/betas.R).

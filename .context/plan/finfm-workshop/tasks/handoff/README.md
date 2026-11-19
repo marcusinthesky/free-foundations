@@ -14,9 +14,9 @@ Give Marcus and Chun-Sung an honest account of what the paper establishes, what 
 
 ## Acceptance
 
-- [ ] `audit.md` lists established results, assumptions, checks run and their outputs, and known limitations.
-- [ ] `roadmap.md` sets out the post-workshop CRSP–SEC and journal programme.
-- [ ] `cover-note.md` flags in-person presentation, OpenReview profiles and co-author decisions.
+- [x] `audit.md` lists established results, assumptions, checks run and their outputs, and known limitations.
+- [x] `roadmap.md` sets out the post-workshop CRSP–SEC and journal programme.
+- [x] `cover-note.md` flags in-person presentation, OpenReview profiles and co-author decisions.
 
 <!-- insitu:begin sql
 id = "planning-children"

@@ -1,0 +1,525 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsthm}
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+\setcounter{secnumdepth}{2}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}[proposition]{Theorem}
+\newtheorem{corollary}[proposition]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{remark}[proposition]{Remark}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\NN}{\mathcal{N}}
+\input{generated/results}
+
+\title{When Are Foundation-Model Neighbours Economic?\\
+Predictive Equivalence, Neighbour Margins and a Spatial APT}
+\author{Anonymous Submission}
+\affiliations{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Embeddings from tabular foundation models (TFMs) are increasingly read as maps
+of firms, with nearest neighbours treated as economic peers. We ask when such
+geometry measures an economic relationship rather than merely supporting a
+prediction. Defining proximity as the volatility of the difference between two
+firms' responses to common shocks, we show that predictive content fixes a
+representation only up to the transformations its readout can undo: a
+prediction-preserving linear map can reverse nearest neighbours, also after
+unit normalisation or coordinate standardisation. A task statistic identifies
+an economic target exactly when equal statistics imply equal targets. Given an
+exposure readout, a sharp neighbour-margin certificate states when an estimated
+k-nearest-neighbour network equals the economic one; these results are
+machine-checked in Lean. We then revisit Fern\'andez's characteristic-history
+spatial CAPM on CRSP and SEC data and extend it to an out-of-sample spatial APT
+whose networks come from four synthetic-prior TFMs, both raw and calibrated to
+factor exposures. Calibration raises agreement with estimated exposures, though
+not beyond the TFMs' own inputs, and no TFM network improves out-of-sample
+covariance scores over a five-factor plus momentum APT, whereas industry links
+do.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+Financial networks connect firms that should move together: peers for
+valuation, neighbours for risk spillovers, links for hedging. Learned
+representations offer a tempting shortcut. If a pretrained model encodes each
+firm's accounting history, distances between its states could define the
+network~\citep{gabaix2025asset,hoberg2016}. The premise is that a model that
+predicts well has learned an economically meaningful geometry.
+
+That premise conflates three things. A representation can contain the
+information a prediction needs; its distances can mean something economically;
+and a finite sample can estimate a readout that turns the first into the
+second. We separate them and test the separation on US equities.
+
+\paragraph{Contributions.}
+\emph{(i) Theory.} We define proximity in common-shock exposure units
+(Section~\ref{sec:setup}) and show that predictive equivalence does not
+identify this geometry (Proposition~\ref{prop:equivalence}), that task success
+identifies a target exactly under a factorisation condition
+(Proposition~\ref{prop:alignment}), and that a neighbour-margin condition
+certifies when an estimated k-nearest-neighbour (k-NN) network equals the
+economic one (Theorem~\ref{thm:margin}). The certificate and the counterexample
+are machine-checked in Lean~4 together with the alignment and
+covariance-stability results. \emph{(ii) Replication.} We reimplement
+Fern\'andez's characteristic-history spatial CAPM~\citep{fernandez2011} on
+CRSP and SEC data, and show that her high spatial coefficient reflects a
+near-uniform kernel absorbing the cross-sectional mean
+(Section~\ref{sec:replication}). \emph{(iii) Extension.} We move from CAPM to a
+spatial APT~\citep{kou2018} and compare characteristic, raw TFM and
+exposure-calibrated TFM networks, separating exposure recovery from
+out-of-sample covariance performance (Section~\ref{sec:apt}).
+
+\paragraph{What is not shown.} We do not claim that pretraining helps, that a
+model creates information absent from its inputs, or any causal effect. All
+empirical results are for one roster and one train/test split, use revised
+rather than as-filed disclosures, and are reported whatever their sign.
+
+\section{Economic Proximity}\label{sec:setup}
+At a given date, firm $i$ has residual return $u_i=b_i^\top q+e_i$, where
+$q\in\R^K$ are centred common shocks with covariance $\Omega\succeq0$, $b_i$ are
+exposures and $e_i$ is idiosyncratic. We call
+\begin{equation}\label{eq:distance}
+  d_E(i,j)=\sqrt{\operatorname{Var}\bigl((b_i-b_j)^\top q\bigr)}
+  =\norm{a_i-a_j}_2,
+\end{equation}
+with risk-scaled exposures $a_i=\Omega^{1/2}b_i$,
+the economic distance: the volatility of the difference in two firms' common
+responses, in return units. Risk scaling makes it Euclidean, and
+$b_i^\top\Omega b_j=\tfrac12(\norm{a_i}^2+\norm{a_j}^2-d_E(i,j)^2)$ ties it to
+common covariance. Spatial models use proximity through a row-normalised
+weight matrix $W$; in a k-NN network firm $i$ links to its $k$ nearest firms.
+
+An encoder maps a firm's observed history $H$ to a state $z=E(H)\in\R^d$, with
+pretrained weights and in-context examples held fixed. A readout class
+$\mathcal R$ (for example linear maps, or a TFM's prediction head) turns states
+into predictions $h(z)$. Raw TFM geometry uses distances between states $z_i$;
+calibrated geometry first fits a readout $\hat a=\hat g(z)$ of exposures and
+then uses $\norm{\hat a_i-\hat a_j}$.
+
+\section{Theory}\label{sec:theory}
+\subsection{Predictive equivalence leaves geometry open}
+Call encoders $E,E'$ \emph{predictively equivalent} under $\mathcal R$ if
+$\{h\circ E:h\in\mathcal R\}=\{h\circ E':h\in\mathcal R\}$. Let
+$\mathcal G_{\mathcal R}$ be the group of bijections $g$ of $\R^d$ with
+$h\circ g^{-1}\in\mathcal R$ for all $h\in\mathcal R$. For linear or affine
+readouts $\mathcal G_{\mathcal R}\supseteq GL(d)$; for unrestricted readouts it
+contains every bijection.
+
+\begin{proposition}[Predictive equivalence does not fix
+  neighbours]\label{prop:equivalence}
+  (a) For every $g\in\mathcal G_{\mathcal R}$, $g\circ E$ is predictively
+  equivalent to $E$: $(h\circ g^{-1})(gE(H))=h(E(H))$.
+  (b) Suppose $GL(d)\subseteq\mathcal G_{\mathcal R}$ and $d\ge2$. If
+  $z_i-z_j$ and $z_i-z_l$ are linearly independent, some $g\in GL(d)$ makes $l$
+  strictly nearer to $i$ than $j$, and another makes $j$ strictly nearer.
+  (c) If $d_{ij}<d_{il}$, every linear $g$ with condition number
+  $\kappa(g)<d_{il}/d_{ij}$ preserves the order; when $z_i-z_j\perp z_i-z_l$
+  the bound is attained.
+\end{proposition}
+\noindent Part (a) is immediate. For (b), map $z_i-z_j$ and $z_i-z_l$ to any two
+vectors of chosen lengths in their span and extend by the identity. For (c),
+$\norm{g(z_i-z_j)}\le\sigma_{\max}d_{ij}<\sigma_{\min}d_{il}\le
+\norm{g(z_i-z_l)}$; stretching $z_i-z_j$ by $\kappa$ attains it.
+
+\begin{table}[t]
+  \centering\footnotesize\setlength{\tabcolsep}{3pt}
+  \resizebox{\columnwidth}{!}{\begin{tabular}{@{}lll@{}}
+    \toprule
+    Normalisation & Undoes & Neighbour flip that survives\\
+    \midrule
+    None & --- & $T=\diag(3,1)$: $A{=}0,\,B{=}(1,0),\,C{=}(0,2)$\\
+    Unit norm & scalars & $T=\diag(4,1)$: $\cos^2$ from $(\tfrac12,\tfrac{25}{34})$\\
+    & & \quad to $(\tfrac{16}{17},\tfrac{25}{34})$, $A{=}(1,1)$\\
+    Coordinate $z$-score & diagonal $T$ & shear $(x,y)\mapsto(x{+}y,y)$, Appendix~\ref{app:examples}\\
+    Whitening & $GL(d)$ & any nonlinear bijection\\
+    \bottomrule
+  \end{tabular}}
+  \caption{Prediction-preserving maps that reverse a nearest neighbour after
+    common normalisations. Whitening needs an invertible cross-sectional
+    covariance, which fails when $d>N$ (every TFM state here).}
+  \label{tab:normalisation}
+\end{table}
+
+Table~\ref{tab:normalisation} gives exact examples; the first is a Lean theorem
+and all are unit tests. Normalisation helps only against the transformations it
+cancels. Unit norm cancels scalars; standardisation cancels diagonal stretches
+but not shears; whitening cancels $GL(d)$ but needs $N>d$ and leaves nonlinear
+reparametrisations, which a TFM's nonlinear head absorbs. Even an identified
+geometry need not be economic: whitened distance equals $d_E$ only if the
+economic readout $L$ satisfies $L^\top L\propto\Sigma_z^{-1}$. This generalises
+the diagonal rescaling argument of \citet{steck2024} for cosine similarity and
+is the geometric face of identifiability up to a group~\citep{roeder2021,
+khemakhem2020}; similarity indices deliberately not invariant to $GL(d)$, such
+as CKA~\citep{kornblith2019}, inherit the same dependence on parametrisation.
+
+\subsection{When a task identifies the target}
+Let $F(H)$ be the statistic an ideal task predictor must recover (the
+conditional mean for squared loss, the law for a proper
+score~\citep{gneiting2011}) and $s(H)$ the economic target.
+\begin{proposition}[Alignment~\citep{achille2018}]\label{prop:alignment}
+  Every representation that supports the task ($F=h\circ E$ for some $h$) also
+  determines $s$ if and only if $F(H)=F(H')$ implies $s(H)=s(H')$.
+\end{proposition}
+\noindent ``If'': define $g(F(H))=s(H)$, well defined by assumption; then
+$s=g\circ h\circ E$. ``Only if'': take $E=F$. The condition is necessary and
+sufficient for \emph{all} task-supporting encoders; a particular encoder may
+retain more. Whether it holds is an empirical premise about the task, not a
+consequence of predictive accuracy. The TFMs here are conditioned on a
+valuation task (next-quarter market equity over assets); two firms with equal
+expected valuation ratios can have different factor exposures, so success on
+that task cannot by itself certify exposure geometry. With a linear
+task-to-exposure link of minimum gain $\kappa$, task error $\varepsilon$ and
+misalignment $\nu$ give exposure error at most $(\varepsilon+\nu)/\kappa$
+(Appendix~\ref{app:chain}).
+
+\subsection{A neighbour-margin certificate}
+Let $S_i$ be firm $i$'s strict k-NN set under distances $d$ and
+$\gamma_i=d_{i(k+1)}-d_{i(k)}$ its \emph{margin}: the gap between its $(k{+}1)$th
+and $k$th nearest distances.
+\begin{theorem}[Neighbour-margin certificate]\label{thm:margin}
+  (a) If $\max_j|\hat d_{ij}-d_{ij}|\le\varepsilon<\gamma_i/2$, then
+  $\hat S_i=S_i$; at $\gamma_i=2\varepsilon$ this can fail.
+  (b) If $\norm{\hat a_j-a_j}\le\delta_j\le\delta$ for all $j$, then
+  $|\hat d_{ij}-d_{ij}|\le\delta_i+\delta$, so $\gamma_i>2(\delta_i+\delta)$
+  suffices; the same holds with the estimated margin $\hat\gamma_i$ in place of
+  $\gamma_i$, which is computable.
+  (c) If (a) holds for every firm, the symmetrised, row-normalised k-NN matrix
+  satisfies $\hat W=W$, so every spatial estimate computed from it equals its
+  value on the economic network.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  For $j\in S_i$ and $l\notin S_i$, $\hat d_{ij}\le d_{ij}+\varepsilon<
+  d_{il}-\varepsilon\le\hat d_{il}$; distances $(0,1,3)\to(0,2,2)$ show
+  sharpness. (b) is the reverse triangle inequality, applied symmetrically for
+  $\hat\gamma_i$. (c) follows because $W$ depends only on the neighbour sets.
+\end{proof}
+Part (b) with the linear map of Proposition~\ref{prop:equivalence}(c) gives the
+same message from two sides: neighbours are stable exactly when margins are
+large relative to either estimation error or reparametrisation. When only
+$m$ rows fail, the directed row-normalised k-NN matrix moves by at most
+$\norm{\hat W-W}_F\le\sqrt{2m/k}$, which feeds a covariance-stability bound
+for $\Sigma=(I-\lambda W)^{-1}D(I-\lambda W)^{-\top}$ and a Gaussian-score
+bound (Appendix~\ref{app:chain}); those bounds assume invertibility and a
+resolvent bound rather than deriving them.
+
+\section{Revisiting Fern\'andez's Spatial CAPM}\label{sec:replication}
+Fern\'andez~\citep{fernandez2011} links firms whose financial characteristics
+co-move: $d_{ij}=\sqrt{2(1-r_{ij})}$, with $r_{ij}$ the Spearman correlation of
+characteristic histories, and $W=\operatorname{rownorm}(\exp(-d))$. A
+cross-sectional spatial lag regresses each firm's median quarterly excess
+return on its MM CAPM beta~\citep{yohai1987} and $Wy$, without an intercept.
+Her 1997--2006 data are not available to us, so this is a reimplementation:
+we keep her outcome, betas, distance, kernel, estimators and lack of intercept,
+and change the sample (CRSP December-2015 top-1{,}000 US issuers, \ffWRoster{}
+on the roster and \ffWIssuers{} with enough quarters, followed through exits
+for 2016--2025) and the characteristic sources (CRSP market equity with SEC
+CompanyFacts books; debt maturity excludes leases, as before 2019). We add an
+intercept specification and a stationary quarter bootstrap that refits betas,
+medians and spatial models (\ffWGeneratedDraws{} draws), so intervals account
+for generated regressors.
+
+\begin{table}[t]
+  \centering\small
+  \resizebox{\columnwidth}{!}{\input{generated/tab-replication}}
+  \caption{Fern\'andez reimplementation, spatial lag ML without intercept
+    (her specification), 2015 formation. Premia are per quarter; intervals are
+    bootstrap percentiles.}
+  \label{tab:replication}
+\end{table}
+
+Table~\ref{tab:replication} reproduces her qualitative pattern: a large spatial
+coefficient ($\rho=\ffWJointRho$, \ffWJointRhoCi{} for the joint network) and a
+CAPM premium that shrinks from \ffWOlsPremiumWithout{} under OLS to
+\ffWJointPremium. Both reflect a degenerate kernel. Chord distances concentrate,
+so the rows of $\exp(-d)$ are close to uniform (mean effective neighbours
+\ffWExpEffMin--\ffWExpEffMax{} of \ffWIssuers; total-variation distance from
+uniform \ffWExpUniformMin--\ffWExpUniformMax), $Wy$ is nearly the
+cross-sectional mean, and $\rho$ stands in for the missing intercept. With an
+intercept, OLS gives a premium of \ffWOlsPremiumWith{} \ffWOlsPremiumWithCi,
+and \ffWInterceptBoundary{} of \ffWInterceptFits{} spatial fits on her kernel
+reach the boundary of the parameter space. Such near-uniform weights also
+weaken identification of spatial coefficients~\citep{lee2004}. This motivates
+ordinal k-NN networks, whose stability is governed by margins
+(Theorem~\ref{thm:margin}).
+
+\section{A Spatial APT with TFM Geometry}\label{sec:apt}
+\paragraph{Design.} The comparison separates three changes: CAPM to APT, adding
+a spatial residual structure, and how proximity is measured. All models share
+one roster (the \ffWAptIssuers{} issuers of the December-2015 roster observed in
+all \ffWAptTrainMonths{} training months), one information set (states from
+January 2016, using facts filed before December 2015) and one calendar:
+monthly training returns for 2016--2020 and a test period of
+\ffWAptTestMonths{} months in 2021--2025 (\ffWAptTestIssuerMonths{}
+issuer-months; \ffWAptExiting{} issuers exit). Exposures $b_i$ are OLS loadings
+on the five Fama--French factors and momentum~\citep{fama2015,carhart1997},
+risk-scaled by the training factor covariance as in~\eqref{eq:distance}. The
+covariance models are CAPM, APT ($B\Omega B^\top+D$) and spatial APT
+($B\Omega B^\top+PDP^\top$, $P=(I-\lambda W)^{-1}$), with $\lambda$ and $D$
+fitted to training residuals by Gaussian maximum likelihood. Every $W$ is a
+symmetrised, row-normalised 10-NN graph built from: Fern\'andez's joint
+distance; the estimated exposures; raw TFM states (chord distance); calibrated
+states (Euclidean distance of a 5-fold cross-fitted ridge readout of $a_i$,
+penalty chosen by leave-one-out within training folds); and the same two
+constructions on a direct-feature control. Industry (same two-digit SIC) and a
+relabelled null are reference networks.
+
+The TFMs are TabPFN~3.5~\citep{hollmann2025}, TabFM~1.1~\citep{kong2026tabfm},
+Kumo Tabular~\citep{nvidia2026kumo} and LimiX-2~\citep{zhang2026limix}, with
+pinned weights. All four state that they were pretrained only on synthetic
+tables, so pretraining cannot have seen these returns. Each encodes two
+information sets: ten annual slots of Fern\'andez's four characteristics
+(``Histories'') and the latest value of every standard CompanyFacts concept
+reported by at least 10\% of issuers (``XBRL''), with 256 labelled support
+rows from earlier quarters. No parameter of a raw network is fitted to returns.
+
+\paragraph{Evaluation.} Recovery is evaluated on the training window only:
+out-of-fold $R^2$ of the readout for $a_i$, and the Spearman Mantel correlation
+between each distance and the exposure distance $d_E$ (node bootstrap,
+\ffWAptMantelDraws{} draws). Out of sample, each month's observed issuers score
+the mean Gaussian log density of their excess returns (zero mean for every
+model, so only second moments differ), and we record the realised volatility
+of the global minimum-variance portfolio. Paired monthly differences against
+APT get stationary-bootstrap intervals (\ffWAptDraws{} draws) and Holm
+adjustment over \ffWComparisons{} pre-declared comparisons.
+
+\begin{table}[t]
+  \centering\small\setlength{\tabcolsep}{4pt}
+  \resizebox{\columnwidth}{!}{\input{generated/tab-recovery}}
+  \caption{Exposure recovery on the training window. $R^2$: out-of-fold
+    readout of risk-scaled exposures. Raw and Cal.: Spearman Mantel
+    correlation of raw and calibrated distances with exposure distance
+    (Fern\'andez joint: \ffWJointMantelExposure).}
+  \label{tab:recovery}
+\end{table}
+
+\paragraph{Recovery.} Table~\ref{tab:recovery} shows modest predictability of
+exposures from frozen states: out-of-fold $R^2$ from \ffWFmRsqMin{} to
+\ffWFmRsqMax{} for TFMs, against \ffWDirectRsqHist{} and \ffWDirectRsqXbrl{}
+for the direct features they encode, so the TFMs do not recover exposures
+better than their own inputs. Calibration raises agreement with the exposure
+geometry: the mean Mantel correlation across TFM networks moves from
+\ffWFmMantelRawMean{} (raw) to \ffWFmMantelCalMean{} (calibrated). It does not
+recover economic neighbours. No row passes the certificate of
+Theorem~\ref{thm:margin} (largest certified share \ffWCertifiedMax): the
+smallest readout RMS error, \ffWRmsErrorMin, is about \ffWErrorMarginRatio{}
+times the largest median neighbour margin ($\ffWMarginMedianMax\times10^{-4}$).
+No network's 10-NN edges overlap more than \ffWJaccardMax{} (Jaccard) with
+the exposure network.
+
+\begin{table}[t]
+  \centering\small\setlength{\tabcolsep}{3.5pt}
+  \input{generated/tab-apt}
+  \caption{Out-of-sample change in mean Gaussian log score per issuer-month
+    ($\times10^{3}$) of spatial APT against APT, 2021--2025. Positive favours
+    the spatial model. $^{*}$Holm $p<0.05$; $^{\dagger}$unadjusted 95\% interval
+    excludes zero.}
+  \label{tab:apt}
+\end{table}
+
+\begin{table}[t]
+  \centering\small
+  \input{generated/tab-apt-baselines}
+  \caption{Reference models. $\Delta$ score as in Table~\ref{tab:apt}; GMV
+    vol.: annualised realised volatility of the minimum-variance portfolio.}
+  \label{tab:baselines}
+\end{table}
+
+\paragraph{Out-of-sample covariance.} Tables~\ref{tab:apt}
+and~\ref{tab:baselines} report the ladder. Relative to APT, CAPM changes the
+score by \ffWCapmGain{} \ffWCapmCi{} ($\times10^{-3}$): the five factors and
+momentum help on average, but not significantly over 60 months.
+Adding a spatial term on TFM geometry does not help: of \ffWFmSpatialCount{}
+TFM networks, \ffWFmBetterPoint{} have a positive point estimate,
+\ffWFmBetterHolm{} improve significantly after Holm adjustment, and
+\ffWFmWorseHolm{} are significantly worse. Calibration improves on raw
+geometry with Holm $p<0.05$ in \ffWCalOverRawBetterHolm{} of
+\ffWCalOverRawCount{} paired comparisons. Fern\'andez's characteristics
+(\ffWCharacteristicsGain{} \ffWCharacteristicsCi) and even the estimated
+exposures themselves (\ffWExposureGain{} \ffWExposureCi, despite
+$\lambda=\ffWExposureLambda$ in training) add nothing out of sample. Industry
+links are the exception: \ffWIndustryGain{} \ffWIndustryCi{} with
+$\lambda=\ffWIndustryLambda$, and the lowest minimum-variance volatility
+(\ffWIndustryGmv{} against \ffWAptGmv{} for APT).
+
+\paragraph{Reading the evidence.} The pattern is consistent with the theory,
+though one split cannot establish it. After five factors and momentum, the
+residual co-movement that a network can capture in this sample runs along
+industry lines, which neither characteristic histories nor TFM states encode as
+nearest neighbours. Exposure-calibrated geometry is closer to the economic
+target, but its neighbour sets are far from certified, and a spatial term on
+uncertified neighbours plausibly adds estimation noise rather than signal. The
+in-sample panels, where TFM networks did show positive spatial coefficients
+and higher Mantel correlations with realised return correlations than direct
+features (Appendix Table~\ref{tab:insample}), therefore do not translate into
+out-of-sample risk gains here.
+
+\section{Related Work}\label{sec:related}
+Identifiability results show that learned representations are often determined
+only up to linear or simple nonlinear maps~\citep{roeder2021,khemakhem2020};
+\citet{steck2024} show that diagonal rescaling makes cosine similarity
+arbitrary in matrix factorisation, and representation-similarity indices build
+in particular invariances~\citep{kornblith2019,huh2024}. Sufficiency
+literatures characterise what information a representation keeps, not its
+metric~\citep{achille2018}. In finance, economically anchored firm networks
+come from product text, supply chains and technology
+links~\citep{hoberg2016,cohen2008,lee2019technological}, and learned asset
+embeddings from holdings~\citep{gabaix2025asset}; spatial asset pricing uses
+characteristic or economic distances~\citep{fernandez2011,kou2018,
+fulle2024spatial}. We add a measurement view connecting these strands:
+TFM geometry must be anchored, and neighbour networks certified, before it can
+stand in for economic proximity.
+
+\section{Limitations}\label{sec:limits}
+The theory is conditional: it assumes an economic target and, for the risk
+bounds, invertibility and resolvent bounds that we do not derive. The empirical
+results use one December roster, one train/test split and monthly exposures
+estimated from 60 observations, which bounds the quality of the exposure
+target itself; the training sample requires complete training returns.
+CompanyFacts values are revised rather than as filed, industry codes are
+current, and model weights postdate the sample, although pretraining used
+synthetic data only. The replication departs from Fern\'andez's sample. We
+evaluate geometry under one valuation-conditioned prompt per model, so other
+prompts or fine-tuning could behave differently. A full multi-formation,
+as-filed design is left for future work.
+
+\bibliography{../refs,anonymous}
+
+\appendix
+\section{Proofs and Bounds}\label{app:proofs}
+\paragraph{Proposition~\ref{prop:equivalence}.} (a) $h\circ g^{-1}\in\mathcal R$
+by definition of $\mathcal G_{\mathcal R}$, and $(h\circ g^{-1})\circ(g\circ E)
+=h\circ E$; the reverse inclusion uses $g^{-1}\in\mathcal G_{\mathcal R}$.
+(b) With $u=z_i-z_j$ and $v=z_i-z_l$ linearly independent, extend $\{u,v\}$ to a
+basis and define $g$ by $gu=se_1$, $gv=e_2$ and the identity on the remaining
+basis vectors, with $(e_1,e_2)$ orthonormal; $s>1$ makes $l$ nearer and $s<1$
+makes $j$ nearer. (c) As in the main text; with $u\perp v$, take
+$g=I+(\kappa-1)uu^\top/\norm u^2$, so $\norm{gu}=\kappa d_{ij}$ and
+$\norm{gv}=d_{il}$, and the order reverses once $\kappa>d_{il}/d_{ij}$.
+
+\paragraph{Proposition~\ref{prop:alignment}.} As in the main text; the
+nonemptiness of the target space supplies values off the image of $F$.
+
+\paragraph{Theorem~\ref{thm:margin}.} (a) For $j\in S_i$, $l\notin S_i\cup\{i\}$,
+$\hat d_{ij}-\hat d_{il}\le d_{ij}-d_{il}+2\varepsilon\le2\varepsilon-\gamma_i<0$.
+Two strict neighbour sets of equal size coincide, since a member of one outside
+the other would be strictly nearer than a member of the other outside the
+first. Sharpness: row distances $(0,1,3)$ have margin 2 and move by at most 1 to
+$(0,2,2)$, where the set $\{1\}$ is no longer strict. (b) The reverse triangle
+inequality gives $|\norm{\hat a_i-\hat a_j}-\norm{a_i-a_j}|\le
+\norm{\hat a_i-a_i}+\norm{\hat a_j-a_j}$; apply (a) with the roles of $d$ and
+$\hat d$ exchanged for $\hat\gamma_i$. (c) Symmetrisation and row normalisation
+are functions of the neighbour sets. For $m$ failing rows of the directed
+row-normalised graph, each changed row has at most $k$ entries moving from
+$1/k$ to $0$ and $k$ from $0$ to $1/k$, so its squared norm is at most $2/k$.
+
+\subsection{From networks to risk}\label{app:chain}
+For $P=(I-\lambda W)^{-1}$ and $\hat P=(I-\hat\lambda\hat W)^{-1}$ with spectral
+norms at most $M$, $\norm D_2\le V$, $\norm{\hat W}_2\le B_W$,
+$|\hat\lambda-\lambda|\le\varepsilon_\lambda$ and $\norm{\hat D-D}_2\le
+\varepsilon_D$,
+\begin{align*}
+  &\norm{\hat P\hat D\hat P^\top-PDP^\top}_2\\
+  &\quad\le2VM^3\bigl(|\lambda|\norm{\hat W-W}_2+\varepsilon_\lambda B_W\bigr)
+  +M^2\varepsilon_D.
+\end{align*}
+If a positive-definite forecast $S\succeq mI$ is within $e<m$ of a
+positive-definite target $M_0$ in spectral norm, the Gaussian score gap
+satisfies $0\le L(S;M_0)-L(M_0;M_0)\le N(e/m)^2/(2(1-e/m))$ with
+$L(C;M)=\log\det C+\operatorname{tr}(C^{-1}M)$. Both are Lean theorems
+(Appendix~\ref{app:lean}). For the exponential kernel, distance errors bounded
+by $b$ after scaling give $\norm{\hat W-W}_\infty\le2(e^b-1)/(e^b+1)$ and hence
+$\norm{\hat W-W}_2\le\sqrt N\cdot2(e^b-1)/(e^b+1)$; the $\sqrt N$ comes from a
+norm conversion and is not claimed to be sharp. The task-to-exposure bound
+$\norm{\hat L\hat\tau_i-a_i}\le(\varepsilon_\tau+\nu)/\kappa+\varepsilon_LB_\tau$
+holds for task means $\tau_i=Ca_i+v_i$ with $\norm{Ca}\ge\kappa\norm a$, task
+error $\varepsilon_\tau$, misalignment $\norm{v_i}\le\nu$ and a fitted decoder
+within $\varepsilon_L$ of a left inverse, with $\norm{\hat\tau_i}\le B_\tau$.
+
+\subsection{Normalisation examples}\label{app:examples}
+Raw: $A=(0,0)$, $B=(1,0)$, $C=(0,2)$; $d_{AB}=1<d_{AC}=2$, and after
+$\diag(3,1)$, $d_{AB}=3>2$. Unit norm: $A=(1,1)$, $B=(1,0)$, $C=(1,4)$ have
+$\cos^2(A,B)=\tfrac12<\cos^2(A,C)=\tfrac{25}{34}$; after $\diag(4,1)$ they are
+$\tfrac{16}{17}>\tfrac{25}{34}$. Standardisation: for $A=(0,0)$, $B=(-2,-2)$,
+$C=(-2,-1)$, $D=(-2,2)$, squared standardised distances from $A$ make $C$
+nearest ($\tfrac{608}{105}$, against $\tfrac{752}{105}$ for $B$); any diagonal
+stretch leaves this unchanged, but after the shear $(x,y)\mapsto(x+y,y)$ and
+re-standardisation $D$ is nearest ($\tfrac{64}{35}$).
+
+\section{Machine-Checked Results}\label{app:lean}
+The following statements compile in Lean~4.35 with Mathlib; a project-wide
+audit rejects proof holes and admits only the axioms \texttt{propext},
+\texttt{Classical.choice} and \texttt{Quot.sound}. Compiled declarations do not
+validate the empirical premises (an economic target, invertibility, resolvent
+bounds) or the paper's prose; Proposition~\ref{prop:equivalence}(b),
+the $\sqrt{2m/k}$ count and the unit-norm and standardisation examples are
+checked by hand and by unit tests, not in Lean.
+\begin{table*}[t]
+\centering\small
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Result & Lean declaration\\
+    \midrule
+    Prop.~\ref{prop:equivalence}(a) & \texttt{Geometry.optimal\_equiv}\\
+    Prop.~\ref{prop:equivalence}(c) & \texttt{Neighbours.neighbourSet\_linear}\\
+    Table~\ref{tab:normalisation}, row 1 & \texttt{Neighbours.anisotropic\_flip}\\
+    Prop.~\ref{prop:alignment} & \texttt{Alignment.optimal\_imp\_sufficient\_iff}\\
+    Thm.~\ref{thm:margin}(a) & \texttt{Neighbours.neighbourSet\_stable}, \texttt{\_unique}, \texttt{\_margin\_sharp}\\
+    Thm.~\ref{thm:margin}(b) & \texttt{Neighbours.neighbourSet\_of\_exposures}, \texttt{\_of\_estimated\_margin}\\
+    Covariance bound & \texttt{Stability.matrix\_covariance\_target\_sub\_le}\\
+    Score bound & \texttt{ScoreStability.loss\_gap\_le\_of\_norm\_sub}\\
+    Kernel bound & \texttt{Kernel.expKernel\_row\_l1\_le\_scaled}, \texttt{EndToEnd.kernel\_spectral\_scaled}\\
+    Task-to-exposure & \texttt{Transfer.fitted\_readout\_error}\\
+    \bottomrule
+  \end{tabular}
+  \caption{Paper results and their Lean declarations (namespace
+    \texttt{FreeFoundations}).}
+  \label{tab:lean}
+\end{table*}
+
+\section{Additional Results}\label{app:results}
+\begin{table}[h]
+  \centering\small
+  \input{generated/tab-insample}
+  \caption{In-sample results from the same study (not out of sample): spatial
+    lag coefficient of quarterly co-movement panels with period effects,
+    2011--2025, and Spearman Mantel correlation of each distance with the chord
+    distance of realised excess-return correlations, 2016--2025. 10-NN
+    networks; Mantel permutation $p$-values all sit at the Holm-adjusted floor
+    of 999 permutations.}
+  \label{tab:insample}
+\end{table}
+
+\begin{table*}[t]
+  \centering\small
+  \input{generated/tab-apt-full}
+  \caption{Every out-of-sample model: training spatial coefficient, mean
+    Gaussian log score per issuer-month (lower is better), change against APT
+    ($\times10^3$, positive favours the model) and minimum-variance volatility.}
+  \label{tab:aptfull}
+\end{table*}
+
+\paragraph{Software and data.} Spatial estimates use an open-source statistical
+library~\citep{anonymous2026}. CRSP data are licensed and are not
+redistributed; SEC CompanyFacts and the French factor library are public. TFM
+weights are used under their research licences. Code and a reproduction
+manifest will be released with the camera-ready version.
+
+\end{document}

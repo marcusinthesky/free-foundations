@@ -67,6 +67,28 @@ def apt(
     run(panel, representations, factors, output, params)
 
 
+@app.command("workshop")
+def workshop(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input explicit.
+    replication: Path = RESULTS / "replication",
+    comovement: Path = RESULTS / "comovement",
+    alignment: Path = RESULTS / "alignment",
+    apt: Path = RESULTS / "apt",
+    output: Path = Path("src/latex/finfm/generated"),
+    params: Path = PARAMS,
+) -> None:
+    """Workshop macros and table bodies from saved results only."""
+    from free_foundations.study.workshop import render  # noqa: PLC0415
+
+    render(
+        replication_dir=replication,
+        comovement=comovement,
+        alignment=alignment,
+        apt_dir=apt,
+        output=output,
+        params=params,
+    )
+
+
 @app.command("publish")
 def publish(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input explicit.
     panel: Path = PANEL,

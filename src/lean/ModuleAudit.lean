@@ -38,6 +38,7 @@ import all FreeFoundations.RiskState
 import all FreeFoundations.Proxy
 import all FreeFoundations.Identifiability
 import all FreeFoundations.Pipeline
+import all FreeFoundations.Neighbours
 public import Lean
 
 @[expose] public section

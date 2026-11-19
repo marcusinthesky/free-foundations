@@ -28,7 +28,9 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
   loadings trained on 2016–2020 and scored on 2021–2025, comparing CAPM, APT and
   spatial APT on characteristic, raw and exposure-calibrated foundation-model
   geometry, with a neighbour-margin certificate for calibrated k-NN graphs.
-- A FinFM AAAI-27 workshop plan record.
+- A FinFM AAAI-27 workshop plan record and anonymous submission (`src/latex/finfm`,
+  pdfLaTeX, tables from a `workshop` stage), with Lean neighbour-set theorems: the
+  margin certificate, its exposure and reparametrisation forms, and a neighbour flip.
 
 ### Changed
 
@@ -57,6 +59,8 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 
 ### Fixed
 
+- The blueprint no longer claims that the Gram matrix pins distances down up to
+  rotation without a proof.
 - The manuscript's undefined `eq:forecast` reference; the forecast covariance is
   now stated inline.
 - Encoding collapses each fact part to its latest standard values before combining,

@@ -176,6 +176,42 @@ def test_anisotropic_map_flips_a_nearest_neighbour_but_not_predictions() -> None
     np.testing.assert_allclose(moved @ np.linalg.inv(transform).T @ readout, points @ readout)
 
 
+@pytest.mark.unit
+def test_unit_normalisation_does_not_undo_an_anisotropic_flip() -> None:
+    # Arrange: A=(1,1), B=(1,0), C=(1,4); T=diag(4,1); rows unit-normalised.
+    points = np.array([[1.0, 1.0], [1.0, 0.0], [1.0, 4.0]])
+    moved = points @ np.diag([4.0, 1.0])
+
+    def normalised(values: np.ndarray) -> np.ndarray:
+        return values / np.linalg.norm(values, axis=1, keepdims=True)
+
+    # Act
+    before = neighbour_sets(euclidean_distance(normalised(points)), 1)[0]
+    after = neighbour_sets(euclidean_distance(normalised(moved)), 1)[0]
+
+    # Assert: cos^2 moves from (1/2, 25/34) to (16/17, 25/34), so C then B.
+    assert before == frozenset({2})
+    assert after == frozenset({1})
+
+
+@pytest.mark.unit
+def test_standardisation_undoes_a_stretch_but_not_a_shear() -> None:
+    # Arrange: A=(0,0), B=(-2,-2), C=(-2,-1), D=(-2,2); per-coordinate z-scores.
+    points = np.array([[0.0, 0.0], [-2.0, -2.0], [-2.0, -1.0], [-2.0, 2.0]])
+
+    def standardised(values: np.ndarray) -> np.ndarray:
+        return (values - values.mean(axis=0)) / values.std(axis=0)
+
+    # Act
+    original = neighbour_sets(euclidean_distance(standardised(points)), 1)[0]
+    stretched = neighbour_sets(euclidean_distance(standardised(points * [5.0, 0.5])), 1)[0]
+    sheared = neighbour_sets(euclidean_distance(standardised(points @ [[1, 0], [1, 1]])), 1)[0]
+
+    # Assert: C is A's neighbour, a diagonal stretch is undone, a shear makes it D.
+    assert original == stretched == frozenset({2})
+    assert sheared == frozenset({3})
+
+
 @pytest.mark.component
 def test_spec_reads_the_apt_block_and_rejects_overlapping_windows(tmp_path: Path) -> None:
     # Arrange

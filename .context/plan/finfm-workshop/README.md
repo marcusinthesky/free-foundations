@@ -28,7 +28,7 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| in-progress | [Review CRSP-SEC evidence and test reparametrization robustness](tasks/evidence/README.md) | Gate the saved CRSP–SEC results and test whether FM geometry survives prediction-preserving reparametrisation. |
+| in-progress | [Review CRSP-SEC evidence and test reparametrization robustness](tasks/evidence/README.md) | Gate the saved CRSP–SEC results and run the out-of-sample spatial APT extension. |
 | in-progress | [Write the audit, roadmap and cover note](tasks/handoff/README.md) | Research audit, claim-to-evidence map, journal roadmap and cover note. |
 | in-progress | [Verify and extend references for the workshop paper](tasks/references/README.md) | Verify every citation against primary sources and add the closest competing work. |
 | in-progress | [Write and build the anonymous AAAI-27 submission](tasks/submission/README.md) | Anonymous AAAI-27 LaTeX source, compiled PDF and OpenReview abstract. |

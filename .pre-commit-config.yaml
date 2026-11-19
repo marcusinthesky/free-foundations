@@ -89,8 +89,9 @@ repos:
         language: system
         types: [text]
         # DVC owns dvc.lock: its YAML writer leaves a trailing space on wrapped `cmd:`
-        # scalars, re-emitted by every `dvc repro`.
-        exclude: ^dvc\.lock$
+        # scalars, re-emitted by every `dvc repro`. The AAAI author kit must stay
+        # byte-identical to the published files.
+        exclude: ^dvc\.lock$|^src/latex/finfm/aaai2027\.(sty|bst)$
       - id: conventional-commit
         name: Conventional commit message
         entry: bash -euc 'exec convco check --from-stdin < "$1"' --

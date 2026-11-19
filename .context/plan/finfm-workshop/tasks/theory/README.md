@@ -14,8 +14,8 @@ Independently check the predictive-equivalence counterexample (including normali
 
 ## Acceptance
 
-- [ ] Anisotropic flips are checked in exact arithmetic for raw, unit-norm and standardised features.
-- [ ] The margin certificate and its corollaries have written proofs; formalised parts compile with only standard axioms.
+- [x] Anisotropic flips are checked in exact arithmetic for raw, unit-norm and standardised features.
+- [x] The margin certificate and its corollaries have written proofs; formalised parts compile with only standard axioms.
 - [ ] Blueprint and README overclaims are corrected.
 
 <!-- insitu:begin sql

@@ -37,3 +37,4 @@ public import FreeFoundations.RiskState
 public import FreeFoundations.Proxy
 public import FreeFoundations.Identifiability
 public import FreeFoundations.Pipeline
+public import FreeFoundations.Neighbours

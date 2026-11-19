@@ -638,12 +638,65 @@ exposures back.
 
 \begin{theorem}[Which maps preserve distances]\label{thm:geometry-distances}
   \lean{FreeFoundations.Geometry.distances_preserved_iff}\leanok
-  A linear $G$ preserves every distance if and only if it preserves norms. The
-  common covariance fixes the Gram matrix (Lemma~\ref{thm:exposure-inner}),
-  which pins distances down up to rotation.
+  A linear $G$ preserves every distance if and only if it preserves norms.
+  (Separately, Lemma~\ref{thm:exposure-inner} expresses distances through the
+  Gram matrix; that rotations are the only linear maps preserving it is not
+  formalized here.)
 \end{theorem}
 \begin{proof}\leanok
   Take $y=0$ in one direction; use $Gx-Gy=G(x-y)$ in the other.
+\end{proof}
+
+\begin{definition}[Strict neighbour set and margin]\label{def:neighbours}
+  \lean{FreeFoundations.Neighbours.IsNeighbourSet,
+  FreeFoundations.Neighbours.HasMargin}\leanok
+  $S$ is a strict neighbour set of firm $i$ under row distances $d$ when every
+  member is strictly closer than every non-member other than $i$; it has
+  margin $\gamma$ when every such gap is at least $\gamma$.
+\end{definition}
+
+\begin{lemma}[Strict neighbour sets are unique]\label{thm:neighbours-unique}
+  \lean{FreeFoundations.Neighbours.neighbourSet_unique}\leanok
+  \uses{def:neighbours}
+  Two strict neighbour sets of equal finite size that omit $i$ coincide.
+\end{lemma}
+\begin{proof}\leanok
+  A member of one outside the other, and vice versa, would each be strictly
+  closer than the other.
+\end{proof}
+
+\begin{theorem}[Neighbour-margin certificate]\label{thm:neighbours-margin}
+  \lean{FreeFoundations.Neighbours.neighbourSet_stable,
+    FreeFoundations.Neighbours.neighbourSet_margin_sharp,
+    FreeFoundations.Neighbours.neighbourSet_of_exposures,
+  FreeFoundations.Neighbours.neighbourSet_of_estimated_margin}\leanok
+  \uses{def:neighbours}
+  If every distance in row $i$ moves by at most $\varepsilon$ and the margin
+  exceeds $2\varepsilon$, the strict neighbour set is unchanged; at margin
+  exactly $2\varepsilon$ it can change. Exposure errors
+  $\norm{\hat a_j-a_j}\le\delta_j\le\delta$ give
+  $\varepsilon=\delta_i+\delta$, so margin $2(\delta_i+\delta)$ suffices,
+  whether read from the true or the estimated distances.
+\end{theorem}
+\begin{proof}\leanok
+  \uses{thm:recovery-distance}
+  Each member/non-member comparison moves by at most $2\varepsilon$; the
+  exposure form uses the reverse triangle inequality.
+\end{proof}
+
+\begin{theorem}[Reparametrization and neighbours]\label{thm:neighbours-linear}
+  \lean{FreeFoundations.Neighbours.neighbourSet_linear,
+  FreeFoundations.Neighbours.anisotropic_flip}\leanok
+  \uses{def:neighbours}
+  A linear map with $\sigma_{\min}\norm x\le\norm{gx}\le\sigma_{\max}\norm x$
+  keeps the neighbour set when $\sigma_{\max}d_{ij}<\sigma_{\min}d_{il}$ for
+  every member $j$ and non-member $l$. The stretch $\diag(3,1)$ makes $(0,2)$,
+  not $(1,0)$, the nearer neighbour of the origin, while any readout composed
+  with its inverse predicts exactly as before.
+\end{theorem}
+\begin{proof}\leanok
+  Bound member distances above and non-member distances below; compute the
+  stretched norms.
 \end{proof}
 
 \begin{definition}[Chord baseline]\label{def:geometry-chord}

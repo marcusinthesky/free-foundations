@@ -509,3 +509,199 @@ stages:
       hash: md5
       md5: c5a07d43c76b4e6313b0fbc94509441a
       size: 21607
+  apt:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      stages research apt --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --factors 
+      data/raw/crsp-sec/factors --output data/research/crsp-sec/apt
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/stages/research/apt.json
+      hash: md5
+      md5: 47ae6cd93b7a1e4b54d0cc18d9950aab
+      size: 49780
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/processed/crsp-sec/representations
+      hash: md5
+      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
+      size: 1312884354
+      nfiles: 91
+    - path: data/raw/crsp-sec/factors/F-F_Momentum_Factor_CSV.zip
+      hash: md5
+      md5: 003ba6fa0de09fe98d3c422eefa6ef4a
+      size: 5603
+    - path: data/raw/crsp-sec/factors/F-F_Research_Data_5_Factors_2x3_CSV.zip
+      hash: md5
+      md5: 9e851d3f8dbebab602499bec111ed7ca
+      size: 11971
+    - path: src/python/uv.lock
+      hash: md5
+      md5: cd9fc86fb76d0871f56dc64fcc9af921
+      size: 342263
+    params:
+      params.yaml:
+        apt:
+          formation: 2015
+          train_start: 2016-01
+          train_end: 2020-12
+          test_start: 2021-01
+          test_end: 2025-12
+          factors:
+          - Mkt-RF
+          - SMB
+          - HML
+          - RMW
+          - CMA
+          - Mom
+          neighbours: 10
+          folds: 5
+          ridge_alphas:
+          - 0.01
+          - 0.0316
+          - 0.1
+          - 0.316
+          - 1.0
+          - 3.16
+          - 10.0
+          - 31.6
+          - 100.0
+          - 316.0
+          - 1000.0
+          - 3160.0
+          - 10000.0
+          clip: 10.0
+          score_draws: 9999
+          mantel_draws: 999
+          seed: 42
+        study:
+          version: crsp-sec-quarterly-v2
+          archive_start: '2001-01-01'
+          archive_end: '2025-12-31'
+          feature_start: '2009-01-01'
+          panel_start: '2011-01-01'
+          top_n: 1000
+          frequency: quarterly
+          characteristic_history_years: 10
+          window_quarters: 40
+          formation_years:
+          - 2010
+          - 2011
+          - 2012
+          - 2013
+          - 2014
+          - 2015
+          primary_formation: 2015
+          min_beta_quarters: 8
+          neighbours: 10
+          neighbour_sensitivities:
+          - 5
+          - 20
+          seed: 42
+          block_columns: 500
+          standard_min_coverage: 0.1
+          support_rows: 256
+          generated_beta_draws: 999
+          likelihood_draws: 9999
+          mantel_draws: 999
+          rungs:
+          - fernandez
+          - standard_xbrl
+          models:
+          - tabpfn_full
+          - tabfm
+          - kumo
+          - limix
+    outs:
+    - path: data/research/crsp-sec/apt
+      hash: md5
+      md5: 74e9288582a2c9a0da733d3988b8c1f9.dir
+      size: 110492
+      nfiles: 7
+  workshop:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      stages research workshop --replication data/research/crsp-sec/replication 
+      --comovement data/research/crsp-sec/comovement --alignment 
+      data/research/crsp-sec/alignment --apt data/research/crsp-sec/apt --output
+      src/latex/finfm/generated
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/stages/research/workshop.json
+      hash: md5
+      md5: 9d097e3ba84644e853fdccde9fa9fdf8
+      size: 76192
+    - path: data/research/crsp-sec/alignment
+      hash: md5
+      md5: d3e220438f6e270a1f448abd36ef9b4b.dir
+      size: 9952
+      nfiles: 3
+    - path: data/research/crsp-sec/apt
+      hash: md5
+      md5: 74e9288582a2c9a0da733d3988b8c1f9.dir
+      size: 110492
+      nfiles: 7
+    - path: data/research/crsp-sec/comovement
+      hash: md5
+      md5: a7c61cbd71a96ffce97b17659bcda72e.dir
+      size: 110145
+      nfiles: 6
+    - path: data/research/crsp-sec/replication
+      hash: md5
+      md5: 33b0215511fc571cdec06d535ef8fd74.dir
+      size: 5847260
+      nfiles: 8
+    - path: src/python/uv.lock
+      hash: md5
+      md5: cd9fc86fb76d0871f56dc64fcc9af921
+      size: 342263
+    params:
+      params.yaml:
+        study:
+          version: crsp-sec-quarterly-v2
+          archive_start: '2001-01-01'
+          archive_end: '2025-12-31'
+          feature_start: '2009-01-01'
+          panel_start: '2011-01-01'
+          top_n: 1000
+          frequency: quarterly
+          characteristic_history_years: 10
+          window_quarters: 40
+          formation_years:
+          - 2010
+          - 2011
+          - 2012
+          - 2013
+          - 2014
+          - 2015
+          primary_formation: 2015
+          min_beta_quarters: 8
+          neighbours: 10
+          neighbour_sensitivities:
+          - 5
+          - 20
+          seed: 42
+          block_columns: 500
+          standard_min_coverage: 0.1
+          support_rows: 256
+          generated_beta_draws: 999
+          likelihood_draws: 9999
+          mantel_draws: 999
+          rungs:
+          - fernandez
+          - standard_xbrl
+          models:
+          - tabpfn_full
+          - tabfm
+          - kumo
+          - limix
+    outs:
+    - path: src/latex/finfm/generated
+      hash: md5
+      md5: 4835ea08e02691379dd9e7a85986c80a.dir
+      size: 8385
+      nfiles: 8

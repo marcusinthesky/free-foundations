@@ -14,9 +14,9 @@ Write `src/latex/finfm/submission.tex` on the AAAI-27 anonymous template, and bu
 
 ## Acceptance
 
-- [ ] The PDF builds from clean with `just latex::finfm`; no undefined citations or references.
-- [ ] At most 7 technical pages; US Letter; legible figures.
-- [ ] No author-identifying text, metadata, filenames, links or acknowledgements.
+- [x] The PDF builds from clean with `just latex::finfm`; no undefined citations or references.
+- [x] At most 7 technical pages; US Letter; legible figures.
+- [x] No author-identifying text, metadata, filenames, links or acknowledgements.
 
 <!-- insitu:begin sql
 id = "planning-children"
