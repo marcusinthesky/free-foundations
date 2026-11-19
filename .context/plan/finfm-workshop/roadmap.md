@@ -4,7 +4,13 @@ description: Prioritised post-workshop research plan toward a JFEC/JFE submissio
 
 # From the FinFM paper to a finance journal
 
-The workshop paper makes three claims:
+## Deferred deep-learning experiment
+
+Reserve encoder fine-tuning, training neural baselines from scratch and their learning curves for a later study. The comparison would vary the amount of dated financial training information, match targets, inputs and label access, and evaluate held-out exposure error with dependence-aware intervals. It would test comparative sample efficiency. The FinFM paper studies native frozen states, non-deep readouts and econometric fits.
+
+## Background from the earlier workshop candidate
+
+The earlier workshop candidate made three claims:
 
 1. Predictive content does not fix firm geometry.
 2. Neighbour networks can be certified by margins.

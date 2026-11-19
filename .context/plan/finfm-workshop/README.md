@@ -1,7 +1,7 @@
 ---
 type: plan
 title: FinFM AAAI-27 workshop submission
-description: Anonymous, theory-led FinFM workshop paper on when foundation-model geometry is economic, due 20 Nov 2026 AoE.
+description: Theory and in-sample CRSP–SEC evidence for an anonymous FinFM workshop paper on economic measurement with frozen tabular representations.
 links:
 - .context/plan/journal-study/README.md
 status: in-progress
@@ -11,11 +11,22 @@ status: in-progress
 
 ## Goal
 
-Prepare, but do not submit, an anonymous AAAI-27 FinFM long paper (at most 7 technical pages) arguing that predictive content fixes a representation only up to the transformations its readout class can undo. It pairs that with a neighbour-margin certificate for k-NN networks and CRSP–SEC evidence labelled retrospective and in sample. The deadline is 20 Nov 2026 23:59 AoE; in-person presentation in Montréal is required. The journal study continues in [journal-study](../journal-study/README.md).
+Prepare an anonymous AAAI-27 FinFM long paper on what frozen tabular representations
+measure about firms. Ground the descriptive and inferential study in a US
+reimplementation of Fernández using CRSP–SEC formation cohorts. Use frozen
+encoders, economically calibrated readouts and in-sample spatial inference.
+New deep-learning training belongs to the journal roadmap. Authors control submission by 20 Nov 2026
+23:59 AoE and the in-person presentation in Montréal.
+
+Use the [work allocation](work-allocation.md) to find each task's inputs, write
+scope, dependencies and handoff. The [journal plan](../journal-study/README.md)
+records the broader programme.
 
 ## Acceptance
 
 - [ ] Every claim in the submission maps to a checked proof, a compiled Lean declaration or a saved stage output (audit claim map).
+- [ ] Each numbered research task supplies evidence or a documented limitation. Empirical claims identify their cohort, estimand and uncertainty.
+- [ ] The complete manuscript implements the workshop brief and has been independently reviewed on the bundled revision. The [paper aims](paper-aims.md) account for the evidence behind each headline contribution.
 - [ ] The anonymous PDF builds from a clean directory with no undefined references, at most 7 technical pages, and passes the anonymity checks.
 - [ ] The audit, journal roadmap, cover note and OpenReview abstract exist and state what remains unresolved.
 - [ ] `just check` passes, or every check that could not run is reported.
@@ -28,13 +39,15 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| in-progress | [Review CRSP-SEC evidence and test reparametrization robustness](tasks/evidence/README.md) | Gate the saved CRSP–SEC results and run the out-of-sample spatial APT extension. |
-| in-progress | [Write the audit, roadmap and cover note](tasks/handoff/README.md) | Research audit, claim-to-evidence map, journal roadmap and cover note. |
-| in-progress | [Verify and extend references for the workshop paper](tasks/references/README.md) | Verify every citation against primary sources and add the closest competing work. |
-| in-progress | [Write and build the anonymous AAAI-27 submission](tasks/submission/README.md) | Anonymous AAAI-27 LaTeX source, compiled PDF and OpenReview abstract. |
-| in-progress | [Verify and extend the theory with a neighbour-margin certificate](tasks/theory/README.md) | Check the counterexample, alignment and stability claims; add the neighbour-margin certificate in prose and Lean. |
+| backlog | [01 Theory and economic identification](tasks/t01-theory/README.md) | Check representability, neighbour certificates and the reversible spatial multiplier. |
+| backlog | [02 Data and formation cohorts](tasks/t02-data-cohorts/README.md) | Validate fixed formation rosters, issuer histories, terminal returns and coverage. |
+| backlog | [03 In-sample spatial inference](tasks/t03-spatial-inference/README.md) | Estimate matched in-sample spatial effects and covariance components. |
+| backlog | [04 PCoA and economic interpretation](tasks/t04-pcoa-interpretation/README.md) | Explain the geometry through principal coordinates, economic alignment and dated mimicking portfolios. |
+| backlog | [05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
+| backlog | [06 Uncertainty and robustness](tasks/t06-uncertainty-robustness/README.md) | Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights. |
+| in-progress | [07 Write, review and package the FinFM paper](tasks/t07-submission-bundle/README.md) | Plan the argument, write the shared sections, render verified results and prepare the reviewed FinFM bundle for the authors. |
 
-`5 open; 0 terminal`
+`7 open; 0 terminal`
 
 <!-- insitu:end -->
 

@@ -15,7 +15,7 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| in-progress | [FinFM AAAI-27 workshop submission](.context/plan/finfm-workshop/README.md) | Anonymous, theory-led FinFM workshop paper on when foundation-model geometry is economic, due 20 Nov 2026 AoE. |
+| in-progress | [FinFM AAAI-27 workshop submission](.context/plan/finfm-workshop/README.md) | Theory and in-sample CRSP–SEC evidence for an anonymous FinFM workshop paper on economic measurement with frozen tabular representations. |
 | in-progress | [Journal-ready in-sample CRSP–SEC study](.context/plan/journal-study/README.md) | In-sample, parameter-light CRSP–SEC study and manuscript ready for journal submission. |
 
 `2 open; 0 terminal`

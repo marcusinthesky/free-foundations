@@ -74,10 +74,10 @@ audit disclose this.
 6. **Licences.** TabPFN 3.5 and LimiX-2 weights are under non-commercial research
    licences. Academic use is fine, but please confirm you are content to name them.
 
-## Before uploading
+## Preparing the revised submission
 
-- Run `just dvc repro -s workshop` and `just latex::finfm`, then read
-  `src/latex/finfm/build/submission.pdf` in full.
-- Paste `src/latex/finfm/abstract.txt` into OpenReview.
-- Check the PDF metadata and that no names, emails, the repository name or links
-  appear (the audit records the checks run).
+The findings and checks above describe the earlier candidate. Build the revised
+paper with `just latex::paper finfm` and read
+`src/latex/projects/free-foundations/build/finfm/finfm.pdf`. Use the plain-text
+abstract matched to that revision. The [submission task](tasks/t07-submission-bundle/README.md)
+owns the final checks, bundle contents and author decisions.

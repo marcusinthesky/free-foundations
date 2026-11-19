@@ -47,7 +47,7 @@ The application then shows the two things the theory warns about:
 | Replication numbers (Table 2, Section 4) | `data/research/crsp-sec/replication` via the `workshop` stage | Saved output |
 | APT numbers (Tables 3–5, 7, Section 5) | `data/research/crsp-sec/apt` via the `workshop` stage | Saved output |
 | In-sample appendix (Table 6) | `comovement` and `alignment` outputs | Saved output |
-| TFMs pretrained on synthetic data only | Model cards and the NVIDIA blog post; see the [gate](tasks/evidence/gate.md) | Documentation |
+| TFMs pretrained on synthetic data only | Model cards and the NVIDIA blog post; see the [gate](tasks/t06-uncertainty-robustness/evidence/historical-gate.md) | Documentation |
 
 Every number in the PDF is a macro or table from
 `src/latex/finfm/generated/`, which the `workshop` DVC stage writes from saved
@@ -100,7 +100,7 @@ outputs. None is typed by hand.
 
 - **Bootstrap shrinkage.** The replication bootstrap draws are shrunk relative to their
   point estimates in the 10-NN cross-sections. The matched table is not quoted in the
-  paper; see the [gate](tasks/evidence/gate.md).
+  paper; see the [gate](tasks/t06-uncertainty-robustness/evidence/historical-gate.md).
 - **Mantel p-values.** They sit at the permutation floor (in-sample appendix only).
 - **Theorem 3(c) count and Proposition 1(b).** These are hand-checked, not formalised.
 - **Exponential-kernel bound.** The `√N` factor is not sharp. A dimension-free version
