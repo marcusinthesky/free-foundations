@@ -13,8 +13,8 @@ Run from the repository root with the pinned environment and existing local data
 
 ```sh
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 \
-  devenv shell -- uv run --offline --project src/python --locked python \
-  .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/pilot.py \
+  devenv shell -- just python::pilot \
+  finfm/pcoa.py \
   > /tmp/ff-pcoa-pilot.json
 ```
 

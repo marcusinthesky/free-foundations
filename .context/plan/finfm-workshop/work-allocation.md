@@ -51,9 +51,11 @@ Carry remaining work in its existing task record and the journal roadmap.
 
 Give each worker its task record, base revision, repository and study contracts,
 source and test entry points, upstream contracts or fixtures, and exclusive
-evidence paths. Workers write reproducible pilots in their evidence directories
-and keep numerical outputs in task-specific scratch directories. The coordinator
-owns shared integration and task status review. A separate reviewer checks each
+evidence paths. Keep reusable replay commands in
+[`src/python/pilots/finfm/`](../../../src/python/pilots/finfm/).
+Evidence receipts record commands, input identities, results and limitations.
+Numerical outputs go in task-specific scratch directories. The coordinator owns
+shared integration and task status review. A separate reviewer checks each
 accepted result.
 
 Use a private outcome sidecar bound to the existing prepared manifest and raw

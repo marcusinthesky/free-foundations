@@ -1,7 +1,7 @@
 """Reconstruct the 2015 fixed-formation joint-graph outcome comparison."""
 
-from pathlib import Path
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -34,25 +34,46 @@ saved = pd.read_parquet(ROOT / "estimates.parquet")
 saved = saved.loc[(saved.formation == 2015) & (saved.network == "fernandez:joint|exp")]
 fits = []
 clipped = wide.clip(lower=wide.stack().quantile(0.01), upper=wide.stack().quantile(0.99))
-outcomes = (("median", median), ("mean", wide.mean().to_numpy(float)),
-            ("median_clipped_1pct", clipped.median().to_numpy(float)),
-            ("mean_clipped_1pct", clipped.mean().to_numpy(float)))
+outcomes = (
+    ("median", median),
+    ("mean", wide.mean().to_numpy(float)),
+    ("median_clipped_1pct", clipped.median().to_numpy(float)),
+    ("mean_clipped_1pct", clipped.mean().to_numpy(float)),
+)
 for name, outcome in outcomes:
     for intercept in (False, True):
         for estimator in ("lag_ml", "error_ml"):
-            fit = spatial.cross_section(outcome, {"beta": beta}, weights, estimator, intercept=intercept)
+            fit = spatial.cross_section(
+                outcome, {"beta": beta}, weights, estimator, intercept=intercept
+            )
             fit["outcome"] = name
             fits.append(fit)
             if name == "median":
-                original = saved.loc[(saved.estimator == estimator) & (saved.with_intercept == intercept)]
+                original = saved.loc[
+                    (saved.estimator == estimator) & (saved.with_intercept == intercept)
+                ]
                 assert len(original) == 1
                 fit["saved_status"] = original.iloc[0].status
                 assert fit["status"] == fit["saved_status"]
                 if fit["status"] == "available" and original.iloc[0].status == "available":
                     for key in ("beta", "spatial"):
-                        assert abs(fit[key] - original.iloc[0][key]) <= 1e-4 * max(1, abs(original.iloc[0][key]))
+                        assert abs(fit[key] - original.iloc[0][key]) <= 1e-4 * max(
+                            1, abs(original.iloc[0][key])
+                        )
 pd.DataFrame(fits).to_json(OUT / "fits.json", orient="records", indent=2)
 wide.to_parquet(OUT / "returns.parquet")
 roster.to_parquet(OUT / "roster.parquet")
 np.save(OUT / "weights.npy", weights)
-(OUT / "metadata.json").write_text(json.dumps({"neutral_component_max": neutral, "quarters": len(wide), "issuers": len(ids), "observed_issuer_quarters": int(wide.count().sum()), "clipping_low": float(wide.stack().quantile(0.01)), "clipping_high": float(wide.stack().quantile(0.99))}, indent=2))
+(OUT / "metadata.json").write_text(
+    json.dumps(
+        {
+            "neutral_component_max": neutral,
+            "quarters": len(wide),
+            "issuers": len(ids),
+            "observed_issuer_quarters": int(wide.count().sum()),
+            "clipping_low": float(wide.stack().quantile(0.01)),
+            "clipping_high": float(wide.stack().quantile(0.99)),
+        },
+        indent=2,
+    )
+)

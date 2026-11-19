@@ -46,7 +46,7 @@ No pipeline reproduction or source acquisition was performed.
 ## Replay after the layout refactor
 
 At `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`, the coordinator reran the
-[cohort replay](replay.py) from the repository root. It verified the frozen
+[cohort replay](../../../../../../src/python/pilots/finfm/cohort_replay.py) from the repository root. It verified the frozen
 source and prepared table hashes, matched December membership, and matched
 all 39,600 quarterly rows, including the outcome mask. The 32,547 observed
 rows are counted over the 990-issuer formation before the analytical filter.
@@ -54,8 +54,8 @@ The reconstructed formation frame SHA-256 is
 `23b56cfbef679d738a365ab46826a0391794ede3fc3733a104b3781119bb4b7d`.
 
 ```sh
-devenv shell -- uv run --offline --frozen --project src/python --package free-foundations python \
-  .context/plan/finfm-workshop/tasks/t02-data-cohorts/evidence/replay.py
+devenv shell -- just python::pilot \
+  finfm/cohort_replay.py
 ```
 
 ## Ledger contract and example

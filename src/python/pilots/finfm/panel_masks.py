@@ -34,7 +34,9 @@ for quarter in calendar:
     annual_ids = set(panel.loc[panel["quarter"].eq(formation), "issuer_id"])
     assert annual_ids == set(state["issuer_ids"])
     rows = panel.loc[panel["quarter"].eq(quarter)].sort_values("issuer_id")
-    keep = rows["observed"] & rows["issuer_id"].map(betas).notna() & rows["issuer_id"].isin(annual_ids)
+    keep = (
+        rows["observed"] & rows["issuer_id"].map(betas).notna() & rows["issuer_id"].isin(annual_ids)
+    )
     selected = rows.loc[keep]
     ids = selected["issuer_id"].tolist()
     assert len(ids) == len(set(ids)) == ledger.loc[quarter, "issuers"]

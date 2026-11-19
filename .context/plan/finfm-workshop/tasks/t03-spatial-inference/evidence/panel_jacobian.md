@@ -1,12 +1,12 @@
 # Panel likelihood fixture
 
-Revision `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`. Run with `devenv shell -- uv run --project src/python --offline --frozen --package free-foundations python .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/panel_jacobian.py`.
+Revision `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`. Run with `devenv shell -- just python::pilot finfm/panel_jacobian.py`.
 
 The three-issuer symmetric row-normalized fixture matches the implementation to a direct Gaussian likelihood with an estimated period intercept for lag and error models at -0.7, 0 and 0.7, within 1e-10. The full Gaussian determinant includes the common eigenvalue. Removing the common mode changes each period's log determinant by `-log(1-rho)` and defines a distinct contrast likelihood. Numerical sensitivity on the saved sample remains pending.
 
 The independent orthonormal-basis fixture also checks the full contrast likelihood for two unequal-size periods and non-symmetric row-stochastic graphs. For both processes at -0.7, 0 and 0.7, it matches the implementation within 1e-10. The contrast likelihood profiles variance using `sum(n_t - 1)` dimensions and removes the common-mode determinant. The earlier replay only removed the determinant and has been corrected before execution.
 
-SHA-256 digests are `d24a0e6b783116257fd4e09a5654dab02e152ae24c3ef7560da93611a575b59e` for `panel_jacobian.py`, `f23052db1093f71749d4aee6c2c4cdee9671ad35a51e97713f5f93f5bbf4d65e` for `panel_contrast.py` and `a4578642bb7dbfa5aabec8339260bbde94a2f90f3e76e6e44a362f23fe3ab21e` for `panel_replay.py`. The saved beta table has columns `ticker` and `mm_beta`.
+The current pilot SHA-256 digests are `6b1555b1da84efd6c312d460e384836ba90032b35f3a21da4b7fd0cf1158eaf5` for `panel_jacobian.py`, `f23052db1093f71749d4aee6c2c4cdee9671ad35a51e97713f5f93f5bbf4d65e` for `panel_contrast.py` and `cbe4c75e0c73affc00002e165610c62182dccdbf330c7d5975a96921638039ba` for `panel_replay.py`. The saved beta table has columns `ticker` and `mm_beta`.
 
 Saved source tables under `data/research/crsp-sec/experiments/comovement/summary` include 54,906 observations in 60 quarters. SHA-256 values are `0119a89ae972c890fe7897d2c77fd2d3504bbd8c6a519dd91128eb52dc8a50a6` for betas, `0b6b713bc547b1af611bce4689e5a2d262b162318ac7faad9c477f119219a42d` for contributions, `ef54d2b35069f5c8472f14e3b71a6642c91004f1614f9a1dda88169338d71c1e` for estimates and `162e75d81e8eedf0ba62e81544249bdd54782788f5241a4cc92f7e84abc0a521` for the ledger. These tables are historical inputs and require matched-mask and graph verification before use as new evidence.
 
@@ -19,7 +19,8 @@ A read-only pivot of `contributions.parquet` found exactly one value per network
 Once the disk floor is restored, run the pending replay from the repository root:
 
 ```sh
-flock /tmp/finfm-swarm-compute.lock bash -c 'test "$(df -Pk /tmp | awk "NR==2 {print \$4}")" -ge 20971520 || exit 40; ulimit -v 16777216; export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES=""; timeout 1800 /usr/bin/time -v devenv shell -- uv run --project src/python --offline --frozen --package free-foundations python .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/panel_replay.py > /tmp/finfm-swarm/panel/replay.log 2>&1'
+mkdir -p /tmp/finfm-swarm/panel
+flock /tmp/finfm-swarm-compute.lock bash -c 'test "$(df -Pk /tmp | awk "NR==2 {print \$4}")" -ge 20971520 || exit 40; ulimit -v 16777216; export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES=""; time timeout 1800 devenv shell -- just python::pilot finfm/panel_replay.py > /tmp/finfm-swarm/panel/replay.log 2>&1'
 ```
 
 Successful output is expected under `/tmp/finfm-swarm/panel/` as `graphs.csv`, `fits.csv`, `contributions.csv`, and `replay.log`. The script must be reviewed against historical output and its results independently checked before handing paired contributions to inference. The script has not been run past its disk preflight.
@@ -35,8 +36,8 @@ the graph replay. The saved fit tables do not provide issuer-level hashes
 against which to check those histories directly.
 
 ```sh
-devenv shell -- uv run --offline --frozen --project src/python --package free-foundations python \
-  .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/panel_masks.py \
+devenv shell -- just python::pilot \
+  finfm/panel_masks.py \
   > /tmp/finfm-swarm/panel/masks.json
 ```
 

@@ -1,5 +1,6 @@
 # Fixed-formation MM beta alignment
 
+mkdir -p /tmp/finfm-swarm/t04
 The 2015 fixed-formation MM betas were aligned by issuer to the January 2016 frozen TabPFN geometry. The 878 available estimates are an exact frame match to Agent 1's verified handoff, with unique issuer IDs and finite betas. All are in the 967-issuer geometry roster. The PCoA uses unit-normalized states centered on all 967 issuers, then selects the 878 matched coordinates. The beta-ranked response regressed on an intercept and the first three coordinates has in-sample R² **0.0024803**. The three coordinate-wise Spearman correlations are 0.0263, −0.0642 and −0.0202, with arbitrary eigenvector signs. A rotation and sign-change check preserves fitted values. The coordinator independently confirmed fixed-cohort quarter frame parity in `/tmp/finfm-swarm/cohort/manifest.json`.
 
 MM beta is a separate return-derived target estimated from observed issuer and market returns. No beta-supervised readout was fitted to produce the frozen states or the PCoA coordinates. The rank-response OLS is a descriptive in-sample summary fitted after those coordinates were computed. The inputs and beta share economic and historical information, and no statistical independence is asserted. The 878 observations are the available-estimate subset. There is no structured null, interval, pricing test or inferential claim from this result. An independent review is pending.
@@ -9,7 +10,7 @@ The panel manifest SHA-256 is `a56bd4ea963bcfd6556b75da3f769fffd875c1ce7593e776e
 At revision `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`, run with the Agent 1 handoff present.
 
 ```sh
-flock /tmp/finfm-swarm-compute.lock env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time uv run --offline --project src/python --locked python .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/beta_alignment.py' > /tmp/finfm-swarm/t04/beta-alignment.json 2> /tmp/finfm-swarm/t04/beta-alignment.log
+flock /tmp/finfm-swarm-compute.lock env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/beta_alignment.py' > /tmp/finfm-swarm/t04/beta-alignment.json 2> /tmp/finfm-swarm/t04/beta-alignment.log
 ```
 
 The JSON SHA-256 is `4a882809d0fb2eef14c1e013bcec96219a2ada0365a03c5a50b486622e5bd794`. The run took 4.50 seconds and recorded 793,448 KiB peak process RSS. The inherited virtual-memory limit was 16 GiB. The JSON includes measured RSS, so a repeat can have a different JSON digest even when the estimates agree.
