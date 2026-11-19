@@ -24,6 +24,7 @@ records the broader programme.
 
 ## Acceptance
 
+- [ ] Complete the [matched financial and encoder comparisons](tasks/t08-matched-comparisons/README.md) and review the resulting manuscript before submission.
 - [ ] Every claim in the submission maps to a checked proof, a compiled Lean declaration or a saved stage output (audit claim map).
 - [ ] Each numbered research task supplies evidence or a documented limitation. Empirical claims identify their cohort, estimand and uncertainty.
 - [ ] The complete manuscript implements the workshop brief and has been independently reviewed on the bundled revision. The [paper aims](paper-aims.md) account for the evidence behind each headline contribution.
@@ -44,8 +45,9 @@ template = "children.md.j2"
 | in-progress | [t05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
 | in-progress | [t06 Uncertainty and robustness](tasks/t06-uncertainty-robustness/README.md) | Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights. |
 | in-progress | [t07 Write, review and package the FinFM paper](tasks/t07-submission-bundle/README.md) | Plan the argument, write the shared sections, render verified results and prepare the reviewed FinFM bundle for the authors. |
+| backlog | [t08 Matched financial and encoder comparisons](tasks/t08-matched-comparisons/README.md) | Establish how factor controls, graph weights, financial inputs and encoder choice affect in-sample spatial fit. |
 
-`5 open; 2 terminal`
+`6 open; 2 terminal`
 
 <!-- insitu:end -->
 

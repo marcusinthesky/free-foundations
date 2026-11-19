@@ -1,18 +1,18 @@
 schema: '2.0'
 stages:
   raw_fetch_checkpoints:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations raw fetch-checkpoints --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations raw fetch-checkpoints --output 
       data/raw/models
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/raw/fetch-checkpoints.json
       hash: md5
       md5: 4b685a8e45615131da25f7db88630067
       size: 8521
-    - path:
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/encoders/checkpoints.json
       hash: md5
       md5: 306e2e3f3af2107bbfeeb89ab1657b96
@@ -23,7 +23,7 @@ stages:
       md5: 4c0af4960d3f9405e9009af34876c08f
       size: 2474
   semflow_refresh:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
       src/python --offline --frozen --all-packages semflow refresh --apply
     deps:
     - path: semflow.toml
@@ -32,8 +32,8 @@ stages:
       size: 762
     - path: src/python/apps/free_foundations/src
       hash: md5
-      md5: 389d686c5edde9fcc8eaf86cabd151c1.dir
-      size: 426392
+      md5: 29994e371726b631bafb65db942048a1.dir
+      size: 426936
       nfiles: 79
     - path: src/python/pyproject.toml
       hash: md5
@@ -42,7 +42,7 @@ stages:
     outs:
     - path: .semflow/hashes
       hash: md5
-      md5: 8c5753af9b4fca81474dfc36f36f57e2.dir
+      md5: f5d667bc1103f8a46701b1d102e3798c.dir
       size: 497096
       nfiles: 12
   raw_sources:
@@ -54,12 +54,12 @@ stages:
       size: 6659889202
       nfiles: 45105
   processed_prepare_panel:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      processed prepare-panel --sources data/raw/crsp-sec --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed prepare-panel --sources data/raw/crsp-sec --output 
       data/processed/crsp-sec/panel
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/prepare-panel.json
       hash: md5
       md5: 47a93777a715ae9a270892ffe4fd8f83
@@ -92,11 +92,11 @@ stages:
       size: 7479426379
       nfiles: 4212
   processed_assemble_states:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
       processed assemble-states
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/assemble-states.json
       hash: md5
       md5: 4a32cd5a64f9e48c21816adda27f61bf
@@ -123,18 +123,18 @@ stages:
       size: 1312884354
       nfiles: 91
   research_collect_replication:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
       research collect-replication
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/research/collect-replication.json
       hash: md5
       md5: ad4508b3a06ad31548b2cc2960b13751
       size: 12290
     - path: data/research/crsp-sec/experiments/replication/formations
       hash: md5
-      md5: cc2ff430fdc0fd3bbaeb5e58df7bb82e.dir
+      md5: e52a8bac3c83c1d95e2e9e1f7475c7ab.dir
       size: 6129893
       nfiles: 38
     params:
@@ -151,17 +151,17 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/summary
       hash: md5
-      md5: 33b0215511fc571cdec06d535ef8fd74.dir
+      md5: b45b3738dad772ac1e2c5df4ba4df4b7.dir
       size: 5847260
       nfiles: 8
   research_estimate_comovement:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research estimate-comovement --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research estimate-comovement --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/comovement/summary
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/research/estimate-comovement.json
       hash: md5
       md5: 3d6682ef859f950915e308d4b2af92ad
@@ -184,7 +184,7 @@ stages:
       hash: md5
       md5: f6c9a493d8a82e34f0bdcd79c0b304a0
       size: 3435
-    - path:
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -208,13 +208,13 @@ stages:
       size: 110145
       nfiles: 6
   research_measure_alignment:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research measure-alignment --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research measure-alignment --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/alignment/summary
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/research/measure-alignment.json
       hash: md5
       md5: 5cdbb75b448488b85a0ec38e5705dbd8
@@ -243,14 +243,14 @@ stages:
       size: 9952
       nfiles: 3
   publication_render:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      publication render --panel data/processed/crsp-sec/panel --replication
-      data/research/crsp-sec/experiments/replication/summary --comovement
-      data/research/crsp-sec/experiments/comovement/summary --alignment
-      data/research/crsp-sec/experiments/alignment/summary --apt
-      data/research/crsp-sec/experiments/apt/summary --output
-      data/publication/crsp-sec/free-foundations --generated
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      publication render --panel data/processed/crsp-sec/panel --replication 
+      data/research/crsp-sec/experiments/replication/summary --comovement 
+      data/research/crsp-sec/experiments/comovement/summary --alignment 
+      data/research/crsp-sec/experiments/alignment/summary --apt 
+      data/research/crsp-sec/experiments/apt/summary --output 
+      data/publication/crsp-sec/free-foundations --generated 
       src/latex/projects/free-foundations/src/generated
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/publication/render.json
@@ -307,14 +307,14 @@ stages:
       size: 46369
       nfiles: 17
   research_estimate_apt:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research estimate-apt --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --factors
-      data/raw/crsp-sec/factors --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research estimate-apt --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --factors 
+      data/raw/crsp-sec/factors --output 
       data/research/crsp-sec/experiments/apt/summary
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/research/estimate-apt.json
       hash: md5
       md5: 3f93b4fcaace49dce60682f9f300cbfc
@@ -380,11 +380,11 @@ stages:
       size: 110492
       nfiles: 7
   processed_prepare_contexts:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
       processed prepare-contexts
     deps:
-    - path:
+    - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/prepare-contexts.json
       hash: md5
       md5: 81edff275212e121b6684eb5a9a9a65e
@@ -410,12 +410,12 @@ stages:
       size: 48386606
       nfiles: 31
   processed_encode@fernandez-tabpfn_full:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung fernandez --model
-      tabpfn_full --panel data/processed/crsp-sec/panel --weights
-      data/raw/models --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung fernandez --model 
+      tabpfn_full --panel data/processed/crsp-sec/panel --weights 
+      data/raw/models --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/fernandez/tabpfn_full
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -457,12 +457,12 @@ stages:
       size: 64990330
       nfiles: 16
   processed_encode@fernandez-tabfm:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung fernandez --model
-      tabfm --panel data/processed/crsp-sec/panel --weights data/raw/models
-      --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung fernandez --model 
+      tabfm --panel data/processed/crsp-sec/panel --weights data/raw/models 
+      --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/fernandez/tabfm
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -504,12 +504,12 @@ stages:
       size: 32266452
       nfiles: 16
   processed_encode@fernandez-kumo:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung fernandez --model
-      kumo --panel data/processed/crsp-sec/panel --weights data/raw/models
-      --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung fernandez --model 
+      kumo --panel data/processed/crsp-sec/panel --weights data/raw/models 
+      --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/fernandez/kumo
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -551,12 +551,12 @@ stages:
       size: 65700835
       nfiles: 16
   processed_encode@fernandez-limix:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung fernandez --model
-      limix --panel data/processed/crsp-sec/panel --weights data/raw/models
-      --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung fernandez --model 
+      limix --panel data/processed/crsp-sec/panel --weights data/raw/models 
+      --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/fernandez/limix
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -598,12 +598,12 @@ stages:
       size: 65948396
       nfiles: 16
   processed_encode@standard_xbrl-tabpfn_full:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung standard_xbrl
-      --model tabpfn_full --panel data/processed/crsp-sec/panel --weights
-      data/raw/models --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung standard_xbrl 
+      --model tabpfn_full --panel data/processed/crsp-sec/panel --weights 
+      data/raw/models --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/standard_xbrl/tabpfn_full
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -645,12 +645,12 @@ stages:
       size: 263838986
       nfiles: 16
   processed_encode@standard_xbrl-tabfm:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung standard_xbrl
-      --model tabfm --panel data/processed/crsp-sec/panel --weights
-      data/raw/models --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung standard_xbrl 
+      --model tabfm --panel data/processed/crsp-sec/panel --weights 
+      data/raw/models --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/standard_xbrl/tabfm
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -692,12 +692,12 @@ stages:
       size: 131453056
       nfiles: 16
   processed_encode@standard_xbrl-kumo:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung standard_xbrl
-      --model kumo --panel data/processed/crsp-sec/panel --weights
-      data/raw/models --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung standard_xbrl 
+      --model kumo --panel data/processed/crsp-sec/panel --weights 
+      data/raw/models --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/standard_xbrl/kumo
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -739,12 +739,12 @@ stages:
       size: 264817935
       nfiles: 16
   processed_encode@standard_xbrl-limix:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
-      --extra limix free-foundations processed encode --rung standard_xbrl
-      --model limix --panel data/processed/crsp-sec/panel --weights
-      data/raw/models --states data/cache/crsp-sec/state-cache --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
+      --extra limix free-foundations processed encode --rung standard_xbrl 
+      --model limix --panel data/processed/crsp-sec/panel --weights 
+      data/raw/models --states data/cache/crsp-sec/state-cache --output 
       data/processed/crsp-sec/state-parts/standard_xbrl/limix
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
@@ -786,9 +786,9 @@ stages:
       size: 268126295
       nfiles: 16
   processed_direct@fernandez:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      processed direct --rung fernandez --panel data/processed/crsp-sec/panel
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed direct --rung fernandez --panel data/processed/crsp-sec/panel 
       --output data/processed/crsp-sec/state-parts/fernandez/direct
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/direct.json
@@ -826,10 +826,10 @@ stages:
       size: 2927911
       nfiles: 16
   processed_direct@standard_xbrl:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      processed direct --rung standard_xbrl --panel
-      data/processed/crsp-sec/panel --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed direct --rung standard_xbrl --panel 
+      data/processed/crsp-sec/panel --output 
       data/processed/crsp-sec/state-parts/standard_xbrl/direct
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/direct.json
@@ -867,15 +867,15 @@ stages:
       size: 164968377
       nfiles: 16
   research_replicate@2010:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2010 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2010 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2010
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -893,9 +893,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -914,19 +914,19 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2010
       hash: md5
-      md5: b01fc7ebc5421e3964fe15854da6b589.dir
+      md5: 36197ad7bfa2fe164fa0c270fed8e630.dir
       size: 109581
       nfiles: 6
   research_replicate@2011:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2011 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2011 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2011
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -944,9 +944,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -965,19 +965,19 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2011
       hash: md5
-      md5: c1bb44be95833f528ccad558e5a7e3ed.dir
+      md5: e57717ef179368dca2c68fffee4cf425.dir
       size: 114051
       nfiles: 6
   research_replicate@2012:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2012 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2012 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2012
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -995,9 +995,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -1016,19 +1016,19 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2012
       hash: md5
-      md5: de50d2fed66717016f5e2d1a78564fca.dir
+      md5: d6d6bb4a95b8a442d9603cb0e7b887e8.dir
       size: 115324
       nfiles: 6
   research_replicate@2013:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2013 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2013 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2013
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -1046,9 +1046,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -1067,19 +1067,19 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2013
       hash: md5
-      md5: 1d3ee70014ccf0270f20b14a3af6e9b0.dir
+      md5: 69de56792dde6490191cc31fc2c7b1e8.dir
       size: 114121
       nfiles: 6
   research_replicate@2014:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2014 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2014 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2014
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -1097,9 +1097,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -1118,19 +1118,19 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2014
       hash: md5
-      md5: 9de1e0aef1fa7a53019ddadbc48dbb37.dir
+      md5: f992dfa3fffdfe6c94056374380af823.dir
       size: 112654
       nfiles: 6
   research_replicate@2015:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
-      src/python --offline --frozen --package free-foundations free-foundations
-      research replicate --formation 2015 --panel data/processed/crsp-sec/panel
-      --representations data/processed/crsp-sec/representations --output
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research replicate --formation 2015 --panel data/processed/crsp-sec/panel 
+      --representations data/processed/crsp-sec/representations --output 
       data/research/crsp-sec/experiments/replication/formations/2015
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 77adb339a79b049858fe7f501d64eb7c
+      md5: 5042e29dd910f55a7911f3465cf5376f
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -1148,9 +1148,9 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
-    - path:
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -1169,6 +1169,6 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2015
       hash: md5
-      md5: 370b041d6c3cc8593053adfddff14ef3.dir
+      md5: ba7389035d4e29fbeae23dcc0ff34561.dir
       size: 5564162
       nfiles: 8
