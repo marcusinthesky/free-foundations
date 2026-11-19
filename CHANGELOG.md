@@ -24,6 +24,11 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 - statadic for spatial estimation, diagnostics, Mantel association and block lengths.
 - `params.yaml` as the single study configuration (`crsp-sec-quarterly-v2`).
 - Reference records for every manuscript citation and a generated `refs.bib`.
+- An out-of-sample spatial APT stage (`apt`): monthly five-factor and momentum
+  loadings trained on 2016–2020 and scored on 2021–2025, comparing CAPM, APT and
+  spatial APT on characteristic, raw and exposure-calibrated foundation-model
+  geometry, with a neighbour-margin certificate for calibrated k-NN graphs.
+- A FinFM AAAI-27 workshop plan record.
 
 ### Changed
 

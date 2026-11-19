@@ -1,4 +1,4 @@
-"""Research layer: in-sample replication, co-movement, alignment and publication."""
+"""Research layer: in-sample layers, the out-of-sample spatial APT and publication."""
 
 from __future__ import annotations
 
@@ -51,6 +51,20 @@ def alignment(
     from free_foundations.study.alignment import run  # noqa: PLC0415
 
     run(panel, representations, output, params)
+
+
+@app.command("apt")
+def apt(
+    panel: Path = PANEL,
+    representations: Path = STATES,
+    factors: Path = Path("data/raw/crsp-sec/factors"),
+    output: Path = RESULTS / "apt",
+    params: Path = PARAMS,
+) -> None:
+    """Out-of-sample CAPM, APT and spatial APT covariances on raw and calibrated geometry."""
+    from free_foundations.study.apt import run  # noqa: PLC0415
+
+    run(panel, representations, factors, output, params)
 
 
 @app.command("publish")

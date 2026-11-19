@@ -159,6 +159,26 @@ stages:
     outs:
     - data/research/crsp-sec/alignment
 
+  apt:
+    desc: Out-of-sample spatial APT on characteristic, raw and calibrated foundation-model geometry.
+    cmd: >-
+      ${py} research apt --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations
+      --factors data/raw/crsp-sec/factors
+      --output data/research/crsp-sec/apt
+    params:
+    - study
+    - apt
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/stages/research/apt.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    - data/raw/crsp-sec/factors/F-F_Research_Data_5_Factors_2x3_CSV.zip
+    - data/raw/crsp-sec/factors/F-F_Momentum_Factor_CSV.zip
+    - src/python/uv.lock
+    outs:
+    - data/research/crsp-sec/apt
+
   publication:
     desc: Tables, figures and the claims audit from saved results only.
     cmd: >-

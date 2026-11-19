@@ -45,6 +45,6 @@ model = "backlinks"
 template = "backlinks.md.j2"
 -->
 
-_No declared backlinks._
+- [FinFM AAAI-27 workshop submission](../finfm-workshop/README.md)
 
 <!-- insitu:end -->
