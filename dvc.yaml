@@ -179,26 +179,6 @@ stages:
     outs:
     - data/research/crsp-sec/apt
 
-  workshop:
-    desc: FinFM workshop macros and table bodies from saved results only.
-    cmd: >-
-      ${py} research workshop --replication data/research/crsp-sec/replication
-      --comovement data/research/crsp-sec/comovement
-      --alignment data/research/crsp-sec/alignment
-      --apt data/research/crsp-sec/apt
-      --output src/latex/finfm/generated
-    params:
-    - study
-    deps:
-    - .semflow/hashes/entrypoints/free-foundations/stages/research/workshop.json
-    - data/research/crsp-sec/replication
-    - data/research/crsp-sec/comovement
-    - data/research/crsp-sec/alignment
-    - data/research/crsp-sec/apt
-    - src/python/uv.lock
-    outs:
-    - src/latex/finfm/generated
-
   publication:
     desc: Tables, figures and the claims audit from saved results only.
     cmd: >-
@@ -206,8 +186,9 @@ stages:
       --replication data/research/crsp-sec/replication
       --comovement data/research/crsp-sec/comovement
       --alignment data/research/crsp-sec/alignment
+      --apt data/research/crsp-sec/apt
       --output data/research/crsp-sec/publication
-      --tex src/latex/build/crsp-study.tex
+      --generated src/latex/projects/free-foundations/src/generated
     params:
     - study
     deps:
@@ -217,8 +198,8 @@ stages:
     - data/research/crsp-sec/replication
     - data/research/crsp-sec/comovement
     - data/research/crsp-sec/alignment
+    - data/research/crsp-sec/apt
     - src/python/uv.lock
     outs:
-    - src/latex/build/crsp-study.tex
-    - src/latex/build/rolling-rho.pdf
+    - src/latex/projects/free-foundations/src/generated
     - data/research/crsp-sec/publication

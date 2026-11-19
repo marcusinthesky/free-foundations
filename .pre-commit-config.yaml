@@ -38,6 +38,8 @@ repos:
         entry: codespell
         language: system
         types: [text]
+        # The AAAI author kit is kept byte-identical to its upstream release.
+        exclude: ^src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)$
       - id: nix-format
         name: Nix formatting
         entry: nixfmt --check
@@ -91,7 +93,7 @@ repos:
         # DVC owns dvc.lock: its YAML writer leaves a trailing space on wrapped `cmd:`
         # scalars, re-emitted by every `dvc repro`. The AAAI author kit must stay
         # byte-identical to the published files.
-        exclude: ^dvc\.lock$|^src/latex/finfm/aaai2027\.(sty|bst)$
+        exclude: ^dvc\.lock$|^src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)$
       - id: conventional-commit
         name: Conventional commit message
         entry: bash -euc 'exec convco check --from-stdin < "$1"' --
@@ -123,7 +125,7 @@ repos:
         entry: just lean::blueprint-check
         language: system
         pass_filenames: false
-        files: ^(src/lean/.*\.(lean|tex|toml)|src/latex/main\.tex)$
+        files: ^(src/lean/.*\.(lean|tex|toml)|src/latex/projects/free-foundations/src/sections/.*\.tex)$
       - id: latex-lint
         name: LaTeX formatting and lint
         entry: just latex::lint

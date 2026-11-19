@@ -67,36 +67,15 @@ def apt(
     run(panel, representations, factors, output, params)
 
 
-@app.command("workshop")
-def workshop(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input explicit.
-    replication: Path = RESULTS / "replication",
-    comovement: Path = RESULTS / "comovement",
-    alignment: Path = RESULTS / "alignment",
-    apt: Path = RESULTS / "apt",
-    output: Path = Path("src/latex/finfm/generated"),
-    params: Path = PARAMS,
-) -> None:
-    """Workshop macros and table bodies from saved results only."""
-    from free_foundations.study.workshop import render  # noqa: PLC0415
-
-    render(
-        replication_dir=replication,
-        comovement=comovement,
-        alignment=alignment,
-        apt_dir=apt,
-        output=output,
-        params=params,
-    )
-
-
 @app.command("publish")
 def publish(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input explicit.
     panel: Path = PANEL,
     replication: Path = RESULTS / "replication",
     comovement: Path = RESULTS / "comovement",
     alignment: Path = RESULTS / "alignment",
+    apt: Path = RESULTS / "apt",
     output: Path = RESULTS / "publication",
-    tex: Path = Path("src/latex/build/crsp-study.tex"),
+    generated: Path = Path("src/latex/projects/free-foundations/src/generated"),
     params: Path = PARAMS,
 ) -> None:
     """Render tables, figures and the claims audit from saved results only."""
@@ -107,7 +86,8 @@ def publish(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input expli
         replication=replication,
         comovement=comovement,
         alignment=alignment,
+        apt=apt,
         output=output,
-        tex=tex,
+        generated=generated,
         params=params,
     )

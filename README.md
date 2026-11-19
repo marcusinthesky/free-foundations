@@ -4,11 +4,11 @@ description: "Typed measurements of firm proximity from tabular foundation model
 
 # Free Foundations
 
-The [paper](src/latex/main.tex), *Pretrained Tabular Features and the Measurement of
-Financial Proximity*, separates predictive information, economic alignment and
-exposure estimation. Its mathematical framework is checked in Lean; the empirical
-study is an in-sample, few-parameter test on CRSP CIZ total returns and dated SEC
-CompanyFacts.
+The [paper](src/latex/projects/free-foundations/src/body.tex), *Pretrained Tabular
+Features and the Measurement of Financial Proximity*, studies economic measurement
+with frozen tabular representations. Its shared outline is being developed for
+arXiv and FinFM targets. The mathematical framework is checked in Lean; the
+empirical study uses CRSP CIZ total returns and dated SEC CompanyFacts.
 
 Each December's top 1,000 CRSP issuers form a cohort followed through exits. The
 study replicates Fernández's characteristic-history spatial CAPM, then asks whether
@@ -48,7 +48,7 @@ stage reaches, so documentation edits do not rerun model inference.
 ```sh
 just sources EXTRACT.csv EXTRACT.py  # deliberately recover sources, freeze, record
 just build                    # check fingerprints, then run stale DVC stages
-just latex::paper             # render saved results and compile the paper
+just latex::paper arxiv       # render saved results and compile the arXiv paper
 ```
 
 The [data guide](data/README.md) describes every stage, acquisition rules

@@ -1,0 +1,8 @@
+[doc]
+name = "free-foundations"
+bundle = "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
+
+[[output]]
+name = "arxiv"
+type = "pdf"
+inputs = ["targets/arxiv.tex"]

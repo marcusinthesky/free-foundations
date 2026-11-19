@@ -18,13 +18,13 @@ stages:
       size: 6659889202
       nfiles: 45105
   model_checkpoints:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
-      --extra limix free-foundations stages raw checkpoints --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
+      --extra limix free-foundations stages raw checkpoints --output
       data/raw/models
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/raw/checkpoints.json
       hash: md5
       md5: 9f4f8dd309a5583792a9bdf2df06c0ce
@@ -33,7 +33,7 @@ stages:
       hash: md5
       md5: ea11cd7581c029f0255e2c57c4379662
       size: 1220
-    - path: 
+    - path:
         src/python/apps/free_foundations/src/free_foundations/checkpoints.json
       hash: md5
       md5: 306e2e3f3af2107bbfeeb89ab1657b96
@@ -48,7 +48,7 @@ stages:
       md5: 4c0af4960d3f9405e9009af34876c08f
       size: 2474
   semflow_refresh:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
       src/python --offline --frozen --all-packages semflow refresh --apply
     deps:
     - path: semflow.toml
@@ -92,12 +92,12 @@ stages:
       size: 6659889202
       nfiles: 45105
   prepare:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages processed prepare --sources data/raw/crsp-sec --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages processed prepare --sources data/raw/crsp-sec --output
       data/processed/crsp-sec/panel
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/processed/prepare.json
       hash: md5
       md5: 67f2f10ac55bd8518e3e0796d88301af
@@ -134,15 +134,15 @@ stages:
       size: 7479426379
       nfiles: 4212
   representations:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV 
-      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen 
-      --package free-foundations --extra tabpfn --extra tabfm --extra kumo 
-      --extra limix free-foundations stages processed encode --panel 
-      data/processed/crsp-sec/panel --weights data/raw/models --states 
-      data/processed/crsp-sec/state-cache --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV
+      TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen
+      --package free-foundations --extra tabpfn --extra tabfm --extra kumo
+      --extra limix free-foundations stages processed encode --panel
+      data/processed/crsp-sec/panel --weights data/raw/models --states
+      data/processed/crsp-sec/state-cache --output
       data/processed/crsp-sec/representations
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/processed/encode.json
       hash: md5
       md5: 68eb2126ceca8f25af7429acd358d53a
@@ -186,13 +186,13 @@ stages:
       size: 1312884354
       nfiles: 91
   replication:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research replicate --panel data/processed/crsp-sec/panel 
-      --representations data/processed/crsp-sec/representations --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research replicate --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations --output
       data/research/crsp-sec/replication
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/replicate.json
       hash: md5
       md5: f79319e10e026b1cde61d97499c15142
@@ -215,7 +215,7 @@ stages:
       hash: md5
       md5: 89be8d454f423d3525b8aa41bbbc05ef
       size: 2806
-    - path: 
+    - path:
         src/python/apps/free_foundations/src/free_foundations/fernandez/betas.R
       hash: md5
       md5: 428fb3ba25b7bce85d827257ac1b5052
@@ -271,13 +271,13 @@ stages:
       size: 5847260
       nfiles: 8
   comovement:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research comovement --panel data/processed/crsp-sec/panel 
-      --representations data/processed/crsp-sec/representations --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research comovement --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations --output
       data/research/crsp-sec/comovement
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/comovement.json
       hash: md5
       md5: 0b60e1d6053af83bff030a3410519fbe
@@ -343,13 +343,13 @@ stages:
       size: 110145
       nfiles: 6
   alignment:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research alignment --panel data/processed/crsp-sec/panel 
-      --representations data/processed/crsp-sec/representations --output 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research alignment --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations --output
       data/research/crsp-sec/alignment
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/alignment.json
       hash: md5
       md5: fb1fc0da457f4fe06e6e2d42d61e7d7d
@@ -415,19 +415,20 @@ stages:
       size: 9952
       nfiles: 3
   publication:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research publish --panel data/processed/crsp-sec/panel 
-      --replication data/research/crsp-sec/replication --comovement 
-      data/research/crsp-sec/comovement --alignment 
-      data/research/crsp-sec/alignment --output 
-      data/research/crsp-sec/publication --tex src/latex/build/crsp-study.tex
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research publish --panel data/processed/crsp-sec/panel
+      --replication data/research/crsp-sec/replication --comovement
+      data/research/crsp-sec/comovement --alignment
+      data/research/crsp-sec/alignment --apt data/research/crsp-sec/apt --output
+      data/research/crsp-sec/publication --generated
+      src/latex/projects/free-foundations/src/generated
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/publish.json
       hash: md5
-      md5: 0f1b579c852ac40cb758804062666fe8
-      size: 61550
+      md5: da50ceab1a9a7cbc05ac653f28f1d759
+      size: 81596
     - path: data/processed/crsp-sec/panel/manifest.json
       hash: md5
       md5: ca6266c353892f520c16bf9a91b70266
@@ -441,6 +442,11 @@ stages:
       md5: d3e220438f6e270a1f448abd36ef9b4b.dir
       size: 9952
       nfiles: 3
+    - path: data/research/crsp-sec/apt
+      hash: md5
+      md5: 74e9288582a2c9a0da733d3988b8c1f9.dir
+      size: 110492
+      nfiles: 7
     - path: data/research/crsp-sec/comovement
       hash: md5
       md5: a7c61cbd71a96ffce97b17659bcda72e.dir
@@ -498,25 +504,22 @@ stages:
     outs:
     - path: data/research/crsp-sec/publication
       hash: md5
-      md5: b855f0d315b04c93d8b3586891ce4627.dir
-      size: 646
-      nfiles: 2
-    - path: src/latex/build/crsp-study.tex
+      md5: 8fec24deb96eb572f544f73fd90e4c2a.dir
+      size: 2572
+      nfiles: 3
+    - path: src/latex/projects/free-foundations/src/generated
       hash: md5
-      md5: 59f4cca1211e4e17fa9cd1ab2b2e9408
-      size: 14920
-    - path: src/latex/build/rolling-rho.pdf
-      hash: md5
-      md5: c5a07d43c76b4e6313b0fbc94509441a
-      size: 21607
+      md5: 26c5a4cdae070c1f6140af898e1a81ff.dir
+      size: 45656
+      nfiles: 17
   apt:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research apt --panel data/processed/crsp-sec/panel 
-      --representations data/processed/crsp-sec/representations --factors 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research apt --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations --factors
       data/raw/crsp-sec/factors --output data/research/crsp-sec/apt
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/apt.json
       hash: md5
       md5: 47ae6cd93b7a1e4b54d0cc18d9950aab
@@ -623,14 +626,14 @@ stages:
       size: 110492
       nfiles: 7
   workshop:
-    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
-      src/python --offline --frozen --package free-foundations free-foundations 
-      stages research workshop --replication data/research/crsp-sec/replication 
-      --comovement data/research/crsp-sec/comovement --alignment 
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project
+      src/python --offline --frozen --package free-foundations free-foundations
+      stages research workshop --replication data/research/crsp-sec/replication
+      --comovement data/research/crsp-sec/comovement --alignment
       data/research/crsp-sec/alignment --apt data/research/crsp-sec/apt --output
       src/latex/finfm/generated
     deps:
-    - path: 
+    - path:
         .semflow/hashes/entrypoints/free-foundations/stages/research/workshop.json
       hash: md5
       md5: 9d097e3ba84644e853fdccde9fa9fdf8

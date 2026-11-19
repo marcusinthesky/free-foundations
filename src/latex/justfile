@@ -1,51 +1,67 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
-# The versioned bundle is shared by setup and cached builds.
-bundle := "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
+project := "projects/free-foundations"
 
 default:
     @just --list
 
-# Explicit network step: fetch TeX resources needed by the current manuscript.
+# Explicit network preparation of the pinned TeX asset closure.
 setup:
-    mkdir -p build
-    bash ../../infra/nix/retry-tex-setup.sh tectonic --untrusted --bundle "{{ bundle }}" --keep-logs --outdir build main.tex
+    cd {{ project }} && bash ../../../../infra/nix/retry-tex-setup.sh tectonic -X build --untrusted --target arxiv
 
-# Saved-result tables, source coverage and claims audit; no empirical estimation.
+# Render saved research results without estimating or acquiring data.
 assets:
     cd ../.. && just latex-assets
 
-# The manuscript builds without saved results; `paper` renders them first.
-build:
-    mkdir -p build
-    tectonic --untrusted --only-cached --bundle "{{ bundle }}" --keep-logs --outdir build main.tex
-    if rg -n 'Citation.+undefined|Reference.+undefined|There were undefined|multiply-defined|Multiply defined' build/main.log; then echo 'Unresolved citations, references or duplicate labels' >&2; exit 1; fi
+# Build one target from the same shared body and appendix.
+build target="arxiv":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{ target }}" in
+      arxiv)
+        cd {{ project }}
+        tectonic -X build --untrusted --only-cached --keep-logs --target arxiv
+        cd ../..
+        ;;
+      finfm)
+        cd {{ project }}/src
+        mkdir -p ../build/finfm
+        pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null
+        if rg -q '\\citation' ../build/finfm/finfm.aux; then
+          (cd ../build/finfm && BIBINPUTS="../../src:" BSTINPUTS="../../src:" bibtex finfm > /dev/null)
+        fi
+        pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null
+        pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null
+        cd ../../..
+        ;;
+      *) echo 'target must be arxiv or finfm' >&2; exit 2 ;;
+    esac
+    log="{{ project }}/build/{{ target }}/{{ target }}.log"
+    if rg -n 'Citation.+undefined|Reference.+undefined|There were undefined|multiply-defined|Multiply defined' "$log"; then
+      echo 'Unresolved citation, reference or duplicate label' >&2
+      exit 1
+    fi
 
-paper: assets build
+paper target="arxiv": assets
+    just build "{{ target }}"
 
-# Anonymous FinFM submission. AAAI-27 requires pdfLaTeX and BibTeX (devenv TeX Live);
-# tables and macros come from the `workshop` DVC stage.
-finfm:
-    mkdir -p finfm/build
-    cd finfm && pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build submission.tex > /dev/null
-    cd finfm && bibtex build/submission
-    cd finfm && pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build submission.tex > /dev/null
-    cd finfm && pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build submission.tex > /dev/null
-    if rg -n 'Citation.+undefined|Reference.+undefined|There were undefined|multiply-defined|Multiply defined' finfm/build/submission.log; then echo 'Unresolved citations, references or duplicate labels' >&2; exit 1; fi
+count target="arxiv":
+    mkdir -p {{ project }}/build/{{ target }}
+    cd {{ project }}/src && texcount -merge -sub=section targets/{{ target }}.tex > ../build/{{ target }}/word-count.txt
+    cat {{ project }}/build/{{ target }}/word-count.txt
 
-# Main text, abstract and captions; TeXcount directives exclude the supplement.
-count: assets
-    texcount -merge -sub=section main.tex > build/word-count.txt
-    cat build/word-count.txt
-
-# Generated study tables are \input only when present, so lint the authored source alone.
 lint:
-    tex-fmt --check main.tex
-    chktex -q -I0 -n 1 -n 8 -n 46 main.tex
+    rg --files {{ project }}/src -g '*.tex' -g '!generated/**' -g '!vendor/**' -0 | xargs -0 -r tex-fmt --check
+    chktex -q -I0 -n 1 -n 8 -n 46 {{ project }}/src/targets/arxiv.tex
+    chktex -q -I0 -n 1 -n 8 -n 46 {{ project }}/src/targets/finfm.tex
 
-check: lint build
+check: lint
+    just build arxiv
+    just build finfm
 
-test: build
+test:
+    just build arxiv
+    just build finfm
 
 fmt:
-    tex-fmt main.tex
+    rg --files {{ project }}/src -g '*.tex' -g '!generated/**' -g '!vendor/**' -0 | xargs -0 -r tex-fmt

@@ -48,7 +48,7 @@ blueprint-pdf: blueprint-web
 
 # Every \lean{...} name in the blueprint and the manuscript must be a compiled declaration.
 blueprint-check: blueprint-web
-    python3 blueprint/manuscript_decls.py ../latex/main.tex > blueprint/manuscript_decls
+    python3 blueprint/manuscript_decls.py ../latex/projects/free-foundations/src/sections/*.tex > blueprint/manuscript_decls
     lake exe checkdecls blueprint/lean_decls
     lake exe checkdecls blueprint/manuscript_decls
 

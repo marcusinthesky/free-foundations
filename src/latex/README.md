@@ -1,39 +1,36 @@
 # Paper and supplement
 
-The manuscript is *Pretrained Tabular Features and the Measurement of Financial
-Proximity*. The retained framework and mathematical appendix distinguish
-predictive sufficiency, economic alignment, exposure estimation, geometry and
-financial loss. The [Lean guide](../lean/README.md) records proof assumptions,
-compiled declarations and integrity checks.
+The single paper lives in `projects/free-foundations`. Its `src/sections/`
+contains the shared article and appendix; `src/targets/arxiv.tex` and
+`src/targets/finfm.tex` supply the two layouts. The current manuscript is an
+outline scaffold: the introduction has reviewed structural comments and the
+remaining sections await drafting. Both targets use the same body and appendix.
 
-The empirical section now consumes the
-[quarterly CRSP–SEC study](../../data/research/crsp-sec/README.md). The previous
-current-survivor manuscript and publication guide remain in the Git history. Their
-numerical findings are not conclusions of the new dataset.
+Run from the repository root, inside the pinned devenv environment:
 
 ```sh
-just latex::assets # saved-result tables, source coverage and claims audit
-just latex::paper  # render, then Tectonic compilation
-just latex::count  # render, then TeXcount to build/word-count.txt
+just latex::build arxiv  # cached Tectonic build of the shared outline
+just latex::build finfm  # anonymous AAAI-27 pdfLaTeX/BibTeX build
+just latex::assets       # render saved research outputs only
+just latex::paper arxiv  # render saved results, then build
+just latex::paper finfm
+just latex::count arxiv
+just latex::check         # format/lint and both target builds
 ```
 
-The combined manuscript is written to `src/latex/build/main.pdf`. Rendering reads
-saved panel, representation, measurement and replication artifacts. It never
-acquires financial data or refits a model. The generated
-`build/crsp-study.tex` reports coverage, estimator availability and recorded
-estimates; pending or failed stages remain explicit. The corresponding claims
-audit is saved under `research/crsp-study/publication`.
+`just latex::assets` writes `projects/free-foundations/src/generated/` from saved
+CRSP–SEC results. It does not acquire data or fit models. Individual numbers
+are declared in `generated/numbers.tex` and read with `\ffvalue{key}`;
+`\ffnum[precision]{key}` and `\ffnume[precision]{key}` format numeric values.
+The canonical keys have `quarterly-` or `apt-` prefixes. Generated tables are
+separate `tabular` fragments under `generated/tables/`; authored sections own
+their table captions, labels and placement and can include the bodies with
+`\input{generated/tables/<name>}`. The corresponding claims and metrics audit
+is saved in `data/research/crsp-sec/publication`.
 
-All empirical artifacts must agree on the study specification, master-panel,
-issuer-roster and observed-return-mask hashes. Consistency checks do not certify
-historical source completeness. Current ticker candidates, verified historical
-SEC links, missing XBRL and unresolved linkage remain distinct. Terminal-return
-coverage and whole-issuer capitalization are not certified by the staged CRSP
-fields. Retrospective model weights and revised SEC data remain limitations.
-
-TeXcount, Tectonic and TeX packages are supplied by `devenv.nix`; generated files
-stay under ignored `build/`. `just lean::blueprint-check` checks every retained
-manuscript declaration against compiled Lean names. Declaration existence is
-separate from checking that a theorem's hypotheses justify an economic claim.
-Publication does not claim that conditional theory establishes an empirical
-model ranking.
+The reference exporter writes the project-local `src/refs.bib` from authored
+CSL records. Run `just sync` after editing references. The AAAI author-kit files
+under `src/vendor/` are kept byte-identical to their source. Generated TeX and
+PDFs are never hand-edited; `build/` is ignored. The arXiv target uses the pinned
+Tectonic bundle, while FinFM uses the pinned TeX Live pdfLaTeX environment required
+by the AAAI kit.

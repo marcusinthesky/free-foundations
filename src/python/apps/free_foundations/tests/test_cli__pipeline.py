@@ -20,7 +20,6 @@ COMMANDS = {
     "comovement": "research/comovement",
     "alignment": "research/alignment",
     "apt": "research/apt",
-    "workshop": "research/workshop",
     "publication": "research/publish",
 }
 
@@ -121,8 +120,9 @@ def test_publication_reads_every_saved_result_without_estimation() -> None:
     # Act / Assert
     for name in RESEARCH:
         assert set(outputs(name)) <= dependencies
+    assert "data/research/crsp-sec/apt" in dependencies
     assert f"{PANEL}/manifest.json" in dependencies
-    assert "src/latex/build/crsp-study.tex" in outputs("publication")
+    assert "src/latex/projects/free-foundations/src/generated" in outputs("publication")
     # Metrics live inside the tracked output, so they are declared at the top level.
     metrics = "data/research/crsp-sec/publication/metrics.json"
     assert yaml.safe_load((ROOT / "dvc.yaml").read_text())["metrics"] == [metrics]

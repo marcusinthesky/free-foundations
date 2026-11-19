@@ -8,6 +8,9 @@ import re
 import sys
 from pathlib import Path
 
-text = re.sub(r"(?m)(?<!\\)%.*$", "", Path(sys.argv[1]).read_text())
+text = "\n".join(Path(name).read_text() for name in sys.argv[1:])
+text = re.sub(r"(?m)(?<!\\)%.*$", "", text)
 names = [name.strip() for tag in re.findall(r"\\lean\{([^}]*)\}", text) for name in tag.split(",")]
-print("\n".join(name for name in names if name))
+declarations = [name for name in names if name]
+if declarations:
+    print("\n".join(declarations))

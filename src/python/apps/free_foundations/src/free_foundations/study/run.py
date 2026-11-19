@@ -85,7 +85,7 @@ def contact_identity() -> str | None:
     declared = os.environ.get("EDGAR_IDENTITY", "").strip()
     if declared:
         return declared
-    manuscript = Path("src/latex/main.tex")
+    manuscript = Path("src/latex/projects/free-foundations/src/metadata.tex")
     if manuscript.exists():
         text = manuscript.read_text()
         match = re.search(r"[A-Za-z0-9_.+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", text)

@@ -160,7 +160,7 @@ def test_research_stages_and_report_run_on_a_small_prepared_panel(tmp_path: Path
         comovement=results / "comovement",
         alignment=results / "alignment",
         output=results / "publication",
-        tex=tmp_path / "latex/build/crsp-study.tex",
+        generated=tmp_path / "latex/generated",
         params=params,
     )
 
@@ -180,8 +180,12 @@ def test_research_stages_and_report_run_on_a_small_prepared_panel(tmp_path: Path
     assert panels.loc[panels["status"].eq("available"), "spatial"].notna().all()
     mantel = pd.read_parquet(results / "alignment/mantel.parquet")
     assert "fernandez:joint" in set(mantel["network"])
-    text = (tmp_path / "latex/build/crsp-study.tex").read_text()
-    assert "\\newcommand{\\ffPrimaryIssuers}{40}" in text
-    assert "tab:fernandez-without" in text
+    text = (tmp_path / "latex/generated/numbers.tex").read_text()
+    assert "\\ffDeclareValue{quarterly-primary-issuers}{40}" in text
+    assert "\\ffDeclareNumber{quarterly-primary-issuers}{40}" in text
+    assert (
+        "% ff-table:fernandez-without"
+        in (tmp_path / "latex/generated/tables/quarterly-fernandez-without.tex").read_text()
+    )
     metrics = json.loads((results / "publication/metrics.json").read_text())
     assert metrics["primary_issuers"] == ISSUERS

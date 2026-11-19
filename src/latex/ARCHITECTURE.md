@@ -1,19 +1,31 @@
 ---
-description: Why one Tectonic engine builds manuscripts and setup owns asset downloads.
+description: One shared manuscript with arXiv and FinFM publishing adapters.
 ---
 
 # Manuscript build
 
-Tectonic is the single PDF engine. The versioned asset bundle fixes the TeX
-package generation, while devenv pins the renderer, tex-fmt and ChkTeX. Setup
-downloads the manuscript's asset closure into Tectonic's cache; builds use
-`--only-cached` so a normal check does not depend on a TeX service.
+The paper project owns its sections, metadata, bibliography and generated result
+fragments. `body.tex` and `appendix.tex` are the composition interfaces consumed
+by both targets. Section files contain manuscript content and shared semantic
+commands; classes, packages, title blocks and bibliography styles belong to the
+target adapters. `templates/ff-manuscript.sty` holds the small shared vocabulary
+for theorem environments and generated values.
 
-The starter uses a generic article class and natbib/plainnat. Publisher templates
-and additional rendering engines belong in explicitly adopted project tooling.
-PDF and intermediate output live under ignored `build/`; canonical manuscript
-text remains directly readable and reviewable in Git.
+The dependency direction is saved research artifacts to the one `publication`
+renderer, then project-local `generated/` fragments, then target PDFs. The
+renderer reads saved panel, replication, co-movement, alignment and APT outputs;
+it does not estimate or acquire data. Its `quarterly-` and `apt-` value keys avoid
+collisions. Missing or unknown result keys remain explicit. Manuscript authors
+choose where to include table fragments and figures. The claims audit and DVC
+stage make their numerical source traceable.
 
-CSL records are canonical. The reference exporter writes `refs.bib`, which is a
-derived artifact. This preserves one bibliographic owner while leaving LaTeX
-responsible for rendering citations.
+The arXiv target compiles with Tectonic's pinned asset bundle and the FinFM target
+with the AAAI-27 author kit and pdfLaTeX. Their build outputs live in distinct
+ignored `build/<target>/` directories. Target adapters may differ in layout and
+front matter, while the body and appendix remain shared. `just latex::check`
+builds both.
+
+CSL reference records are canonical. `just sync` exports their BibTeX catalog
+into the paper project. Lean declaration checks scan authored paper sections and
+the blueprint, so moving or adding a formal result cannot bypass the proof
+contract check. No generated Insitu region is edited as part of manuscript work.

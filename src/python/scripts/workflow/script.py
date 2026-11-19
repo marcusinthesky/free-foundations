@@ -355,7 +355,7 @@ def bibliography(root: Path, records: list[Record], *, check: bool) -> None:
             input=json.dumps(references, ensure_ascii=False),
             capture_output=True,
         ).stdout
-    destination = root / "src" / "latex" / "refs.bib"
+    destination = root / "src" / "latex" / "projects" / "free-foundations" / "src" / "refs.bib"
     if destination.is_symlink() or destination.parent.resolve() != destination.parent:
         raise ValueError(
             "bibliography destination must use regular files and directories"
@@ -363,7 +363,7 @@ def bibliography(root: Path, records: list[Record], *, check: bool) -> None:
     actual = destination.read_text() if destination.exists() else ""
     if actual != expected:
         if check:
-            raise ValueError("src/latex/refs.bib is stale; run just sync")
+            raise ValueError("paper refs.bib is stale; run just sync")
         destination.write_text(expected)
 
 

@@ -390,7 +390,7 @@ to these tools rerun the regression hook; Lean changes rerun the integrity hook.
 contracts in ordinary notation, in the [leanblueprint](https://github.com/PatrickMassot/leanblueprint)
 format: each statement carries `\lean{...}` with the declaration it is checked against,
 `\leanok` once the proof has no `sorry`, and `\uses{...}` for the results it builds on.
-The [manuscript](../latex/main.tex) maintains a curated mathematical appendix
+The [manuscript](../latex/projects/free-foundations/src/appendix.tex) maintains a curated mathematical appendix
 and its own `\lean{...}` tags. Both sources are checked against the same compiled
 library; the manuscript does not include the full blueprint source.
 

@@ -14,10 +14,8 @@ def check() -> None:
     project = Path(__file__).resolve().parents[1]
     repository = project.parents[1]
     tagged: set[str] = set()
-    for source in (
-        repository / "src/latex/main.tex",
-        project / "blueprint/src/content.tex",
-    ):
+    manuscript = repository / "src/latex/projects/free-foundations/src/sections"
+    for source in (*sorted(manuscript.glob("*.tex")), project / "blueprint/src/content.tex"):
         for tag in re.findall(
             r"\\lean\{([^}]*)\}", without_comments(source.read_text())
         ):

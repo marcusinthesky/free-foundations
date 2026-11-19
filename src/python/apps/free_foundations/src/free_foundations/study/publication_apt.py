@@ -1,8 +1,6 @@
-"""Workshop tables and macros, rendered from saved stage outputs only.
+"""APT tables and claims for the shared saved-result publisher.
 
-The anonymous FinFM submission inputs ``results.tex`` (macros) and one ``tab-*.tex``
-file per table body; captions and placement stay in the manuscript. Every number
-quoted in the paper is a macro defined here from a saved parquet or manifest.
+Every value and table is derived from saved parquet or manifest files.
 """
 
 from __future__ import annotations
@@ -18,13 +16,13 @@ from free_foundations.study.publication import (
     MODEL_LABELS,
     _escape,
     _interval,
-    _macro_name,
     _number,
 )
-from free_foundations.study.spec import StudySpec
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from free_foundations.study.spec import StudySpec
 
 MODELS = ("tabpfn_full", "tabfm", "kumo", "limix")
 RUNGS = ("fernandez", "standard_xbrl")
@@ -38,10 +36,12 @@ class Workshop:
     def __init__(self) -> None:
         """Start empty."""
         self.macros: dict[str, str] = {}
+        self.values: dict[str, float | int | str] = {}
         self.tables: dict[str, str] = {}
 
     def claim(self, key: str, value: float | str, digits: int = 3) -> None:
         r"""Define ``\ffw<Key>`` from a saved value."""
+        self.values[key] = value
         if isinstance(value, str):
             text = value
         elif isinstance(value, (int, np.integer)):
@@ -49,17 +49,6 @@ class Workshop:
         else:
             text = _number(value, digits)
         self.macros[key] = _escape(text)
-
-    def write(self, output: Path) -> None:
-        """Write ``results.tex`` and every table body."""
-        output.mkdir(parents=True, exist_ok=True)
-        lines = [
-            f"\\newcommand{{{_macro_name('w ' + key)}}}{{{text}}}"
-            for key, text in sorted(self.macros.items())
-        ]
-        (output / "results.tex").write_text("\n".join(lines) + "\n")
-        for name, body in self.tables.items():
-            (output / f"tab-{name}.tex").write_text(body)
 
 
 def _scalar(value: object) -> float:
@@ -358,22 +347,3 @@ def insample(work: Workshop, comovement: Path, alignment: Path) -> None:
             ]
         )
     work.tables["insample"] = _tabular("lrr", ["Network", "Panel $\\rho$", "Mantel"], rows)
-
-
-def render(  # noqa: PLR0913 -- every saved input is explicit.
-    *,
-    replication_dir: Path,
-    comovement: Path,
-    alignment: Path,
-    apt_dir: Path,
-    output: Path,
-    params: Path,
-) -> None:
-    """Write the workshop macros and tables."""
-    spec = StudySpec.read(params)
-    work = Workshop()
-    replication(work, replication_dir, spec)
-    apt(work, apt_dir)
-    insample(work, comovement, alignment)
-    work.write(output)
-    (output / "claims.json").write_text(json.dumps(work.macros, indent=2, sort_keys=True))
