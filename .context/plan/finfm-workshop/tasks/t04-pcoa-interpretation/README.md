@@ -40,10 +40,9 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| in-progress | [t04.2 Audit subspaces and quantify economic alignment](tasks/t04-2-economic-alignment/README.md) | Link dated coordinates or subspaces to measured economics. |
 | backlog | [t04.3 Evaluate dated factor-mimicking portfolios](tasks/t04-3-mimicking-portfolios/README.md) | Construct and test dated factor-mimicking portfolios. |
 
-`2 open; 1 terminal`
+`1 open; 2 terminal`
 
 <!-- insitu:end -->
 

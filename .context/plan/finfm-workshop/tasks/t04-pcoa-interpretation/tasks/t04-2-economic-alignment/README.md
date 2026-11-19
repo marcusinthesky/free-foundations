@@ -4,7 +4,9 @@ title: t04.2 Audit subspaces and quantify economic alignment
 description: Link dated coordinates or subspaces to measured economics.
 links:
 - .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/interpretation.md
-status: in-progress
+- .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/beta-alignment-receipt.md
+- .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/stability-receipt.md
+status: done
 ---
 
 # t04.2 Audit subspaces and quantify economic alignment
@@ -20,7 +22,7 @@ Interpretation worker. Consume t04.1 and t02 ratios. Exposure alignment also req
 ## Acceptance
 
 - [x] Describe January 2016 alignment with encoder-input ratios on each observed subset of the 967-issuer roster. The interpretation receipt records the PC1 sign check and rotation-invariant three-coordinate summary.
-- [ ] For an independent economic descriptor, name the target and document its independence from encoder inputs and calibration. An exposure target requires accepted t03 loadings. For a stability claim, compare subspaces across dated formations and record roster overlap. Label descriptive associations and supply a structured null and uncertainty for any inferential claim.
+- [x] Describe rank association with the matched t03 CAPM beta. The return-derived proxy is separate from the encoder targets and calibration. Compare the 2016 and 2017 subspaces on the common roster. The checks support descriptive claims. An inferential extension requires a structured null and uncertainty.
 
 <!-- insitu:begin sql
 id = "planning-children"

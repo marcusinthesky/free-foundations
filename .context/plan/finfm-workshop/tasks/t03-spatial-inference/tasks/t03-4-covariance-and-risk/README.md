@@ -2,7 +2,8 @@
 type: task
 title: t03.4 Separate exposure, residual covariance and risk
 description: Distinguish common exposure, spatial residual dependence and model-implied risk.
-links: []
+links:
+- .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/panel_jacobian.md
 status: backlog
 ---
 

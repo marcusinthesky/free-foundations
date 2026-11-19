@@ -31,6 +31,11 @@ experiments and publication. CLI defaults live in `study.paths`. DVC owns the
 artifact dependencies and Semflow fingerprints the callback for each stage.
 The root Python API exports the encoder contracts independently of the CLI.
 
+Research pilots live under `pilots/` and run through the locked study
+environment. Keep a pilot when it reproduces cited evidence or supports an
+active experiment. Task evidence records link to their commands and retain
+the inputs, results and verification limits.
+
 | Package | Responsibility |
 | --- | --- |
 | `encoders` | Typed batches, contexts, pooling, frozen backend adapters and verified readout caches |

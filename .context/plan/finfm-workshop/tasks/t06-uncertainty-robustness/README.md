@@ -41,7 +41,7 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| backlog | [t06.3 Qualify intervals, sensitivity and estimation burden](tasks/t06-3-intervals-and-sensitivity/README.md) | Attach validated uncertainty to available workshop endpoints. |
+| in-progress | [t06.3 Qualify intervals, sensitivity and estimation burden](tasks/t06-3-intervals-and-sensitivity/README.md) | Attach validated uncertainty to available workshop endpoints. |
 
 `1 open; 2 terminal`
 

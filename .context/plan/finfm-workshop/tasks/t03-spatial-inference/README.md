@@ -43,7 +43,7 @@ template = "children.md.j2"
 | Status | Item | Description |
 | --- | --- | --- |
 | in-progress | [t03.2 Verify estimator parity and comparison identities](tasks/t03-2-fit-parity/README.md) | Verify fit implementation parity and publish a comparison identity. |
-| backlog | [t03.3 Compare native, calibrated and direct-input geometry](tasks/t03-3-geometry-contrasts/README.md) | Compare frozen and direct geometry on the same financial sample. |
+| in-progress | [t03.3 Compare native, calibrated and direct-input geometry](tasks/t03-3-geometry-contrasts/README.md) | Compare frozen and direct geometry on the same financial sample. |
 | backlog | [t03.4 Separate exposure, residual covariance and risk](tasks/t03-4-covariance-and-risk/README.md) | Distinguish common exposure, spatial residual dependence and model-implied risk. |
 
 `3 open; 1 terminal`

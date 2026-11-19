@@ -2,8 +2,9 @@
 type: task
 title: t05.2 Estimate and test in-sample pricing restrictions
 description: Evaluate pricing restrictions for one accepted in-sample fit.
-links: []
-status: backlog
+links:
+- .context/plan/finfm-workshop/tasks/t05-sapt-restrictions/evidence/pricing-pilot.md
+status: in-progress
 ---
 
 # t05.2 Estimate and test in-sample pricing restrictions

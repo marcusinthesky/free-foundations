@@ -41,7 +41,7 @@ template = "children.md.j2"
 | --- | --- | --- |
 | in-progress | [t03 In-sample spatial inference](tasks/t03-spatial-inference/README.md) | Estimate matched in-sample spatial effects and covariance components. |
 | in-progress | [t04 PCoA and economic interpretation](tasks/t04-pcoa-interpretation/README.md) | Explain the geometry through principal coordinates, economic alignment and dated mimicking portfolios. |
-| backlog | [t05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
+| in-progress | [t05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
 | in-progress | [t06 Uncertainty and robustness](tasks/t06-uncertainty-robustness/README.md) | Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights. |
 | in-progress | [t07 Write, review and package the FinFM paper](tasks/t07-submission-bundle/README.md) | Plan the argument, write the shared sections, render verified results and prepare the reviewed FinFM bundle for the authors. |
 

@@ -2,8 +2,9 @@
 type: task
 title: t03.3 Compare native, calibrated and direct-input geometry
 description: Compare frozen and direct geometry on the same financial sample.
-links: []
-status: backlog
+links:
+- .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/panel_jacobian.md
+status: in-progress
 ---
 
 # t03.3 Compare native, calibrated and direct-input geometry

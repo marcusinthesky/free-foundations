@@ -4,6 +4,7 @@ title: t03.2 Verify estimator parity and comparison identities
 description: Verify fit implementation parity and publish a comparison identity.
 links:
 - .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/baseline.md
+- .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/mean_median.md
 status: in-progress
 ---
 
@@ -19,7 +20,7 @@ Spatial worker. Use the existing statadic and profile-likelihood paths and the a
 
 ## Acceptance
 
-- [ ] Show original-sample parity on the declared relative tolerance. Record ordered issuers, dates and masks and demonstrate rejection of a mismatched comparison.
+- [x] Show original-sample parity on the declared relative tolerance. Record ordered issuers, dates and masks and demonstrate rejection of a mismatched comparison.
 - [ ] Retain the median-return fit as the Fernández benchmark. For the expected-return contrast, use each issuer’s arithmetic mean excess return over the same observed quarters, weighting issuers equally in the second stage. Hold the formation, ordered roster, masks, MM betas, graph, and intercept specification fixed within each contrast. Record available fits and boundary diagnostics. Pass paired quarter-block draws to t06.3, recomputing means, medians and betas on the same draws. Qualify the mean as conditional on observed returns and report sensitivity to influential issuer-quarters.
 
 <!-- insitu:begin sql

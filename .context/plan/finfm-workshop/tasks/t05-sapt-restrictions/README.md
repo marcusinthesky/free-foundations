@@ -7,7 +7,7 @@ links:
 - src/python/apps/free_foundations/src/free_foundations/study/experiments/apt.py
 - src/python/apps/free_foundations/src/free_foundations/study/sources/factors.py
 - src/lean/FreeFoundations/ReversibleNetwork.lean
-status: backlog
+status: in-progress
 ---
 
 # t05 Spatial APT pricing restrictions
@@ -40,7 +40,7 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| backlog | [t05.2 Estimate and test in-sample pricing restrictions](tasks/t05-2-primary-pricing-test/README.md) | Evaluate pricing restrictions for one accepted in-sample fit. |
+| in-progress | [t05.2 Estimate and test in-sample pricing restrictions](tasks/t05-2-primary-pricing-test/README.md) | Evaluate pricing restrictions for one accepted in-sample fit. |
 | backlog | [t05.3 Evaluate the mimicking-factor pricing contrast](tasks/t05-3-mimicking-pricing/README.md) | Test pricing with an additional mimicking factor. |
 
 `2 open; 1 terminal`

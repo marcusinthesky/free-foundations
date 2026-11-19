@@ -5,11 +5,21 @@ description: FinFM task dependencies, write ownership and evidence handoffs.
 # FinFM work allocation
 
 The [paper aims](paper-aims.md) and final in-sample protocol in the 19 November
-Paper Overview govern the workshop study. The coordinator pins the revision and allocates one
-child at a time to each of three GPT-6.1 Terra high workers. The first wave owns
-theory, cohort validation, and the manuscript brief and sources. Subsequent
-workers take the next ready child or an independent review. Stable task paths
-use hyphenated slugs and dotted display IDs.
+Paper Overview govern the workshop study. The coordinator pins the working
+snapshot, verifies t01 and t02, and assigns t03–t06 to five GPT-6.1 Terra workers
+at medium reasoning effort. The fixed-formation mean-versus-median comparison
+and the matched quarterly spatial panel lead the empirical work. The other
+workers start fixture and saved-data checks while fit evidence becomes available.
+The research handoff precedes manuscript writing and submission packaging.
+See the [research handoff](research-handoff.md) for review dispositions.
+
+| Worker | Research ownership | First dependency |
+| --- | --- | --- |
+| Cross-section | t03.1–t03.2, Fernández parity and matched arithmetic means | t02 fixed-formation outcomes and saved replication roster |
+| Spatial panel | t03.3–t03.4, matched co-movement and covariance | Verified quarterly masks, frozen states and t01 graph premises |
+| Interpretation | t04.1–t04.3, PCoA and dated mimicking portfolios | t02 roster and verified states, then t03 loadings for exposure alignment |
+| Pricing | t05.1–t05.3, in-sample mean restrictions | t01 and t03, then t04.3 only for the mimicking-factor contrast |
+| Uncertainty | t06.1–t06.3, paired intervals and fitted-component inventory | Matched point fits and their observation and graph identities |
 
 | Task | Inputs needed for use | Handoff |
 | --- | --- | --- |
@@ -40,11 +50,11 @@ Carry remaining work in its existing task record and the journal roadmap.
 ## Write ownership and compute
 
 Give each worker its task record, base revision, repository and study contracts,
-its TeX paragraph roles, source and test entry points, upstream contracts or
-fixtures, and the exact write boundaries. Theory owns Lean and its blueprint.
-Cohorts owns return and roster logic. Estimator, interpretation and inference
-owners work in their corresponding study modules or in private pilot outputs.
-A separate worker reviews each accepted result.
+source and test entry points, upstream contracts or fixtures, and exclusive
+evidence paths. Workers write reproducible pilots in their evidence directories
+and keep numerical outputs in task-specific scratch directories. The coordinator
+owns shared integration and task status review. A separate reviewer checks each
+accepted result.
 
 Use a private outcome sidecar bound to the existing prepared manifest and raw
 CRSP digest. Keep the saved prepared panel and representation store read-only.

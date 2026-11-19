@@ -61,6 +61,14 @@ Features use dated disclosures before each quarter's trading cutoff. Native
 missingness passes to tabular models; the direct control uses support-median
 imputation with indicators. Deterministic column blocks retain every eligible field.
 
+## Reproduce a research pilot
+
+`pilots/finfm/` contains the replay commands for recorded workshop evidence
+and the runners for pending panel and refit work. Use the same uv lock as
+the study. For example, from pinned devenv run
+`just python::pilot finfm/cohort_replay.py`. The task receipts give the input
+identities, resource settings and expected outputs for each run.
+
 ## Model catalogue
 
 | Key / extra | Model | Retained readout |

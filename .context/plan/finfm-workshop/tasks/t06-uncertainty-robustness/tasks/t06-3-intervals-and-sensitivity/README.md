@@ -2,8 +2,9 @@
 type: task
 title: t06.3 Qualify intervals, sensitivity and estimation burden
 description: Attach validated uncertainty to available workshop endpoints.
-links: []
-status: backlog
+links:
+- .context/plan/finfm-workshop/tasks/t06-uncertainty-robustness/evidence/swarm-t06/receipt.md
+status: in-progress
 ---
 
 # t06.3 Qualify intervals, sensitivity and estimation burden

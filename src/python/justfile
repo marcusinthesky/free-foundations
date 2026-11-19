@@ -12,6 +12,10 @@ setup:
 run *args:
     cd ../.. && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations "$@"
 
+# Run a research pilot from pilots/ using the locked study environment.
+pilot script *args:
+    cd ../.. && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations python "src/python/pilots/$1" "${@:2}"
+
 lint:
     env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff check .
     env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen ruff format --check .
