@@ -19,6 +19,8 @@ COMMANDS = {
     "replication": "research/replicate",
     "comovement": "research/comovement",
     "alignment": "research/alignment",
+    "apt": "research/apt",
+    "workshop": "research/workshop",
     "publication": "research/publish",
 }
 
@@ -87,14 +89,15 @@ def test_financial_sources_are_restored_without_running_acquisition() -> None:
 @pytest.mark.unit
 def test_every_estimating_stage_declares_its_params() -> None:
     # Arrange
-    params = yaml.safe_load((ROOT / "params.yaml").read_text())["study"]
+    blocks = yaml.safe_load((ROOT / "params.yaml").read_text())
+    params = blocks["study"]
 
-    # Act / Assert
+    # Act / Assert: a whole block (`study`, `apt`) or one `study.` setting.
     for name in COMMANDS:
         declared = PIPELINE[name]["params"]
         assert declared, name
         for key in declared:
-            assert key == "study" or key.removeprefix("study.") in params, (name, key)
+            assert key in blocks or key.removeprefix("study.") in params, (name, key)
 
 
 @pytest.mark.unit

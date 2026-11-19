@@ -50,6 +50,8 @@ def test_only_layered_pipeline_commands_are_exposed() -> None:
         ("stages", "research", "replicate"),
         ("stages", "research", "comovement"),
         ("stages", "research", "alignment"),
+        ("stages", "research", "apt"),
+        ("stages", "research", "workshop"),
         ("stages", "research", "publish"),
     }
 
