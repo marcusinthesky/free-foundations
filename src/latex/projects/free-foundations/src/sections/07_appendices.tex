@@ -137,3 +137,78 @@ maintained assumptions.
   unverified.}
   \label{tab:us-benchmark}
 \end{table}
+\paragraph{Does the encoder add to its inputs?}
+With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
+4.98 log-likelihood units per quarter over the joint characteristic graph,
+while selecting peers directly from the same financial inputs gains 5.91.
+The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
+with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
+against the joint graph has a Holm-adjusted $p$-value of 0.135
+(Table~\ref{tab:quarterly-comparisons}).
+
+\paragraph{The characteristic benchmark.}
+The joint characteristic kernel has
+\ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
+neighbours per row on average, compared with $n-1$ for a fitted roster of
+$n$ issuers under uniform
+off-diagonal weights. When most issuers receive similar weights,
+firms share much of the same peer return. These averages carry little
+cross-sectional variation relative to a more concentrated graph. On
+the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
+joint-kernel lag maximum-likelihood estimate without an intercept is
+$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$.
+Table~\ref{tab:us-benchmark} records the contrast and its
+uncertainty. With an intercept, the joint-kernel fit is flagged as
+invalid or on the boundary. The no-intercept estimate is consistent
+with the spatial term absorbing much of the common mean in this US sample.
+
+The point fit and a separate profile-likelihood calculation agree on
+the saved original-sample betas, issuer medians and reconstructed
+graph. The percentile endpoints recompute betas and medians in common
+time blocks and restrict the graph when firms drop out of a refit.
+They quantify a different source of variation from the standard error
+conditional on the generated beta. These diagnostics
+characterize the US reimplementation, where the original sample is unavailable.
+
+\paragraph{A dated view of learned geometry.}
+To identify which financial histories organize the learned peers, we
+form principal coordinates from chord distances of the January
+2016 TabPFN states on the original characteristic rung. Because the
+embedding uses information available at formation, the analysis
+includes all \ffnum[0]{quarterly-primary-roster} issuers on the
+analytical roster, including firms with incomplete subsequent
+returns. For each ratio we use the latest
+available annual slot and restrict the comparison to its observed
+issuers. The leading coordinate has stronger absolute rank correlation with
+market capitalization over assets and market-to-book than with
+dividend yield or debt maturity. The same ordering holds for explained
+rank variation after regression on the leading three coordinates and
+an intercept. This subspace comparison is invariant to sign changes and
+orthogonal rotations.
+
+The valuation ratios are part of the encoder inputs. Their alignment
+describes how the model organizes its own inputs on this date.
+The historical ratio embedding puts about 45\% of positive inertia
+in its leading coordinate. On the 878 issuers with estimated market
+betas, its first three coordinates explain about one quarter of one
+percent of beta rank variation. The same subspace explains about
+93\% of market-cap-to-assets rank variation among the 960 issuers
+with that ratio observed.
+On this formation date the learned geometry is closely associated
+with a valuation measure supplied to the encoder, while its alignment
+with independently estimated market exposure is weak.
+
+\section{Matched factor specifications}
+\newcommand{\ffFactorDetail}[2]{
+  \begin{table*}[p]
+    \centering
+    \small
+    \input{generated/tables/matched-detail-#1}
+    \caption{#2 on the common issuer-quarter mask. Information criteria
+    condition on estimated first-stage exposures.}
+\end{table*}}
+\IfFileExists{generated/tables/matched-detail-none.tex}{
+  \ffFactorDetail{none}{Factor-only models}
+  \ffFactorDetail{lag}{Spatial lag models}
+  \ffFactorDetail{error}{Spatial error models}
+}{\ffmissing}

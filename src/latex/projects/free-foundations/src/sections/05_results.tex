@@ -1,62 +1,64 @@
 \section{Results}
 
-\paragraph{Does the encoder add to its inputs?}
-With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
-4.98 log-likelihood units per quarter over the joint characteristic graph,
-while selecting peers directly from the same financial inputs gains 5.91.
-The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
-with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
-against the joint graph has a Holm-adjusted $p$-value of 0.135
-(Table~\ref{tab:quarterly-comparisons}).
+\paragraph{Peer returns after factor adjustment.}
+Across the common issuer-quarters, the ratio-based TabPFN peer return
+improves in-sample fit even after controlling for exposures to the five
+Fama--French factors and momentum. The joint characteristic graph also
+adds fit, although the paired contrast favours the encoder
+(Table~\ref{tab:matched-factors}). Because both graphs use the same
+ten-neighbour rule, this comparison holds the weighting convention fixed.
 
-\paragraph{The characteristic benchmark.}
-The joint characteristic kernel has
-\ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
-neighbours per row on average, compared with $n-1$ for a fitted roster of
-$n$ issuers under uniform
-off-diagonal weights. When most issuers receive similar weights,
-firms share much of the same peer return. These averages carry little
-cross-sectional variation relative to a more concentrated graph. On
-the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
-joint-kernel lag maximum-likelihood estimate without an intercept is
-$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$.
-Table~\ref{tab:us-benchmark} records the contrast and its
-uncertainty. With an intercept, the joint-kernel fit is flagged as
-invalid or on the boundary. The no-intercept estimate is consistent
-with the spatial term absorbing much of the common mean in this US sample.
+\begin{table*}[t]
+  \centering
+  \IfFileExists{generated/tables/matched-factors.tex}{\resizebox{\textwidth}{!}{\input{generated/tables/matched-factors}}}{\ffmissing}
+  \caption{Factor-only log likelihood and incremental spatial-lag fit.
+    The two gain columns compare each graph with the factor-only fit.
+    Gains are in nats per issuer-quarter, with paired 95\% stationary-quarter
+  intervals conditional on fitted loadings and parameters.}
+  \label{tab:matched-factors}
+\end{table*}
 
-The point fit and a separate profile-likelihood calculation agree on
-the saved original-sample betas, issuer medians and reconstructed
-graph. The percentile endpoints recompute betas and medians in common
-time blocks and restrict the graph when firms drop out of a refit.
-They quantify a different source of variation from the standard error
-conditional on the generated beta. These diagnostics
-characterize the US reimplementation, where the original sample is unavailable.
+\paragraph{How much does the weighting rule matter?}
+The ratio-based encoder also improves on the joint characteristic distance
+when both graphs use exponential or median-bandwidth Gaussian weights.
+Figure~\ref{fig:matched-kernels} shows the paired contrasts under market
+controls. The effective neighbour counts indicate how much the typical peer
+return averages across firms, even when two rules produce similar fit.
 
-\paragraph{A dated view of learned geometry.}
-To identify which financial histories organize the learned peers, we
-form principal coordinates from chord distances of the January
-2016 TabPFN states on the original characteristic rung. Because the
-embedding uses information available at formation, the analysis
-includes all \ffnum[0]{quarterly-primary-roster} issuers on the
-analytical roster, including firms with incomplete subsequent
-returns. For each ratio we use the latest
-available annual slot and restrict the comparison to its observed
-issuers. The leading coordinate has stronger absolute rank correlation with
-market capitalization over assets and market-to-book than with
-dividend yield or debt maturity. The same ordering holds for explained
-rank variation after regression on the leading three coordinates and
-an intercept. This subspace comparison is invariant to sign changes and
-orthogonal rotations.
+\begin{figure}[t]
+  \centering
+  \IfFileExists{generated/figures/matched-kernels.pdf}{\includegraphics[width=\columnwidth]{generated/figures/matched-kernels.pdf}}{\ffmissing}
+  \caption{Market-controlled lag likelihood gain for the encoder over the
+    joint characteristic distance, with conditional paired 95\% intervals.
+    Parentheses give mean effective neighbours for Fernández and TabPFN,
+  respectively.}
+  \label{fig:matched-kernels}
+\end{figure}
 
-The valuation ratios are part of the encoder inputs. Their alignment
-describes how the model organizes its own inputs on this date.
-The historical ratio embedding puts about 45\% of positive inertia
-in its leading coordinate. On the 878 issuers with estimated market
-betas, its first three coordinates explain about one quarter of one
-percent of beta rank variation. The same subspace explains about
-93\% of market-cap-to-assets rank variation among the 960 issuers
-with that ratio observed.
-On this formation date the learned geometry is closely associated
-with a valuation measure supplied to the encoder, while its alignment
-with independently estimated market exposure is weak.
+\paragraph{What does encoding add to the same inputs?}
+Because Fernández compares characteristic ranks over time, its graph
+leaves open how much fit a researcher could obtain by selecting peers
+directly from the financial features supplied to the encoder.
+Table~\ref{tab:matched-encoders} makes this comparison under market
+controls. For TabPFN the estimated gain is slightly negative on the four
+ratio histories and positive on their operands, with both intervals
+including zero. On broad financial inputs all four point estimates are
+positive, and TabPFN achieves the largest gain among the twelve fitted
+combinations. The reported intervals measure gains over each input set's
+own control. Selection uses the same sample as estimation.
+
+\begin{table*}[t]
+  \centering
+  \IfFileExists{generated/tables/matched-encoders.tex}{\resizebox{\textwidth}{!}{\input{generated/tables/matched-encoders}}}{\ffmissing}
+  \caption{Market-controlled spatial-lag gain over the direct graph built
+    from the same inputs, in nats per issuer-quarter. Brackets give conditional
+  paired 95\% intervals. All graphs use symmetrized ten-neighbour weights.}
+  \label{tab:matched-encoders}
+\end{table*}
+
+For the selected broad-financial TabPFN representation, the leading
+coordinate accounts for
+\IfFileExists{generated/tables/matched-inertia.tex}{\input{generated/tables/matched-inertia}}{\ffmissing}\%
+of positive inertia on the January 2016 formation roster. This share
+motivates comparing the neighbours recovered by the first coordinate with
+those used by the full spatial graph.

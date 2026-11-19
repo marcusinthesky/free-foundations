@@ -161,3 +161,4 @@ publication:
 latex-assets:
     mkdir -p src/latex/build
     MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" {{ stages }} publication render
+    if test -f data/research/crsp-sec/experiments/matched-comparisons/evidence/manifest.json; then {{ stages }} publication matched-exhibits; fi

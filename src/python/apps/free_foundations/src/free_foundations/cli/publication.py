@@ -56,3 +56,14 @@ def render_matched(
     from free_foundations.study.publication.matched import render  # noqa: PLC0415
 
     render(results, evidence, output)
+
+
+@app.command("matched-exhibits")
+def matched_exhibits(
+    results: Path = MATCHED_RESULTS,
+    generated: Path = Path("src/latex/projects/free-foundations/src/generated"),
+) -> None:
+    """Typeset the completed matched fit comparisons and their paired intervals."""
+    from free_foundations.study.publication.exhibits import render  # noqa: PLC0415
+
+    render(results, generated)
