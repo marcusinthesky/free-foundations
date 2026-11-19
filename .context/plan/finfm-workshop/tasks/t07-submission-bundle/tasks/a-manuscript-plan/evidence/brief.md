@@ -14,7 +14,7 @@ Proposed internal evidence freeze: **20 November 18:00 SAST**. Proposed author h
 
 ## Seven-page allocation
 
-These are hard layout targets including captions and floats, to be checked on the compiled AAAI PDF; references and appendices follow the technical pages.
+Use six pages for the main manuscript, including captions and floats. References and appendices follow the technical pages.
 
 | Section | Pages | Paragraph roles and protected content |
 | --- | ---: | --- |

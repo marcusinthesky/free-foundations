@@ -15,11 +15,10 @@ class gives closure under composition and inversion. The fibre
 argument is pointwise. A measurable or approximate recovery claim
 requires additional assumptions on the spaces and readout class.
 
-% REVIEW: Introduce the change of question before the symbols. The
-% recoding example shows how peers can change, while the gap argument
-% gives a sufficient condition for retaining the selected peers
-% despite error in estimated exposures.
-Suppose $a_i$ is a true exposure, $\widehat a_i$ its estimate, and
+Although recoding can change peers, an estimated exposure can
+preserve the selected peers when the gap at the neighbourhood
+boundary is sufficiently wide. Suppose $a_i$ is a true exposure,
+$\widehat a_i$ its estimate, and
 $\norm{\widehat a_j-a_j}\leq\delta_j\leq\delta_{\max}$ for every
 issuer. Each distance in row $i$ can move by at most
 $\delta_i+\delta_{\max}$. Therefore an estimated strict gap between
@@ -70,11 +69,6 @@ where the ratio calls for a positive denominator, stale balance
 sheets, and undefined paired history correlations each have separate
 availability rules.
 
-% REVIEW: Separate what stays fixed across bootstrap draws from what
-% is recomputed within one draw. State the order from common quarter
-% blocks to issuer estimates, eligible issuers, and row
-% normalization, then explain how refit percentiles can coexist with
-% an unavailable original fit.
 The characteristic reimplementation estimates OLS, spatial lag by
 instrumental variables and maximum likelihood, and spatial error by
 maximum likelihood. Fit states distinguish available estimates from
@@ -89,13 +83,9 @@ that case as an identification or estimation limitation.
 \section{Scope of the Empirical Evidence}
 \label{app:scope}
 
-% REVIEW: Replace 'endpoints' with the two quantities measured, the
-% cross-sectional association in median returns and the alignment of
-% input ratios with the dated embedding. Use these to explain why
-% evaluating a risk or pricing claim would require a different
-% outcome.
-The primary results condition on the declared formation and the
-endpoints reported in the text. A return-based exposure proxy, a
+The fixed-cohort fit measures cross-sectional association in median
+returns, while the dated geometry analysis measures how the formation
+inputs align with encoder coordinates. A return-based exposure proxy, a
 residual-dependence parameter and a cross-sectional pricing error
 answer different questions. A dated geometry exhibit describes one
 estimated representation space. Factor spanning, joint pricing
@@ -110,6 +100,31 @@ maintained assumptions.
   \caption{In-sample lag log-likelihood differences per quarter.
     Positive values favour the network in the first column.
     Percentiles resample paired quarterly contributions conditional on
-    fitted parameters. The last column adjusts for multiple comparisons.}
+  fitted parameters. The last column adjusts for multiple comparisons.}
   \label{tab:quarterly-comparisons}
 \end{table*}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    Joint kernel lag ML & $\widehat\rho$ & Refit percentiles \\
+    \midrule
+    Without intercept & \ffnum{quarterly-fernandez-joint-rho} &
+    $[\ffnum{quarterly-fernandez-joint-rho-bootstrap-low},\
+    \ffnum{quarterly-fernandez-joint-rho-bootstrap-high}]$
+    \\
+    With intercept & Invalid or boundary & --- \\
+    \bottomrule
+  \end{tabular}
+  \caption{US reimplementation for the December 2015 formation.
+    Percentiles are the central 95\% of
+    \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
+    stationary-quarter refits. They describe refit variation
+    conditional on the formation graph and the observed-quarter design.
+    Issuer availability can change by draw. Statistical coverage of
+    this interval
+    and complete terminal-outcome coverage of the formation cohort remain
+  unverified.}
+  \label{tab:us-benchmark}
+\end{table}

@@ -28,7 +28,7 @@ records the broader programme.
 - [ ] Every claim in the submission maps to a checked proof, a compiled Lean declaration or a saved stage output (audit claim map).
 - [ ] Each numbered research task supplies evidence or a documented limitation. Empirical claims identify their cohort, estimand and uncertainty.
 - [ ] The complete manuscript implements the workshop brief and has been independently reviewed on the bundled revision. The [paper aims](paper-aims.md) account for the evidence behind each headline contribution.
-- [ ] The anonymous PDF builds from a clean directory with no undefined references, at most 7 technical pages, and passes the anonymity checks.
+- [ ] The anonymous PDF builds from a clean directory with no undefined references, at most 6 technical pages, and passes the anonymity checks.
 - [ ] The audit, journal roadmap, cover note and OpenReview abstract exist and state what remains unresolved.
 - [ ] `just check` passes, or every check that could not run is reported.
 

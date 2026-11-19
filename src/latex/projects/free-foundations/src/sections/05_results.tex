@@ -1,16 +1,12 @@
 \section{Results}
 
 \paragraph{The characteristic benchmark.}
-% REVIEW: Explain why the effective neighbour count matters. Weights
-% spread across nearly the whole fitted roster give each issuer a
-% similar peer average. Use that observation to
-% motivate fitting an intercept, and keep the common-mean explanation
-% conditional.
 The joint characteristic kernel has
 \ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
 neighbours per row on average, compared with $n-1$ for a fitted roster of
 $n$ issuers under uniform
-off-diagonal weights. Its broad peer averages carry little
+off-diagonal weights. When most issuers receive similar weights,
+firms share much of the same peer return. These averages carry little
 cross-sectional variation relative to a more concentrated graph. On
 the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
 joint-kernel lag maximum-likelihood estimate without an intercept is
@@ -20,89 +16,39 @@ uncertainty. With an intercept, the joint-kernel fit is flagged as
 invalid or on the boundary. The no-intercept estimate is consistent
 with the spatial term absorbing much of the common mean in this US sample.
 
-\begin{table}[t]
-  \centering
-  \begin{tabular}{lcc}
-    \toprule
-    Joint kernel lag ML & $\widehat\rho$ & Refit percentiles \\
-    \midrule
-    Without intercept & \ffnum{quarterly-fernandez-joint-rho} &
-    $[\ffnum{quarterly-fernandez-joint-rho-bootstrap-low},\
-    \ffnum{quarterly-fernandez-joint-rho-bootstrap-high}]$
-    \\
-    With intercept & Unavailable & --- \\
-    \bottomrule
-  \end{tabular}
-  % REVIEW: Explain the 'Unavailable' table cell with the reported
-  % invalid-or-boundary diagnostic. Keep the refit percentiles and
-  % their conditional interpretation together, and tie incomplete
-  % return histories to the data discussion so the two meanings of
-  % coverage stay clear.
-  \caption{US reimplementation for the December 2015 formation.
-    Percentiles are the central 95\% of
-    \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
-    stationary-quarter refits. They describe refit variation
-    conditional on the formation graph and the observed-quarter design.
-    Issuer availability can change by draw. Statistical coverage of
-    this interval
-    and complete terminal-outcome coverage of the formation cohort remain
-  unverified.}
-  \label{tab:us-benchmark}
-\end{table}
-
-% REVIEW: Give the two checks distinct subjects. The profile
-% calculation checks the point estimate on fixed data, while the
-% block refits measure variation when betas and medians are
-% re-estimated. Specify which check governs inclusion where the text
-% says 'this comparison'.
 The point fit and a separate profile-likelihood calculation agree on
 the saved original-sample betas, issuer medians and reconstructed
 graph. The percentile endpoints recompute betas and medians in common
 time blocks and restrict the graph when firms drop out of a refit.
 They quantify a different source of variation from the standard error
-conditional on the generated beta. We leave estimates for which this
-comparison remains unresolved outside the table. These diagnostics
+conditional on the generated beta. These diagnostics
 characterize the US reimplementation, where the original sample is unavailable.
 
 \paragraph{Does the encoder add to its inputs?}
-On the quarterly panel, the ratio-based TabPFN graph has a higher mean
-lag log likelihood than the joint characteristic-history graph when both
-use symmetrized ten-neighbour weights. Against peers selected directly
-from the financial inputs, the estimated difference changes sign and its
-paired percentile interval includes zero (Table~\ref{tab:quarterly-comparisons}). The positive contrast with
-the joint graph also falls short of the five-percent threshold after
-Holm adjustment. The choice of reference changes what an apparent gain
-in spatial fit tells us about the encoder.
+With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
+4.98 log-likelihood units per quarter over the joint characteristic graph,
+while selecting peers directly from the same financial inputs gains 5.91.
+The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
+with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
+against the joint graph has a Holm-adjusted $p$-value of 0.135
+(Table~\ref{tab:quarterly-comparisons}).
 
 \paragraph{A dated view of learned geometry.}
-% REVIEW: Bridge from the return fit to the question of which inputs
-% align with the principal coordinates. Join the two sample-selection
-% sentences with 'because' to explain why an analysis of formation
-% inputs can use issuers with incomplete subsequent returns. Name the
-% four input histories behind 'original characteristic rung'.
-We form principal coordinates from chord distances of the January
+To identify which financial histories organize the learned peers, we
+form principal coordinates from chord distances of the January
 2016 TabPFN states on the original characteristic rung. The state and
 date match the full analytical formation roster of
 \ffnum[0]{quarterly-primary-roster} issuers. This calculation uses
 the formation information available to the encoder. It does not apply
 the later return-estimation filter. For each ratio we use the latest
 available annual slot and restrict the comparison to its observed
-% REVIEW: Specify that 'stronger' refers to absolute rank
-% correlation, since the coordinate's sign is arbitrary. Give one
-% verified valuation comparison and its observed issuer count so
-% readers can judge the magnitude and see which observations support
-% it.
-issuers. The leading coordinate has stronger rank correlation with
+issuers. The leading coordinate has stronger absolute rank correlation with
 market capitalization over assets and market-to-book than with
 dividend yield or debt maturity. The same ordering holds for explained
 rank variation after regression on the leading three coordinates and
 an intercept. This subspace comparison is invariant to sign changes and
 orthogonal rotations.
 
-% REVIEW: Lead with what alignment to the valuation inputs reveals
-% about this encoding on this date. Keep input overlap beside that
-% interpretation and consolidate the repeated pricing and portfolio
-% qualifications in the scope appendix.
 The valuation ratios are part of the encoder inputs. Their alignment
 describes how the model organizes its own inputs on this date.
 The historical ratio embedding puts about 45\% of positive inertia

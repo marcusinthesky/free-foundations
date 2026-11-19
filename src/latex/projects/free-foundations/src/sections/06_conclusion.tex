@@ -1,27 +1,22 @@
 \section{Conclusion}
 
-% REVIEW: Start with what an analyst choosing peers can conclude.
-% Recovering a target still permits different peer rankings, so the
-% distance rule needs its own justification. Carry that choice into
-% the covariance calculation to connect the two formal results.
-Frozen features offer a candidate measure of financial proximity.
-Exact recoverability identifies which histories can share a
-representation for a given target. It leaves room for recodings that
-change their neighbours. The graph's normalization, degree ratio, and
+An analyst selecting peer firms must justify the distance used to
+rank them, because even an encoding that retains the desired exposure
+can change which firms are closest.
+The graph's normalization, degree ratio, and
 spatial parameter then govern the sensitivity of a spatial covariance
 calculation.
 
-% REVIEW: Explain 'unavailable' using the same fit diagnostic as
-% Results. Explain how comparing matched issuers on an independent
-% target would test whether nearby firms in the embedding are also
-% close on the economic quantity of interest.
 In the US characteristic reimplementation, the literal joint kernel
-yields a large no-intercept estimate and an unavailable fit when the
-intercept is included. On the quarterly panel, the estimated gain from encoding depends on
+yields a large no-intercept estimate and a fit flagged as invalid or
+on the boundary when the
+intercept is included. On the quarterly panel, the estimated gain
+from encoding depends on
 the reference graph. Using direct financial inputs as the reference
 leaves the incremental lag fit uncertain. The dated exhibit describes an
-embedding geometry visibly aligned with valuation inputs. A stronger
-economic interpretation requires independent targets and tests on
-matched samples. This is the distinction between a feature map that
+embedding geometry visibly aligned with valuation inputs. Comparing
+the same firms on independently measured exposures would establish
+how closely the selected peers resemble each other on a quantity
+outside the encoder inputs. This is the distinction between a feature map that
 retains financial information and a spatial network that measures a
 particular economic relation.

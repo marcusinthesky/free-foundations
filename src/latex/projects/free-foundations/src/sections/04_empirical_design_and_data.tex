@@ -1,12 +1,10 @@
 \section{Empirical Design and Data}
 
-% REVIEW: Introduce PERMNO as a security identifier and PERMCO as a
-% company identifier. Follow one selected share class into its issuer
-% portfolio, then say which issuers qualify for the geometry exhibit
-% and which also have enough return data and a converged fit.
 The December 2015 formation ranks US common securities in CRSP CIZ by
-market capitalization. The selected PERMNOs define fixed portfolios
-over 2016--2025, grouped by formation PERMCO. The top 1,000
+market capitalization. Each selected share class has a security
+identifier (PERMNO). We combine the classes belonging to the same
+company at formation (PERMCO) into an issuer portfolio and follow
+those classes over 2016--2025. The top 1,000
 securities represent \ffnum[0]{quarterly-primary-population-issuers}
 issuer portfolios before linkage and feature requirements. The
 analytical formation roster contains
@@ -25,10 +23,6 @@ cause and proceeds unknown. The application describes observed
 quarters, with formation membership and exclusions accounted for
 across the full window.
 
-% REVIEW: End on the timing facts that make this analysis
-% retrospective. The final SIC sentence repeats 'current' without
-% explaining its relevance. Move it to the industry comparison if
-% readers need to know when firms were classified.
 Financial variables use CRSP market equity and dated SEC
 CompanyFacts. We retain the four original characteristic families:
 market equity over assets, market-to-book, dividend yield, and debt
@@ -36,8 +30,7 @@ maturity. The histories use annual slots available as of formation,
 subject to SEC linkage and reporting cutoffs. CompanyFacts can
 include revised historical values, and the encoder checkpoints
 postdate the sample. The design therefore evaluates retrospective
-measurement. Current SIC, when used as a comparison, describes
-current industry classifications.
+measurement.
 
 Following \citet{fernandez2011}, an issuer's beta comes from a robust
 regression of quarterly excess returns on the market excess return.
@@ -49,7 +42,8 @@ generated-regressor uncertainty.
 
 For the quarterly comparison each observation is one issuer's excess
 return in one quarter. January formation rosters determine the eligible
-peers, and issuers with missing outcomes drop out before graph construction.
+peers, and the quarterly fit restricts the peer graph to issuers on
+the common outcome mask.
 We estimate quarter effects and control for the product of the issuer's
 full-panel market beta and the quarterly market excess return. We compare
 the spatial lag fits on common quarters. Stationary blocks of paired
