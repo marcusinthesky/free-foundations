@@ -27,3 +27,10 @@ analysis does not establish interval coverage or complete terminal-outcome
 coverage. The 10-NN bootstrap result remains open and is absent from the
 exhibit. Pricing restrictions, portfolio risk and a matched supervised
 readout comparison require their own evidence.
+
+The revised quarterly lag comparison uses the co-movement summary's
+comparisons.parquet and the quarterly-likelihood TeX fragment. Its unit
+is mean log likelihood per quarter on the 60-quarter market-adjusted panel.
+The TabPFN ratio graph versus joint and direct ratio graphs gives 4.98 and
+−0.94 respectively. T08 ranks in nats per issuer-quarter on its own common
+mask. Its publication output and selected-model decision remain pending.

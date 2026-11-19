@@ -5,7 +5,7 @@ description: Write the results and captions against the signed-off estimands and
 links:
 - src/latex/projects/free-foundations/src/sections/05_results.tex
 - .context/plan/finfm-workshop/audit.md
-status: done
+status: in-progress
 ---
 
 # t07.5 Write the empirical results
@@ -15,6 +15,8 @@ status: done
 Own `05_results.tex` and captions of its exhibits. Use [t07.1](../a-manuscript-plan/README.md) for narrative order and [t07.2](../b-evidence-exhibits/README.md) for numerical bindings. Draft each result as its research owner delivers evidence.
 
 ## Acceptance
+
+- [ ] Integrate matched factor, kernel, financial-input and encoder results and the conditional geometry decision.
 
 - [x] Lead with the Fernández design bridge. For each retained comparison state the estimand, benchmark, effect size, uncertainty and interpretation. Distinguish recovery of exposure geometry, residual dependence and pricing restrictions.
 - [x] Explain informative negative and unidentified results. Tie scope to actual cohorts and fitted models. Bind quoted numbers to generated macros, and check units, denominators, interval labels and figure references.

@@ -7,7 +7,7 @@ links:
 - dvc.yaml
 - src/latex/ARCHITECTURE.md
 - .context/plan/finfm-workshop/work-allocation.md
-status: done
+status: in-progress
 ---
 
 # t07.2 Integrate evidence and render exhibits
@@ -17,6 +17,8 @@ status: done
 Own the shared pipeline wiring, lock updates, publication renderer and corresponding tests assigned to 07. Start interface work with tasks 02–06. Use [the editorial brief](../a-manuscript-plan/README.md) to prioritize exhibits.
 
 ## Acceptance
+
+- [ ] Verify the T08 publication output and bind qualified exhibits to the paper.
 
 - [x] Register accepted stages and verify their cohort, mask and specification identities. Record the revision and reproduction commands.
 - [x] Prepare `evidence/exhibits.md` here mapping each selected exhibit to its scientific question, units, sample, interval method, saved inputs, LaTeX fragment or value keys and section writer.

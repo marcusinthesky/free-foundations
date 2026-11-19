@@ -38,10 +38,14 @@ template = "children.md.j2"
 | Status | Item | Description |
 | --- | --- | --- |
 | in-progress | [t07.1 Plan the manuscript and page budget](tasks/a-manuscript-plan/README.md) | Turn the shared section outline into a seven-page workshop argument and exhibit budget. |
+| in-progress | [t07.2 Integrate evidence and render exhibits](tasks/b-evidence-exhibits/README.md) | Deliver reproducible publication assets and an exhibit inventory keyed to accepted results. |
+| in-progress | [t07.3 Write related work and verify citations](tasks/c-literature/README.md) | Draft the literature review, verify primary citations and hand off stable BibTeX keys. |
 | in-progress | [t07.4 Write methodology, data and appendices](tasks/d-methods-data/README.md) | Draft the formal argument, empirical design and technical appendix against verified inputs. |
+| in-progress | [t07.5 Write the empirical results](tasks/e-results/README.md) | Write the results and captions against the signed-off estimands and generated exhibits. |
+| in-progress | [t07.6 Write the framing and assemble the paper](tasks/f-editorial/README.md) | Write the introduction, abstract and conclusion and deliver a coherent candidate PDF. |
 | in-progress | [t07.7 Independently review and revise the candidate](tasks/g-review/README.md) | Independently audit the rendered candidate and track author revisions through closure. |
 
-`3 open; 4 terminal`
+`7 open; 0 terminal`
 
 <!-- insitu:end -->
 

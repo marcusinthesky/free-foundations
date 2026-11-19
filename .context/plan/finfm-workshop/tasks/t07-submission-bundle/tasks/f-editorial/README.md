@@ -7,7 +7,7 @@ links:
 - src/latex/projects/free-foundations/src/sections/01_introduction.tex
 - src/latex/projects/free-foundations/src/sections/06_conclusion.tex
 - src/latex/projects/free-foundations/src/metadata.tex
-status: done
+status: in-progress
 ---
 
 # t07.6 Write the framing and assemble the paper
@@ -17,6 +17,8 @@ status: done
 Own `01_introduction.tex`, `00_abstract.tex`, `06_conclusion.tex`, title metadata and shared composition in `body.tex` and `appendix.tex`. Start the framing from [t07.1](../a-manuscript-plan/README.md). Finalize the abstract and conclusion after [t07.3](../c-literature/README.md), [t07.4](../d-methods-data/README.md) and [t07.5](../e-results/README.md) deliver their text.
 
 ## Acceptance
+
+- [ ] Reconcile framing with the final matched evidence and review the new anonymous PDF.
 
 - [x] Reconcile the title, research question and contribution with the strongest supported findings. Preserve the reviewed introduction's arc and report material limitations in the conclusion.
 - [x] Read the assembled manuscript end to end. Resolve inconsistent notation, duplicated explanations, missing transitions and stale outline placeholders with the owner of each affected section.

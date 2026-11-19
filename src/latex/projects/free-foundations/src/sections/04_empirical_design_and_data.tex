@@ -46,3 +46,12 @@ returns. The US market, CRSP--SEC inputs, date coverage and explicit
 intercept comparison differ from the original application.
 Appendix~\ref{app:data} details the timing, observability rules and
 generated-regressor uncertainty.
+
+For the quarterly comparison each observation is one issuer's excess
+return in one quarter. January formation rosters determine the eligible
+peers, and issuers with missing outcomes drop out before graph construction.
+We estimate quarter effects and control for the product of the issuer's
+full-panel market beta and the quarterly market excess return. We compare
+the spatial lag fits on common quarters. Stationary blocks of paired
+quarterly likelihood contributions measure variation conditional on the
+estimated loadings and point fits.

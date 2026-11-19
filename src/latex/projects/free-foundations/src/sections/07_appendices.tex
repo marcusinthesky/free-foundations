@@ -101,3 +101,15 @@ answer different questions. A dated geometry exhibit describes one
 estimated representation space. Factor spanning, joint pricing
 restrictions, and portfolio evaluation require separate outcomes and
 maintained assumptions.
+
+\begin{table*}[t]
+  \centering
+  \IfFileExists{generated/tables/quarterly-likelihood.tex}{%
+    \resizebox{\textwidth}{!}{\input{generated/tables/quarterly-likelihood}}%
+  }{\ffmissing}
+  \caption{In-sample lag log-likelihood differences per quarter.
+    Positive values favour the network in the first column.
+    Percentiles resample paired quarterly contributions conditional on
+    fitted parameters. The last column adjusts for multiple comparisons.}
+  \label{tab:quarterly-comparisons}
+\end{table*}
