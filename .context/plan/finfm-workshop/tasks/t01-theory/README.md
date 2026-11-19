@@ -1,17 +1,18 @@
 ---
 type: task
-title: 01 Theory and economic identification
+title: t01 Theory and economic identification
 description: Check representability, neighbour certificates and the reversible spatial multiplier.
 links:
+- .context/plan/finfm-workshop/tasks/t01-theory/evidence/theory.md
 - src/lean/FreeFoundations/Geometry.lean
 - src/lean/FreeFoundations/Neighbours.lean
 - src/lean/FreeFoundations/ReversibleNetwork.lean
 - src/lean/FreeFoundations/EndToEnd.lean
 - src/lean/FreeFoundations/Selection.lean
-status: backlog
+status: done
 ---
 
-# 01 Theory and economic identification
+# t01 Theory and economic identification
 
 ## Goal
 
@@ -29,9 +30,9 @@ Read the shared [module and artifact contracts](../../work-allocation.md) before
 
 ## Acceptance
 
-- [ ] Define the restricted-readout stabilizer using equality of classes. Demonstrate geometric non-identification and interpret an uncertified row as inconclusive about its true neighbours.
-- [ ] Apply the reversible bound to the actual symmetrized, row-normalized graph. Specify degree ratios, boundary distance, innovation bounds and the extra factor, trading and no-arbitrage assumptions needed for pricing.
-- [ ] Scope statistical learning claims to fitted components, dependence and loss assumptions. Verify blueprint statements and record `just lean::check` with the proof revision.
+- [x] Define the restricted-readout stabilizer using equality of classes. Demonstrate geometric non-identification and interpret an uncertified row as inconclusive about its true neighbours.
+- [x] Apply the reversible bound to the actual symmetrized, row-normalized graph. Specify degree ratios, boundary distance, innovation bounds and the extra factor, trading and no-arbitrage assumptions needed for pricing.
+- [x] Scope statistical learning claims to fitted components, dependence and loss assumptions. Verify blueprint statements and record `just lean::check` with the proof revision.
 
 <!-- insitu:begin sql
 id = "planning-children"
@@ -41,7 +42,7 @@ template = "children.md.j2"
 
 _No open children._
 
-`0 open; 0 terminal`
+`0 open; 3 terminal`
 
 <!-- insitu:end -->
 

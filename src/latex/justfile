@@ -28,7 +28,7 @@ build target="arxiv":
         mkdir -p ../build/finfm
         pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null
         if rg -q '\\citation' ../build/finfm/finfm.aux; then
-          (cd ../build/finfm && BIBINPUTS="../../src:" BSTINPUTS="../../src:" bibtex finfm > /dev/null)
+          (cd ../build/finfm && BIBINPUTS="../../src:" BSTINPUTS="../../src/vendor:" bibtex finfm > /dev/null)
         fi
         pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null
         pdflatex -interaction=nonstopmode -halt-on-error -output-directory=../build/finfm -jobname=finfm targets/finfm.tex > /dev/null

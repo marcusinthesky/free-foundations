@@ -16,6 +16,15 @@
 \newcommand{\lean}[1]{\ignorespaces}
 \newcommand{\leanok}{\ignorespaces}
 \newcommand{\ffmissing}{--}
+\newif\ifffsavedvalues
+\newcommand{\ffLoadValues}{%
+  \InputIfFileExists{generated/numbers.tex}{\ffsavedvaluestrue}{}%
+}
+\newcommand{\ffResultStatus}{%
+  \ifffsavedvalues\else
+    \begin{quote}\emph{Saved numerical results are unavailable in this source build.}\end{quote}%
+  \fi
+}
 \newcommand{\ffDeclareValue}[2]{%
   \ifcsname ff@value@#1\endcsname
     \PackageError{ff-manuscript}{Duplicate generated value '#1'}{Regenerate the saved-result bindings.}%
@@ -34,7 +43,11 @@
   \ifcsname ff@value@#1\endcsname
     \csname ff@value@#1\endcsname
   \else
-    \PackageError{ff-manuscript}{Undefined generated value '#1'}{Run just latex::assets.}%
+    \ifffsavedvalues
+      \PackageError{ff-manuscript}{Undefined generated value '#1'}{Run just latex::assets.}%
+    \else
+      \ffmissing
+    \fi
   \fi
 }
 \ExplSyntaxOn

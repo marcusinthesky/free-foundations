@@ -1,82 +1,91 @@
 \section{Methodology}
 
-% Source: .context/chat/Paper Overview (2026-11-19) (2).md.
-% Structure: nine paragraph roles plus two foregrounded formal results;
-% provisional drafting budget 1,400--1,800 words.
-% Governing distinction: information recovery, financial geometry and
-% spatial-economic consequences are separate claims.
+\paragraph{Economic target and representation.}
+Let $h$ be a dated financial history, $s(h)$ an economic target, and
+$z(h)$ the representation of that history produced by a frozen
+encoder in a specified context. Targets could be factor exposures or
+another designated economic quantity. The choice of target determines
+the meaning of recovery. We use characteristic histories in the
+reimplementation and report the interpretation of frozen states separately.
 
-% P1 -- Economic and statistical objects.
-% Define firms, dates, returns, factors, accounting histories and dated
-% information sets; distinguish issuer and security units.
-% Define target explicitly: factor exposures, residual dependence or another
-% economic quantity; never switch targets between theorem and experiment.
-% Separate Fernandez characteristics from expanded accounting inputs.
+\begin{proposition}[Recoverability and geometric identification]
+  \label{prop:recovery}
+  Let $s:H\to S$ and $z:H\to Z$, with $S$ nonempty. An unrestricted
+  pointwise readout $r:Z\to S$ with $s=r\circ z$ exists exactly when
+  $s$ is constant on the fibres of $z$. For any bijection $g:Z\to Z$,
+  the recoding $g\circ z$ recovers the same target with readout
+  $r\circ g^{-1}$. Such a recoding can change nearest neighbours.
+\end{proposition}
 
-% P2 -- Conventional characteristic distances.
-% Preserve Fernandez-style historical-ratio correlation distances and weights.
-% Prespecify standardized Euclidean, Mahalanobis and PCA comparators if the
-% active study supports them.
-% State overlap, undefined-correlation, bandwidth and normalization rules.
-% US reimplementation kernel behavior cannot explain unavailable original
-% sample estimates.
+For a restricted readout class $\mathcal R$, the recoding preserves
+the class when
+$\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$.
+These bijections form a group. For example, an invertible anisotropic
+stretch preserves the class of linear readouts and can reverse a
+nearest-neighbour comparison. Appendix~\ref{app:proofs} gives the
+construction. A separate sufficient condition certifies a
+$k$-neighbour set from an independently justified exposure-error
+bound and a sufficiently wide gap at the $k$th neighbour. Empirical
+gaps can describe sensitivity when the error bound is unavailable.
 
-% P3 -- Frozen TFM representation and estimation inventory.
-% Define fixed encoder E_{theta_0}, row embeddings and model-specific context.
-% Inventory preprocessing, reference context, exposure readout, factor
-% covariance, innovation variances, spatial coefficient and distance
-% calibration.
-% Distinguish native fixed features from financially supervised calibration.
-% Freezing removes encoder weight estimation on the financial sample, but does
-% not confer automatic admissibility.
-% SPOTTING -- Estimation inventory and dependence by unit of observation.
+\paragraph{Distances and weights.}
+For the US benchmark, we compute Spearman chord distance for each
+characteristic over paired annual observations. Pairs with fewer than
+two common years or an undefined correlation receive the neutral
+distance $\sqrt{2}$. The joint distance is the root mean square
+across the four characteristics. We set the diagonal of $K$ to zero,
+set $K_{ij}=\exp(-d_{ij})$ off the diagonal, and divide each row by
+its sum. On normalized nonzero embeddings the chord distance is the
+Euclidean distance between unit vectors. To construct a binary
+$k$-nearest-neighbour graph we join two firms if either selects the
+other before row normalization. Both constructions use a symmetric raw affinity.
 
-% P4 -- Native and calibrated geometry.
-% Define cosine, angular, chordal and decoded-exposure distances.
-% Chordal construction: primary PCoA-compatible candidate where applicable.
-% Compare native, exposure-calibrated and metric-calibrated procedures with
-% controls for normalization, dimension and supervision where possible.
-% Distinguish recoverable information from native nearest neighbors.
+\paragraph{Spatial specification.}
+Write $y_i$ for median quarterly excess return and $b_i$ for the
+issuer's estimated CAPM beta. We compare the conventional
+cross-section to the spatial lag model
+$y=\alpha\mathbf{1}+\gamma b+\rho Wy+u$, with $\alpha$ either fixed
+to zero or estimated. The corresponding spatial-error specification
+applies the multiplier to the error and leaves the systematic term
+unchanged. With $\alpha=0$, the peer average may absorb the
+cross-sectional mean. With an intercept, exact uniform off-diagonal
+weights make the added regressor a linear combination of a constant
+and $y$, so the spatial term requires variation beyond the sample
+mean and the mechanical own-observation correction.
 
-% P5 -- Theorem 1: representability without geometric identification.
-% State target recovery through constancy on encoder fibers.
-% Give an invertible non-isometric transformation that changes distances while
-% preserving recovery; define the transformation class precisely.
-% Separate exact from approximate recovery and sufficient certificates from
-% necessary conditions.
-% Interpretation: limit on native-distance claims, not proof all
-% embeddings fail.
-% Put measurability detail and full Lean mapping in appendices.
+\begin{proposition}[Spatial stability]
+  \label{prop:multiplier}
+  Let $K=K^\top\geq 0$ entrywise, with positive degrees $d_i=\sum_j
+  K_{ij}$, and set $W=D^{-1}K$ for $D=\operatorname{diag}(d_i)$. For
+  $|\rho|<1$, the inverse $P=(I-\rho W)^{-1}$ exists and
+  \[
+    \norm{P}_2\leq \frac{\sqrt{d_{\max}/d_{\min}}}{1-|\rho|}.
+  \]
+  On the same roster, let $\widehat W$ have multiplier $\widehat P$
+  at the same $\rho$. If both inverse norms are at most $M$ and the
+  common innovation covariance has $\norm V_2\leq v$, then
+  \[
+    \norm{\widehat P V\widehat P^\top-PVP^\top}_2
+    \leq 2v|\rho|M^3\norm{\widehat W-W}_2 .
+  \]
+\end{proposition}
 
-% P6 -- Spatial weight construction.
-% Define affinity kernel, bandwidth, diagonal treatment, sparsification and
-% normalization for the actual implemented network.
-% Report symmetry, spectrum, row sums and degree ratios where applicable.
-% Similarity networks are not directed causal transmission networks.
-% State identification and multiplier-stability conditions for each model.
+The two bounds concern the conditioning of a finite spatial model. To
+use them for risk one must also specify the innovation covariance,
+the exposure model, and the portfolio. Pricing implications
+additionally require a maintained factor structure, residual-risk
+diversification, trading or spanning conditions, and a
+no-asymptotic-arbitrage assumption \citep{kou2018}.
 
-% P7 -- Spatial CAPM and S-APT specifications.
-% Present factor benchmark, SAR, SLX and SEM with model-specific reduced-form
-% exposures and residual covariance.
-% State inherited pricing restrictions and maintained factor, trading and
-% no-asymptotic-arbitrage assumptions separately from covariance fit.
-% Distinguish pricing errors, covariance fit and spatial-coefficient inference.
-% Explain what the active APT residual-covariance experiment identifies.
-
-% P8 -- Theorem 2: spectral and financial-risk stability.
-% Use the implemented normalization; state a sufficient spectral gap and
-% bounded-innovation premise for multiplier and covariance control.
-% Trace distance/embedding error -> network error -> multiplier error ->
-% covariance error -> portfolio-risk error with explicit scope.
-% Bounded multiplier or positive-definite covariance is not a
-% no-arbitrage proof.
-% Place finite-probability constructions and intermediate lemmas in appendices.
-
-% P9 -- Inference and economic interpretation.
-% Specify uncertainty for generated weights, factors, spatial parameters and
-% pricing contrasts; distinguish conditional from full uncertainty.
-% Use dependence-aware intervals, fit diagnostics and multiplicity control.
-% Define PCoA alignment, subspace stability, factor-mimicking construction and
-% attribution as distinct interpretation tests.
-% Risk endpoints: in-sample covariance and model-implied VaR under stated
-% distribution assumptions; historical fit, not forecasting claims.
+\paragraph{Estimation and uncertainty.}
+For the characteristic benchmark the estimated quantities include the
+market betas, the cross-sectional premium, the intercept when
+included, the spatial coefficient, and the error variance. The
+frozen-state comparison fixes model weights, the dated support
+protocol, and the distance convention. Its preprocessing and support
+selection remain part of the measurement procedure. Any supervised
+calibration additionally fits a readout, and a financial covariance
+comparison would estimate loadings, factor covariance, innovation
+variances, and spatial coefficients. Financial observations are
+dependent within and across issuers. Freezing the encoder removes one
+fitted component and provides no generalization rate by itself.

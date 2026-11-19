@@ -53,10 +53,13 @@ lean_decls
 /data/staging/
 /data/processed/crsp-sec/panel/
 /data/processed/crsp-sec/representations/
-/data/processed/crsp-sec/state-cache/
-/data/research/crsp-sec/replication/
-/data/research/crsp-sec/comovement/
-/data/research/crsp-sec/alignment/
-/data/research/crsp-sec/publication/
+/data/cache/crsp-sec/state-cache/
+/data/research/crsp-sec/experiments/replication/summary/
+/data/research/crsp-sec/experiments/comovement/summary/
+/data/research/crsp-sec/experiments/alignment/summary/
+/data/publication/crsp-sec/free-foundations/
 # Generated blueprint declaration lists; the sources are src/lean/blueprint/src.
 src/lean/blueprint/manuscript_decls
+/data/processed/crsp-sec/state-parts/
+/data/research/crsp-sec/experiments/replication/formations/
+/data/processed/crsp-sec/contexts/

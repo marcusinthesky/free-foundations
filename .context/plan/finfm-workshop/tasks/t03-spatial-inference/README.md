@@ -1,16 +1,17 @@
 ---
 type: task
-title: 03 In-sample spatial inference
+title: t03 In-sample spatial inference
 description: Estimate matched in-sample spatial effects and covariance components.
 links:
-- src/python/apps/free_foundations/src/free_foundations/study/apt.py
-- src/python/apps/free_foundations/src/free_foundations/study/replication.py
-- src/python/apps/free_foundations/src/free_foundations/study/comovement.py
-- src/python/apps/free_foundations/src/free_foundations/study/spatial_ml.py
-status: backlog
+- .context/plan/finfm-workshop/tasks/t03-spatial-inference/evidence/baseline.md
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/apt.py
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/replication.py
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/comovement.py
+- src/python/apps/free_foundations/src/free_foundations/methods/spatial_ml.py
+status: in-progress
 ---
 
-# 03 In-sample spatial inference
+# t03 In-sample spatial inference
 
 ## Goal
 
@@ -18,7 +19,7 @@ Estimate the Fernández baseline and the incremental effect of changing the netw
 
 ## Work and inputs
 
-Start estimator and diagnostic tests with fixtures. Run financial estimates after [02](../t02-data-cohorts/README.md) supplies the verified panel and states. Use [01](../t01-theory/README.md) for interpretation. Own `study/replication.py`, `comovement.py`, `apt.py`, `spatial.py`, `spatial_ml.py` and proposed `study/spatial_fit.py`, plus matching tests. Keep the historical APT comparison identifiable.
+Start estimator and diagnostic tests with fixtures. Run financial estimates after [t02](../t02-data-cohorts/README.md) supplies the verified panel and states. Use [t01](../t01-theory/README.md) for interpretation. Own the replication, co-movement and APT experiments under `study/experiments/`, the spatial methods under `methods/`, and matching tests.
 
 Read the shared [module and artifact contracts](../../work-allocation.md) before integrating changes.
 
@@ -39,9 +40,13 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| in-progress | [t03.2 Verify estimator parity and comparison identities](tasks/t03-2-fit-parity/README.md) | Verify fit implementation parity and publish a comparison identity. |
+| backlog | [t03.3 Compare native, calibrated and direct-input geometry](tasks/t03-3-geometry-contrasts/README.md) | Compare frozen and direct geometry on the same financial sample. |
+| backlog | [t03.4 Separate exposure, residual covariance and risk](tasks/t03-4-covariance-and-risk/README.md) | Distinguish common exposure, spatial residual dependence and model-implied risk. |
 
-`0 open; 0 terminal`
+`3 open; 1 terminal`
 
 <!-- insitu:end -->
 

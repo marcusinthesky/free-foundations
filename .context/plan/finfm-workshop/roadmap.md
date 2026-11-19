@@ -23,9 +23,9 @@ order.
 
 ## 1. Make the extension a full design (highest priority)
 
-- **Formations.** Repeat the APT ladder for every December formation from 2010 to 2015,
-  each with its own five-year train and test windows. Then pool, or meta-analyse, the
-  paired score differences. One split is the main weakness of the workshop evidence.
+- **Formations.** Repeat the in-sample comparisons for the declared December
+  formations from 2010 to 2015. Compare paired effects on matched masks with
+  dependence-aware intervals, accounting for overlapping windows.
 - **As-filed information.** Replace revised CompanyFacts values with as-filed values
   from the original filings. That needs the stalled original-filing recovery: 661 of
   3,357 CIKs were done, with 113,441 filings pending. Budget its download time and SEC
@@ -50,9 +50,9 @@ and how proximity is measured. For the journal, add:
 - spatial-lag and spatial-error versions, alongside a dynamic factor covariance
   benchmark (rolling or DCC);
 - economic metrics beyond the Gaussian score:
-  - realised minimum-variance volatility with turnover;
-  - tracking error of hedged peer portfolios;
-  - Diebold–Mariano-type tests with the block bootstrap.
+  - in-sample model-implied portfolio variance under dated holdings;
+  - residual covariance and pricing errors on matched masks;
+  - paired time-block inference with declared generated-regressor scope.
 
 ## 3. Theory for the journal version
 

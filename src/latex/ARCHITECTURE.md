@@ -15,7 +15,8 @@ The dependency direction is saved research artifacts to the one `publication`
 renderer, then project-local `generated/` fragments, then target PDFs. The
 renderer reads saved panel, replication, co-movement, alignment and APT outputs;
 it does not estimate or acquire data. Its `quarterly-` and `apt-` value keys avoid
-collisions. Missing or unknown result keys remain explicit. Manuscript authors
+collisions. A source-only build displays a notice and placeholders. When a
+catalogue exists, an unknown key fails the build. Manuscript authors
 choose where to include table fragments and figures. The claims audit and DVC
 stage make their numerical source traceable.
 

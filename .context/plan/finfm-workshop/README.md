@@ -39,15 +39,13 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| backlog | [01 Theory and economic identification](tasks/t01-theory/README.md) | Check representability, neighbour certificates and the reversible spatial multiplier. |
-| backlog | [02 Data and formation cohorts](tasks/t02-data-cohorts/README.md) | Validate fixed formation rosters, issuer histories, terminal returns and coverage. |
-| backlog | [03 In-sample spatial inference](tasks/t03-spatial-inference/README.md) | Estimate matched in-sample spatial effects and covariance components. |
-| backlog | [04 PCoA and economic interpretation](tasks/t04-pcoa-interpretation/README.md) | Explain the geometry through principal coordinates, economic alignment and dated mimicking portfolios. |
-| backlog | [05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
-| backlog | [06 Uncertainty and robustness](tasks/t06-uncertainty-robustness/README.md) | Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights. |
-| in-progress | [07 Write, review and package the FinFM paper](tasks/t07-submission-bundle/README.md) | Plan the argument, write the shared sections, render verified results and prepare the reviewed FinFM bundle for the authors. |
+| in-progress | [t03 In-sample spatial inference](tasks/t03-spatial-inference/README.md) | Estimate matched in-sample spatial effects and covariance components. |
+| in-progress | [t04 PCoA and economic interpretation](tasks/t04-pcoa-interpretation/README.md) | Explain the geometry through principal coordinates, economic alignment and dated mimicking portfolios. |
+| backlog | [t05 Spatial APT pricing restrictions](tasks/t05-sapt-restrictions/README.md) | Evaluate model-specific pricing restrictions and pricing errors in sample. |
+| in-progress | [t06 Uncertainty and robustness](tasks/t06-uncertainty-robustness/README.md) | Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights. |
+| in-progress | [t07 Write, review and package the FinFM paper](tasks/t07-submission-bundle/README.md) | Plan the argument, write the shared sections, render verified results and prepare the reviewed FinFM bundle for the authors. |
 
-`7 open; 0 terminal`
+`5 open; 2 terminal`
 
 <!-- insitu:end -->
 

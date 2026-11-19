@@ -1,15 +1,16 @@
 ---
 type: task
-title: 04 PCoA and economic interpretation
+title: t04 PCoA and economic interpretation
 description: Explain the geometry through principal coordinates, economic alignment and dated mimicking portfolios.
 links:
-- src/python/apps/free_foundations/src/free_foundations/study/networks.py
-- src/python/apps/free_foundations/src/free_foundations/study/rosters.py
-- src/python/apps/free_foundations/src/free_foundations/study/alignment.py
-status: backlog
+- .context/plan/finfm-workshop/tasks/t04-pcoa-interpretation/evidence/interpretation.md
+- src/python/apps/free_foundations/src/free_foundations/methods/networks.py
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/inputs.py
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/alignment.py
+status: in-progress
 ---
 
-# 04 PCoA and economic interpretation
+# t04 PCoA and economic interpretation
 
 ## Goal
 
@@ -37,9 +38,12 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| in-progress | [t04.2 Audit subspaces and quantify economic alignment](tasks/t04-2-economic-alignment/README.md) | Link dated coordinates or subspaces to measured economics. |
+| backlog | [t04.3 Evaluate dated factor-mimicking portfolios](tasks/t04-3-mimicking-portfolios/README.md) | Construct and test dated factor-mimicking portfolios. |
 
-`0 open; 0 terminal`
+`2 open; 1 terminal`
 
 <!-- insitu:end -->
 

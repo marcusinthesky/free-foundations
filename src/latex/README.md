@@ -2,14 +2,15 @@
 
 The single paper lives in `projects/free-foundations`. Its `src/sections/`
 contains the shared article and appendix; `src/targets/arxiv.tex` and
-`src/targets/finfm.tex` supply the two layouts. The current manuscript is an
-outline scaffold: the introduction has reviewed structural comments and the
-remaining sections await drafting. Both targets use the same body and appendix.
+`src/targets/finfm.tex` supply the two layouts. Both targets use the same body
+and appendix. A source build works without the private numerical inputs and
+shows a visible data-availability notice. Use the paper command for a
+candidate with results.
 
 Run from the repository root, inside the pinned devenv environment:
 
 ```sh
-just latex::build arxiv  # cached Tectonic build of the shared outline
+just latex::build arxiv  # cached Tectonic build of the shared manuscript
 just latex::build finfm  # anonymous AAAI-27 pdfLaTeX/BibTeX build
 just latex::assets       # render saved research outputs only
 just latex::paper arxiv  # render saved results, then build
@@ -26,7 +27,7 @@ The canonical keys have `quarterly-` or `apt-` prefixes. Generated tables are
 separate `tabular` fragments under `generated/tables/`; authored sections own
 their table captions, labels and placement and can include the bodies with
 `\input{generated/tables/<name>}`. The corresponding claims and metrics audit
-is saved in `data/research/crsp-sec/publication`.
+is saved in `data/publication/crsp-sec/free-foundations`.
 
 The reference exporter writes the project-local `src/refs.bib` from authored
 CSL records. Run `just sync` after editing references. The AAAI author-kit files

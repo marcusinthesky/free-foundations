@@ -130,31 +130,31 @@ data-push:
 # Source acquisition is frozen so routine repros never refetch it. This recipe never
 # executes the extraction script or accesses WRDS. EDGAR_IDENTITY can provide your SEC
 # contact name and email.
-stages := "env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations stages"
+stages := "env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations"
 
 # Stage SEC and factor recovery for a CRSP extract, promote it, and record the DVC stage.
 sources crsp script:
     {{ stages }} raw acquire --crsp-csv "{{ crsp }}" --extraction-script "{{ script }}"
     {{ stages }} raw freeze
-    just dvc commit -f crsp_sec_sources
+    just dvc commit -f raw_sources
 
 # Each research stage reruns only when its inputs, parameters or code fingerprints change.
 representations:
-    just dvc repro representations
+    just dvc repro processed_assemble_states
 
 replication:
-    just dvc repro replication
+    just dvc repro research_collect_replication
 
 comovement:
-    just dvc repro comovement
+    just dvc repro research_estimate_comovement
 
 alignment:
-    just dvc repro alignment
+    just dvc repro research_measure_alignment
 
 publication:
-    just dvc repro publication
+    just dvc repro publication_render
 
 # Render saved study results for the manuscript without running DVC stages.
 latex-assets:
     mkdir -p src/latex/build
-    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" {{ stages }} research publish
+    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" {{ stages }} publication render

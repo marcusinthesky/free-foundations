@@ -1,62 +1,72 @@
 \section{Results}
 
-% Source: .context/chat/Paper Overview (2026-11-19) (2).md.
-% Structure: seven staged result roles; finish with a claim--evidence scorecard.
-% Write findings only from corrected active CRSP--SEC outputs; never import
-% withdrawn-study estimates or treat proposed exhibits as observed results.
-% Main evaluation: in-sample descriptive and inferential evidence.
+\paragraph{The characteristic benchmark.}
+The joint characteristic kernel has
+\ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
+neighbours per row on average, compared with 877 under uniform
+off-diagonal weights. Its broad peer averages carry little
+cross-sectional variation relative to a more concentrated graph. On
+the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
+joint-kernel lag maximum-likelihood estimate without an intercept is
+$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$.
+Table~\ref{tab:us-benchmark} records the contrast and its
+uncertainty. With an intercept, the joint-kernel fit is flagged as
+invalid or on the boundary. The no-intercept estimate is consistent
+with the spatial term absorbing much of the common mean in this US sample.
 
-% R1 -- Fernandez foundation before foundation models.
-% Compare original-ratio CAPM and spatial specifications in the US cohort.
-% Report coefficients, intervals, diagnostics, intercept and kernel sensitivity.
-% Separate US kernel behavior from the unavailable original sample.
-% Preserve negative or unidentified replication findings.
-% SPOTTING -- Foundation table from generated quarterly fragments only where
-% corrected estimand and authored table note agree.
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    Joint kernel lag ML & $\widehat\rho$ & Refit percentiles \\
+    \midrule
+    Without intercept & \ffnum{quarterly-fernandez-joint-rho} &
+    $[\ffnum{quarterly-fernandez-joint-rho-bootstrap-low},\
+    \ffnum{quarterly-fernandez-joint-rho-bootstrap-high}]$
+    \\
+    With intercept & Unavailable & --- \\
+    \bottomrule
+  \end{tabular}
+  \caption{US reimplementation for the December 2015 formation.
+    Percentiles are the central 95\% of
+    \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
+    stationary-quarter refits. They describe refit variation
+    conditional on the formation graph and the observed-quarter design.
+    Issuer availability can change by draw. Statistical coverage of
+    this interval
+    and complete terminal-outcome coverage of the formation cohort remain
+  unverified.}
+  \label{tab:us-benchmark}
+\end{table}
 
-% R2 -- Estimation burden with frozen encoder weights.
-% Report the financial sample and dependence structure for each fitted stage.
-% SPOTTING -- Inventory of fixed weights, contexts, fitted readouts and
-% estimated financial parameters.
+The point fit and a separate profile-likelihood calculation agree on
+the saved original-sample betas, issuer medians and reconstructed
+graph. The percentile endpoints recompute betas and medians in common
+time blocks and restrict the graph when firms drop out of a refit.
+They quantify a different source of variation from the standard error
+conditional on the generated beta. We leave estimates for which this
+comparison remains unresolved outside the table. These diagnostics
+characterize the US reimplementation, where the original sample is unavailable.
 
-% R3 -- Economic information versus native geometry.
-% Compare readout recovery of estimated exposures, overlap with the proxy
-% graph and financial dependence for the same firms and dates.
-% Pair observed contrast with representability/non-identification theorem.
-% Do not infer useful distances from predictive information alone.
-% SPOTTING -- Exposure recovery versus network-quality exhibit; separate
-% native, decoded and calibrated geometries.
+\paragraph{A dated view of learned geometry.}
+We form principal coordinates from chord distances of the January
+2016 TabPFN states on the original characteristic rung. The state and
+date match the full analytical formation roster of
+\ffnum[0]{quarterly-primary-roster} issuers. This calculation uses
+the formation information available to the encoder. It does not apply
+the later return-estimation filter. For each ratio we use the latest
+available annual slot and restrict the comparison to its observed
+issuers. The leading coordinate has stronger rank correlation with
+market capitalization over assets and market-to-book than with
+dividend yield or debt maturity. The same ordering holds for explained
+rank variation after regression on the leading three coordinates and
+an intercept. This subspace comparison is invariant to sign changes and
+orthogonal rotations.
 
-% R4 -- Does economic calibration change the geometry?
-% Hold financial estimator fixed where possible; compare native,
-% exposure-calibrated and prespecified metric-calibrated distances.
-% Separate common-marginal correlation gains from covariance gains when each
-% model fits its own innovation variances.
-% Show paired effects and intervals; avoid "adds nothing" without an
-% equivalence margin or sufficiently precise estimate.
-
-% R5 -- Spatial asset pricing and portfolio-risk consequences.
-% Distinguish spatial association, covariance structure and S-APT pricing
-% restrictions; active APT covariance experiment alone does not establish all.
-% Compare strong ratio, sector and return-derived networks with TFM networks.
-% Report in-sample factor/pricing residuals, spatial coefficients, covariance
-% and model-implied portfolio risk with visible uncertainty and assumptions.
-% SPOTTING -- Financial-effect forest plot with controlled paired contrasts;
-% include only endpoints actually estimated.
-
-% R6 -- What learned geometry measures.
-% PCoA: dated eigenspaces, coordinate/subspace stability, ratio/exposure
-% alignment and independently defined economic characteristics.
-% Attribution: identify inputs driving distances or coordinates without
-% asserting a causal transmission mechanism.
-% Factor-mimicking: define weights, returns, spanning and pricing tests before
-% claiming an economic factor.
-% SPOTTING -- Economic-interpretation exhibit only from active-study outputs.
-
-% R7 -- Theory meets measured premises.
-% Report actual normalization, degree ratios, spectral radii, multiplier
-% conditioning, boundary fits and residual covariance eigenspectra.
-% Identify empirically bounded premises versus maintained economic assumptions.
-% Stability certificates are not no-arbitrage or pricing proofs.
-% SPOTTING -- Claim | estimand | evidence | supported, unsupported or
-% unidentified; retain negative results.
+The valuation ratios are part of the encoder inputs. Their alignment
+describes how the model organizes its own inputs on this date. It
+leaves open independent exposure recovery, stability across
+formations, and incremental financial value relative to a
+direct-input geometry. A coordinate has an arbitrary orientation and
+does not identify a traded factor. The economic pricing restrictions
+and model-implied portfolio risk remain open.

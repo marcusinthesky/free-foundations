@@ -1,8 +1,31 @@
 ---
-description: Research audit of the FinFM submission; evidence inventory, claim map, checks run and limitations.
+description: Current claim map and limitations with the earlier FinFM audit preserved for provenance.
 ---
 
 # Research audit (2026-11-19)
+
+## Current in-sample candidate
+
+The two propositions, the US characteristic reimplementation and the dated
+TabPFN interpretation are the retained claims. These are the current receipts:
+
+| Claim | Evidence and qualification |
+| --- | --- |
+| Recoverability and reversible spatial stability | [Theory handoff](tasks/t01-theory/evidence/theory.md) distinguishes compiled components from written arguments and maintained economic premises. |
+| Fixed 2015 cohort and analytical selection | [Coverage audit](tasks/t02-data-cohorts/evidence/coverage.md) rebuilds all 39,600 quarterly records. The estimand uses observed complete quarters. Unresolved exits stay unknown. |
+| Joint ratio kernel, original-sample fit and bootstrap percentiles | [Baseline audit](tasks/t03-spatial-inference/evidence/baseline.md) reproduces the point fit from saved inputs. [Refit audit](tasks/t06-uncertainty-robustness/evidence/refit.md) documents draw attrition, interval scope and unresolved matched 10-NN shrinkage. |
+| Dated geometry | [PCoA pilot](tasks/t04-pcoa-interpretation/evidence/interpretation.md) verifies dated states, roster, distance reconstruction and descriptive ratio alignment. The ratios are input measurements. |
+| PDF and reported values | [Exhibit inventory](tasks/t07-submission-bundle/tasks/b-evidence-exhibits/evidence/exhibits.md) identifies the generated bindings and the evidence behind the interpretation. |
+
+Use the updated [cover note](cover-note.md) for the author decision. Matched
+calibration, residual-covariance contrasts, pricing restrictions, model-implied
+portfolio risk, and multi-date uncertainty remain open. The spatial-error
+pricing fixture is synthetic and stays outside the manuscript results.
+
+## Earlier forecasting candidate
+
+The following audit records an earlier candidate, its out-of-sample APT run
+and the commands and source paths in use at that time.
 
 ## Verdict
 

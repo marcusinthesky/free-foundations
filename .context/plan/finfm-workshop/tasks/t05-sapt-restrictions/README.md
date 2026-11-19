@@ -1,15 +1,16 @@
 ---
 type: task
-title: 05 Spatial APT pricing restrictions
+title: t05 Spatial APT pricing restrictions
 description: Evaluate model-specific pricing restrictions and pricing errors in sample.
 links:
-- src/python/apps/free_foundations/src/free_foundations/study/apt.py
-- src/python/apps/free_foundations/src/free_foundations/study/factors.py
+- .context/plan/finfm-workshop/tasks/t05-sapt-restrictions/evidence/restriction.md
+- src/python/apps/free_foundations/src/free_foundations/study/experiments/apt.py
+- src/python/apps/free_foundations/src/free_foundations/study/sources/factors.py
 - src/lean/FreeFoundations/ReversibleNetwork.lean
 status: backlog
 ---
 
-# 05 Spatial APT pricing restrictions
+# t05 Spatial APT pricing restrictions
 
 ## Goal
 
@@ -37,9 +38,12 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| backlog | [t05.2 Estimate and test in-sample pricing restrictions](tasks/t05-2-primary-pricing-test/README.md) | Evaluate pricing restrictions for one accepted in-sample fit. |
+| backlog | [t05.3 Evaluate the mimicking-factor pricing contrast](tasks/t05-3-mimicking-pricing/README.md) | Test pricing with an additional mimicking factor. |
 
-`0 open; 0 terminal`
+`2 open; 1 terminal`
 
 <!-- insitu:end -->
 

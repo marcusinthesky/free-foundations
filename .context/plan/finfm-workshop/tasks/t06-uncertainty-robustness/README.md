@@ -1,15 +1,17 @@
 ---
 type: task
-title: 06 Uncertainty and robustness
+title: t06 Uncertainty and robustness
 description: Quantify dependence-aware uncertainty and document the estimation burden conditional on frozen encoder weights.
 links:
-- src/python/apps/free_foundations/src/free_foundations/study/inference.py
+- .context/plan/finfm-workshop/tasks/t06-uncertainty-robustness/evidence/refit.md
+- .context/plan/finfm-workshop/tasks/t06-uncertainty-robustness/evidence/resampling.md
+- src/python/apps/free_foundations/src/free_foundations/methods/inference.py
 - src/lean/FreeFoundations/ReadoutStability.lean
 - .context/plan/finfm-workshop/tasks/t06-uncertainty-robustness/evidence/historical-gate.md
-status: backlog
+status: in-progress
 ---
 
-# 06 Uncertainty and robustness
+# t06 Uncertainty and robustness
 
 ## Goal
 
@@ -17,7 +19,7 @@ Measure how sensitive the paper's conclusions are to dependence, generated quant
 
 ## Work and inputs
 
-Design resampling fixtures immediately. Use the corrected data from [02](../t02-data-cohorts/README.md) and the estimands from [03](../t03-spatial-inference/README.md), [04](../t04-pcoa-interpretation/README.md) and [05](../t05-sapt-restrictions/README.md) as each arrives. Own `study/inference.py`, proposed `study/robustness.py`, matching tests and the `robustness/` output.
+Design resampling fixtures immediately. Use the corrected data from [t02](../t02-data-cohorts/README.md) and the estimands from [t03](../t03-spatial-inference/README.md), [t04](../t04-pcoa-interpretation/README.md) and [t05](../t05-sapt-restrictions/README.md) as each arrives. Own `methods/inference.py`, the corresponding tests and any verified robustness output.
 
 Read the shared [module and artifact contracts](../../work-allocation.md) before integrating changes.
 
@@ -37,9 +39,11 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| backlog | [t06.3 Qualify intervals, sensitivity and estimation burden](tasks/t06-3-intervals-and-sensitivity/README.md) | Attach validated uncertainty to available workshop endpoints. |
 
-`0 open; 0 terminal`
+`1 open; 2 terminal`
 
 <!-- insitu:end -->
 

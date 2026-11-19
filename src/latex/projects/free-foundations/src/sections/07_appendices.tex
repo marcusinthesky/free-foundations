@@ -1,28 +1,89 @@
 \section{Technical Proofs and Formalization}
+\label{app:proofs}
 
-% Source: .context/chat/Paper Overview (2026-11-19) (2).md.
-% Keep main representability and stability statements assessable in the paper.
-% A1 -- Fibers, exact/approximate recovery and transformation-class definition.
-% A2 -- Non-isometric counterexamples, neighbor margins and certificate scope.
-% A3 -- Network normalization, spectral gap, multiplier and covariance bounds.
-% A4 -- Finite-probability constructions, measurability and error propagation.
-% A5 -- Map manuscript statements to Lean declarations and assumptions.
+\paragraph{Recoverability and the transformation class.}
+If $s=r\circ z$, histories in the same fibre of $z$ share the same
+target. Conversely, define $r$ on $z(H)$ by the unique target of each
+fibre and use any value in $S$ outside the image. For the
+nearest-neighbour example, take the origin, $(1,0)$ and $(0,2)$ in
+$\R^2$. The first point is nearer to the origin before the recoding
+$g=\operatorname{diag}(3,1)$, and the second is nearer afterward.
+Composing the readout with $g^{-1}$ preserves the target. A
+restricted class preserved under both $g$ and $g^{-1}$ has the same
+attainable functions after the recoding. Equality of the transformed
+class gives closure under composition and inversion. The fibre
+argument is pointwise. A measurable or approximate recovery claim
+requires additional assumptions on the spaces and readout class.
+
+Suppose $a_i$ is a true exposure, $\widehat a_i$ its estimate, and
+$\norm{\widehat a_j-a_j}\leq\delta_j\leq\delta_{\max}$ for every
+issuer. Each distance in row $i$ can move by at most
+$\delta_i+\delta_{\max}$. Therefore an estimated strict gap between
+selected and unselected neighbours exceeding
+$2(\delta_i+\delta_{\max})$ preserves that set. Ties and smaller gaps
+leave the conclusion open.
+
+\paragraph{Multiplier and covariance.}
+Symmetry makes $d$ stationary for $W$. Jensen's inequality gives
+$\norm{Wx}_D\leq\norm{x}_D$, where $\norm{x}_D^2=x^\top Dx$. Hence
+$\norm{(I-\rho W)x}_D\geq(1-|\rho|)\norm{x}_D$.
+In finite dimension this implies invertibility, and comparing the
+weighted and Euclidean norms gives
+Proposition~\ref{prop:multiplier}'s first inequality. A symmetric
+affinity with isolates gives a block diagonal operator with a zero
+block on the isolates, whose multiplier is identity. The bound
+applies on the positive-degree block.
+
+The inverse identity gives $\widehat P-P=\rho \widehat P(\widehat
+W-W)P$. Expanding the covariance difference as
+$(\widehat P-P)V\widehat P^\top+PV(\widehat P-P)^\top$
+and using submultiplicativity gives the second inequality. A fixed
+portfolio with weights $w$ multiplies the covariance error bound by
+$\norm{w}_2^2$. The displayed bound holds with common $\rho$ and $V$.
+Changes to those quantities contribute additional terms.
+
+\paragraph{Formalized components.}
+The fibre criterion and coding invariance have Lean formalizations.
+\lean{FreeFoundations.Alignment.state_optimal_iff}
+\lean{FreeFoundations.Geometry.sufficient_equiv}
+Lean also checks the neighbour certificate, multiplier bound, and
+covariance bound.
+\lean{FreeFoundations.Neighbours.neighbourSet_of_estimated_margin}
+\lean{FreeFoundations.ReversibleNetwork.normalize_resolvent_l2_bound}
+\lean{FreeFoundations.Stability.matrix_covariance_sub_le}
+The restricted class group argument and isolate decomposition are
+elementary written arguments.
 
 \section{Data Construction and Estimation Details}
+\label{app:data}
 
-% B1 -- CRSP--SEC linkage, security/issuer units, ranking and cohort ledger.
-% B2 -- Exit and terminal-return audits; reporting-date and missingness rules.
-% B3 -- Original ratios, expanded features, overlap and undefined distances.
-% B4 -- Encoder contexts, preprocessing, checkpoints and readout inventory.
-% B5 -- Spatial estimators, optimizer diagnostics and parameter boundaries.
-% B6 -- Bootstrap scopes, dependence, factor uncertainty and multiplicity.
+Formation membership is fixed at the December ranking cutoff. An
+issuer retains its formation identity when a selected security's
+subsequent source issuer changes. Missing returns and missing
+prior-month capitalization are explicit. SEC information uses filing
+timestamps before the preceding CRSP close. Negative book equity
+where the ratio calls for a positive denominator, stale balance
+sheets, and undefined paired history correlations each have separate
+availability rules.
 
-\section{Extended Evidence and Sensitivity}
+The characteristic reimplementation estimates OLS, spatial lag by
+instrumental variables and maximum likelihood, and spatial error by
+maximum likelihood. Fit states distinguish available estimates from
+invalid or boundary fits. For the primary formation, the stationary
+quarter bootstrap resamples common date blocks, recomputes betas and
+medians, and refits models while the formation graph stays fixed
+before filtering unavailable issuers and renormalizing its rows. A
+bootstrap distribution for a constrained refit can still be computed
+when the corresponding original fit is unavailable. The paper treats
+that case as an identification or estimation limitation.
 
-% C1 -- Full model roster, sample counts and alternative formations.
-% C2 -- Kernel/bandwidth, sparsity, normalization and graph-spectrum variants.
-% C3 -- Common-marginal correlation versus fitted-marginal covariance results.
-% C4 -- Estimation units, dependence and readout calibration details.
-% C5 -- PCoA subspace stability and economic alignment details.
-% C6 -- Factor-mimicking, pricing and model-implied VaR, if tested.
-% C7 -- Claims audit: main-text results to saved artifact identity.
+\section{Scope of the Empirical Evidence}
+\label{app:scope}
+
+The primary results condition on the declared formation and the
+endpoints reported in the text. A return-based exposure proxy, a
+residual-dependence parameter and a cross-sectional pricing error
+answer different questions. A dated geometry exhibit describes one
+estimated representation space. Factor spanning, joint pricing
+restrictions, and portfolio evaluation require separate outcomes and
+maintained assumptions.

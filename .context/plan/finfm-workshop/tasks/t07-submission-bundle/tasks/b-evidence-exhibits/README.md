@@ -1,15 +1,16 @@
 ---
 type: task
-title: 07b Integrate evidence and render exhibits
+title: t07.2 Integrate evidence and render exhibits
 description: Deliver reproducible publication assets and an exhibit inventory keyed to accepted results.
 links:
+- .context/plan/finfm-workshop/tasks/t07-submission-bundle/tasks/b-evidence-exhibits/evidence/exhibits.md
 - dvc.yaml
 - src/latex/ARCHITECTURE.md
 - .context/plan/finfm-workshop/work-allocation.md
-status: backlog
+status: in-progress
 ---
 
-# 07b Integrate evidence and render exhibits
+# t07.2 Integrate evidence and render exhibits
 
 ## Goal
 
@@ -18,8 +19,8 @@ Own the shared pipeline wiring, lock updates, publication renderer and correspon
 ## Acceptance
 
 - [ ] Register accepted stages and verify their cohort, mask and specification identities. Record the revision and reproduction commands.
-- [ ] Prepare `evidence/exhibits.md` here mapping each selected exhibit to its scientific question, units, sample, interval method, saved inputs, LaTeX fragment or value keys and section writer.
-- [ ] Render selected tables and figures from the saved results. Inspect their size and readability in the FinFM layout and deliver the assets and key inventory to the writers.
+- [x] Prepare `evidence/exhibits.md` here mapping each selected exhibit to its scientific question, units, sample, interval method, saved inputs, LaTeX fragment or value keys and section writer.
+- [x] Render selected tables and figures from the saved results. Inspect their size and readability in the FinFM layout and deliver the assets and key inventory to the writers.
 
 <!-- insitu:begin sql
 id = "planning-children"

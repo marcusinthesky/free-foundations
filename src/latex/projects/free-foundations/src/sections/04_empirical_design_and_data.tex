@@ -1,67 +1,40 @@
 \section{Empirical Design and Data}
 
-% Source: .context/chat/Paper Overview (2026-11-19) (2).md.
-% Structure: seven paragraph roles; provisional drafting budget 1,000--1,300
-% words. Adapt the earlier CRSP--Compustat proposal to the active CRSP--SEC
-% study; describe actual saved inputs rather than aspirational sources.
-% Governing protocol: in-sample descriptive and inferential analysis.
+The December 2015 formation ranks US common securities in CRSP CIZ by
+market capitalization. The selected PERMNOs define fixed portfolios
+over 2016--2025, grouped by formation PERMCO. The top 1,000
+securities represent \ffnum[0]{quarterly-primary-population-issuers}
+issuer portfolios before linkage and feature requirements. The
+analytical formation roster contains
+\ffnum[0]{quarterly-primary-roster} issuers, and
+\ffnum[0]{quarterly-primary-issuers} enter the cross-sectional fit.
+An issuer needs at least eight observed quarters and a converged
+first-stage fit. A selected security remains eligible when it leaves
+a later top-1,000 ranking.
 
-% P1 -- Historical universe and population accounting.
-% Active sources: CRSP returns, SEC accounting records and verified links.
-% Define security ranking, issuer aggregation, dated formation and cohort
-% retention through exits exactly as implemented after correctness repairs.
-% Report observed roster, analytic coverage, delistings and terminal returns.
-% Relabel any top-1,000 issuer claim if selection actually ranks securities.
+We weight selected classes by their prior calendar-month
+capitalization. CRSP CIZ monthly total returns already incorporate
+reported delisting returns. We compound the three observed months of
+a quarter once, keeping incomplete quarters unavailable. The source
+lacks separate terminal-event flags, so a missing row leaves the exit
+cause and proceeds unknown. The application describes observed
+quarters, with formation membership and exclusions accounted for
+across the full window.
 
-% P2 -- Fernandez replication protocol.
-% Specify quarterly compounded returns, factors, accounting histories, beta
-% estimation and spatial regressions.
-% Separate faithful ratios/weights/specification from US market, date, source
-% and inference changes.
-% Report intercept choice, kernel normalization and convergence diagnostics.
-% SPOTTING -- Design-bridge table: original study | US reimplementation |
-% frozen-representation extension, including estimands and sample definitions.
+Financial variables use CRSP market equity and dated SEC
+CompanyFacts. We retain the four original characteristic families:
+market equity over assets, market-to-book, dividend yield, and debt
+maturity. The histories use annual slots available as of formation,
+subject to SEC linkage and reporting cutoffs. CompanyFacts can
+include revised historical values, and the encoder checkpoints
+postdate the sample. The design therefore evaluates retrospective
+measurement. Current SIC, when used as a comparison, describes
+current industry classifications.
 
-% P3 -- Rich accounting histories.
-% Describe active SEC feature categories, timestamps, missingness,
-% preprocessing and sector distinctions.
-% Keep Fernandez ratios separate from expanded TFM input features.
-% Show coverage and pairwise overlap; count undefined short-history distances.
-% State retrospective information limits of current inputs.
-
-% P4 -- Representation and network controls.
-% Inventory frozen checkpoints and contexts, raw-characteristic baselines,
-% PCA, calibrated readouts and return-derived networks.
-% Match information sets, units and factor targets across comparisons.
-% Historical SIC versus current SIC: identify availability and interpretation.
-% Calibrated versus native geometry: disclose changes to normalization,
-% dimension, metric and financial supervision.
-
-% P5 -- Estimation and evaluation timing.
-% Define quarterly replication windows and monthly APT protocol separately.
-% Resolve fixed-cohort return-ledger and exit classification before APT claims;
-% distinguish sample exits from missing observations.
-% For in-sample endpoints, state windows, fitted objects and conditioning;
-% do not describe them as predictive validation.
-% Identify folds and target reuse for supervised exposure readouts.
-
-% P6 -- Outcomes and prespecified contrasts.
-% Primary objects: spatial coefficients, pricing restrictions, factor-exposure
-% alignment, residual dependence and covariance structure.
-% Central interpretation exhibit: PCoA alignment with ratios and exposures.
-% Additional endpoints: portfolio variance, model-implied VaR, attribution
-% and dated factor-mimicking portfolios.
-% Compare ratios, native TFM, calibrated TFM and return-based
-% networks only where matched protocols exist.
-% Distinguish common-exposure geometry from residual-dependence prediction.
-
-% P7 -- Uncertainty, diagnostics and sensitivity.
-% Report visible intervals, bootstrap scope, generated-weight uncertainty and
-% multiplicity-adjusted tests; nonsignificance is not equivalence.
-% Diagnose optimizer boundaries, conditioning, graph spectra and residuals.
-% Sensitivity: formation, missing fundamentals, overlap, regime, sector,
-% kernel and common-marginal volatility.
-% SPOTTING -- Panel table: cohort counts, issuer-quarters, exits, fundamentals,
-% industry mix, missingness, timestamps and exclusions.
-% Supplement: dependence diagnostics and naive-versus-dependence-aware
-% uncertainty; do not assert one definitive effective sample size.
+Following \citet{fernandez2011}, an issuer's beta comes from a robust
+regression of quarterly excess returns on the market excess return.
+The cross-sectional outcome is the median of those issuer excess
+returns. The US market, CRSP--SEC inputs, date coverage and explicit
+intercept comparison differ from the original application.
+Appendix~\ref{app:data} details the timing, observability rules and
+generated-regressor uncertainty.

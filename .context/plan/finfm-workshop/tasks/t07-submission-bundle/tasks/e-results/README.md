@@ -1,24 +1,24 @@
 ---
 type: task
-title: 07e Write the empirical results
+title: t07.5 Write the empirical results
 description: Write the results and captions against the signed-off estimands and generated exhibits.
 links:
 - src/latex/projects/free-foundations/src/sections/05_results.tex
 - .context/plan/finfm-workshop/audit.md
-status: backlog
+status: done
 ---
 
-# 07e Write the empirical results
+# t07.5 Write the empirical results
 
 ## Goal
 
-Own `05_results.tex` and captions of its exhibits. Use [07a](../a-manuscript-plan/README.md) for narrative order and [07b](../b-evidence-exhibits/README.md) for numerical bindings. Draft each result as its research owner delivers evidence.
+Own `05_results.tex` and captions of its exhibits. Use [t07.1](../a-manuscript-plan/README.md) for narrative order and [t07.2](../b-evidence-exhibits/README.md) for numerical bindings. Draft each result as its research owner delivers evidence.
 
 ## Acceptance
 
-- [ ] Lead with the Fernández design bridge. For each retained comparison state the estimand, benchmark, effect size, uncertainty and interpretation. Distinguish recovery of exposure geometry, residual dependence and pricing restrictions.
-- [ ] Explain informative negative and unidentified results. Tie scope to actual cohorts and fitted models. Bind quoted numbers to generated macros, and check units, denominators, interval labels and figure references.
-- [ ] Hand the editor a list of supported headline claims and unresolved items. Remove or qualify unsupported promised exhibits across the results section.
+- [x] Lead with the Fernández design bridge. For each retained comparison state the estimand, benchmark, effect size, uncertainty and interpretation. Distinguish recovery of exposure geometry, residual dependence and pricing restrictions.
+- [x] Explain informative negative and unidentified results. Tie scope to actual cohorts and fitted models. Bind quoted numbers to generated macros, and check units, denominators, interval labels and figure references.
+- [x] Hand the editor a list of supported headline claims and unresolved items. Remove or qualify unsupported promised exhibits across the results section.
 
 <!-- insitu:begin sql
 id = "planning-children"
