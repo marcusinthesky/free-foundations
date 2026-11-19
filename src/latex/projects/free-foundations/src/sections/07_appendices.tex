@@ -6,9 +6,11 @@ If $s=r\circ z$, histories in the same fibre of $z$ share the same
 target. Conversely, define $r$ on $z(H)$ by the unique target of each
 fibre and use any value in $S$ outside the image. For the
 nearest-neighbour example, take the origin, $(1,0)$ and $(0,2)$ in
-$\R^2$. The first point is nearer to the origin before the recoding
-$g=\operatorname{diag}(3,1)$, and the second is nearer afterward.
-Composing the readout with $g^{-1}$ preserves the target. A
+$\R^2$. The point $(1,0)$ is nearer to the origin before the recoding
+$g=\operatorname{diag}(3,1)$, and $(0,2)$ is nearer afterward.
+Composing the readout with $g^{-1}$ preserves the target. For a
+restricted readout class $\mathcal R$, a bijection $g$ preserves
+the class when $\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$. A
 restricted class preserved under both $g$ and $g^{-1}$ has the same
 attainable functions after the recoding. Equality of the transformed
 class gives closure under composition and inversion. The fibre
@@ -102,11 +104,14 @@ maintained assumptions.
 
 \begin{table*}[t]
   \centering
+  \fftabletype
   \IfFileExists{generated/tables/quarterly-likelihood.tex}{%
-    \resizebox{\textwidth}{!}{\input{generated/tables/quarterly-likelihood}}%
+    \input{generated/tables/quarterly-likelihood}%
   }{\ffmissing}
   \caption{In-sample lag log-likelihood differences per quarter.
-    Positive values favour the network in the first column.
+    All graphs use ten-neighbour weights. Ratios denote Fernández
+    histories and XBRL denotes CompanyFacts inputs. Positive values
+    favour the network in the first column.
     Percentiles resample paired quarterly contributions conditional on
   fitted parameters. The last column adjusts for multiple comparisons.}
   \label{tab:quarterly-comparisons}
@@ -114,6 +119,7 @@ maintained assumptions.
 
 \begin{table}[t]
   \centering
+  \fftabletype
   \begin{tabular}{lcc}
     \toprule
     Intercept & $\widehat\rho$ & Refit percentiles \\
@@ -138,7 +144,11 @@ maintained assumptions.
   \label{tab:us-benchmark}
 \end{table}
 \paragraph{Does the encoder add to its inputs?}
-With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
+The earlier quarterly comparison in Table~\ref{tab:quarterly-comparisons}
+reports differences per quarter. Tables~\ref{tab:matched-factors}
+and~\ref{tab:matched-encoders} report differences per issuer-quarter on
+the common factor sample. With symmetrized ten-neighbour weights, the
+ratio-based TabPFN graph gains
 4.98 log-likelihood units per quarter over the joint characteristic graph,
 while selecting peers directly from the same financial inputs gains 5.91.
 The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
@@ -170,10 +180,10 @@ They quantify a different source of variation from the standard error
 conditional on the generated beta. These diagnostics
 characterize the US reimplementation, where the original sample is unavailable.
 
-\paragraph{A dated view of learned geometry.}
+\paragraph{Historical ratio-only geometry.}
 To identify which financial histories organize the learned peers, we
 form principal coordinates from chord distances of the January
-2016 TabPFN states on the original characteristic rung. Because the
+2016 TabPFN states using only the four ratio histories. Because the
 embedding uses information available at formation, the analysis
 includes all \ffnum[0]{quarterly-primary-roster} issuers on the
 analytical roster, including firms with incomplete subsequent
@@ -198,11 +208,47 @@ On this formation date the learned geometry is closely associated
 with a valuation measure supplied to the encoder, while its alignment
 with independently estimated market exposure is weak.
 
+\section{Selected broad-input geometry}
+\label{app:ablation}
+
+For the broad-input model selected by its market-controlled gain, we rebuild
+the peer graph using the first one or three principal coordinates at each
+formation. We also omit each engineered ratio history in turn from both
+the historical examples and the issuers being encoded. The underlying broad
+filing fields remain available, so the omission measures the incremental
+role of the supplied ratio history. Each comparison uses the same return
+observations and the full broad-input graph as its reference.
+
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-ablation.tex}{\input{generated/tables/matched-ablation}}{\ffmissing}
+  \caption{Broad-input TabPFN peer graphs after projection or omission.
+    Overlap averages issuer-level Jaccard similarities within each quarter
+    and then across quarters. Fit differences are nats per issuer-quarter
+  relative to the full graph, with paired conditional 95\% intervals.}
+  \label{tab:ablation}
+\end{table*}
+
+Using three coordinates improves on the first-coordinate projection, although
+both projected graphs fit less well than the full graph
+(Table~\ref{tab:ablation}). For each single ratio omission the interval for
+the change in fit includes zero. The retained financial fields can still
+carry information about the omitted ratio.
+
 \section{Matched factor specifications}
+
+The following tables report the factor-only, spatial-lag and spatial-error
+fits on the same issuer-quarters. Reading down each table shows how fit
+changes as factors enter separately, alongside the market, or jointly.
+Within a spatial specification, comparing the two peer graphs at the same
+factor controls isolates the choice of distance. The parameter counts and
+information criteria refer to the return fit conditional on the estimated
+issuer exposures.
 \newcommand{\ffFactorDetail}[2]{
   \begin{table*}[p]
     \centering
-    \small
+    \fftabletype
     \input{generated/tables/matched-detail-#1}
     \caption{#2 on the common issuer-quarter mask. Information criteria
     condition on estimated first-stage exposures.}

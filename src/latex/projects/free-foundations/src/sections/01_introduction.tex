@@ -4,44 +4,35 @@ Spatial asset pricing begins with a measurement choice. A firm can be
 close to another in leverage, cash flow, or market exposure, and each
 definition creates a different network of peers.
 \citet{fernandez2011} makes that choice explicit by building spatial
-weights from financial characteristics. We reimplement her spatial
-CAPM on a dated US equity cohort and ask what changes when financial
-proximity comes from a frozen tabular foundation model.
+weights from financial characteristics. We ask whether a frozen tabular
+foundation model selects peers whose returns improve the fit of a spatial
+return model, and how much of that fit one can obtain by comparing the same
+financial inputs directly.
 
-A pretrained encoder can supply nonlinear features without estimating
-its weights on the financial sample. Its predictions or downstream
-readouts may retain information about an economic target. Yet the
-same information can survive an invertible change of coordinates that
-reverses which firm is nearest. This distinction matters because the
-spatial estimator uses the neighbour graph, while a prediction
-criterion can be indifferent to how that graph changes.
+We begin with Fern\'andez's spatial CAPM because it makes the economic
+meaning of a peer return explicit. Each issuer receives a weighted average
+of other issuers' returns, with more weight on firms whose financial
+histories resemble its own. In our US reimplementation, the conventional
+joint kernel spreads weight across so many firms that their peer returns
+approach a common mean. This raises two distinct measurement questions.
+Which firms does a distance identify as close, and how much weight should
+those firms receive?
 
-Because each firm’s peer return depends on which firms receive
-weight, a change of coordinates can reach the covariance calculation
-through the graph. We give a recoverability condition and a
-counterexample to geometric
-identification. We then connect the weights actually used in the
-study to a finite-panel stability bound for the spatial multiplier
-and residual covariance. The bound involves the degree ratio and the
-distance of the spatial coefficient from the edge of its stability
-region. A separate sufficient certificate indicates when estimated
-exposure distances preserve a chosen set of neighbours.
+On a matched panel of quarterly issuer returns, we can vary the distance
+while holding the weighting rule and the return observations fixed.
+After adjustment for the five Fama--French factors and momentum, the graph
+built from TabPFN's representation of the four ratios improves on the graph
+built from Fern\'andez's joint distance. A closer benchmark for the value
+of encoding uses the input features themselves to select peers. Under market
+controls, TabPFN's incremental fit against this benchmark is uncertain on
+the four ratios. With a broad panel of financial disclosures, its estimated
+gain over the corresponding direct graph is the largest among the four
+encoders and three input sets we study.
 
-Our empirical application starts with the conventional characteristic
-benchmark. We follow the securities selected in December 2015,
-aggregate them into issuer portfolios, and track coverage through the
-return window. We first ask whether the characteristic peer return
-carries enough cross-sectional variation to distinguish its
-contribution from an intercept. The comparison illustrates how a nearly uniform
-peer average can absorb the cross-sectional mean and impair
-identification of a distinct spatial term. The study evaluates
-proximity and in-sample spatial association. Tests of risk prices
-require further model and economic restrictions.
-
-We then compare three ways to select peers on the quarterly panel.
-The joint characteristic graph compares histories of annual ranks.
-A second graph uses the financial inputs directly, and a third uses
-the frozen encoder's representation of those inputs. Holding the
-neighbour rule fixed, we find that the encoder improves on the joint
-characteristic graph, while its incremental fit over the direct
-financial inputs remains uncertain.
+Why evaluate peer selection separately from an encoder's predictive ability?
+Two representations can retain exactly the same information about a firm's
+exposure while ranking its peers differently. We give a simple construction
+and bound how changes in peer weights can affect the covariance implied by
+a spatial model. Finally, we examine which financial quantities align with
+the leading coordinate of the selected representation and whether that
+coordinate recovers the neighbours used in the return fit.

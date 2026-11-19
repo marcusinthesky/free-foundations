@@ -14,7 +14,8 @@ from free_foundations.artifacts.metadata import write_json
 STAGES = ("sample", "factors", "kernels", "encoders", "geometry", "historical-geometry", "ablation")
 
 
-def _verify(results: Path, manifest: Path) -> dict[str, dict[str, str]]:
+def verify_evidence(results: Path, manifest: Path) -> dict[str, dict[str, str]]:
+    """Verify indexed artifacts before binding results to publication outputs."""
     document = json.loads(manifest.read_text())
     if document["schema"] != 1:
         message = "Unknown matched-comparison evidence schema."
@@ -40,7 +41,7 @@ def _verify(results: Path, manifest: Path) -> dict[str, dict[str, str]]:
 def render(results: Path, evidence: Path, output: Path) -> None:
     """Check the evidence index before copying or formatting any saved findings."""
     manifest = evidence / "manifest.json"
-    artifacts = _verify(results, manifest)
+    artifacts = verify_evidence(results, manifest)
     for stage in STAGES[1:]:
         for name in artifacts[stage]:
             source = results / stage / name

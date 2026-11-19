@@ -1,16 +1,31 @@
 \section{Results}
 
+\paragraph{When many firms share the same peer return.}
+In the December 2015 cohort, the joint exponential kernel gives each issuer
+an average of \ffnum[0]{quarterly-fernandez-joint-effective-neighbours}
+effective neighbours. Because so many issuers receive similar weights, their
+peer returns have little variation around the common mean. When the
+intercept is fixed at zero the estimated spatial coefficient is
+$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$. Allowing an intercept
+produces an invalid or boundary fit (Table~\ref{tab:us-benchmark}). The
+large coefficient in the first fit is consistent with the peer return
+absorbing the mean. On the repeated-formation panel we can absorb the common
+level with quarter effects and compare more concentrated peer weights.
+
 \paragraph{Peer returns after factor adjustment.}
 Across the common issuer-quarters, the ratio-based TabPFN peer return
 improves in-sample fit even after controlling for exposures to the five
-Fama--French factors and momentum. The joint characteristic graph also
-adds fit, although the paired contrast favours the encoder
-(Table~\ref{tab:matched-factors}). Because both graphs use the same
-ten-neighbour rule, this comparison holds the weighting convention fixed.
+Fama--French factors and momentum. Both peer graphs improve on the
+factor-only fit. Compared directly with
+Fern\'andez's joint graph, TabPFN gains \ffmatched{factor-gain} nats per
+issuer-quarter (paired 95\% interval \ffmatched{factor-interval},
+Table~\ref{tab:matched-factors}). Both graphs select ten neighbours before
+symmetrization, so this difference arises under a common weighting rule.
 
 \begin{table*}[t]
   \centering
-  \IfFileExists{generated/tables/matched-factors.tex}{\resizebox{\textwidth}{!}{\input{generated/tables/matched-factors}}}{\ffmissing}
+  \fftabletype
+  \IfFileExists{generated/tables/matched-factors.tex}{\input{generated/tables/matched-factors}}{\ffmissing}
   \caption{Factor-only log likelihood and incremental spatial-lag fit.
     The two gain columns compare each graph with the factor-only fit.
     Gains are in nats per issuer-quarter, with paired 95\% stationary-quarter
@@ -18,11 +33,24 @@ ten-neighbour rule, this comparison holds the weighting convention fixed.
   \label{tab:matched-factors}
 \end{table*}
 
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-encoders.tex}{\input{generated/tables/matched-encoders}}{\ffmissing}
+  \caption{Market-controlled spatial-lag gain over the direct graph built
+    from the same inputs, in nats per issuer-quarter. Brackets give conditional
+  paired 95\% intervals. All graphs use symmetrized ten-neighbour weights.}
+  \label{tab:matched-encoders}
+\end{table*}
+
 \paragraph{How much does the weighting rule matter?}
-The ratio-based encoder also improves on the joint characteristic distance
-when both graphs use exponential or median-bandwidth Gaussian weights.
-Figure~\ref{fig:matched-kernels} shows the paired contrasts under market
-controls. The effective neighbour counts indicate how much the typical peer
+To see whether the comparison depends on concentrating weight among close
+peers, we hold market exposure fixed as the sole factor control and vary
+the weighting rule for both graphs. The ratio-based encoder improves on
+the joint characteristic distance with exponential, median-bandwidth
+Gaussian and ten-neighbour weights
+(Figure~\ref{fig:matched-kernels}). The effective neighbour counts
+indicate how much the typical peer
 return averages across firms, even when two rules produce similar fit.
 
 \begin{figure}[t]
@@ -41,24 +69,29 @@ leaves open how much fit a researcher could obtain by selecting peers
 directly from the financial features supplied to the encoder.
 Table~\ref{tab:matched-encoders} makes this comparison under market
 controls. For TabPFN the estimated gain is slightly negative on the four
-ratio histories and positive on their operands, with both intervals
+ratio histories and positive on the financial quantities used to
+construct them, with both intervals
 including zero. On broad financial inputs all four point estimates are
-positive, and TabPFN achieves the largest gain among the twelve fitted
-combinations. The reported intervals measure gains over each input set's
-own control. Selection uses the same sample as estimation.
+positive, and broad-input TabPFN has the largest estimated gain over its own
+direct graph among the twelve combinations evaluated on this sample. Each
+interval compares an encoder with its direct graph.
 
-\begin{table*}[t]
-  \centering
-  \IfFileExists{generated/tables/matched-encoders.tex}{\resizebox{\textwidth}{!}{\input{generated/tables/matched-encoders}}}{\ffmissing}
-  \caption{Market-controlled spatial-lag gain over the direct graph built
-    from the same inputs, in nats per issuer-quarter. Brackets give conditional
-  paired 95\% intervals. All graphs use symmetrized ten-neighbour weights.}
-  \label{tab:matched-encoders}
-\end{table*}
+\paragraph{Which peers does the leading coordinate recover?}
+For the selected broad-input TabPFN model, the first principal coordinate
+summarizes \ffmatched{inertia}\% of positive inertia in the January 2016
+formation distances. Because this share exceeds the prespecified 25\%
+threshold, we examine which firms occupy nearby positions on this axis.
+The coordinate orders issuers strongly by market equity over
+assets (absolute rank correlation \ffmatched{valuation}), a ratio supplied
+to the model and used to label its historical examples.
 
-For the selected broad-financial TabPFN representation, the leading
-coordinate accounts for
-\IfFileExists{generated/tables/matched-inertia.tex}{\input{generated/tables/matched-inertia}}{\ffmissing}\%
-of positive inertia on the January 2016 formation roster. This share
-motivates comparing the neighbours recovered by the first coordinate with
-those used by the full spatial graph.
+We repeat the projection at each annual formation and compare each issuer's
+peers along the first coordinate with its peers in the full representation.
+The mean quarterly Jaccard similarity is \ffmatched{overlap}, where similarity
+is the number of shared peers divided by the number selected by either graph.
+With market controls, the projected graph changes log likelihood by
+$\ffmatched{projected-gain}$ nats per issuer-quarter relative to the full
+graph. The valuation gradient is visible along one axis, but the full graph
+also uses distinctions among firms that improve the spatial fit.
+Appendix~\ref{app:ablation} reports the three-coordinate and
+input-omission comparisons.

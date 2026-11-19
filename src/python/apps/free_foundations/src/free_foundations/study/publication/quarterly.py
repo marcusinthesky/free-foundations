@@ -24,6 +24,17 @@ if TYPE_CHECKING:
     from free_foundations.study.spec import StudySpec
 
 
+def compact_peer_label(key: str) -> str:
+    """Shorten peer labels for the quarterly likelihood table."""
+    return (
+        network_label(key)
+        .removesuffix(", 10-NN")
+        .replace("Fernández histories", "ratios")
+        .replace("CompanyFacts XBRL", "XBRL")
+        .replace("Fernández: Joint (RMS)", "Fernández joint")
+    )
+
+
 def _tabular(  # noqa: PLR0913 -- one table's caption, label, cells and alignment.
     caption: str,
     label: str,
@@ -313,8 +324,8 @@ def _comovement(report: Report, comovement: Path, spec: StudySpec) -> None:
     for item in comparisons.loc[comparisons["process"].eq("lag")].to_dict("records"):
         rows.append(
             [
-                _escape(network_label(str(item["network"]))),
-                _escape(network_label(str(item["reference"]))),
+                _escape(compact_peer_label(str(item["network"]))),
+                _escape(compact_peer_label(str(item["reference"]))),
                 _number(item["mean_difference"], 2),
                 _interval(item["low"], item["high"], 2),
                 _number(item["p_holm"]),

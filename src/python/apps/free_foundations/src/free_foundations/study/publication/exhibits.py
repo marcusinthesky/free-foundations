@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from free_foundations.artifacts.atomic import atomic_bytes
+from free_foundations.study.publication.matched import verify_evidence
 
 
 def _comparisons(results: Path, stage: str) -> pd.DataFrame:
@@ -14,14 +15,23 @@ def _comparisons(results: Path, stage: str) -> pd.DataFrame:
     return rows.loc[rows.process.eq("lag")].set_index(["cell", "reference"], verify_integrity=True)
 
 
-def _interval(row: pd.Series) -> str:
+def _contrast(rows: pd.DataFrame, key: tuple[str, str]) -> pd.Series:
+    """Read the unique comparison for this candidate and reference."""
+    return rows.loc[[key]].iloc[0]
+
+
+def _interval(row: pd.Series, digits: int = 4) -> str:
     if row.status != "available":
         return "---"
-    return f"{row.gain_per_observation:.4f} [{row.low_per_observation:.4f}, {row.high_per_observation:.4f}]"
+    low = row.low_per_observation
+    high = row.high_per_observation
+    return f"{row.gain_per_observation:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
 
 
 def render(results: Path, generated: Path) -> None:
-    """Write the three matched exhibits and their selected-geometry statistic."""
+    """Write the matched exhibits and numeric bindings from indexed results."""
+    verify_evidence(results, results / "evidence/manifest.json")
+    (generated / "tables").mkdir(parents=True, exist_ok=True)
     factors = _comparisons(results, "factors")
     fits = pd.read_parquet(results / "factors/fits.parquet")
     baselines = fits.loc[fits.process.eq("none")].set_index("factor_set")
@@ -30,9 +40,9 @@ def render(results: Path, generated: Path) -> None:
     for key, name in [
         ("market", "Market"),
         ("mom", "Momentum"),
-        ("market_mom", "Market + momentum"),
+        ("market_mom", "Market + Mom."),
         ("ff5", "FF5"),
-        ("ff5_mom", "FF5 + momentum"),
+        ("ff5_mom", "FF5 + Mom."),
     ]:
         direct, model, base = (
             f"{key}|{arm}" for arm in ("direct_characteristics", "tabpfn_full", "none")
@@ -42,7 +52,7 @@ def render(results: Path, generated: Path) -> None:
                 name,
                 f"{baselines.loc[key].log_likelihood:,.1f}",
                 *[
-                    _interval(factors.loc[pair])
+                    _interval(_contrast(factors, pair))
                     for pair in [(direct, base), (model, base), (model, direct)]
                 ],
             ]
@@ -97,7 +107,7 @@ def render(results: Path, generated: Path) -> None:
             [
                 name,
                 *[
-                    _interval(encoders.loc[(f"{r}:{key}", f"{r}:direct")])
+                    _interval(_contrast(encoders, (f"{r}:{key}", f"{r}:direct")))
                     for r in ("fernandez", "operands", "standard_xbrl")
                 ],
             ]
@@ -123,7 +133,7 @@ def render(results: Path, generated: Path) -> None:
         [("knn10", "10-NN"), ("gaussian", "Gaussian"), ("exp", "Exponential")]
     ):
         candidate, reference = (f"joint:{family}|{key}" for family in ("tabpfn", "direct"))
-        row = kernels.loc[(candidate, reference)]
+        row = _contrast(kernels, (candidate, reference))
         ax.hlines(y, row.low_per_observation, row.high_per_observation)
         ax.plot(row.gain_per_observation, y, "ko")
         labels.append(f"{name} ({graphs[reference]:.0f}, {graphs[candidate]:.0f})")
@@ -134,8 +144,42 @@ def render(results: Path, generated: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output)
     plt.close(fig)
+    factor = _contrast(factors, ("ff5_mom|tabpfn_full", "ff5_mom|direct_characteristics"))
+    _render_geometry(results, generated, factor)
+
+
+def _render_geometry(results: Path, generated: Path, factor: pd.Series) -> None:
     selected = json.loads((results / "geometry/manifest.json").read_text())["selected"]
-    atomic_bytes(
-        tables / "matched-inertia.tex",
-        f"{100 * selected['positive_inertia_shares'][0]:.2f}".encode(),
+    associations = pd.read_parquet(results / "geometry/selected_associations.parquet")
+    valuation = associations.set_index("descriptor").spearman_pc1.abs().loc["market_cap_assets"]
+    ablations = _comparisons(results, "ablation")
+    overlap = pd.read_parquet(results / "ablation/peer_overlap.parquet")
+    means = overlap.groupby("cell").mean_peer_jaccard.mean()
+    rows = []
+    for cell, label in [
+        ("pc1", "First coordinate"),
+        ("top_three", "First three coordinates"),
+        ("omit:market_cap_assets", "Omit market equity / assets"),
+        ("omit:market_to_book", "Omit market-to-book"),
+        ("omit:dividend_yield", "Omit dividend yield"),
+        ("omit:debt_maturity", "Omit debt maturity"),
+    ]:
+        row = _contrast(ablations, (cell, "full"))
+        rows.append([label, f"{means[cell]:.3f}", _interval(row, 5)])
+    table = pd.DataFrame(
+        rows, columns=["Peer graph", "Mean overlap", r"Fit difference [95\% interval]"]
     )
+    atomic_bytes(
+        generated / "tables/matched-ablation.tex",
+        table.to_latex(index=False, escape=False).encode(),
+    )
+    values = {
+        "factor-gain": f"{factor.gain_per_observation:.4f}",
+        "factor-interval": f"[{factor.low_per_observation:.4f}, {factor.high_per_observation:.4f}]",
+        "inertia": f"{100 * selected['positive_inertia_shares'][0]:.2f}",
+        "valuation": f"{valuation:.2f}",
+        "overlap": f"{means['pc1']:.3f}",
+        "projected-gain": f"{_contrast(ablations, ('pc1', 'full')).gain_per_observation:.4f}",
+    }
+    bindings = "".join(f"\\ffDeclareValue{{matched-{k}}}{{{v}}}\n" for k, v in values.items())
+    atomic_bytes(generated / "matched-values.tex", bindings.encode())

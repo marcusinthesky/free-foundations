@@ -1,5 +1,11 @@
 \section{Empirical Design and Data}
 
+The two return comparisons use different units of observation. To examine
+the original spatial CAPM specification, we follow a fixed cohort and
+summarize each issuer's subsequent returns by its median. To compare peer
+rules after factor adjustment, we form a new roster each December and
+observe one return per issuer per quarter in the following year.
+
 The December 2015 formation ranks US common securities in CRSP CIZ by
 market capitalization. Each selected share class has a security
 identifier (PERMNO). We combine the classes belonging to the same
@@ -25,8 +31,12 @@ market equity over assets, market-to-book, dividend yield, and debt
 maturity. A second input set supplies the dated financial quantities used
 to construct those ratios, allowing the encoder to learn relationships
 between their components. A third supplies a broader panel of eligible
-financial fields from SEC CompanyFacts. Wide inputs are encoded in blocks
-and their representations concatenated. Comparing each encoder with peers
+financial fields from SEC CompanyFacts. Each January we represent an
+issuer using the financial fields available
+at formation. The encoder's context consists of historical examples labelled
+with next-quarter market equity over assets, whose values are already
+observed by the query date. Wide inputs are encoded in blocks and their
+representations concatenated. Comparing each encoder with peers
 formed directly from its own input set measures what encoding adds at
 that information level. Filing cutoffs govern availability at formation,
 although revised historical filings and checkpoints released after the
@@ -35,8 +45,11 @@ sample make this a retrospective exercise.
 Three peer-selection rules can use exactly the same ratio histories.
 The joint Fern\'andez distance compares annual ranks within each history
 and combines the four distances by their root mean square. The direct-input
-control computes distance in financial feature space, while the encoder
-computes distance between frozen representations of those features.
+control imputes missing features with historical support medians, includes
+missingness indicators, and standardizes the features before computing
+distances. The encoder graph instead uses distances between the resulting
+issuer representations. Each graph assigns weights to peers, whose weighted
+returns enter the spatial lag.
 Applying the same neighbour rule to all three distances isolates the choice
 of representation. Holding a distance fixed while varying the weighting
 rule measures how concentrating weight on fewer peers changes the fit.
@@ -50,10 +63,12 @@ model is
 Each column of $X_t$ multiplies an issuer's estimated factor exposure by
 the corresponding quarterly factor return. The factor comparison considers
 individual controls and joint specifications including the five
-Fama--French factors plus momentum. Quarter effects absorb the common
+Fama--French factors (FF5) plus momentum. For the nonmarket factors we use
+the study's compounded long--short proxies. Quarter effects absorb the common
 level of returns. The matched sample requires observed outcomes and
 converged exposures across the declared specifications, so a change in
 fit cannot arise simply because a different set of issuers enters.
+The estimated exposures use each issuer's full observed quarterly panel.
 The factor comparison uses the joint Fern\'andez distance for its
 characteristic graph. The encoder ranking instead compares each frozen
 representation with its same-input control. Paired blocks of quarterly

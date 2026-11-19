@@ -17,8 +17,10 @@
 \newcommand{\leanok}{\ignorespaces}
 \newcommand{\ffmissing}{--}
 \newif\ifffsavedvalues
+\newif\ifffmatchedvalues
 \newcommand{\ffLoadValues}{%
   \InputIfFileExists{generated/numbers.tex}{\ffsavedvaluestrue}{}%
+  \InputIfFileExists{generated/matched-values.tex}{\ffmatchedvaluestrue}{}%
 }
 \newcommand{\ffResultStatus}{%
   \ifffsavedvalues\else
@@ -50,6 +52,7 @@
     \fi
   \fi
 }
+\newcommand{\ffmatched}[1]{\ifffmatchedvalues\ffvalue{matched-#1}\else\ffmissing\fi}
 \ExplSyntaxOn
 \NewDocumentCommand{\ffnum}{O{3}m}{%
   \ifcsname ff@number@#2\endcsname
@@ -70,3 +73,6 @@
   \bibliographystyle{#1}%
   \bibliography{refs}%
 }
+
+% Keep numeric exhibits at the same physical size across layouts.
+\newcommand{\fftabletype}{\fontsize{10}{12}\selectfont\setlength{\tabcolsep}{3pt}}

@@ -1,14 +1,13 @@
 \section{Methodology}
 
 \paragraph{Economic target and representation.}
-If two firms receive identical encodings, any exposure recovered from
-that encoding must be the same for both firms. Let $h$ be a dated
+Must two encodings that recover the same exposure also select the same peer?
+Recovery requires that firms with identical encodings share the
+target exposure. Let $h$ be a dated
 financial history, $s(h)$ an economic target, and
 $z(h)$ the representation of that history produced by a frozen
 encoder in a specified context. Targets could be factor exposures or
-another designated economic quantity. The choice of target determines
-the meaning of recovery. We use characteristic histories in the
-reimplementation and report the interpretation of frozen states separately.
+another designated economic quantity.
 
 \begin{proposition}[Recoverability and geometric identification]
   \label{prop:recovery}
@@ -19,16 +18,13 @@ reimplementation and report the interpretation of frozen states separately.
   $r\circ g^{-1}$. Such a recoding can change nearest neighbours.
 \end{proposition}
 
-For a restricted readout class $\mathcal R$, the recoding preserves
-the class when
-$\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$.
-These bijections form a group. For example, an invertible anisotropic
-stretch preserves the class of linear readouts and can reverse a
-nearest-neighbour comparison. Appendix~\ref{app:proofs} gives the
-construction. A separate sufficient condition certifies a
-$k$-neighbour set from an independently justified exposure-error
-bound and a sufficiently wide gap at the $k$th neighbour. Empirical
-gaps can describe sensitivity when the error bound is unavailable.
+Consider three firms at $(0,0)$, $(1,0)$ and $(0,2)$. The first firm's
+nearest peer is the second firm. Stretching the horizontal axis by a factor
+of three makes the third firm its nearest peer, although a readout can undo
+the stretch and recover the original exposure. Even a linear readout can
+absorb this change of coordinates. Appendix~\ref{app:proofs} gives the
+general condition for restricted readouts and a sufficient error bound for
+certifying neighbours selected from estimated exposures.
 
 \paragraph{Distances and weights.}
 For the US benchmark, we compute Spearman chord distance for each
@@ -55,6 +51,11 @@ weights make the added regressor a linear combination of a constant
 and $y$, so the spatial term requires variation beyond the sample
 mean and the mechanical own-observation correction.
 
+Changing a firm's peers changes a row of $W$. Because each peer return can
+itself depend on other firms' returns, the effect can propagate through the
+network. The spatial multiplier sums these repeated effects. How sensitive
+is the covariance it implies to a change in weights on the same firms?
+
 \begin{proposition}[Spatial stability]
   \label{prop:multiplier}
   Let $K=K^\top\geq 0$ entrywise, with positive degrees $d_i=\sum_j
@@ -75,12 +76,9 @@ mean and the mechanical own-observation correction.
 As peer degrees become more unequal or the spatial coefficient
 approaches its stability boundary, the first bound loosens. The
 second bounds the change in implied covariance when the peer weights
-change on the same firms at a fixed coefficient and innovation covariance. To
-use them for risk one must also specify the innovation covariance,
-the exposure model, and the portfolio. Pricing implications
-additionally require a maintained factor structure, residual-risk
-diversification, trading or spanning conditions, and a
-no-asymptotic-arbitrage assumption \citep{kou2018}.
+change on the same firms at a fixed coefficient and innovation
+covariance. For a given portfolio, this also bounds the change in the variance
+implied by the model (Appendix~\ref{app:proofs}).
 
 \paragraph{Estimation and uncertainty.}
 For the characteristic benchmark the estimated quantities include the

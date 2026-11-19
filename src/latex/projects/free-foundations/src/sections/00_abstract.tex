@@ -1,13 +1,15 @@
-A frozen representation can preserve an economic target while a change of
-coordinates reverses its nearest neighbours. We give a spatial
-multiplier and covariance bound for row-normalized symmetric
-affinities. In a US reimplementation of Fern\'andez's spatial CAPM,
-we follow a fixed December 2015 formation cohort in CRSP--SEC data.
-The joint characteristic kernel gives a large spatial lag coefficient
-when the intercept is fixed at zero. With an intercept, the
-corresponding fit is invalid or on the boundary. On the matched quarterly
-panel, ratio-based TabPFN peers improve spatial fit beyond five-factor
-and momentum exposures. Under market controls, their gain over direct
-use of the same ratios is uncertain, while TabPFN on the broad financial
-panel gives the largest estimated gain over its own direct-input graph
-among twelve encoder and input combinations.
+Can a pretrained tabular model select financially informative peers for a firm?
+We compare peer returns constructed from financial characteristics and from
+frozen representations of the same information in US equity data. After
+adjustment for the five Fama--French factors and momentum, peers selected by
+TabPFN from four financial ratios improve in-sample spatial fit over peers
+selected by Fern\'andez's characteristic-history distance. With the market as
+the sole factor, the gain over direct use of the four ratios is uncertain.
+When both methods use a broad panel of financial disclosures, TabPFN gives the
+largest estimated gain over its own direct-input benchmark among twelve
+encoder and input combinations. Its leading principal coordinate aligns with
+valuation, yet selecting peers along that coordinate recovers little of the
+full network. We show why the distinction matters: an invertible recoding can
+preserve a financial exposure and reverse a firm's nearest neighbour. For
+row-normalized symmetric affinities, we bound the resulting sensitivity of
+the spatial multiplier and implied covariance.

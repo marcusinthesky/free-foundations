@@ -1,39 +1,28 @@
 \section{Literature Review}
 
-Financial proximity need not be geographic. \citet{fernandez2011}
-constructs spatial links using histories of firm financial
-characteristics and studies a spatial CAPM. The resulting association
-depends on how distances become weights; a characteristic network
-alone does not establish causal transmission. Our US application
-reimplements the characteristic-based benchmark in a different
-sample, rather than reproducing its original market.
+\citet{fernandez2011} uses the co-movement of firms' financial
+characteristics over time to define distances and converts those distances
+into weights with an exponential kernel. Her construction supplies both a
+benchmark for our US application and a way to separate two choices that a
+single spatial fit combines. We can use her distance with different weights
+or hold the weighting rule fixed and change the distance. Our empirical
+criterion is the in-sample association of issuer returns with peer returns
+after factor adjustment. The spatial asset-pricing theory of \citet{kou2018}
+gives pricing implications under additional economic restrictions.
 
-\citet{kou2018} develop a spatial CAPM and spatial arbitrage pricing
-theory and apply the latter to stock indices and housing futures.
-Their pricing implications rely on economic assumptions in addition
-to a spatial specification. Accordingly, we distinguish estimated
-spatial association and residual covariance from tests of pricing
-restrictions. Similarity of factor exposures and residual dependence
-are also distinct targets.
+Financial representation learning offers a different source of distances.
+\citet{gu2021} learn characteristic-dependent exposures and latent factors
+within an autoencoder asset-pricing model. \citet{hollmann2025} show that
+TabPFN, pretrained across tabular datasets, supports prediction and produces
+reusable embeddings. We use the latter approach to obtain a vector for each
+issuer, with encoder weights fixed before the financial comparison. The
+question for spatial measurement is what a short distance between two such
+vectors implies about the firms.
 
-Financial representation learning offers another way to relate
-characteristics to returns. For example, \citet{gu2021} use an
-autoencoder asset-pricing model to learn characteristic-dependent
-exposures and latent factors. Tabular pretraining instead transfers a
-model learned across datasets: \citet{hollmann2025} present TabPFN
-and demonstrate prediction and reusable embeddings in their tabular
-evaluation. These results motivate candidate financial measurements;
-they do not establish that an embedding's native distances measure
-economic proximity. Freezing encoder weights removes their estimation
-on the financial sample, while context, preprocessing, readouts and
-financial parameters can still require choices or estimation.
-
-Two representations can support the same financial readout while
-assigning different peers to a firm.
-\citet{roeder2021} establish identification up to a linear
-transformation for a family of discriminative models under their
-assumptions. An invertible non-isometric transformation can preserve
-recoverable information while changing distances and nearest
-neighbours. We therefore separate recovery of an economic target from
-the validity of a particular geometry, and study the consequences of
-the constructed network for spatial models under stated assumptions.
+A result from representation learning clarifies the issue.
+\citet{roeder2021} establish identification up to a linear transformation
+for a family of discriminative models under their assumptions. A linear
+transformation can stretch one direction more than another, changing the
+ordering of distances even when the transformation is invertible. This
+observation motivates our first proposition, which separates the information
+a readout can recover from the choice of neighbours in a spatial model.
