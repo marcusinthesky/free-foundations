@@ -14,38 +14,48 @@ An issuer needs at least eight observed quarters and a converged
 first-stage fit. A selected security remains eligible when it leaves
 a later top-1,000 ranking.
 
-We weight selected classes by their prior calendar-month
-capitalization. CRSP CIZ monthly total returns already incorporate
-reported delisting returns. We compound the three observed months of
-a quarter once, keeping incomplete quarters unavailable. The source
-lacks separate terminal-event flags, so a missing row leaves the exit
-cause and proceeds unknown. The application describes observed
-quarters, with formation membership and exclusions accounted for
-across the full window.
+For the fixed cohort, the outcome is the median of each issuer's observed
+quarterly excess returns. Following \citet{fernandez2011}, we estimate its
+market exposure by robust regression. Incomplete quarters and the treatment
+of delistings determine which returns enter the median
+(Appendix~\ref{app:data}).
 
-Financial variables use CRSP market equity and dated SEC
-CompanyFacts. We retain the four original characteristic families:
+The financial comparison begins with the annual histories of four ratios:
 market equity over assets, market-to-book, dividend yield, and debt
-maturity. The histories use annual slots available as of formation,
-subject to SEC linkage and reporting cutoffs. CompanyFacts can
-include revised historical values, and the encoder checkpoints
-postdate the sample. The design therefore evaluates retrospective
-measurement.
+maturity. A second input set supplies the dated financial quantities used
+to construct those ratios, allowing the encoder to learn relationships
+between their components. A third supplies a broader panel of eligible
+financial fields from SEC CompanyFacts. Wide inputs are encoded in blocks
+and their representations concatenated. Comparing each encoder with peers
+formed directly from its own input set measures what encoding adds at
+that information level. Filing cutoffs govern availability at formation,
+although revised historical filings and checkpoints released after the
+sample make this a retrospective exercise.
 
-Following \citet{fernandez2011}, an issuer's beta comes from a robust
-regression of quarterly excess returns on the market excess return.
-The cross-sectional outcome is the median of those issuer excess
-returns. The US market, CRSP--SEC inputs, date coverage and explicit
-intercept comparison differ from the original application.
-Appendix~\ref{app:data} details the timing, observability rules and
-generated-regressor uncertainty.
+Three peer-selection rules can use exactly the same ratio histories.
+The joint Fern\'andez distance compares annual ranks within each history
+and combines the four distances by their root mean square. The direct-input
+control computes distance in financial feature space, while the encoder
+computes distance between frozen representations of those features.
+Applying the same neighbour rule to all three distances isolates the choice
+of representation. Holding a distance fixed while varying the weighting
+rule measures how concentrating weight on fewer peers changes the fit.
 
-For the quarterly comparison each observation is one issuer's excess
-return in one quarter. January formation rosters determine the eligible
-peers, and the quarterly fit restricts the peer graph to issuers on
-the common outcome mask.
-We estimate quarter effects and control for the product of the issuer's
-full-panel market beta and the quarterly market excess return. We compare
-the spatial lag fits on common quarters. Stationary blocks of paired
-quarterly likelihood contributions measure variation conditional on the
-estimated loadings and point fits.
+For the repeated-formation panel the outcome is one issuer's excess return
+in one quarter. With $y_t$ the vector of those returns, the spatial lag
+model is
+\[
+  y_t=\alpha_t\mathbf{1}+X_t\gamma+\rho W_t y_t+u_t .
+\]
+Each column of $X_t$ multiplies an issuer's estimated factor exposure by
+the corresponding quarterly factor return. The factor comparison considers
+individual controls and joint specifications including the five
+Fama--French factors plus momentum. Quarter effects absorb the common
+level of returns. The matched sample requires observed outcomes and
+converged exposures across the declared specifications, so a change in
+fit cannot arise simply because a different set of issuers enters.
+The factor comparison uses the joint Fern\'andez distance for its
+characteristic graph. The encoder ranking instead compares each frozen
+representation with its same-input control. Paired blocks of quarterly
+likelihood contributions quantify variation conditional on the estimated
+loadings and point fits.

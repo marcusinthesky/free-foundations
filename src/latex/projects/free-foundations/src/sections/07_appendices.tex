@@ -60,6 +60,14 @@ elementary written arguments.
 \section{Data Construction and Estimation Details}
 \label{app:data}
 
+We weight selected classes by their prior calendar-month
+capitalization. CRSP CIZ monthly total returns already incorporate
+reported delisting returns. We compound the three observed months of
+a quarter once, keeping incomplete quarters unavailable. The source
+lacks separate terminal-event flags, so a missing row leaves the exit
+cause and proceeds unknown. The application describes observed
+quarters, with formation membership and exclusions accounted for
+across the full window.
 Formation membership is fixed at the December ranking cutoff. An
 issuer retains its formation identity when a selected security's
 subsequent source issuer changes. Missing returns and missing
@@ -108,16 +116,17 @@ maintained assumptions.
   \centering
   \begin{tabular}{lcc}
     \toprule
-    Joint kernel lag ML & $\widehat\rho$ & Refit percentiles \\
+    Intercept & $\widehat\rho$ & Refit percentiles \\
     \midrule
-    Without intercept & \ffnum{quarterly-fernandez-joint-rho} &
+    Excluded & \ffnum{quarterly-fernandez-joint-rho} &
     $[\ffnum{quarterly-fernandez-joint-rho-bootstrap-low},\
     \ffnum{quarterly-fernandez-joint-rho-bootstrap-high}]$
     \\
-    With intercept & Invalid or boundary & --- \\
+    Included & Invalid or boundary & --- \\
     \bottomrule
   \end{tabular}
-  \caption{US reimplementation for the December 2015 formation.
+  \caption{Joint characteristic kernel lag fit for the December 2015
+    US formation.
     Percentiles are the central 95\% of
     \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
     stationary-quarter refits. They describe refit variation

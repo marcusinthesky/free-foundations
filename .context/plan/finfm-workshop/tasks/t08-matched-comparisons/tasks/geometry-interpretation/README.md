@@ -23,9 +23,11 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| backlog | [Attribute peer selection to financial feature groups with shapiq](tasks/shapiq-peer-attribution/README.md) | Attribute peer selection to financial feature groups with shapiq |
 
-`0 open; 0 terminal`
+`1 open; 0 terminal`
 
 <!-- insitu:end -->
 

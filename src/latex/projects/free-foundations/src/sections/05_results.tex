@@ -1,5 +1,14 @@
 \section{Results}
 
+\paragraph{Does the encoder add to its inputs?}
+With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
+4.98 log-likelihood units per quarter over the joint characteristic graph,
+while selecting peers directly from the same financial inputs gains 5.91.
+The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
+with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
+against the joint graph has a Holm-adjusted $p$-value of 0.135
+(Table~\ref{tab:quarterly-comparisons}).
+
 \paragraph{The characteristic benchmark.}
 The joint characteristic kernel has
 \ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
@@ -24,23 +33,14 @@ They quantify a different source of variation from the standard error
 conditional on the generated beta. These diagnostics
 characterize the US reimplementation, where the original sample is unavailable.
 
-\paragraph{Does the encoder add to its inputs?}
-With symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains
-4.98 log-likelihood units per quarter over the joint characteristic graph,
-while selecting peers directly from the same financial inputs gains 5.91.
-The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
-with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
-against the joint graph has a Holm-adjusted $p$-value of 0.135
-(Table~\ref{tab:quarterly-comparisons}).
-
 \paragraph{A dated view of learned geometry.}
 To identify which financial histories organize the learned peers, we
 form principal coordinates from chord distances of the January
-2016 TabPFN states on the original characteristic rung. The state and
-date match the full analytical formation roster of
-\ffnum[0]{quarterly-primary-roster} issuers. This calculation uses
-the formation information available to the encoder. It does not apply
-the later return-estimation filter. For each ratio we use the latest
+2016 TabPFN states on the original characteristic rung. Because the
+embedding uses information available at formation, the analysis
+includes all \ffnum[0]{quarterly-primary-roster} issuers on the
+analytical roster, including firms with incomplete subsequent
+returns. For each ratio we use the latest
 available annual slot and restrict the comparison to its observed
 issuers. The leading coordinate has stronger absolute rank correlation with
 market capitalization over assets and market-to-book than with
@@ -57,8 +57,6 @@ betas, its first three coordinates explain about one quarter of one
 percent of beta rank variation. The same subspace explains about
 93\% of market-cap-to-assets rank variation among the 960 issuers
 with that ratio observed.
-The evidence leaves open stability across
-formations and incremental financial value relative to a
-direct-input geometry. A coordinate has an arbitrary orientation and
-does not identify a traded factor. The economic pricing restrictions
-and model-implied portfolio risk remain open.
+On this formation date the learned geometry is closely associated
+with a valuation measure supplied to the encoder, while its alignment
+with independently estimated market exposure is weak.

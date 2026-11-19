@@ -18,6 +18,7 @@ dependencies = [
   "pyyaml>=6.0.2,<7",  # DVC params.yaml is the study configuration
   # Spatial estimation, spatial inference, Mantel association and resampling.
   "statadic==0.5.0a2",
+  "jax[cuda13]>=0.11.2 ; platform_machine == 'x86_64' and sys_platform == 'linux'",
 ]
 
 [project.scripts]
