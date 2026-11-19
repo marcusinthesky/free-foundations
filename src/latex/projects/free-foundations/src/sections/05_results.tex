@@ -1,9 +1,15 @@
 \section{Results}
 
 \paragraph{The characteristic benchmark.}
+% REVIEW: Explain why the effective neighbour count matters. Weights
+% spread across nearly the whole fitted roster give each issuer a
+% similar peer average. Use that observation to
+% motivate fitting an intercept, and keep the common-mean explanation
+% conditional.
 The joint characteristic kernel has
 \ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
-neighbours per row on average, compared with 877 under uniform
+neighbours per row on average, compared with $n-1$ for a fitted roster of
+$n$ issuers under uniform
 off-diagonal weights. Its broad peer averages carry little
 cross-sectional variation relative to a more concentrated graph. On
 the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
@@ -27,6 +33,11 @@ with the spatial term absorbing much of the common mean in this US sample.
     With intercept & Unavailable & --- \\
     \bottomrule
   \end{tabular}
+  % REVIEW: Explain the 'Unavailable' table cell with the reported
+  % invalid-or-boundary diagnostic. Keep the refit percentiles and
+  % their conditional interpretation together, and tie incomplete
+  % return histories to the data discussion so the two meanings of
+  % coverage stay clear.
   \caption{US reimplementation for the December 2015 formation.
     Percentiles are the central 95\% of
     \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
@@ -39,6 +50,11 @@ with the spatial term absorbing much of the common mean in this US sample.
   \label{tab:us-benchmark}
 \end{table}
 
+% REVIEW: Give the two checks distinct subjects. The profile
+% calculation checks the point estimate on fixed data, while the
+% block refits measure variation when betas and medians are
+% re-estimated. Specify which check governs inclusion where the text
+% says 'this comparison'.
 The point fit and a separate profile-likelihood calculation agree on
 the saved original-sample betas, issuer medians and reconstructed
 graph. The percentile endpoints recompute betas and medians in common
@@ -49,6 +65,11 @@ comparison remains unresolved outside the table. These diagnostics
 characterize the US reimplementation, where the original sample is unavailable.
 
 \paragraph{A dated view of learned geometry.}
+% REVIEW: Bridge from the return fit to the question of which inputs
+% align with the principal coordinates. Join the two sample-selection
+% sentences with 'because' to explain why an analysis of formation
+% inputs can use issuers with incomplete subsequent returns. Name the
+% four input histories behind 'original characteristic rung'.
 We form principal coordinates from chord distances of the January
 2016 TabPFN states on the original characteristic rung. The state and
 date match the full analytical formation roster of
@@ -56,6 +77,11 @@ date match the full analytical formation roster of
 the formation information available to the encoder. It does not apply
 the later return-estimation filter. For each ratio we use the latest
 available annual slot and restrict the comparison to its observed
+% REVIEW: Specify that 'stronger' refers to absolute rank
+% correlation, since the coordinate's sign is arbitrary. Give one
+% verified valuation comparison and its observed issuer count so
+% readers can judge the magnitude and see which observations support
+% it.
 issuers. The leading coordinate has stronger rank correlation with
 market capitalization over assets and market-to-book than with
 dividend yield or debt maturity. The same ordering holds for explained
@@ -63,6 +89,10 @@ rank variation after regression on the leading three coordinates and
 an intercept. This subspace comparison is invariant to sign changes and
 orthogonal rotations.
 
+% REVIEW: Lead with what alignment to the valuation inputs reveals
+% about this encoding on this date. Keep input overlap beside that
+% interpretation and consolidate the repeated pricing and portfolio
+% qualifications in the scope appendix.
 The valuation ratios are part of the encoder inputs. Their alignment
 describes how the model organizes its own inputs on this date. It
 leaves open independent exposure recovery, stability across

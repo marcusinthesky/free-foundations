@@ -1,6 +1,10 @@
 \section{Methodology}
 
 \paragraph{Economic target and representation.}
+% REVIEW: Give the fibre condition an economic reading before the
+% proposition. Two histories with the same encoding must share the
+% same target value for exact recovery to be possible. The
+% exposure example can carry this intuition into the notation.
 Let $h$ be a dated financial history, $s(h)$ an economic target, and
 $z(h)$ the representation of that history produced by a frozen
 encoder in a specified context. Targets could be factor exposures or
@@ -28,6 +32,11 @@ $k$-neighbour set from an independently justified exposure-error
 bound and a sufficiently wide gap at the $k$th neighbour. Empirical
 gaps can describe sensitivity when the error bound is unavailable.
 
+% REVIEW: Distinguish the uses of distance at the point of
+% construction. The benchmark compares firms' annual characteristic
+% ranks, while the geometry exhibit compares their normalized encoder
+% states. Say where the binary neighbour graph enters the argument so
+% readers can identify the weights used in the reported fit.
 \paragraph{Distances and weights.}
 For the US benchmark, we compute Spearman chord distance for each
 characteristic over paired annual observations. Pairs with fewer than
@@ -70,6 +79,11 @@ mean and the mechanical own-observation correction.
   \]
 \end{proposition}
 
+% REVIEW: Interpret the inequalities before listing further
+% assumptions. The first bound loosens as degrees become more unequal
+% or the coefficient approaches the stability boundary. The second
+% limits the covariance change when peer weights change at fixed
+% roster, coefficient and innovation covariance.
 The two bounds concern the conditioning of a finite spatial model. To
 use them for risk one must also specify the innovation covariance,
 the exposure model, and the portfolio. Pricing implications
@@ -78,6 +92,11 @@ diversification, trading or spanning conditions, and a
 no-asymptotic-arbitrage assumption \citep{kou2018}.
 
 \paragraph{Estimation and uncertainty.}
+% REVIEW: Use the move into Empirical Design to explain which
+% uncertainty captured by recomputing betas and median returns on
+% common quarter blocks. Move
+% hypothetical calibration and portfolio inputs to the scope
+% discussion if they obscure this handoff.
 For the characteristic benchmark the estimated quantities include the
 market betas, the cross-sectional premium, the intercept when
 included, the spatial coefficient, and the error variance. The

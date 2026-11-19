@@ -16,6 +16,10 @@ spatial association and residual covariance from tests of pricing
 restrictions. Similarity of factor exposures and residual dependence
 are also distinct targets.
 
+% REVIEW: Use the preceding distinction between exposures and
+% residual dependence to introduce the exposures learned by Gu et al.
+% as an example of an economic target. Then explain what changes
+% when the features come from an encoder trained across datasets.
 Financial representation learning offers another way to relate
 characteristics to returns. For example, \citet{gu2021} use an
 autoencoder asset-pricing model to learn characteristic-dependent
@@ -28,6 +32,10 @@ economic proximity. Freezing encoder weights removes their estimation
 on the financial sample, while context, preprocessing, readouts and
 financial parameters can still require choices or estimation.
 
+% REVIEW: Name the distinction in the opening sentence. Explain which
+% transformations the cited identification result admits and why that
+% freedom matters to a researcher who selects peers by distance. This
+% gives the citation a specific role in motivating the proposition.
 Representation identification sharpens the distinction.
 \citet{roeder2021} establish identification up to a linear
 transformation for a family of discriminative models under their
