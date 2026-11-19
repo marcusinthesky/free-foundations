@@ -7,6 +7,7 @@ import pytest
 
 from free_foundations.methods.matched_panel import Period, fit
 from free_foundations.study.experiments.matched_encoders import select_winner
+from free_foundations.study.experiments.matched_panel import compare
 
 
 @pytest.mark.unit
@@ -72,3 +73,21 @@ def test_tie_tolerance_is_in_nats_per_observation() -> None:
 
     # Act and assert
     assert select_winner(order, estimates) == (first, pytest.approx(1.0))
+
+
+@pytest.mark.unit
+def test_paired_interval_weights_each_resampled_issuer_quarter() -> None:
+    # Arrange
+    periods = [Period.of(np.arange(n, dtype=float), np.zeros((n, 0))) for n in (3, 5)]
+    baseline = fit(periods, "none")
+    candidate = replace(baseline, contributions=baseline.contributions + np.array([3.0, 15.0]))
+    orders = np.array([[0, 0], [1, 1], [1, 0]])
+
+    # Act
+    result = compare(candidate, baseline, orders)
+
+    # Assert
+    assert result["gain_per_observation"] == pytest.approx(18 / 8)
+    expected = np.percentile([1, 3, 18 / 8], [2.5, 97.5])
+    assert result["low_per_observation"] == pytest.approx(expected[0])
+    assert result["high_per_observation"] == pytest.approx(expected[1])

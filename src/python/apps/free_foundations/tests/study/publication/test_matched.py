@@ -1,11 +1,13 @@
 """Only indexed, unchanged evidence reaches the matched workshop output."""
 
+import hashlib
+import json
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from free_foundations.study.experiments.matched_evidence import collect
+from free_foundations.study.experiments.matched_evidence import collect, required_artifacts
 from free_foundations.study.publication.matched import render
 
 
@@ -26,10 +28,19 @@ def test_render_reads_saved_results_and_refuses_changed_evidence(tmp_path: Path)
     ):
         directory = results / stage
         directory.mkdir(parents=True)
-        (directory / "manifest.json").write_text("{}")
+        manifest: dict[str, object] = {"status": "unavailable"}
+        hashes = {}
+        for name in required_artifacts(stage, manifest):
+            path = directory / name
+            if path.suffix == ".json":
+                path.write_text("{}")
+            else:
+                pd.DataFrame({"factor": ["market"], "loglik": [-3.25]}).to_parquet(
+                    path, index=False
+                )
+            hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        (directory / "manifest.json").write_text(json.dumps(manifest | {"artifacts": hashes}))
     fits = results / "factors" / "fits.parquet"
-    pd.DataFrame({"factor": ["market"], "loglik": [-3.25]}).to_parquet(fits, index=False)
-
     # Act
     collect(results, evidence)
     render(results, evidence, output)
@@ -41,3 +52,8 @@ def test_render_reads_saved_results_and_refuses_changed_evidence(tmp_path: Path)
     fits.write_bytes(b"changed")
     with pytest.raises(ValueError, match="evidence changed"):
         render(results, evidence, output)
+    with pytest.raises(ValueError, match="disagree"):
+        collect(results, evidence)
+    (results / "factors" / "unexpected.csv").write_text("stale")
+    with pytest.raises(ValueError, match="inventory"):
+        collect(results, evidence)

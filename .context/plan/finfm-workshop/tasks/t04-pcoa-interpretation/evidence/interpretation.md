@@ -11,11 +11,10 @@ The pilot calls `study.experiments.inputs.load`, which verifies the prepared inv
 
 Run from the repository root with the pinned environment and existing local data, without network or new encoding:
 
+The original pilot is preserved at revision `0acc62f`. Reproduce the exhibit and beta overlay with the maintained stage.
+
 ```sh
-OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 \
-  devenv shell -- just python::pilot \
-  finfm/pcoa.py \
-  > /tmp/ff-pcoa-pilot.json
+devenv shell -- just dvc repro research_matched_historical_geometry
 ```
 
 The recheck after the study layout move reproduced the reported identities and

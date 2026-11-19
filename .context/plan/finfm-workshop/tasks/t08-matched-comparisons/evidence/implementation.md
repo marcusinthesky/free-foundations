@@ -44,3 +44,19 @@ skipped. LaTeX, context, Semflow and DVC graph checks passed. The existing
 co-movement computation still occupied the empirical queue at handoff. The
 T08 reproduction, publication evidence and Lean portion of the repository
 gate remain pending.
+
+## Corrected comparison implementation
+
+The paired interval now uses the ratio of summed likelihood differences to
+summed issuer-quarter counts within each sampled draw. It conditions on
+the point fits and loadings. Reduced graphs use coordinates computed on
+each full formation roster before the quarterly outcome mask. Wide financial
+inputs use independently encoded column blocks with concatenated embeddings.
+Ablations retain surviving features in their baseline blocks.
+
+The maintained historical geometry command reproduced the 967-issuer roster
+digest, PC1 share 0.44882441, and leading-three beta-rank R² 0.00248033 on
+878 matched exposures. The selected-model result still requires the complete
+financial ranking. The production invocation stopped at DVC's Semflow dependency
+lock held by the concurrent co-movement reproduction, before generating new
+matched comparison results.

@@ -6,12 +6,13 @@ from pathlib import Path  # noqa: TC003 -- Typer resolves annotations at runtime
 
 import typer
 
-from free_foundations.study.matched_paths import MATCHED_CELLS, MATCHED_CONTEXTS
 from free_foundations.study.panel import prepare as panel_prepare
 from free_foundations.study.panel.store import inputs
 from free_foundations.study.paths import (
     CACHE,
     CONTEXTS,
+    MATCHED_CELLS,
+    MATCHED_CONTEXTS,
     PANEL,
     PARTS,
     SOURCES,
@@ -115,7 +116,9 @@ def prepare_matched_contexts(
     params: Path = PARAMS,
 ) -> None:
     """Materialize the matched financial inputs and single-history contexts."""
-    from free_foundations.study.representations.matched import prepare_contexts  # noqa: PLC0415
+    from free_foundations.study.representations.matched_contexts import (  # noqa: PLC0415 -- lazy CLI stage.
+        prepare_contexts,
+    )
 
     prepare_contexts(panel, sources, legacy_contexts, output, params)
 

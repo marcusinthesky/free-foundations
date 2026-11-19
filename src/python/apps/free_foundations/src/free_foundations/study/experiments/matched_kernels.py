@@ -21,7 +21,7 @@ from free_foundations.methods.networks import (
     representation_distance,
 )
 from free_foundations.study.experiments.inputs import load
-from free_foundations.study.experiments.matched_factors import (
+from free_foundations.study.experiments.matched_panel import (
     cell_manifest_hash,
     compare,
     contribution_rows,
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
     from free_foundations.methods.matched_panel import Fit
     from free_foundations.study.experiments.inputs import StudyInputs
-    from free_foundations.study.experiments.matched_factors import Sample, SampleQuarter
+    from free_foundations.study.experiments.matched_panel import Sample, SampleQuarter
 
 KERNELS = ("exp", "gaussian", "knn10")
 GEOMETRIES = (*CHARACTERISTICS, "joint")
@@ -166,9 +166,9 @@ def run(panel: Path, sample: Path, cells: Path, output: Path, params: Path) -> N
             if left is not None and right is not None
             else {
                 "total_difference": None,
-                "mean_difference": None,
-                "low": None,
-                "high": None,
+                "gain_per_observation": None,
+                "low_per_observation": None,
+                "high_per_observation": None,
                 "draws": 0,
                 "attempted_draws": len(orders),
             }

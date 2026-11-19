@@ -6,8 +6,9 @@ from pathlib import Path
 
 import typer
 
-from free_foundations.study.matched_paths import MATCHED_PUBLICATION, MATCHED_RESULTS
 from free_foundations.study.paths import (
+    MATCHED_PUBLICATION,
+    MATCHED_RESULTS,
     PANEL,
     PUBLICATION,
     RESULTS,

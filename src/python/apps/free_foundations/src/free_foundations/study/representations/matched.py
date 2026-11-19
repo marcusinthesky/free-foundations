@@ -21,9 +21,6 @@ from free_foundations.study.representations.encoding import (
     feature_blocks,
 )
 from free_foundations.study.representations.matched_contexts import RUNGS, select_columns
-from free_foundations.study.representations.matched_contexts import (
-    prepare_contexts as prepare_contexts,  # noqa: PLC0414 -- public stage entry point.
-)
 from free_foundations.study.spec import CHARACTERISTICS, StudySpec, digest_json, file_hash
 
 if TYPE_CHECKING:
@@ -152,7 +149,7 @@ def _qualification_inputs(data: Prepared, quarter: str) -> dict[str, Any]:
     }
 
 
-def encode_cell(  # noqa: C901, PLR0913, PLR0915 -- independent DVC cell and provenance.
+def encode_cell(  # noqa: C901, PLR0912, PLR0913, PLR0915 -- independent DVC cell and provenance.
     contexts: Path,
     weights: Path,
     cache: Path,
@@ -202,7 +199,16 @@ def encode_cell(  # noqa: C901, PLR0913, PLR0915 -- independent DVC cell and pro
                     | {"status": "unavailable", "reason": "no finite support or query features"}
                 )
                 continue
-            blocks = feature_blocks(data, spec.block_columns)
+            blocks = feature_blocks(prepared, spec.block_columns)
+            if omit is not None:
+                retained = set(data.features)
+                blocks = [
+                    block
+                    if retained.issuperset(block.features)
+                    else select_columns(block, omit, omit=True)
+                    for block in blocks
+                    if retained.intersection(block.features)
+                ]
             direct = conventional_states(data)["direct"] if checkpoint is None else None
             native = _native_contracts(blocks, model, checkpoint) if checkpoint is not None else []
             archived_row = archived.get(quarter)
@@ -249,6 +255,11 @@ def encode_cell(  # noqa: C901, PLR0913, PLR0915 -- independent DVC cell and pro
                     "sha256": file_hash(destination),
                     "native_cache_contracts": native,
                     "blocks": [list(block.features) for block in blocks],
+                    "removed_columns": [
+                        name for name in prepared.features if name not in data.features
+                    ]
+                    if omit is not None
+                    else [],
                 }
             )
     expected_dates = {

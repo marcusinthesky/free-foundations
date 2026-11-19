@@ -6,17 +6,15 @@ from pathlib import Path
 
 import typer
 
-from free_foundations.study.matched_paths import (
-    MATCHED_CACHE,
+from free_foundations.study.paths import (
+    CACHE,
     MATCHED_CELLS,
     MATCHED_CONTEXTS,
     MATCHED_RESULTS,
-    MATCHED_WEIGHTS,
-)
-from free_foundations.study.paths import (
     PANEL,
     RESULTS,
     STATES,
+    WEIGHTS,
 )
 from free_foundations.study.spec import PARAMS
 
@@ -162,12 +160,13 @@ def matched_historical_geometry(
     panel: Path = PANEL,
     representations: Path = STATES,
     output: Path = MATCHED_RESULTS / "historical-geometry",
+    exposures: Path = RESULTS / "replication/summary/roster.parquet",
     params: Path = PARAMS,
 ) -> None:
     """Save the workshop's dated ratio geometry from its audited frozen state."""
     from free_foundations.study.experiments.matched_geometry import historical  # noqa: PLC0415
 
-    historical(panel, representations, output, params)
+    historical(panel, representations, output, params, exposures)
 
 
 @app.command("matched-ablation")
@@ -178,8 +177,8 @@ def matched_ablation(  # noqa: PLR0913, PLR0917 -- explicit DVC artifact paths.
     geometry: Path = MATCHED_RESULTS / "geometry",
     contexts: Path = MATCHED_CONTEXTS,
     cells: Path = MATCHED_CELLS,
-    weights: Path = MATCHED_WEIGHTS,
-    cache: Path = MATCHED_CACHE,
+    weights: Path = WEIGHTS,
+    cache: Path = CACHE,
     output: Path = MATCHED_RESULTS / "ablation",
     params: Path = PARAMS,
     device: str = "cuda",

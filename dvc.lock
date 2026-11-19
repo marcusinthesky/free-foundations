@@ -32,9 +32,9 @@ stages:
       size: 762
     - path: src/python/apps/free_foundations/src
       hash: md5
-      md5: 29994e371726b631bafb65db942048a1.dir
-      size: 426936
-      nfiles: 79
+      md5: 9f76c29eebb973ae1b7661151d05e2d4.dir
+      size: 535185
+      nfiles: 92
     - path: src/python/pyproject.toml
       hash: md5
       md5: f942fd1c5ea542a94dbd4451d635d0d1
@@ -42,9 +42,9 @@ stages:
     outs:
     - path: .semflow/hashes
       hash: md5
-      md5: f5d667bc1103f8a46701b1d102e3798c.dir
-      size: 497096
-      nfiles: 12
+      md5: 2363db05072cfd0b6f4fe60ba2314aab.dir
+      size: 1051206
+      nfiles: 23
   raw_sources:
     cmd: 'false'
     outs:
@@ -164,7 +164,7 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/research/estimate-comovement.json
       hash: md5
-      md5: 3d6682ef859f950915e308d4b2af92ad
+      md5: 31e678a59cf31f9356c37dcd7d11647a
       size: 55963
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -182,8 +182,8 @@ stages:
       size: 2206
     - path: infra/nix/devenv.nix
       hash: md5
-      md5: f6c9a493d8a82e34f0bdcd79c0b304a0
-      size: 3435
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
     - path: 
         src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
       hash: md5
@@ -204,7 +204,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/comovement/summary
       hash: md5
-      md5: a7c61cbd71a96ffce97b17659bcda72e.dir
+      md5: 9a6d897b761a5dd4c11e4d2b484aa5a8.dir
       size: 110145
       nfiles: 6
   research_measure_alignment:

@@ -18,7 +18,7 @@ from free_foundations.methods.matched_panel import Period, fit
 from free_foundations.methods.networks import CHARACTERISTICS, representation_distance
 from free_foundations.methods.pcoa import coordinate_distances, principal_coordinates
 from free_foundations.study.experiments.inputs import load
-from free_foundations.study.experiments.matched_factors import (
+from free_foundations.study.experiments.matched_panel import (
     compare,
     contribution_rows,
     fit_row,
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from free_foundations.methods.matched_panel import Fit
     from free_foundations.methods.pcoa import Coordinates
     from free_foundations.study.experiments.inputs import StudyInputs
-    from free_foundations.study.experiments.matched_factors import Sample
+    from free_foundations.study.experiments.matched_panel import Sample
 
 LEADING_AXES = 3
 KERNEL = "knn10"
@@ -132,6 +132,12 @@ def _write_geometry(
         _descriptors(inputs, rows, quarter, issuers) if historical or coordinates.trigger else {}
     )
     tables = _tables(coordinates, issuers, descriptors)
+    if historical:
+        delta = (coordinate_distances(coordinates.coordinates) - distance)[
+            np.triu_indices(len(distance), 1)
+        ]
+        identity["distance_reconstruction_rmse"] = float(np.sqrt(np.mean(delta**2)))
+        identity["distance_reconstruction_max_abs"] = float(np.max(np.abs(delta)))
     artifacts = {}
     prefix = "historical_ratio" if historical else "selected"
     for table, frame in tables.items():
@@ -189,12 +195,15 @@ def run(panel: Path, selection: Path, cells: Path, output: Path, params: Path) -
             "panel_manifest_sha256": file_hash(panel / "manifest.json"),
             "positive_inertia_gate": {"statistic": "PC1 share", "operator": ">", "threshold": 0.25},
             "selected": geometry,
+            "artifacts": geometry.pop("artifacts", {}),
             "interpretation": "Dated descriptive associations, with no causal or pricing claims",
         },
     )
 
 
-def historical(panel: Path, representations: Path, output: Path, params: Path) -> None:
+def historical(
+    panel: Path, representations: Path, output: Path, params: Path, exposures: Path
+) -> None:
     """Verify the archived January 2016 TabPFN geometry used in the workshop exhibit."""
     inputs = load(panel, representations, params)
     if inputs.store is None:
@@ -206,6 +215,22 @@ def historical(panel: Path, representations: Path, output: Path, params: Path) -
     output.mkdir(parents=True, exist_ok=True)
     (output / "manifest.json").unlink(missing_ok=True)
     exhibit = _write_geometry(inputs, quarter, output, values, historical=True)
+    if values is not None:
+        dated = (
+            pd.read_parquet(exposures)
+            .query("formation == 2015 and status == 'available'")
+            .set_index("issuer_id", verify_integrity=True)
+            .sort_index()
+        )
+        axes = (
+            pd.read_parquet(output / "historical_ratio_coordinates.parquet")
+            .set_index("issuer_id")
+            .loc[dated.index]
+        )
+        exhibit["beta_overlay"] = _association(
+            "mm_beta", dated["mm_beta"].to_numpy(), axes.to_numpy()
+        )
+        exhibit["exposures_sha256"] = file_hash(exposures)
     metadata = {
         "panel_manifest_sha256": file_hash(panel / "manifest.json"),
         "representation_manifest_sha256": file_hash(representations / "manifest.json"),
@@ -216,7 +241,7 @@ def historical(panel: Path, representations: Path, output: Path, params: Path) -
     if values is not None:
         state, digest = inputs.store.state_file(quarter, "fernandez")
         metadata |= {"state_path": state, "state_sha256": digest}
-    write_json(output / "manifest.json", exhibit | metadata)
+    write_json(output / "manifest.json", {"artifacts": {}} | exhibit | metadata)
 
 
 @dataclass
@@ -228,12 +253,13 @@ class ComparisonFit:
     overlap: list[dict[str, object]]
 
 
-def _conditional_fits(
+def _conditional_fits(  # noqa: C901 -- independent graph comparisons.
     study: Sample, baseline: Path, cell: Path, views: dict[str, int]
 ) -> dict[str, ComparisonFit]:
     periods: dict[str, list[Period]] = {label: [] for label in views}
     overlap: dict[str, list[dict[str, object]]] = {label: [] for label in views}
     failures: dict[str, str] = {}
+    formation_axes: dict[pd.Timestamp, pd.DataFrame] = {}
     for rows in study.quarters:
         original = load_cell(baseline, rows.formation, rows.issuers)
         candidate = original if cell == baseline else load_cell(cell, rows.formation, rows.issuers)
@@ -242,7 +268,21 @@ def _conditional_fits(
             return {label: ComparisonFit(None, reason, overlap[label]) for label in views}
         original_distance = representation_distance(original)
         distance = original_distance if cell == baseline else representation_distance(candidate)
-        axes = principal_coordinates(distance).coordinates if any(views.values()) else None
+        axes = None
+        if any(views.values()):
+            if rows.formation not in formation_axes:
+                records = json.loads((cell / "manifest.json").read_text())["states"]
+                record = next(r for r in records if r["quarter"] == str(rows.formation.date()))
+                roster = tuple(record["issuer_ids"])
+                full = load_cell(cell, rows.formation, roster)
+                if full is None:
+                    message = "Missing full formation geometry"
+                    raise ValueError(message)
+                coordinates = principal_coordinates(representation_distance(full)).coordinates
+                formation_axes[rows.formation] = pd.DataFrame(
+                    coordinates[:, :LEADING_AXES], index=roster
+                )
+            axes = formation_axes[rows.formation].loc[list(rows.issuers)].to_numpy()
         original_graph = kernel_weights(original_distance, KERNEL)[0]
         for label, count in views.items():
             if label in failures:
@@ -358,7 +398,7 @@ def ablate(  # noqa: PLR0913, PLR0917 -- explicit DVC inputs, outputs and execut
     }
     if decision["status"] != "complete" or not decision["selected"]["trigger"]:
         status = "not_triggered" if decision["status"] == "complete" else "unavailable"
-        write_json(output / "manifest.json", identity | {"status": status})
+        write_json(output / "manifest.json", identity | {"status": status, "artifacts": {}})
         return
     selected = json.loads(selection.read_text())
     if selected["sample_sha256"] != file_hash(sample / "manifest.json"):

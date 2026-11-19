@@ -533,6 +533,7 @@ stages:
     - study.rungs
     - study.models
     deps:
+    - data/research/crsp-sec/experiments/replication/summary/roster.parquet
     - .semflow/hashes/entrypoints/free-foundations/research/matched-historical-geometry.json
     - data/processed/crsp-sec/panel
     - data/processed/crsp-sec/representations

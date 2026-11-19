@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli.research:alignment",
-  "digest": "sha256:57bec99f1613192a1e682dc8148c2693950b6d1cbfd7f51b9832d53829d466f9",
+  "digest": "sha256:ca1cba54fa2d4e0be98d9bd557c7f9adc53262eb51adcf8416901167b726201c",
   "entrypoint": "free-foundations research measure-alignment",
   "fallbacks": [
   ],
@@ -23,11 +23,11 @@
     {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:json=json>"},
     {"digest":"sha256:db14cae1a81ee06a1930fa9f46771b454957916d2bbbc048661adf0613fd70de","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:uuid=uuid>"},
     {"digest":"sha256:9b30414938f2ecef2b4868b13a6e3510db115d17e59fa7ee2695c62f96780765","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:write_json"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PANEL=free_foundations.study.paths:PANEL>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PANEL=free_foundations.study.paths:PANEL>"},
     {"digest":"sha256:864c8c75b9c136e24090032fd1a6c8af11b19657dd26d7d2973d8a34d1069955","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PARAMS=free_foundations.study.spec:PARAMS>"},
     {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:Path=pathlib:Path>"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:RESULTS=free_foundations.study.paths:RESULTS>"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:STATES=free_foundations.study.paths:STATES>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:RESULTS=free_foundations.study.paths:RESULTS>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:STATES=free_foundations.study.paths:STATES>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:typer=typer>"},
     {"digest":"sha256:cbd5c7934e271586c44ce969661aaf2dddb1a5d41104cda7b98113bd91e01cef","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:alignment"},

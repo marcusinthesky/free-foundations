@@ -21,7 +21,9 @@ def test_principal_coordinates_reconstruct_euclidean_distances() -> None:
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(("first_share", "expected"), [(0.25, False), (0.25001, True)])
+@pytest.mark.parametrize(
+    ("first_share", "expected"), [(0.24999, False), (0.25, False), (0.25001, True)]
+)
 def test_interpretation_trigger_is_strict(first_share: float, *, expected: bool) -> None:
     # Arrange
     fit = Coordinates(np.empty(0), np.empty((0, 0)), np.array([first_share]), 0.0)

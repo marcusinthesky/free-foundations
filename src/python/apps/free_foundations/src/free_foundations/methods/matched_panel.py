@@ -116,6 +116,7 @@ class Fit:
     variance: float
     loglik: float
     contributions: FloatArray
+    period_sizes: np.ndarray
     observations: int
     parameters: int
     lower: float
@@ -235,6 +236,7 @@ def fit(periods: Sequence[Period], process: Process = "lag") -> Fit:
         variance,
         float(contributions.sum()),
         contributions,
+        sizes,
         observations,
         columns + len(periods) + 1 + (process != "none"),
         low,

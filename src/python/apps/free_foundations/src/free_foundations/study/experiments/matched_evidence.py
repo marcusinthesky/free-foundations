@@ -12,6 +12,34 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
+FIT_TABLES = {"fits.parquet", "comparisons.parquet", "contributions.parquet"}
+
+
+def required_artifacts(stage: str, manifest: dict[str, object]) -> set[str]:
+    """Tables owned by each stage for its recorded outcome."""
+    if stage == "sample":
+        return {"sample.parquet", "ledger.parquet", "exposures.parquet"}
+    if stage == "factors":
+        return FIT_TABLES
+    if stage == "kernels":
+        return FIT_TABLES | {"graphs.parquet"}
+    if stage == "encoders":
+        return FIT_TABLES | {"selection.json"}
+    if stage == "ablation":
+        return (
+            FIT_TABLES | {"peer_overlap.parquet"}
+            if manifest["status"] in {"complete", "partial"}
+            else set()
+        )
+    prefix = "selected" if stage == "geometry" else "historical_ratio"
+    tables = ("coordinates", "spectrum", "associations")
+    return (
+        {f"{prefix}_{table}.parquet" for table in tables}
+        if manifest["status"] == "complete"
+        else set()
+    )
+
+
 def collect(results: Path, output: Path) -> None:
     """Record the result manifests and tabular evidence used for publication."""
     artifacts = {}
@@ -32,6 +60,11 @@ def collect(results: Path, output: Path) -> None:
         ]
         producer = json.loads((directory / "manifest.json").read_text())
         hashes = {path.name: file_hash(path) for path in paths}
+        if set(hashes) != {"manifest.json", *required_artifacts(stage, producer)} or set(
+            hashes
+        ) != {"manifest.json", *producer["artifacts"]}:
+            message = f"Unexpected matched-comparison artifact inventory for {stage}."
+            raise ValueError(message)
         if any(
             hashes.get(name) != digest for name, digest in producer.get("artifacts", {}).items()
         ):

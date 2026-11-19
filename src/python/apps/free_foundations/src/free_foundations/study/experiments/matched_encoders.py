@@ -9,7 +9,7 @@ import numpy as np
 from free_foundations.artifacts.metadata import write_json
 from free_foundations.methods.matched_panel import Period
 from free_foundations.methods.networks import knn_weights, representation_distance
-from free_foundations.study.experiments.matched_factors import (
+from free_foundations.study.experiments.matched_panel import (
     NEIGHBOURS,
     RUNG_ORDER,
     cell_manifest_hash,
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from free_foundations.methods.matched_panel import Fit, Process
-    from free_foundations.study.experiments.matched_factors import Sample
+    from free_foundations.study.experiments.matched_panel import Sample
 
 TIE_TOLERANCE = 1e-8
 PROCESSES: tuple[Process, ...] = ("lag", "error")
@@ -118,10 +118,6 @@ def run(sample: Path, cells: Path, output: Path, params: Path) -> None:
                     comparison = comparison_row(
                         name, f"{rung}:direct", process, (estimate, direct), orders
                     )
-                    if estimate is not None and direct is not None:
-                        comparison["gain_per_observation"] = (
-                            estimate.loglik - direct.loglik
-                        ) / estimate.observations
                     comparisons.append({**comparison, "contrast": "versus_direct_control"})
     winner = select_winner(ranking, estimates["lag"])
     selection: dict[str, object] = {
@@ -151,6 +147,7 @@ def run(sample: Path, cells: Path, output: Path, params: Path) -> None:
                 "cell_sha256": cell_hashes[f"{rung}:{model}"],
             }
         )
+    write_json(output / "selection.json", selection)
     write_results(
         output,
         fits,
@@ -167,5 +164,5 @@ def run(sample: Path, cells: Path, output: Path, params: Path) -> None:
             "draws": len(orders),
             "seed": common.spec.seed,
         },
+        extra_artifacts={"selection.json": file_hash(output / "selection.json")},
     )
-    write_json(output / "selection.json", selection)

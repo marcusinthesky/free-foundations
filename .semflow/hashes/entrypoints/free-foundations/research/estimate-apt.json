@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli.research:apt",
-  "digest": "sha256:482e85ee546ddcc5dd751ff478a68ef679ebdd35f2ecdb2d5fbf0eab60385daf",
+  "digest": "sha256:268fb2b4f09240c63cbbd7e60f241a27b9334d0e5c4b86779e6f770add9a2b10",
   "entrypoint": "free-foundations research estimate-apt",
   "fallbacks": [
     {"module":"free_foundations.encoders.contracts","path":"src/python/apps/free_foundations/src/free_foundations/encoders/contracts.py","reason":"imported reference FloatArray could not resolve 'FloatArray'"}
@@ -24,11 +24,11 @@
     {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:json=json>"},
     {"digest":"sha256:db14cae1a81ee06a1930fa9f46771b454957916d2bbbc048661adf0613fd70de","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:uuid=uuid>"},
     {"digest":"sha256:9b30414938f2ecef2b4868b13a6e3510db115d17e59fa7ee2695c62f96780765","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:write_json"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PANEL=free_foundations.study.paths:PANEL>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PANEL=free_foundations.study.paths:PANEL>"},
     {"digest":"sha256:864c8c75b9c136e24090032fd1a6c8af11b19657dd26d7d2973d8a34d1069955","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:PARAMS=free_foundations.study.spec:PARAMS>"},
     {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:Path=pathlib:Path>"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:RESULTS=free_foundations.study.paths:RESULTS>"},
-    {"digest":"sha256:f77b1f1f1510b0220d4867deb0bfdef18d7ad4a4f14f9e4fffa7b5d2b0f10348","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:STATES=free_foundations.study.paths:STATES>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:RESULTS=free_foundations.study.paths:RESULTS>"},
+    {"digest":"sha256:c228cd763a68e5b12dd7f0edeb4bd9545cc501c324e0f806d0f9d59c8b57dba3","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:STATES=free_foundations.study.paths:STATES>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:typer=typer>"},
     {"digest":"sha256:d2f4495d198efe58a035cee3fbaa49efd4a4d3cd9662681295decfb56f5dde1b","kind":"global","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:app"},

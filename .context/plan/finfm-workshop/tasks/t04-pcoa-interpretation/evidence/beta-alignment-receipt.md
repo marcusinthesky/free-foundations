@@ -9,8 +9,10 @@ The panel manifest SHA-256 is `a56bd4ea963bcfd6556b75da3f769fffd875c1ce7593e776e
 
 At revision `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`, run with the Agent 1 handoff present.
 
+The original pilot is preserved at revision `0acc62f`. Reproduce the exhibit and beta overlay with the maintained stage.
+
 ```sh
-flock /tmp/finfm-swarm-compute.lock env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/pcoa.py --beta-overlay' > /tmp/finfm-swarm/t04/beta-alignment.json 2> /tmp/finfm-swarm/t04/beta-alignment.log
+devenv shell -- just dvc repro research_matched_historical_geometry
 ```
 
 The live command computes the beta overlay alongside the candidate coordinates. The original standalone command and its output schema are preserved at revision `d2e6a21898d8a729f68dd177c6cc4b9f962ccaa4` in `src/python/pilots/finfm/beta_alignment.py`. The digest below belongs to that historical run.
