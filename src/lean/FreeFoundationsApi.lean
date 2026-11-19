@@ -3423,3 +3423,15 @@ section NeighbourContract8
     (∀ (j : Fin 3), |![(0 : ℝ), 2, 2] j - ![(0 : ℝ), 1, 3] j| ≤ 1) ∧
       ¬FreeFoundations.Neighbours.IsNeighbourSet ![(0 : ℝ), 2, 2] 0 {1}
 end NeighbourContract8
+
+open FreeFoundations.Neighbours in
+#assert_signature FreeFoundations.Neighbours.chord_neighbour_flip [] :
+    quadrantChord 1 1 4 < quadrantChord 1 1 0 ∧
+    quadrantChord 4 1 0 < quadrantChord 4 1 4
+
+open FreeFoundations.Neighbours in
+#assert_signature FreeFoundations.Neighbours.symmetrized_chord_edge_flip [] :
+    let heights : Fin 4 → ℝ := ![1, 0, 4, 5]
+    let selected := fun (x : ℝ) (peers : Fin 4 → Fin 4) =>
+      ∀ i, IsNeighbourSet (fun j => quadrantChord x (heights i) (heights j)) i {peers i}
+    selected 1 ![2, 0, 3, 2] ∧ selected 4 ![1, 0, 3, 2]

@@ -1,18 +1,14 @@
-In a spatial model of equity returns, a firm's peer return is a weighted
-average whose composition depends on how one measures financial proximity.
-Using US issuer portfolios, we compare peers selected by a pretrained tabular
-model with peers selected directly from the same financial records. After
-adjustment for the five Fama--French factors and momentum, a peer network
-constructed by TabPFN from four financial ratios improves in-sample fit
-over one based on Fern\'andez's characteristic-history distance. Under
-market controls, the estimated TabPFN gain over direct use of the four
-ratios is close to zero, whereas on a broader set of financial
-disclosures its gain
-over the corresponding direct benchmark is the largest among twelve model
-and input combinations. Within this representation, the leading
-principal coordinate
-orders firms by valuation but recovers few of the neighbours used in the
-return model. We show how an invertible change of coordinates can preserve a
-firm's exposure while reversing its nearest neighbour, and we bound the
-sensitivity of the spatial multiplier and implied covariance for
-row-normalized symmetric affinities.
+When can a pretrained tabular model measure firms' exposure to common shocks?
+We show that every representation supporting a prediction task preserves
+a specified economic exposure exactly when its ideal predictions distinguish
+histories with different exposures. An invertible recoding can nevertheless
+change the peer graph constructed from normalized vectors.
+In January 2016 the first three coordinates of a ratio-based TabPFN
+representation explain about 93\% of valuation-rank variation and 0.25\%
+of estimated market-beta-rank variation on their respective samples.
+Across US issuer-quarters, its peers improve in-sample return fit over
+Fern\'andez's characteristic-history peers after adjustment for five
+Fama--French factors and momentum. Under market controls its gain over
+direct use of the four ratios is close to zero. With broader disclosures
+TabPFN has the largest estimated gain over its corresponding direct
+benchmark among twelve model and input combinations.

@@ -16,7 +16,14 @@ asset-pricing model to learn how exposures vary with characteristics and to
 estimate latent factors from returns. Tabular pretraining provides a
 different starting point. Drawing on a model trained across datasets,
 \citet{hollmann2025} demonstrate prediction and reusable embeddings with
-TabPFN. We use a frozen encoder to obtain a vector for each issuer and
+TabPFN. In a prior-data fitted network, pretraining samples tasks and
+teaches the predictor to infer labels given examples from a new table
+\citep{muller2022,nagler2023}. For finite labels and contexts, excess
+log loss equals average divergence from the task's conditional label law.
+\lean{FreeFoundations.Score.pretraining_excess}
+Our issuer examples carry previously observed next-quarter valuation
+labels. Common-shock exposure supplies a separate economic target.
+We use a frozen encoder to obtain a vector for each issuer and
 evaluate the financial meaning of the distances between those vectors
 through the returns of the firms they bring together.
 
@@ -24,5 +31,6 @@ through the returns of the firms they bring together.
 for a family of discriminative models under their assumptions. A linear
 transformation can stretch one direction more than another, changing the
 ordering of distances even when the transformation is invertible. This
-observation motivates our first proposition, which separates the information
+observation motivates our geometric identification result, which
+separates the information
 a readout can recover from the choice of neighbours in a spatial model.

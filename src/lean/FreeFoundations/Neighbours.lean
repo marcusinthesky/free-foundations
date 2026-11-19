@@ -153,4 +153,34 @@ theorem stretch_predictions {Y : Type*} (e : Plane ≃ₗ[ℝ] Plane) (h : Plane
     (h ∘ e.symm) (e z) = h z := by
   simp
 
+/-- Unit-sphere chord distance for the first-quadrant vectors (x,y) and (x,z).
+Their cosine is nonnegative, so its square root can be taken from the squared cosine. -/
+noncomputable def quadrantChord (x y z : ℝ) : ℝ :=
+  Real.sqrt (2 - 2 * Real.sqrt ((x ^ 2 + y*z)^2 / ((x^2+y^2)*(x^2+z^2))))
+
+private theorem chord_lt {a b : ℝ} (hab : b < a) (hb : 0 ≤ b) (ha : a ≤ 1) :
+    Real.sqrt (2 - 2 * Real.sqrt a) < Real.sqrt (2 - 2 * Real.sqrt b) := by
+  have h := Real.sqrt_lt_sqrt hb hab
+  have hu : Real.sqrt a ≤ 1 := by simpa using Real.sqrt_le_sqrt ha
+  apply Real.sqrt_lt_sqrt <;> linarith
+
+/-- A's closer peer changes from C to B after stretching the horizontal axis. -/
+theorem chord_neighbour_flip :
+    quadrantChord 1 1 4 < quadrantChord 1 1 0 ∧
+    quadrantChord 4 1 0 < quadrantChord 4 1 4 := by
+  constructor <;> apply chord_lt <;> norm_num
+
+/-- With four firms the two unique directed selection lists determine different
+symmetrized graphs: A selects C only before the stretch and C always selects D. -/
+theorem symmetrized_chord_edge_flip :
+    let heights : Fin 4 → ℝ := ![1, 0, 4, 5]
+    let selected := fun (x : ℝ) (peers : Fin 4 → Fin 4) =>
+      ∀ i, IsNeighbourSet (fun j => quadrantChord x (heights i) (heights j)) i {peers i}
+    selected 1 ![2, 0, 3, 2] ∧ selected 4 ![1, 0, 3, 2] := by
+  dsimp only
+  constructor <;> intro i j hj l hl hli <;> simp only [Set.mem_singleton_iff] at hj hl
+    <;> subst j <;> fin_cases i <;> fin_cases l <;>
+    first | exfalso; exact hl (by decide) | exfalso; exact hli (by decide) |
+      apply chord_lt <;> norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]
+
 end FreeFoundations.Neighbours

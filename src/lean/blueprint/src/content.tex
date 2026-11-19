@@ -699,6 +699,20 @@ exposures back.
   stretched norms.
 \end{proof}
 
+\begin{theorem}[Peer reversal under chord distance]
+  \lean{FreeFoundations.Neighbours.chord_neighbour_flip,
+  FreeFoundations.Neighbours.symmetrized_chord_edge_flip}\leanok
+  For $(1,1),(1,0),(1,4)$ the first point switches its closest peer
+  from the third to the second under $\diag(4,1)$ followed by unit
+  normalization. Adding $(1,5)$ also removes the first--third edge
+  under symmetrized one-neighbour selection.
+\end{theorem}
+\begin{proof}\leanok
+  For unit vectors squared chord distance equals two minus
+  twice their cosine. All inner products here are positive. Comparing
+  squared cosines therefore gives the strict rankings.
+\end{proof}
+
 \begin{definition}[Chord baseline]\label{def:geometry-chord}
   \lean{FreeFoundations.Geometry.chord}\leanok
   $v(x)=[x,1]/\norm{[x,1]}$, the direct-distance baseline.

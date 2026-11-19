@@ -4,11 +4,20 @@
 \paragraph{Recoverability and the transformation class.}
 If $s=r\circ z$, histories in the same fibre of $z$ share the same
 target. Conversely, define $r$ on $z(H)$ by the unique target of each
-fibre and use any value in $S$ outside the image. For the
-nearest-neighbour example, take the origin, $(1,0)$ and $(0,2)$ in
-$\R^2$. The point $(1,0)$ is nearer to the origin before the recoding
-$g=\operatorname{diag}(3,1)$, and $(0,2)$ is nearer afterward.
-Composing the readout with $g^{-1}$ preserves the target. For a
+fibre and use any value in $S$ outside the image. In the chord example
+the four vectors have coordinates $(x,y)$ with $y=1,0,4,5$ respectively.
+The stretch takes $x=1$ to $x=4$. For heights $y,z$ the squared cosine is
+\[
+  c^2=\frac{(x^2+yz)^2}{(x^2+y^2)(x^2+z^2)}.
+\]
+All dot products are positive, so the unit-vector chord is
+$\sqrt{2-2\sqrt{c^2}}$. For $AB$ the squared cosine rises from $1/2$
+to $16/17$, while for $AC$ it stays at $25/34$. This reverses the
+first firm's choice even on the three-firm roster. With the fourth
+firm present, $C$ and $D$ select one another before and after the stretch.
+\lean{FreeFoundations.Neighbours.chord_neighbour_flip}
+Composing the raw-state readout with the inverse stretch preserves
+predictions. For a
 restricted readout class $\mathcal R$, a bijection $g$ preserves
 the class when $\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$. A
 restricted class preserved under both $g$ and $g^{-1}$ has the same
@@ -28,7 +37,35 @@ selected and unselected neighbours exceeding
 $2(\delta_i+\delta_{\max})$ preserves that set. Ties and smaller gaps
 leave the conclusion open.
 
+\paragraph{Statistical alignment and transfer.}
+Under squared loss the economic conditional mean must be a measurable
+function of the task conditional mean almost surely for every representation
+attaining the latter to attain the former.
+\lean{FreeFoundations.Sufficiency.sufficient_iff}
+Transporting a source-law task error to issuers requires further premises.
+If the issuer law is bounded by $\omega$ times the source law, source
+root-mean-square error enters the recovery bound multiplied by
+$\sqrt{\omega}$. Changes in conditional task means and task--exposure
+mismatch enter separately, all divided by the positive separation margin.
+\lean{FreeFoundations.Transfer.source_target_recovery}
+
 \paragraph{Multiplier and covariance.}
+\begin{proposition}[Spatial stability]
+  \label{prop:multiplier}
+  Let $K=K^\top\geq 0$ entrywise, with positive degrees $d_i=\sum_j
+  K_{ij}$, and set $W=D^{-1}K$ for $D=\operatorname{diag}(d_i)$. For
+  $|\rho|<1$, the inverse $P=(I-\rho W)^{-1}$ exists and
+  \[
+    \norm{P}_2\leq \frac{\sqrt{d_{\max}/d_{\min}}}{1-|\rho|}.
+  \]
+  On the same roster, let $\widehat W$ have multiplier $\widehat P$
+  at the same $\rho$. If both inverse norms are at most $M$ and the
+  common innovation covariance has $\norm V_2\leq v$, then
+  \[
+    \norm{\widehat P V\widehat P^\top-PVP^\top}_2
+    \leq 2v|\rho|M^3\norm{\widehat W-W}_2 .
+  \]
+\end{proposition}
 Symmetry makes $d$ stationary for $W$. Jensen's inequality gives
 $\norm{Wx}_D\leq\norm{x}_D$, where $\norm{x}_D^2=x^\top Dx$. Hence
 $\norm{(I-\rho W)x}_D\geq(1-|\rho|)\norm{x}_D$.
@@ -194,11 +231,9 @@ orthogonal rotations.
 The valuation ratios are part of the encoder inputs. Their alignment
 describes how the model organizes its own inputs on this date.
 The historical ratio embedding puts about 45\% of positive inertia
-in its leading coordinate. On the 878 issuers with estimated market
-betas, its first three coordinates explain about one quarter of one
-percent of beta rank variation. The same subspace explains about
-93\% of market-cap-to-assets rank variation among the 960 issuers
-with that ratio observed.
+in its leading coordinate. For the market-beta comparison we restrict
+these same coordinates to issuers with an available return-based beta
+estimate and regress beta ranks on the three coordinates and an intercept.
 On this formation date the learned geometry is closely associated
 with a valuation measure supplied to the encoder, while its alignment
 with independently estimated market exposure is weak.

@@ -105,3 +105,22 @@ def test_network_rejects_unnormalized_or_self_linked_weights() -> None:
     # Act / Assert
     with pytest.raises(ValueError, match="row-normalized"):
         Network("bad", "control", "test", ("A", "B"), bad)
+
+
+@pytest.mark.unit
+def test_chord_stretch_removes_a_symmetrized_peer_edge() -> None:
+    # Arrange four nonzero firms with strict distance rankings.
+    firms = np.array([[1, 1], [1, 0], [1, 4], [1, 5]])
+    stretched = firms * [4, 1]
+
+    # Act through the study's distance and graph constructors.
+    before = knn_weights(representation_distance(firms), 1)
+    after = knn_weights(representation_distance(stretched), 1)
+
+    # Assert the A-C edge disappears and the surviving peers receive its weight.
+    np.testing.assert_allclose(
+        before, [[0, 0.5, 0.5, 0], [1, 0, 0, 0], [0.5, 0, 0, 0.5], [0, 0, 1, 0]]
+    )
+    np.testing.assert_allclose(
+        after, [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
+    )
