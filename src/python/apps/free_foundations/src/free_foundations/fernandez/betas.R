@@ -47,7 +47,9 @@ complete <- function(fit, control, messages) {
   final && rank && below_limits && !adverse
 }
 
-fit_firm <- function(firm, replicate) {
+fit_firm <- function(firm, replicate, ticker) {
+  # Unobserved quarters (absent or resampled) are rows without an outcome; drop them.
+  firm <- firm[!is.na(firm$excess), , drop = FALSE]
   warnings <- character()
   errors <- character()
   attempt <- function(settings) {
@@ -83,7 +85,7 @@ fit_firm <- function(firm, replicate) {
   names <- c("(Intercept)", terms)
   estimates <- if (is.null(fit)) rep(NA_real_, length(names)) else unname(coef(fit)[names])
   data.frame(
-    replicate = replicate, ticker = firm$ticker[1], term = c("intercept", terms),
+    replicate = replicate, ticker = ticker, term = c("intercept", terms),
     estimate = estimates, converged = complete(fit, settings, final_warnings),
     warnings = length(warnings), retried = retried, observations = nrow(firm),
     package_version = version, backend = backend,
@@ -96,15 +98,13 @@ fit_firm <- function(firm, replicate) {
 }
 
 fit_replicate <- function(replicate) {
-  sample <- data
+  firms <- split(data, data$ticker)
   if (!is.null(indices)) {
     order <- indices[indices$replicate == replicate, ]
     order <- order[order(order$position), ]
-    sample <- do.call(rbind, lapply(split(data, data$ticker), function(firm) {
-      firm[match(order$quarter, firm$quarter), ]
-    }))
+    firms <- lapply(firms, function(firm) firm[match(order$quarter, firm$quarter), , drop = FALSE])
   }
-  do.call(rbind, lapply(split(sample, sample$ticker), fit_firm, replicate = replicate))
+  do.call(rbind, Map(fit_firm, firms, replicate, names(firms)))
 }
 
 replicates <- if (is.null(indices)) 0L else sort(unique(indices$replicate))

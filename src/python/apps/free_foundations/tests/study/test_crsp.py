@@ -9,10 +9,13 @@ import pytest
 
 from free_foundations.study.crsp import build_crsp
 from free_foundations.study.spec import StudySpec, frame_digest
+from tests._strategies import compact_spec
 
 
 def spec(*, archive_end: str = "2003-12-31") -> StudySpec:
-    return StudySpec(archive_end=archive_end, feature_start="2001-01-01", top_n=2)
+    return compact_spec(
+        "2001-01-01", archive_end, top_n=2, formation_years=(2001,), primary_formation=2001
+    )
 
 
 def source() -> pd.DataFrame:
@@ -144,14 +147,33 @@ def test_formation_identity_stays_fixed_and_change_is_visible(tmp_path: Path) ->
     assert cell(result["quarterly"], "2002-03-31", column="quarter")["issuer_identity_changed"]
 
 
-def test_history_uses_current_known_classes_before_their_membership(tmp_path: Path) -> None:
-    result = run(tmp_path, source())
-    history = result["history"].query("asof_year == 2002")
-    prior = cell(history, "2001-06-30", column="quarter")
-    assert prior["observed"]
-    assert prior["total_return"] == pytest.approx(1.175**3 - 1)
-    assert not result["quarterly"]["quarter"].dt.year.eq(2001).any()
-    assert history["quarter"].max() == pd.Timestamp("2002-12-31")
+@pytest.mark.unit
+def test_cohort_follows_formation_classes_through_its_window(tmp_path: Path) -> None:
+    # Arrange: the December 2001 top two are both PERMCO 100 classes.
+    frame = source()
+
+    # Act
+    cohort = run(tmp_path, frame)["cohorts"]
+
+    # Assert: one issuer, followed for exactly the four quarters of 2002.
+    assert set(cohort["formation_year"]) == {2001}
+    assert set(cohort["issuer_id"]) == {"PERMCO:100"}
+    assert cohort["quarter"].tolist() == list(pd.date_range("2002-03-31", periods=4, freq="QE"))
+    assert cohort["observed"].all()
+
+
+@pytest.mark.unit
+def test_cohort_exit_leaves_later_quarters_unobserved(tmp_path: Path) -> None:
+    # Arrange: both selected classes stop trading after June 2002.
+    frame = source()
+    frame = frame.loc[~(frame["permco"].eq(100) & frame["date"].gt("2002-06-30"))]
+
+    # Act
+    cohort = run(tmp_path, frame)["cohorts"].set_index("quarter")
+
+    # Assert: the exit removes outcomes without dropping the issuer's rows.
+    assert cohort["observed"].tolist() == [True, True, False, False]
+    assert cohort["total_return"].iloc[2:].isna().all()
 
 
 def test_order_and_future_caps_cannot_change_earlier_weights(tmp_path: Path) -> None:
@@ -190,28 +212,8 @@ def test_business_month_dates_and_ticker_reuse_do_not_change_identity(tmp_path: 
     assert cell(result["quarterly"], "2002-03-31", column="quarter")["observed"]
 
 
-def test_history_is_bounded_and_does_not_require_past_membership(tmp_path: Path) -> None:
-    dates = pd.date_range("2001-01-31", "2010-12-31", freq="ME")
-    frame = pd.DataFrame(
-        {
-            "permno": 1,
-            "permco": 9,
-            "ticker": "HISTORY",
-            "date": dates,
-            "total_return": 0.01,
-            "market_cap": 10.0,
-        }
-    )
-    result = run(tmp_path, frame, spec(archive_end="2010-12-31"))
-    history = result["history"].query("asof_year == 2010")
-    assert history["quarter"].min() == pd.Timestamp("2005-03-31")
-    assert history["quarter"].max() == pd.Timestamp("2010-12-31")
-    assert len(history) == 24
-    assert history["observed"].all()
-
-
 def test_empty_source_preserves_schemas(tmp_path: Path) -> None:
     result = run(tmp_path, source().iloc[:0])
     assert all(frame.empty for frame in result.values())
-    assert set(result) == {"monthly", "membership", "issuer_monthly", "quarterly", "history"}
+    assert set(result) == {"monthly", "membership", "issuer_monthly", "quarterly", "cohorts"}
     assert {"issuer_id", "quarter", "total_return", "observed"} <= set(result["quarterly"])

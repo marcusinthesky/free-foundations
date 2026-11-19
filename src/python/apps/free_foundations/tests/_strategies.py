@@ -3,11 +3,13 @@
 from datetime import UTC, datetime
 
 import numpy as np
+import pandas as pd
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 from hypothesis.strategies import DrawFn, SearchStrategy
 
 from free_foundations.contracts import FloatArray, PanelBatch, Tokens
+from free_foundations.study.spec import StudySpec
 
 CUTOFF = datetime(2025, 1, 1, tzinfo=UTC)
 
@@ -36,3 +38,19 @@ def panel(rows: int, *, cutoff: datetime = CUTOFF) -> PanelBatch:
         ("assets", "debt"),
         cutoff,
     )
+
+
+def compact_spec(start: str, end: str, **changes: object) -> StudySpec:
+    """A small valid study: the December before ``start`` forms one four-quarter cohort."""
+    formation = pd.Timestamp(start).year - 1
+    settings: dict[str, object] = {
+        "archive_start": start,
+        "archive_end": end,
+        "feature_start": start,
+        "panel_start": start,
+        "window_quarters": 4,
+        "formation_years": (formation,),
+        "primary_formation": formation,
+        "min_beta_quarters": 3,
+    }
+    return StudySpec(**(settings | changes))  # type: ignore[arg-type]

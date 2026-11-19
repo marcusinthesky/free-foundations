@@ -80,7 +80,7 @@ def identity(data: Prepared, model: str, checkpoint: dict[str, Any]) -> dict[str
 def location(cache: Path, contract: dict[str, Any]) -> Path:
     """Content-addressed cache namespace; legacy states cannot satisfy this contract."""
     key = hashlib.sha256(json.dumps(contract, sort_keys=True).encode()).hexdigest()
-    return cache / "embeddings" / f"{contract['model']}-v2-{key}.npz"
+    return cache / f"{contract['model']}-v2-{key}.npz"
 
 
 def load(path: Path, contract: dict[str, Any]) -> dict[str, FloatArray]:

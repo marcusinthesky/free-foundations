@@ -13,13 +13,11 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from free_foundations.data import write_json
 from free_foundations.representations import cache as state_cache
-from free_foundations.representations.baselines import supervised_states
 from free_foundations.representations.checkpoints import expected as checkpoint_expected
 from free_foundations.representations.encoding import Prepared, foundation_states
 from free_foundations.study.features import feature_value_types, read_feature_rows
@@ -43,7 +41,6 @@ def _implementation_provenance(spec: StudySpec) -> dict[str, Any]:
     package = Path(__file__).resolve().parents[1]
     sources = {
         *state_cache.SOURCES,
-        "representations/baselines.py",
         "representations/checkpoints.py",
         "representations/setup.py",
         "study/encoding.py",
@@ -140,61 +137,87 @@ def _native_feature_values(wide: pd.DataFrame, declared_types: dict[str, str]) -
     return wide
 
 
-def rung_view(  # noqa: PLR0913 -- matched rows, information inputs and as-of catalogue.
+def _standard_rows(broad: pd.DataFrame) -> pd.DataFrame:
+    """Entity-wide standard-taxonomy facts, each published by its own feature cutoff."""
+    selected = broad.loc[
+        broad["is_standard"].fillna(value=False).astype(bool)
+        & broad["entity_wide"].fillna(value=False).astype(bool)
+    ]
+    if "dimensions" in selected:
+        selected = selected.loc[selected["dimensions"].fillna("{}").isin(["", "{}", "[]"])]
+    _validate_filing_times(selected)
+    return selected
+
+
+def _latest_facts(selected: pd.DataFrame) -> pd.DataFrame:
+    """Collapse every lag and offset variant to the most recent disclosed period.
+
+    Ties keep the later source row, so collapsing consecutive source parts and then
+    their concatenation keeps the same row as a single pass over all parts.
+    """
+    if selected.empty:
+        return selected
+    order = [name for name in ("end", "fact_available_at") if name in selected]
+    frame = selected.sort_values(order or KEYS, kind="stable")
+    if {"concept", "unit", "period_kind"}.issubset(frame.columns):
+        frame = frame.assign(
+            feature_id=frame["concept"].astype(str)
+            + "|"
+            + frame["unit"].astype(str)
+            + "|"
+            + frame["period_kind"].astype(str)
+        )
+    return frame.drop_duplicates([*KEYS, "feature_id"], keep="last")
+
+
+def _standard_snapshot(selected: pd.DataFrame, coverage: float) -> pd.DataFrame:
+    """Latest as-of value of each standard concept, unit and period kind.
+
+    Concepts reported by fewer than ``coverage`` of the view's issuer-quarters are
+    dropped; the threshold reads disclosure coverage only, never outcomes.
+    """
+    frame = _latest_facts(selected)
+    if frame.empty:
+        return frame
+    reported = frame.loc[frame["value"].notna(), [*KEYS, "feature_id"]].drop_duplicates()
+    rows = len(frame[KEYS].drop_duplicates())
+    shares = reported.groupby("feature_id").size() / rows
+    return frame.loc[frame["feature_id"].isin(shares.index[shares >= coverage])]
+
+
+def rung_view(  # noqa: PLR0913 -- matched rows, information inputs and as-of facts.
     panel: pd.DataFrame,
     characteristics: pd.DataFrame,
     broad: pd.DataFrame,
     spec: StudySpec,
     rung: str,
     *,
-    schema: pd.DataFrame | None = None,
+    schema: pd.DataFrame | None = None,  # noqa: ARG001 -- streamed callers pass their schema.
 ) -> pd.DataFrame:
-    """Expand information only; the master roster, dates and outcomes remain fixed."""
+    """Expand information only; the master roster, dates and outcomes remain fixed.
+
+    ``fernandez`` is the annual characteristic history. ``standard_xbrl`` adds the
+    latest as-of value of each entity-wide standard-taxonomy concept reported by at
+    least ``spec.standard_min_coverage`` of the view's issuer-quarters.
+    """
     if rung not in spec.rungs:
         message = f"Undeclared information rung: {rung}"
         raise ValueError(message)
     result = original_view(panel, characteristics, spec)
-    if rung == "fernandez":
+    if rung == "fernandez" or broad.empty:
         return result
-    if broad.empty and (schema is None or schema.empty):
-        return result
-    selected = broad
-    if rung == "standard_xbrl":
-        selected = broad.loc[
-            broad["is_standard"].fillna(value=False).astype(bool)
-            & broad["entity_wide"].fillna(value=False).astype(bool)
-        ]
-        if "dimensions" in selected:
-            selected = selected.loc[selected["dimensions"].fillna("{}").isin(["", "{}", "[]"])]
-    _validate_filing_times(selected)
+    selected = _standard_rows(broad)
+    keys = pd.MultiIndex.from_frame(panel[KEYS])
+    selected = selected.loc[pd.MultiIndex.from_frame(selected[KEYS]).isin(keys)]
+    selected = _standard_snapshot(selected, spec.standard_min_coverage)
     declared_types = feature_value_types(selected)
-    if selected.duplicated([*KEYS, "feature_id"]).any():
-        message = "Ambiguous XBRL feature cells; resolve periods/contexts before encoding."
-        raise ValueError(message)
-    wide = selected.pivot(  # noqa: PD010 -- reject rather than aggregate duplicate facts.
+    wide = selected.pivot(  # noqa: PD010 -- keys are unique after the snapshot.
         index=KEYS, columns="feature_id", values="value"
     )
-    known = schema
-    if known is not None:
-        if rung == "standard_xbrl":
-            known = known.loc[known["is_standard"] & known["entity_wide"]]
-        known_types = feature_value_types(known)
-        if any(
-            name in known_types and known_types[name] != value_type
-            for name, value_type in declared_types.items()
-        ):
-            message = "Selected XBRL value_type disagrees with its persisted feature schema."
-            raise ValueError(message)
-        declared_types = known_types | declared_types
-        wide = wide.reindex(columns=known["feature_id"].astype(str).tolist())
     wide = _native_feature_values(wide, declared_types)
     wide.columns = [f"xbrl:{column}" for column in wide.columns]
     joined = result.join(wide, how="left")
-    first = (
-        known.set_index("feature_id")["quarter"]
-        if known is not None
-        else selected.groupby("feature_id", sort=True)["quarter"].min()
-    )
+    first = selected.groupby("feature_id", sort=True)["quarter"].min()
     joined.attrs[SCHEMA] = result.attrs.get(SCHEMA, {}) | {
         f"xbrl:{name}": pd.Timestamp(date) for name, date in first.items()
     }
@@ -226,14 +249,37 @@ def _context_panel(
     return pd.concat([candidates.iloc[order], panel.loc[panel["quarter"].eq(quarter)]])
 
 
+def _source_parts(source: Path) -> list[Path]:
+    """Parquet parts in the order a dataset read concatenates them."""
+    if source.is_file():
+        return [source]
+    return sorted(
+        path
+        for path in source.rglob("*")
+        if path.is_file()
+        and not any(name.startswith(("_", ".")) for name in path.relative_to(source).parts)
+    )
+
+
 def _quarter_facts(
     broad: pd.DataFrame | Path, context: pd.DataFrame, quarter: pd.Timestamp
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Read selected rows and the as-of column catalogue without a full-panel dense pivot."""
+    """Read selected rows and the as-of column catalogue without a full-panel dense pivot.
+
+    A streamed source keeps only each part's latest standard facts. The selected
+    rows carry every lag and offset of every concept, millions of rows for a late
+    quarter, which the rung's snapshot would drop anyway.
+    """
     if isinstance(broad, Path):
         schema = pd.read_parquet(broad.parent / "schema.parquet")
         schema = schema.loc[schema["quarter"].le(quarter)]
-        facts = read_feature_rows(broad, pd.MultiIndex.from_frame(context[KEYS]))
+        keys = pd.MultiIndex.from_frame(context[KEYS])
+        parts = [
+            _latest_facts(_standard_rows(read_feature_rows(part, keys)))
+            for part in _source_parts(broad)
+        ]
+        kept = [part for part in parts if not part.empty]
+        facts = pd.concat(kept or parts[:1] or [pd.DataFrame(columns=KEYS)], ignore_index=True)
     else:
         known = broad.loc[broad["quarter"].le(quarter)]
         declared_types = feature_value_types(known)
@@ -401,20 +447,17 @@ def feature_blocks(data: Prepared, width: int) -> list[Prepared]:
 
 
 def conventional_states(data: Prepared) -> dict[str, np.ndarray]:
-    """Give nonpretrained controls the same information with disclosed support-only NA handling."""
+    """The direct control: the same features, support-median imputed with indicators.
+
+    Imputation and standardization use the labeled support rows only and fit no
+    parameter to returns; the result is a deterministic coordinate system for the
+    same information the foundation models receive.
+    """
     imputer = SimpleImputer(strategy="median", keep_empty_features=True, add_indicator=True)
     train = imputer.fit_transform(data.support)
     query = imputer.transform(data.query)
     scaler = StandardScaler().fit(train)
-    train = np.asarray(scaler.transform(train), dtype=float)
-    query = np.asarray(scaler.transform(query), dtype=float)
-    result = {"direct": np.asarray(query, dtype=float)}
-    rank = min(16, train.shape[1], len(train))
-    pca = PCA(n_components=rank, random_state=42).fit(train)
-    result["pca16"] = pca.transform(query)
-    finite = replace(data, support=train, query=query, preprocessing="support-median-indicators")
-    result["supervised_mlp16"] = supervised_states(finite)
-    return result
+    return {"direct": np.asarray(scaler.transform(query), dtype=float)}
 
 
 def _validate_embeddings(values: np.ndarray, rows: int) -> None:
@@ -427,7 +470,7 @@ def _validate_embeddings(values: np.ndarray, rows: int) -> None:
 
 
 def _foundation_blocks(
-    blocks: list[Prepared], model: str, cache: Path, contracts: list[dict[str, Any]]
+    blocks: list[Prepared], model: str, models: tuple[Path, Path], contracts: list[dict[str, Any]]
 ) -> np.ndarray:
     pieces = []
     base = model.partition("_random")[0].removesuffix("_labelnull")
@@ -439,7 +482,7 @@ def _foundation_blocks(
             if base in state_cache.RUNTIMES
             else None
         )
-        readouts = foundation_states(block, model, cache, cache)
+        readouts = foundation_states(block, model, *models)
         values = np.asarray(readouts.get("late"), dtype=float)
         _validate_embeddings(values, len(block.tickers))
         pieces.append(values)
@@ -460,13 +503,10 @@ def _save_states(destination: Path, states: dict[str, np.ndarray]) -> None:
         np.savez_compressed(stream, allow_pickle=False, **payload)
 
 
-def _unavailable_context(
-    common: dict[str, Any], unavailable_rungs: dict[str, str] | None
-) -> dict[str, Any]:
-    reason = (unavailable_rungs or {}).get(str(common["rung"]))
+def _unavailable_context(common: dict[str, Any]) -> dict[str, Any]:
     return common | {
-        "status": "source_rung_unavailable" if reason else "training_context_unavailable",
-        "reason": reason or "fewer_than_two_observed_past_context_labels",
+        "status": "training_context_unavailable",
+        "reason": "fewer_than_two_observed_past_context_labels",
     }
 
 
@@ -491,11 +531,15 @@ def encode_panel(  # noqa: PLR0913, PLR0915 -- matched source/context/model avai
     spec: StudySpec,
     output: Path,
     *,
-    model_cache: Path = Path("research/expanded/cache"),
+    weights: Path,
+    states_cache: Path,
     input_digest: str | None = None,
-    unavailable_rungs: dict[str, str] | None = None,
 ) -> None:
-    """Extract all declared states; unsupported cells are statuses, never smaller cohorts."""
+    """Extract all declared states; unsupported cells are statuses, never smaller cohorts.
+
+    Quarters before the panel start are context only: they supply labeled support
+    rows but no query states, because no analysis reads them.
+    """
     output.mkdir(parents=True, exist_ok=True)
     contract = panel_contract(panel, spec)
     provenance = {
@@ -505,8 +549,12 @@ def encode_panel(  # noqa: PLR0913, PLR0915 -- matched source/context/model avai
     provenance_digest = digest_json(provenance)
     records: list[dict[str, Any]] = []
     contexts: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {}
+    first = pd.Timestamp(spec.panel_start)
     for quarter in sorted(panel["quarter"].unique()):
         date = pd.Timestamp(quarter)
+        # Networks form annually from January information, like the December roster.
+        if date < first or date.quarter != 1:
+            continue
         selected = _context_panel(panel, characteristics, date, spec)
         shared = {
             "quarter": str(date.date()),
@@ -515,26 +563,10 @@ def encode_panel(  # noqa: PLR0913, PLR0915 -- matched source/context/model avai
             "provenance_sha256": provenance_digest,
         }
         if int(selected["quarter"].lt(date).sum()) < 2:
-            records.extend(
-                _unavailable_context(shared | {"rung": rung}, unavailable_rungs)
-                for rung in spec.rungs
-            )
+            records.extend(_unavailable_context(shared | {"rung": rung}) for rung in spec.rungs)
             continue
         facts, schema = _quarter_facts(broad, selected, date)
         for rung in spec.rungs:
-            if unavailable_rungs and rung in unavailable_rungs:
-                records.append(
-                    {
-                        "quarter": str(date.date()),
-                        "rung": rung,
-                        "master": contract,
-                        "input_digest": input_digest,
-                        "provenance_sha256": provenance_digest,
-                        "status": "source_rung_unavailable",
-                        "reason": unavailable_rungs[rung],
-                    }
-                )
-                continue
             view = rung_view(selected, characteristics, facts, spec, rung, schema=schema)
             data = _required_context(view, characteristics, panel, date, spec)
             common = shared | {"rung": rung}
@@ -579,7 +611,9 @@ def encode_panel(  # noqa: PLR0913, PLR0915 -- matched source/context/model avai
             for model in spec.models:
                 try:
                     model_contracts: list[dict[str, Any]] = []
-                    states[model] = _foundation_blocks(blocks, model, model_cache, model_contracts)
+                    states[model] = _foundation_blocks(
+                        blocks, model, (weights, states_cache), model_contracts
+                    )
                     native_contracts[model] = model_contracts
                 except (ImportError, ValueError, RuntimeError, OSError) as error:
                     records.append(
@@ -594,9 +628,7 @@ def encode_panel(  # noqa: PLR0913, PLR0915 -- matched source/context/model avai
             destination = path / "states.npz"
             _save_states(destination, states)
             record = context | {
-                "status": "complete"
-                if {*spec.models, "direct", "pca16", "supervised_mlp16"}.issubset(states)
-                else "incomplete",
+                "status": "complete" if {*spec.models, "direct"}.issubset(states) else "incomplete",
                 "models": sorted(states),
                 "sha256": file_hash(destination),
                 "path": str(destination),
@@ -658,43 +690,53 @@ def _validate_context_provenance(record: dict[str, Any], manifest: dict[str, Any
         raise ValueError(message)
 
 
-def load_representations(
-    output: Path, panel: pd.DataFrame, spec: StudySpec, *, expected_input_digest: str | None = None
-) -> dict[str, Any]:
-    """Reject states from another source vintage without requiring optional model runtimes."""
-    manifest = json.loads((output / "manifest.json").read_text())
-    _validate_representation_manifest(manifest, panel, spec, expected_input_digest)
-    result: dict[str, Any] = {}
-    for record in manifest["states"]:
-        _validate_context_provenance(record, manifest)
-        if "path" not in record:
-            continue
-        path = Path(record["path"])
-        if file_hash(path) != record["sha256"]:
-            message = "Representation bytes disagree with their manifest."
-            raise ValueError(message)
-        quarter = pd.Timestamp(record["quarter"])
-        expected = panel.loc[panel["quarter"].eq(quarter), "issuer_id"].sort_values().tolist()
-        if record["issuer_ids"] != expected or record["rung"] not in spec.rungs:
-            message = "Representation rows or rung disagree with the master query."
-            raise ValueError(message)
-        with np.load(path, allow_pickle=False) as arrays:
-            if sorted(arrays.files) != record["models"]:
-                message = "Representation inventory disagrees with its manifest."
+class RepresentationStore:
+    """Verified, quarter-at-a-time access to saved representation states.
+
+    The manifest and its provenance are validated once; each quarter's arrays are
+    hash-checked when read, so memory holds one quarter's states at a time.
+    """
+
+    def __init__(
+        self,
+        output: Path,
+        panel: pd.DataFrame,
+        spec: StudySpec,
+        *,
+        expected_input_digest: str | None,
+    ) -> None:
+        """Validate the representation manifest against the prepared master panel."""
+        manifest = json.loads((output / "manifest.json").read_text())
+        _validate_representation_manifest(manifest, panel, spec, expected_input_digest)
+        self.records: dict[str, list[dict[str, Any]]] = {}
+        for record in manifest["states"]:
+            _validate_context_provenance(record, manifest)
+            if "path" in record:
+                self.records.setdefault(record["quarter"], []).append(record)
+        self.statuses = [
+            {key: record.get(key) for key in ("quarter", "rung", "model", "status", "reason")}
+            for record in manifest["states"]
+        ]
+
+    def states(self, quarter: pd.Timestamp, issuers: tuple[str, ...]) -> dict[str, np.ndarray]:
+        """``rung:model`` arrays for one quarter, rows reordered to ``issuers``."""
+        result: dict[str, np.ndarray] = {}
+        for record in self.records.get(str(pd.Timestamp(quarter).date()), []):
+            path = Path(record["path"])
+            if file_hash(path) != record["sha256"]:
+                message = "Representation bytes disagree with their manifest."
                 raise ValueError(message)
-            for name in arrays.files:
-                _validate_embeddings(arrays[name], len(expected))
-            states = {
-                name: {
-                    "issuer_ids": record["issuer_ids"],
-                    "values": arrays[name],
-                    "master_digest": manifest["master"]["panel_sha256"],
-                }
-                for name in arrays.files
-            }
-        quarter_states = result.setdefault(record["quarter"], {})
-        if record["rung"] in quarter_states:
-            message = "Representation manifest repeats a quarter and information rung."
-            raise ValueError(message)
-        quarter_states[record["rung"]] = states
-    return result
+            position = {issuer: index for index, issuer in enumerate(record["issuer_ids"])}
+            if any(issuer not in position for issuer in issuers):
+                message = "A roster issuer has no representation row for its quarter."
+                raise ValueError(message)
+            rows = [position[issuer] for issuer in issuers]
+            with np.load(path, allow_pickle=False) as arrays:
+                if sorted(arrays.files) != record["models"]:
+                    message = "Representation inventory disagrees with its manifest."
+                    raise ValueError(message)
+                for name in arrays.files:
+                    values = arrays[name]
+                    _validate_embeddings(values, len(record["issuer_ids"]))
+                    result[f"{record['rung']}:{name}"] = values[rows]
+        return result

@@ -270,20 +270,22 @@ def tabfm_states(data: Prepared, path: str, checkpoint: str) -> dict[str, FloatA
 
 
 def foundation_states(
-    data: Prepared, model: str, cache: Path, _source: Path, *, store: bool = True
+    data: Prepared, model: str, weights: Path, states: Path, *, store: bool = True
 ) -> dict[str, FloatArray]:
     """Cache numerical readouts with checkpoint, context, schema and cohort provenance.
+
+    ``weights`` holds verified checkpoint snapshots; ``states`` caches readouts.
 
     Audit variants pass ``store=False``: they reuse cached readouts but never add files.
     """
     base, random_marker, seed_text = model.partition("_random")
     seed = int(seed_text) if seed_text else 42
-    metadata = local_checkpoint(cache, base)
+    metadata = local_checkpoint(weights, base)
     root = Path(metadata["root"])
     path = str(root / ("regression" if base == "tabfm" else metadata["files"][0]))
     checkpoint = f"{metadata['repository']}@{metadata['revision']}:{metadata['files']}"
     contract = state_cache.identity(data, model, metadata)
-    destination = state_cache.location(cache, contract)
+    destination = state_cache.location(states, contract)
     if destination.exists():
         return state_cache.load(destination, contract)
     if model.startswith("tabpfn"):

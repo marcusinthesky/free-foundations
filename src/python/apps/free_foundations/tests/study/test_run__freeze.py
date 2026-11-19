@@ -10,6 +10,7 @@ from typing import Any
 
 import pandas as pd
 import pytest
+import yaml
 
 from free_foundations.study import run
 from free_foundations.study.source_io import atomic_bytes, sources_lock
@@ -27,7 +28,10 @@ def _snapshot(
     sources = output / "sources"
     sources.mkdir(parents=True)
     (sources / "crsp.csv").write_bytes(csv)
-    report = {"study_sha256": spec.digest, "crsp_sha256": file_hash(sources / "crsp.csv")}
+    report = {
+        "population_sha256": spec.population_digest,
+        "crsp_sha256": file_hash(sources / "crsp.csv"),
+    }
     records = {
         "crsp-manifest.json": report,
         "sec/acquisition.json": {
@@ -57,8 +61,8 @@ def _manifest(sources: Path, report: dict[str, str] | None = None) -> None:
 
 def _study(tmp_path: Path) -> tuple[StudySpec, Path, Path, Path]:
     spec = StudySpec()
-    path = tmp_path / "study.json"
-    path.write_text(json.dumps(spec.payload()))
+    path = tmp_path / "params.yaml"
+    path.write_text(yaml.safe_dump({"study": spec.payload()}))
     output = tmp_path / "study"
     return spec, path, output, output / "recovery"
 
@@ -93,7 +97,7 @@ def test_freeze_promotes_complete_snapshot_and_retains_old_cache_bytes(
         (current / "payload.txt").symlink_to(cache)
     before = (current / "manifest.json").read_bytes()
     staged_manifest = (staged / "manifest.json").read_bytes()
-    receipt = run.freeze(staging=staging, output=output, spec_path=spec_path)
+    receipt = run.freeze(staging=staging, canonical=output / "sources", params=spec_path)
     backup = Path(receipt["previous_sources"])
     assert not staged.exists()
     assert (current / "payload.txt").read_text() == "new recovered payload"
@@ -107,14 +111,7 @@ def test_freeze_promotes_complete_snapshot_and_retains_old_cache_bytes(
 
 @pytest.mark.parametrize(
     "update",
-    [
-        {"phase": "metadata", "status": "metadata_ready", "metadata_only": True},
-        {"metadata_complete": False},
-        {"originals_pending": 1},
-        {"originals_pending": False},
-        {"status": "pending_network"},
-        {"filing_statuses": {"no_native_facts": 1}},
-    ],
+    [{"metadata_complete": False}, {"metadata_complete": None}],
 )
 def test_freeze_rejects_incomplete_sec_without_moving_sources(
     tmp_path: Path, update: dict[str, object]
@@ -125,8 +122,8 @@ def test_freeze_rejects_incomplete_sec_without_moving_sources(
     path = staged / "sec/acquisition.json"
     path.write_text(json.dumps(json.loads(path.read_text()) | update))
     _manifest(staged)
-    with pytest.raises(ValueError, match="completed originals phase"):
-        run.freeze(staging=staging, output=output, spec_path=spec_path)
+    with pytest.raises(ValueError, match="complete SEC metadata"):
+        run.freeze(staging=staging, canonical=output / "sources", params=spec_path)
     assert (current / "payload.txt").read_text() == "old"
     assert (staged / "payload.txt").read_text() == "new"
 
@@ -148,9 +145,9 @@ def test_freeze_rejects_mutated_or_mismatched_snapshot(tmp_path: Path, change: s
         manifest["crsp_sha256"] = "false claimed hash"
         (staged / "manifest.json").write_text(json.dumps(manifest))
     elif change == "spec":
-        spec_path.write_text(json.dumps(StudySpec(top_n=99).payload()))
+        spec_path.write_text(yaml.safe_dump({"study": StudySpec(top_n=99).payload()}))
     with pytest.raises(ValueError, match=r"changed|inconsistent|different canonical"):
-        run.freeze(staging=staging, output=output, spec_path=spec_path)
+        run.freeze(staging=staging, canonical=output / "sources", params=spec_path)
     assert (current / "payload.txt").read_text() == "old"
     assert staged.exists()
 
@@ -171,10 +168,10 @@ def test_promotion_rename_failure_rolls_back_prior_directory(
 
     monkeypatch.setattr(Path, "rename", fail_promotion)
     with pytest.raises(OSError, match="simulated promotion failure"):
-        run.freeze(staging=staging, output=output, spec_path=spec_path)
+        run.freeze(staging=staging, canonical=output / "sources", params=spec_path)
     assert (current / "payload.txt").read_text() == "old"
     assert (staged / "payload.txt").read_text() == "new"
-    assert not (output / "recovery/freeze-latest.json").exists()
+    assert not (staging / "freeze-latest.json").exists()
 
 
 @pytest.mark.parametrize("cache_link", ["hardlink", "symlink"])
@@ -192,7 +189,6 @@ def test_staged_acquisition_seeds_hardlinks_and_does_not_overwrite_canonical(
         os.link(cache, current / "payload.txt")
     else:
         (current / "payload.txt").symlink_to(os.path.relpath(cache, current))
-    monkeypatch.setattr(run, "ROOT", output)
     calls = []
 
     def acquire_no_network(*_args: object, **_kwargs: object) -> None:
@@ -204,7 +200,7 @@ def test_staged_acquisition_seeds_hardlinks_and_does_not_overwrite_canonical(
         calls.append("seeded")
 
     monkeypatch.setattr(run, "_acquire", acquire_no_network)
-    run.acquire(csv, output=staging, spec_path=spec_path, offline=True)
+    run.acquire(csv, staging=staging, canonical=output / "sources", params=spec_path, offline=True)
     assert calls == ["seeded"]
     assert (current / "payload.txt").read_text() == "old"
     assert (staging / "sources/payload.txt").read_text() == "new"
@@ -220,7 +216,6 @@ def test_acquisition_preserves_existing_stage_and_never_seeds_a_different_csv(
         _snapshot(staging, spec, "existing in-progress sources")
     csv = tmp_path / "incoming.csv"
     csv.write_bytes(b"different CRSP vintage")
-    monkeypatch.setattr(run, "ROOT", output)
 
     def inspect_stage(*_args: object, **_kwargs: object) -> None:
         if existing:
@@ -229,7 +224,7 @@ def test_acquisition_preserves_existing_stage_and_never_seeds_a_different_csv(
             assert not (staging / "sources").exists()
 
     monkeypatch.setattr(run, "_acquire", inspect_stage)
-    run.acquire(csv, output=staging, spec_path=spec_path, offline=True)
+    run.acquire(csv, staging=staging, canonical=output / "sources", params=spec_path, offline=True)
 
 
 @pytest.mark.parametrize("operation", ["acquire", "link", "prepare"])
@@ -237,7 +232,6 @@ def test_source_entrypoints_hold_required_lock_through_work(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, operation: str
 ) -> None:
     _, spec_path, output, _ = _study(tmp_path)
-    monkeypatch.setattr(run, "ROOT", output)
     csv = tmp_path / "incoming.csv"
     csv.write_bytes(b"fixture")
     calls = []
@@ -249,7 +243,7 @@ def test_source_entrypoints_hold_required_lock_through_work(
 
     if operation == "acquire":
         monkeypatch.setattr(run, "_acquire", work)
-        run.acquire(csv, output=output, spec_path=spec_path, offline=True)
+        run.acquire(csv, staging=output, canonical=tmp_path / "raw", params=spec_path, offline=True)
     elif operation == "link":
 
         def no_build(*_args: object) -> dict[str, pd.DataFrame]:
@@ -257,10 +251,10 @@ def test_source_entrypoints_hold_required_lock_through_work(
 
         monkeypatch.setattr(run, "build_crsp", no_build)
         monkeypatch.setattr(run, "_recover_links", work)
-        run.link(csv, output=output, spec_path=spec_path, offline=True)
+        run.link(csv, staging=output, canonical=tmp_path / "raw", params=spec_path, offline=True)
     else:
         monkeypatch.setattr(run, "_prepare", work)
-        run.prepare(output=output, spec_path=spec_path)
+        run.prepare(output / "sources", tmp_path / "panel", spec_path)
     assert calls == [operation]
     assert _can_lock(output, exclusive=True)
 
@@ -279,7 +273,7 @@ def test_freeze_holds_stage_then_canonical_exclusive_locks(
         return original(staged, current, study)
 
     monkeypatch.setattr(run, "_freeze_validation", validate)
-    run.freeze(staging=staging, output=output, spec_path=spec_path)
+    run.freeze(staging=staging, canonical=output / "sources", params=spec_path)
 
 
 def test_read_lock_can_coexist_and_releases_after_error(tmp_path: Path) -> None:

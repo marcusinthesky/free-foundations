@@ -7,7 +7,6 @@ import io
 import json
 import os
 import zipfile
-from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -15,7 +14,7 @@ import pytest
 
 from free_foundations.study import bulk, factors, linkage, sec
 from free_foundations.study.source_io import atomic_bytes, atomic_copy, atomic_output
-from free_foundations.study.spec import StudySpec
+from tests._strategies import compact_spec
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -161,7 +160,7 @@ def test_factor_refresh_preserves_frozen_zip_parquet_and_status(tmp_path: Path, 
     status.write_text('{"status":"old"}')
     paths = [*raw, *derived, status]
     frozen = [_freeze(path, tmp_path / "cache", kind) for path in paths]
-    spec = replace(StudySpec(), archive_end="2001-03-31", feature_start="2001-01-01")
+    spec = compact_spec("2001-01-01", "2001-03-31")
     assert factors.acquire_factors(tmp_path, spec, offline=True)
     assert len(pd.read_parquet(derived[0])) == 3
     assert len(pd.read_parquet(derived[1])) == 1

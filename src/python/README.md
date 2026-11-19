@@ -26,36 +26,36 @@ CUDA is used when available, with CPU fallback.
 
 ## Research commands
 
-The active [quarterly study](../../research/crsp-study/README.md) has one versioned
-specification and one master panel:
+The [study contract](../../data/research/crsp-sec/README.md) has one parameter file,
+[`params.yaml`](../../params.yaml), and one master panel. Commands are organized by
+data layer, each with explicit inputs and outputs:
 
 ```sh
-free-foundations study acquire    # resumable public-source recovery into staging
-free-foundations study freeze     # promote only completed, validated source recovery
-free-foundations models checkpoints
-free-foundations study prepare    # offline panel and information vintages
-free-foundations study encode     # save all declared model/control states
-free-foundations study run        # matched quarterly measurement
-free-foundations study replicate  # original MM CAPM and spatial core
-free-foundations study report     # saved-result rendering only
+free-foundations stages raw acquire --crsp-csv X.csv --extraction-script X.py
+free-foundations stages raw freeze        # promote completed staging
+free-foundations stages raw checkpoints   # verify the four pinned weights
+free-foundations stages processed prepare # roster, mask, cohorts, characteristics
+free-foundations stages processed encode  # both rungs, every model and control
+free-foundations stages research replicate   # Fernández cross-sections
+free-foundations stages research comovement  # quarterly spatial panels
+free-foundations stages research alignment   # Mantel alignment
+free-foundations stages research publish     # tables, figure, metrics
 ```
 
-Use `dvc repro measurement`, `dvc repro replication` or `dvc repro publication`
-from the repository root to honor dependencies. Acquisition is a separate frozen
-stage: routine reproduction cannot refetch or change financial inputs. The
-staged extraction script is archived as text and never executed.
+Run them through `just dvc repro <stage>` to honor dependencies. Acquisition is the
+only networked command and never executes the staged extraction script.
 
-`study` implements CRSP cohorts, public SEC linkage and XBRL parsing, quarterly
-factor construction, full-column representations, pairwise moments, unbalanced
-likelihood scoring and reporting. `representations` supplies the pinned adapters;
-`fernandez` supplies original spatial estimators, and `panel` keeps the
-cross-fitted decoding and PCoA geometry the study reuses.
+`study` owns CRSP cohorts, SEC linkage and XBRL parsing, factor construction,
+representation encoding, networks, the three research layers and publication.
+`study.spatial` is the statadic boundary; `study.spatial_ml` holds the eigenvalue
+profile likelihood used for resampling and panels, checked against statadic.
+`fernandez` holds the characteristic definitions and the R MM beta script;
+`representations` supplies the pinned adapters; `stages` is the Typer CLI.
 
-All empirical tasks verify a shared panel hash, roster hash and outcome-mask
-hash. Features use dated disclosures before each quarter's trading cutoff.
-Native missingness is preserved for tabular models; conventional controls use
-past-support medians and missingness indicators. Deterministic blocks concatenate
-states when necessary to retain every eligible feature column.
+All research stages verify the shared panel, roster and outcome-mask hashes.
+Features use dated disclosures before each quarter's trading cutoff. Native
+missingness passes to tabular models; the direct control uses support-median
+imputation with indicators. Deterministic column blocks retain every eligible field.
 
 ## Model catalogue
 

@@ -7,7 +7,7 @@ financial loss. The [Lean guide](../lean/README.md) records proof assumptions,
 compiled declarations and integrity checks.
 
 The empirical section now consumes the
-[quarterly CRSP–SEC study](../../research/crsp-study/README.md). The previous
+[quarterly CRSP–SEC study](../../data/research/crsp-sec/README.md). The previous
 current-survivor manuscript and publication guide remain in the Git history. Their
 numerical findings are not conclusions of the new dataset.
 

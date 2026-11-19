@@ -91,7 +91,7 @@ def prepared() -> Prepared:
 
 def test_rungs_share_all_query_and_label_conditioned_support_ids() -> None:
     panel, chars, broad = fixture()
-    spec = StudySpec()
+    spec = StudySpec(panel_start="2009-01-01")
     contexts = []
     for rung in spec.rungs:
         view = encoding.rung_view(panel, chars, broad, spec, rung)
@@ -111,9 +111,9 @@ def test_rungs_share_all_query_and_label_conditioned_support_ids() -> None:
 
 def test_future_concepts_categories_and_labels_cannot_change_earlier_context() -> None:
     panel, chars, broad = fixture()
-    spec = StudySpec()
+    spec = StudySpec(panel_start="2009-01-01")
     quarter = pd.Timestamp("2010-03-31")
-    view = encoding.rung_view(panel, chars, broad, spec, "full_xbrl")
+    view = encoding.rung_view(panel, chars, broad, spec, "standard_xbrl")
     before = encoding.prepare_quarter(view, chars, panel, quarter, spec)
     assert before is not None
     extra = broad.loc[broad["quarter"].gt(quarter)].copy()
@@ -126,7 +126,7 @@ def test_future_concepts_categories_and_labels_cannot_change_earlier_context() -
     )
     changed_chars = chars.copy()
     changed_chars.loc[changed_chars["quarter"].gt(quarter), "value"] = 1e8
-    future_view = encoding.rung_view(panel, changed_chars, changed, spec, "full_xbrl")
+    future_view = encoding.rung_view(panel, changed_chars, changed, spec, "standard_xbrl")
     after = encoding.prepare_quarter(future_view, changed_chars, panel, quarter, spec)
     assert after is not None
     assert after.digest == before.digest
@@ -137,19 +137,50 @@ def test_future_concepts_categories_and_labels_cannot_change_earlier_context() -
     assert not any("category=new" in name for name in after.features)
 
 
-def test_reported_all_missing_fields_stay_and_standard_rung_is_entity_wide() -> None:
+@pytest.mark.unit
+def test_standard_rung_is_entity_wide_and_drops_unreported_fields() -> None:
+    # Arrange
     panel, chars, broad = fixture()
-    spec = StudySpec()
+    spec = StudySpec(panel_start="2009-01-01")
+
+    # Act
     standard = encoding.rung_view(panel, chars, broad, spec, "standard_xbrl")
-    full = encoding.rung_view(panel, chars, broad, spec, "full_xbrl")
+
+    # Assert: dimensional, custom and never-reported fields are absent.
+    assert "xbrl:Assets" in standard
     assert "xbrl:Segment" not in standard
     assert "xbrl:Custom" not in standard
-    assert {"xbrl:Segment", "xbrl:Custom"} <= set(full.columns)
-    data = encoding.prepare_quarter(standard, chars, panel, pd.Timestamp("2010-03-31"), spec)
-    assert data is not None
-    column = data.features.index("xbrl:ReportedNil")
-    assert np.isnan(data.support[:, column]).all()
-    assert np.isnan(data.query[:, column]).all()
+    assert "xbrl:ReportedNil" not in standard
+
+
+@pytest.mark.unit
+def test_standard_snapshot_keeps_the_latest_period_and_the_coverage_floor() -> None:
+    # Arrange: two periods of one concept, and a concept one issuer in four reports.
+    keys = [("A", "2020-03-31"), ("B", "2020-03-31"), ("C", "2020-03-31"), ("D", "2020-03-31")]
+    rows = []
+    for issuer, quarter in keys:
+        for end, value in (("2019-09-30", 1.0), ("2019-12-31", 2.0)):
+            rows.append(
+                {
+                    "issuer_id": issuer,
+                    "quarter": pd.Timestamp(quarter),
+                    "concept": "us-gaap:Assets",
+                    "unit": "USD",
+                    "period_kind": "instant",
+                    "end": pd.Timestamp(end),
+                    "value": value,
+                }
+            )
+    rows.append(rows[0] | {"concept": "us-gaap:Rare", "value": 5.0})
+    facts = pd.DataFrame(rows).assign(feature_id="lagged-variant")
+
+    # Act
+    snapshot = encoding._standard_snapshot(facts, 0.5)  # noqa: SLF001 -- the rung's rule.
+
+    # Assert
+    assert set(snapshot["feature_id"]) == {"us-gaap:Assets|USD|instant"}
+    assert snapshot["value"].eq(2.0).all()
+    assert len(snapshot) == len(keys)
 
 
 def test_scalar_categories_and_all_missing_columns_preserve_native_missingness() -> None:
@@ -199,38 +230,44 @@ def test_quarterly_query_identity_and_cutoff_are_not_annual_aliases() -> None:
 def test_no_labels_or_future_filing_evidence_never_reach_models() -> None:
     panel, chars, broad = fixture()
     chars["value"] = np.nan
-    spec = StudySpec()
+    spec = StudySpec(panel_start="2009-01-01")
     for rung in spec.rungs:
         view = encoding.rung_view(panel, chars, broad, spec, rung)
         assert (
             encoding.prepare_quarter(view, chars, panel, pd.Timestamp("2010-03-31"), spec) is None
         )
-    cutoff = pd.Timestamp(str(broad.loc[0, "cutoff"])).to_pydatetime()
-    broad.loc[0, "fact_available_at"] = cutoff + timedelta(days=1)
+    standard = broad.index[broad["is_standard"].astype(bool) & broad["entity_wide"].astype(bool)][0]
+    cutoff = pd.Timestamp(str(broad.loc[standard, "cutoff"])).to_pydatetime()
+    broad.loc[standard, "fact_available_at"] = cutoff + timedelta(days=1)
     with pytest.raises(ValueError, match="published after"):
-        encoding.rung_view(panel, chars, broad, spec, "full_xbrl")
+        encoding.rung_view(panel, chars, broad, spec, "standard_xbrl")
 
 
 def test_encode_manifest_keeps_shared_rows_and_model_failures_explicit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     panel, chars, broad = fixture()
-    spec = replace(StudySpec(), models=("mock",), block_columns=20)
+    spec = replace(StudySpec(panel_start="2009-01-01"), models=("mock",), block_columns=20)
     seen = []
 
     def controls(data: Prepared) -> dict[str, np.ndarray]:
-        return {
-            name: np.ones((len(data.tickers), 2))
-            for name in ("direct", "pca16", "supervised_mlp16")
-        }
+        return {name: np.ones((len(data.tickers), 2)) for name in ("direct",)}
 
-    def model(data: Prepared, _model: str, _cache: Path, _source: Path) -> dict[str, np.ndarray]:
+    def model(data: Prepared, _model: str, _weights: Path, _states: Path) -> dict[str, np.ndarray]:
         seen.append(data)
         return {"late": np.ones((len(data.tickers), 2))}
 
     monkeypatch.setattr(encoding, "conventional_states", controls)
     monkeypatch.setattr(encoding, "foundation_states", model)
-    encoding.encode_panel(panel, chars, broad, spec, tmp_path)
+    encoding.encode_panel(
+        panel,
+        chars,
+        broad,
+        spec,
+        tmp_path,
+        weights=tmp_path / "weights",
+        states_cache=tmp_path / "states",
+    )
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["status"] == "incomplete"  # Early queries have no available training labels.
     assert seen
@@ -241,17 +278,18 @@ def test_encode_manifest_keeps_shared_rows_and_model_failures_explicit(
         rows = [record for record in contexts if record["quarter"] == quarter]
         assert len({tuple(record["support_ids"]) for record in rows}) == 1
         assert {record["rung"] for record in rows} == set(spec.rungs)
-    restored = encoding.load_representations(tmp_path, panel, spec)
-    assert all(set(rungs) == set(spec.rungs) for rungs in restored.values())
+    store = encoding.RepresentationStore(tmp_path, panel, spec, expected_input_digest=None)
+    quarter = pd.Timestamp(contexts[-1]["quarter"])
+    restored = store.states(quarter, ("C", "A"))
+    assert {key.split(":")[0] for key in restored} == set(spec.rungs)
+    assert all(values.shape[0] == 2 for values in restored.values())
+    with pytest.raises(ValueError, match="no representation row"):
+        store.states(quarter, ("A", "Z"))
     changed = panel.copy()
     changed.loc[0, "observed"] = False
     changed.loc[0, "total_return"] = np.nan
     with pytest.raises(ValueError, match="different master"):
-        encoding.load_representations(tmp_path, changed, spec)
-    contexts[0]["issuer_ids"] = ["C", "B", "A"]
-    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="rows or rung"):
-        encoding.load_representations(tmp_path, panel, spec)
+        encoding.RepresentationStore(tmp_path, changed, spec, expected_input_digest=None)
 
 
 def test_unavailable_training_context_is_reported_without_calling_any_adapter(
@@ -266,7 +304,15 @@ def test_unavailable_training_context_is_reported_without_calling_any_adapter(
     monkeypatch.setattr(encoding, "conventional_states", unexpected)
     monkeypatch.setattr(encoding, "foundation_states", unexpected)
     monkeypatch.setattr(encoding, "_quarter_facts", unexpected)
-    encoding.encode_panel(panel, chars, broad, StudySpec(), tmp_path)
+    encoding.encode_panel(
+        panel,
+        chars,
+        broad,
+        StudySpec(panel_start="2009-01-01"),
+        tmp_path,
+        weights=tmp_path / "weights",
+        states_cache=tmp_path / "states",
+    )
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["status"] == "unavailable"
     assert {record["status"] for record in manifest["states"]} == {"training_context_unavailable"}
@@ -276,20 +322,27 @@ def test_invalid_model_rows_are_statuses_without_changing_the_cohort(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     panel, chars, broad = fixture()
-    spec = replace(StudySpec(), models=("bad",))
+    spec = replace(StudySpec(panel_start="2009-01-01"), models=("bad",))
 
     def controls(data: Prepared) -> dict[str, np.ndarray]:
-        return {
-            name: np.ones((len(data.tickers), 2))
-            for name in ("direct", "pca16", "supervised_mlp16")
-        }
+        return {name: np.ones((len(data.tickers), 2)) for name in ("direct",)}
 
-    def invalid(data: Prepared, _model: str, _cache: Path, _source: Path) -> dict[str, np.ndarray]:
+    def invalid(
+        data: Prepared, _model: str, _weights: Path, _states: Path
+    ) -> dict[str, np.ndarray]:
         return {"late": np.ones((len(data.tickers) - 1, 2))}
 
     monkeypatch.setattr(encoding, "conventional_states", controls)
     monkeypatch.setattr(encoding, "foundation_states", invalid)
-    encoding.encode_panel(panel, chars, broad, spec, tmp_path)
+    encoding.encode_panel(
+        panel,
+        chars,
+        broad,
+        spec,
+        tmp_path,
+        weights=tmp_path / "weights",
+        states_cache=tmp_path / "states",
+    )
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     failures = [record for record in manifest["states"] if record.get("model") == "bad"]
     assert failures
@@ -363,12 +416,9 @@ def test_native_tabpfn_passes_full_blocks_and_declares_no_hidden_column_subsampl
 
 def _mock_states(monkeypatch: pytest.MonkeyPatch, calls: list[Prepared]) -> None:
     def controls(data: Prepared) -> dict[str, np.ndarray]:
-        return {
-            name: np.ones((len(data.tickers), 2))
-            for name in ("direct", "pca16", "supervised_mlp16")
-        }
+        return {name: np.ones((len(data.tickers), 2)) for name in ("direct",)}
 
-    def model(data: Prepared, _model: str, _cache: Path, _source: Path) -> dict[str, np.ndarray]:
+    def model(data: Prepared, _model: str, _weights: Path, _states: Path) -> dict[str, np.ndarray]:
         calls.append(data)
         return {"late": np.ones((len(data.tickers), 2))}
 
@@ -381,10 +431,19 @@ def test_aggregate_states_reject_stale_inputs_and_implementation_without_runtime
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, component: str
 ) -> None:
     panel, chars, broad = fixture()
-    spec = replace(StudySpec(), models=("mock",))
+    spec = replace(StudySpec(panel_start="2009-01-01"), models=("mock",))
     calls = []
     _mock_states(monkeypatch, calls)
-    encoding.encode_panel(panel, chars, broad, spec, tmp_path, input_digest="feature-vintage-a")
+    encoding.encode_panel(
+        panel,
+        chars,
+        broad,
+        spec,
+        tmp_path,
+        weights=tmp_path / "weights",
+        states_cache=tmp_path / "states",
+        input_digest="feature-vintage-a",
+    )
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["input_digest"] == "feature-vintage-a"
     implementation = manifest["provenance"]["implementation"]
@@ -396,22 +455,22 @@ def test_aggregate_states_reject_stale_inputs_and_implementation_without_runtime
         pytest.fail("Financial loading must not inspect installed model runtimes.")
 
     monkeypatch.setattr(encoding, "_runtime_provenance", forbidden)
-    assert encoding.load_representations(
+    assert encoding.RepresentationStore(
         tmp_path, panel, spec, expected_input_digest="feature-vintage-a"
     )
     with pytest.raises(ValueError, match="feature vintage"):
-        encoding.load_representations(
+        encoding.RepresentationStore(
             tmp_path, panel, spec, expected_input_digest="feature-vintage-b"
         )
     with pytest.raises(ValueError, match="feature vintage"):
-        encoding.load_representations(tmp_path, panel, spec)
+        encoding.RepresentationStore(tmp_path, panel, spec, expected_input_digest=None)
 
     def changed(_spec: StudySpec) -> dict[str, object]:
         return implementation | {component: "changed"}
 
     monkeypatch.setattr(encoding, "_implementation_provenance", changed)
     with pytest.raises(ValueError, match="implementation, lock or approved checkpoints"):
-        encoding.load_representations(
+        encoding.RepresentationStore(
             tmp_path, panel, spec, expected_input_digest="feature-vintage-a"
         )
 
@@ -420,7 +479,7 @@ def test_native_cache_contracts_record_approved_weights_without_duplicate_infere
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     panel, chars, broad = fixture()
-    spec = replace(StudySpec(), models=("tabpfn_full",), block_columns=20)
+    spec = replace(StudySpec(panel_start="2009-01-01"), models=("tabpfn_full",), block_columns=20)
     calls = []
     _mock_states(monkeypatch, calls)
     approved: dict[str, object] = {
@@ -443,7 +502,16 @@ def test_native_cache_contracts_record_approved_weights_without_duplicate_infere
 
     monkeypatch.setattr(encoding, "checkpoint_expected", checkpoint)
     monkeypatch.setattr(encoding.state_cache, "identity", identity)
-    encoding.encode_panel(panel, chars, broad, spec, tmp_path, input_digest="prepared-manifest")
+    encoding.encode_panel(
+        panel,
+        chars,
+        broad,
+        spec,
+        tmp_path,
+        weights=tmp_path / "weights",
+        states_cache=tmp_path / "states",
+        input_digest="prepared-manifest",
+    )
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["provenance"]["implementation"]["checkpoints"]["tabpfn_full"] == approved
     contexts = [row for row in manifest["states"] if "path" in row]
@@ -457,12 +525,12 @@ def test_native_cache_contracts_record_approved_weights_without_duplicate_infere
         pytest.fail("Loading aggregate states must not resolve a native cache or load a model.")
 
     monkeypatch.setattr(encoding.state_cache, "identity", forbidden)
-    assert encoding.load_representations(
+    assert encoding.RepresentationStore(
         tmp_path, panel, spec, expected_input_digest="prepared-manifest"
     )
     approved["revision"] = "different-revision"
     with pytest.raises(ValueError, match="approved checkpoints"):
-        encoding.load_representations(
+        encoding.RepresentationStore(
             tmp_path, panel, spec, expected_input_digest="prepared-manifest"
         )
 
@@ -478,7 +546,7 @@ def test_streamed_quarter_facts_preserve_asof_schema_and_native_values(tmp_path:
     )
     schema.to_parquet(tmp_path / "schema.parquet", index=False)
     quarter = pd.Timestamp("2010-03-31")
-    spec = StudySpec()
+    spec = StudySpec(panel_start="2009-01-01")
     context = encoding._context_panel(  # noqa: SLF001 -- exercise the streaming boundary.
         panel, chars, quarter, spec
     )
@@ -486,9 +554,11 @@ def test_streamed_quarter_facts_preserve_asof_schema_and_native_values(tmp_path:
         source, context, quarter
     )
     assert streamed_facts["quarter"].le(quarter).all()
-    view = encoding.rung_view(context, chars, streamed_facts, spec, "full_xbrl", schema=catalogue)
+    view = encoding.rung_view(
+        context, chars, streamed_facts, spec, "standard_xbrl", schema=catalogue
+    )
     streamed = encoding.prepare_quarter(view, chars, panel, quarter, spec)
-    dense_view = encoding.rung_view(panel, chars, broad, spec, "full_xbrl")
+    dense_view = encoding.rung_view(panel, chars, broad, spec, "standard_xbrl")
     dense = encoding.prepare_quarter(dense_view, chars, panel, quarter, spec)
     assert streamed is not None
     assert dense is not None

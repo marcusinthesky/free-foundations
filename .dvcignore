@@ -8,7 +8,7 @@ __pycache__/
 *.pyc
 
 # Model weights are refetched at pinned revisions, never redistributed from the bucket.
-research/expanded/cache/models/
+data/raw/models/*/
 
 # Run logs.
 *.log

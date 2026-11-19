@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 from typing import TYPE_CHECKING, Any
@@ -11,7 +12,7 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_string_dtype
 
-from free_foundations.fernandez.characteristics import debt_maturity_with_audit
+from free_foundations.fernandez.characteristics import characteristics
 from free_foundations.study.sec import (
     CROSSWALK_COLUMNS,
     FACT_COLUMNS,
@@ -28,14 +29,7 @@ if TYPE_CHECKING:
 
     from free_foundations.study.spec import StudySpec
 
-CHARACTERISTICS = ("market_cap_assets", "market_to_book", "dividend_yield", "debt_maturity")
 LOGGER = logging.getLogger(__name__)
-CHARACTERISTIC_REASONS = {
-    "market_cap_assets": "verified_full_issuer_market_cap_or_assets_unavailable",
-    "market_to_book": "verified_full_issuer_market_cap_or_positive_parent_equity_unavailable",
-    "dividend_yield": "matched_class_annual_cash_dividend_per_share_or_verified_price_unavailable",
-    "debt_maturity": "aligned_lease_inclusive_debt_components_unavailable",
-}
 STANDARD_TAXONOMIES = {"us-gaap", "ifrs-full", "dei", "srt"}
 CHAR_COLUMNS = [
     "issuer_id",
@@ -82,6 +76,7 @@ AVAILABILITY_COLUMNS = [
     "reason",
     "native_scalar_count",
     "original_characteristics_available",
+    "sic",
 ]
 
 
@@ -346,41 +341,6 @@ def _provenance(frame: pd.DataFrame) -> str:
     return frame[columns].to_json(orient="records", date_format="iso")
 
 
-def _tag(facts: pd.DataFrame, tag: str, period: pd.Timestamp | None = None) -> pd.DataFrame:
-    selected = facts.loc[
-        facts["namespace"].eq("us-gaap")
-        & facts["tag"].eq(tag)
-        & facts["unit"].eq("USD")
-        & facts["dimensions"].eq("{}")
-        & facts["period_kind"].eq("instant")
-        & facts["value_type"].eq("numeric")
-    ]
-    if period is not None:
-        selected = selected.loc[selected["end"].eq(period)]
-    return selected.tail(1)
-
-
-def _value(frame: pd.DataFrame) -> float:
-    if frame.empty:
-        return float("nan")
-    return float(pd.to_numeric(frame["value"], errors="coerce").iloc[-1])
-
-
-def _catalog(root: Path) -> pd.DataFrame:
-    """Only explicitly reviewed SEC concept semantics may identify market quantities."""
-    filename = root / "metadata/component-semantics.csv"
-    if not filename.exists():
-        return pd.DataFrame(
-            columns=["concept", "component", "unit", "scope", "status", "evidence_url"]
-        )
-    frame = pd.read_csv(filename).fillna("")
-    required = {"concept", "component", "unit", "scope", "status", "evidence_url"}
-    if not required.issubset(frame):
-        message = "Component semantics need concept/component/unit/scope/status/SEC evidence URL."
-        raise ValueError(message)
-    return frame.loc[frame["status"].eq("verified") & frame["evidence_url"].map(_official_url)]
-
-
 def _official_url(value: object) -> bool:
     return urlparse(str(value)).hostname in {"www.sec.gov", "data.sec.gov"}
 
@@ -409,153 +369,64 @@ def _acquisition_issue(root: Path, cik: int) -> str:
     return "no_available_native_facts"
 
 
-def _component(facts: pd.DataFrame, catalog: pd.DataFrame, name: str) -> pd.DataFrame:
-    parts = []
-    for definition in catalog.loc[catalog["component"].eq(name)].to_dict("records"):
-        # Public float and par value cannot become prices/capitalization by a label.
-        if definition["concept"] in {
-            "dei:EntityPublicFloat",
-            "us-gaap:CommonStockParOrStatedValuePerShare",
-        }:
-            continue
-        selected = facts.loc[
-            facts["concept"].eq(definition["concept"])
-            & facts["unit"].eq(definition["unit"])
-            & facts["value_type"].eq("numeric")
-        ]
-        if name == "market_cap" and definition["scope"] != "entire_common_equity":
-            continue
-        if name == "market_price" and definition["scope"] not in {
-            "single_common_class",
-            "class_context",
-        }:
-            continue
-        if name == "market_cap":
-            selected = selected.loc[selected["dimensions"].eq("{}")]
-        if name in {"market_cap", "market_price"}:
-            selected = selected.loc[selected["period_kind"].eq("instant")]
-        selected = selected.assign(
-            semantic_evidence_url=definition["evidence_url"], semantic_scope=definition["scope"]
-        )
-        parts.append(selected)
-    return (
-        pd.concat(parts).sort_values(["end", "fact_available_at"]).tail(1)
-        if parts
-        else facts.iloc[:0]
+def current_sic(root: Path, cik: int | None) -> str | None:
+    """The filer's current four-digit SIC from its frozen submissions record.
+
+    SEC submissions expose only the current code, so industry networks built from it
+    carry today's classification back in time; ``0000`` and blanks are missing.
+    """
+    if cik is None:
+        return None
+    filename = root / "submissions" / f"CIK{cik:010}.json"
+    compressed = filename.with_suffix(".json.gz")
+    if filename.is_file():
+        record = json.loads(filename.read_text())
+    elif compressed.is_file():
+        record = json.loads(gzip.decompress(compressed.read_bytes()))
+    else:
+        return None
+    if not isinstance(record, dict):
+        return None
+    code = str(record.get("sic") or "").strip()
+    return code if code.isdigit() and int(code) > 0 else None
+
+
+def market_equity(monthly: pd.DataFrame) -> dict[int, pd.Series]:
+    """CRSP issuer market equity in USD by PERMCO and month end, summed over classes."""
+    if monthly.empty or "market_cap_usd" not in monthly:
+        return {}
+    month = (
+        monthly["month"]
+        if "month" in monthly
+        else pd.to_datetime(monthly["date"]).dt.to_period("M").dt.to_timestamp("M")
     )
+    totals = monthly.assign(month=month).groupby(["permco", "month"])["market_cap_usd"].sum()
+    return {
+        int(str(permco)): series.droplevel("permco")
+        for permco, series in totals.groupby(level="permco")
+    }
 
 
 def _characteristics(
-    facts: pd.DataFrame,
-    catalog: pd.DataFrame,
-    base: dict[str, Any],
+    facts: pd.DataFrame, equity: pd.Series, base: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    if facts.empty:
-        return [
-            base
-            | {
-                "characteristic": name,
-                "value": np.nan,
-                "status": "unavailable",
-                "reason": CHARACTERISTIC_REASONS[name],
-                "fact_available_at": pd.NaT,
-                "components": "[]",
-            }
-            for name in CHARACTERISTICS
-        ]
-    assets = _tag(facts, "Assets")
-    period = assets.iloc[-1]["end"] if not assets.empty else None
-    parent = _tag(facts, "StockholdersEquity", period)
-    parent_value = _value(parent)
-    if parent.empty and period is not None:
-        consolidated = _tag(
-            facts, "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest", period
-        )
-        nci = _tag(facts, "MinorityInterest", period)
-        if not consolidated.empty and not nci.empty:
-            parent = pd.concat([consolidated, nci])
-            parent_value = _value(consolidated) - _value(nci)
-    cap = _component(facts, catalog, "market_cap")
-    if period is not None:
-        cap = cap.loc[cap["end"].eq(period)]
-    cap_value = _value(cap)
-    price = _component(facts, catalog, "market_price")
-    dividends = facts.loc[
-        facts["concept"].eq("us-gaap:CommonStockDividendsPerShareCashPaid")
-        & facts["unit"].eq("USD/shares")
-        & facts["period_kind"].eq("annual")
-        & facts["value_type"].eq("numeric")
-    ]
-    # Yield needs the same class context and end date; no inferred market price,
-    # issuer-wide payout substitute, public-float denominator, or absent-as-zero.
-    if not price.empty:
-        dividends = dividends.loc[
-            dividends["end"].eq(price.iloc[-1]["end"])
-            & dividends["dimensions"].eq(price.iloc[-1]["dimensions"])
-        ].tail(1)
-    else:
-        dividends = dividends.iloc[:0]
-    debt = facts.loc[
-        facts["namespace"].eq("us-gaap")
-        & facts["unit"].eq("USD")
-        & facts["dimensions"].eq("{}")
-        & facts["period_kind"].eq("instant")
-        & facts["value_type"].eq("numeric")
-    ].copy()
-    debt_value, debt_evidence = float("nan"), debt.iloc[:0]
-    if not debt.empty:
-        debt_period = period if period is not None else debt["end"].max()
-        adapted = debt.rename(columns={"value": "val", "accession": "accn"})
-        adapted["val"] = pd.to_numeric(adapted["val"], errors="coerce")
-        adapted["filed"] = pd.to_datetime(adapted["filed"], errors="coerce")
-        debt_value, audit = debt_maturity_with_audit(adapted, debt_period)
-        if not audit.empty:
-            debt_evidence = audit.rename(columns={"val": "value", "accn": "accession"})
-    specifications = [
-        (
-            "market_cap_assets",
-            cap_value / _value(assets) if cap_value > 0 and _value(assets) > 0 else np.nan,
-            pd.concat([cap, assets]),
-            CHARACTERISTIC_REASONS["market_cap_assets"],
-        ),
-        (
-            "market_to_book",
-            cap_value / parent_value if cap_value > 0 and parent_value > 0 else np.nan,
-            pd.concat([cap, parent]),
-            CHARACTERISTIC_REASONS["market_to_book"],
-        ),
-        (
-            "dividend_yield",
-            _value(dividends) / _value(price)
-            if _value(price) > 0 and _value(dividends) >= 0
-            else np.nan,
-            pd.concat([dividends, price]),
-            CHARACTERISTIC_REASONS["dividend_yield"],
-        ),
-        (
-            "debt_maturity",
-            debt_value,
-            debt_evidence,
-            CHARACTERISTIC_REASONS["debt_maturity"],
-        ),
-    ]
-    results = []
-    for name, value, evidence, reason in specifications:
-        available = np.isfinite(value)
-        results.append(
+    rows = []
+    for item in characteristics(facts, equity):
+        evidence = item.evidence
+        rows.append(
             {
                 **base,
-                "characteristic": name,
-                "value": value,
-                "status": "available" if available else "unavailable",
-                "reason": "" if available else reason,
+                "characteristic": item.name,
+                "value": item.value,
+                "status": "available" if not item.reason else "unavailable",
+                "reason": item.reason,
                 "fact_available_at": evidence["fact_available_at"].max()
                 if not evidence.empty and "fact_available_at" in evidence
                 else pd.NaT,
-                "components": _provenance(evidence),
+                "components": _provenance(evidence) if not evidence.empty else "[]",
             }
         )
-    return results
+    return rows
 
 
 def _broad_frame(selected: pd.DataFrame, base: dict[str, Any], day: pd.Timestamp) -> pd.DataFrame:
@@ -594,7 +465,7 @@ def _build_feature_chunk(  # noqa: PLR0913 -- bounded CIK task and cached shared
     *,
     normalized: pd.DataFrame | None = None,
     links: pd.DataFrame | None = None,
-    components: pd.DataFrame | None = None,
+    equity: dict[int, pd.Series] | None = None,
     cutoffs: dict[pd.Timestamp, tuple[pd.Timestamp, pd.Timestamp]] | None = None,
     resolved_links: dict[tuple[str, pd.Timestamp], tuple[int | None, str]] | None = None,
 ) -> dict[str, pd.DataFrame]:
@@ -628,7 +499,8 @@ def _build_feature_chunk(  # noqa: PLR0913 -- bounded CIK task and cached shared
         if normalized is not None
         else _normalized_facts(load_source_facts(root, linked_ciks))
     )
-    catalog = components if components is not None else _catalog(root)
+    equities = equity if equity is not None else market_equity(monthly)
+    sic_codes: dict[int | None, str | None] = {}
     chars: list[dict[str, Any]] = []
     broad: list[pd.DataFrame] = []
     availability: list[dict[str, Any]] = []
@@ -669,7 +541,11 @@ def _build_feature_chunk(  # noqa: PLR0913 -- bounded CIK task and cached shared
             reason = _acquisition_issue(root, cik)
         else:
             reason = ""
-        characteristic_rows = _characteristics(current, catalog, base)
+        if cik not in sic_codes:
+            sic_codes[cik] = current_sic(root, cik)
+        characteristic_rows = _characteristics(
+            current, equities.get(permco, pd.Series(dtype=float)), base
+        )
         chars.extend(characteristic_rows)
         availability.append(
             {
@@ -682,6 +558,7 @@ def _build_feature_chunk(  # noqa: PLR0913 -- bounded CIK task and cached shared
                 "original_characteristics_available": sum(
                     row["status"] == "available" for row in characteristic_rows
                 ),
+                "sic": sic_codes[cik],
             }
         )
         if current.empty:
@@ -759,7 +636,7 @@ def build_features(  # noqa: PLR0912, PLR0915, C901 -- one bounded source materi
     schema: dict[str, tuple[pd.Timestamp, bool, bool, str, str]] = {}
     empty_facts = _normalized_facts(pd.DataFrame(columns=FACT_COLUMNS))
     empty_broad = pd.DataFrame(columns=BROAD_COLUMNS)
-    catalog = _catalog(root)
+    equities = market_equity(monthly)
     if destination is not None:
         destination.mkdir(parents=True, exist_ok=True)
         for name in ("facts", "broad"):
@@ -781,7 +658,7 @@ def build_features(  # noqa: PLR0912, PLR0915, C901 -- one bounded source materi
             spec,
             normalized=facts,
             links=links,
-            components=catalog,
+            equity=equities,
             cutoffs=cutoffs,
             resolved_links=resolved_links,
         )

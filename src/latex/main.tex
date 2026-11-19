@@ -1,7 +1,9 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,array,booktabs,graphicx,longtable}
-\usepackage{xurl,pgf,float,hyperref}
+\usepackage{xurl,pgf,float}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
 \hypersetup{hidelinks}
 \urlstyle{same}
 \setlength{\emergencystretch}{1em}
@@ -18,47 +20,59 @@
 \maketitle
 \begin{abstract}
   Financial proximity measures similarity in firms' exposures to common shocks.
-  We distinguish predictive information, economic alignment, and
-  exposure-readout
-  estimation, and formalize how their errors propagate into networks and risk
-  forecasts. Our empirical design replicates the characteristic-history spatial
-  CAPM of Fern\'andez on a quarterly CRSP total-return panel linked to dated SEC
-  disclosures. Every empirical comparison uses the same issuer-quarter roster,
-  calendar and observed-return mask. A representation ladder expands
-  the original
-  financial characteristics to all available structured scalar XBRL facts while
-  preserving missingness. Pairwise moments use intersecting observation dates.
-  Source coverage, estimator availability, and numerical findings are generated
-  from the recorded experiment; results from the earlier current-survivor study
-  are archived and are not conclusions of this migration.
+  We distinguish predictive information, economic alignment and geometric
+  measurement, and formalize how errors in each propagate into networks and
+  covariance. Empirically, we ask whether the native geometry of frozen tabular
+  foundation-model representations organizes US stock returns,
+  fitting no readout
+  on the representations: each network is defined by distances between frozen
+  states, so the spatial coefficient is the only network parameter
+  estimated from
+  returns. We first replicate the characteristic-history spatial CAPM of
+  Fern\'andez on point-in-time CRSP top-1,000 cohorts followed
+  through exits, with
+  characteristics from CRSP market equity and dated SEC CompanyFacts. We then
+  compare foundation-model networks with characteristic, size, industry and
+  permutation-null networks in quarterly spatial co-movement panels
+  and by Mantel
+  alignment with realized return correlations. All estimates are in sample, with
+  intervals that account for generated regressors and serial dependence.
 \end{abstract}
 
 \section{Introduction}\label{sec:question}
 Financial distance should connect firms whose exposures to common shocks are
 similar. Prediction quality does not by itself identify that economic distance:
 representations can preserve a task's predictions while changing their native
-geometry. We study this distinction through a formal measurement framework and
-a matched empirical comparison.
+geometry. We study this distinction through a formal measurement framework and a
+deliberately parameter-light empirical test.
 
-The empirical benchmark follows the characteristic-history spatial CAPM of
-Fern\'andez~\cite{fernandez}. CRSP CIZ total returns replace the earlier public
-price source, and dated SEC disclosures determine the information available at
-each historical cutoff. Annual membership uses prior-December capitalization,
-retaining inactive securities and permitting entry and exit. The company-quarter
-roster is common to the replication, financial measurement, risk evaluation and
-representation ladder; missing histories do not define separate samples.
+The benchmark is the characteristic-history spatial CAPM of
+Fern\'andez~\cite{fernandez2011}, in which firms are neighbours when their
+financial characteristics move together over time. We rebuild it on CRSP total
+returns for the December top-1,000 US issuers, followed through exits
+so that the
+sample does not condition on survival, with characteristics combining
+CRSP market
+equity and SEC disclosures available at each date. We report her specification
+without an intercept and the identified specification with one: under her nearly
+uniform kernel, a spatial lag without an intercept also absorbs the
+cross-sectional mean.
 
-Four pinned pretrained tabular models and conventional controls receive the
-same information within each rung. The ladder expands financial characteristic
-histories to standard SEC facts and then to filing-level scalar XBRL facts,
-including custom concepts and dimensional contexts. These are retrospective
-experiments with current pretrained weights, rather than claims that those
-weights or revised data vintages were historically available.
+Four pinned pretrained tabular models then encode the same information: her
+characteristic histories and, separately, standard CompanyFacts disclosures. No
+decoder is fitted to their states. Networks are $k$-nearest-neighbour graphs on
+representation distances, built exactly as for the characteristic, size and
+direct-feature controls. Comparing these networks asks whether pretrained
+geometry carries information about which firms' returns move
+together, beyond the
+geometry of the inputs themselves. These are retrospective measurements with
+current pretrained weights and revised disclosures, not claims about information
+available to investors at the time.
 
-The formal results below separate economic identification from estimation.
-The empirical report records which source observations and estimator outputs
-are available. It does not transfer model rankings or financial conclusions
-from the archived current-survivor experiment.
+The formal results in Section~\ref{sec:measurement} explain why the
+answer is not
+implied by predictive performance, and the empirical sections report what the
+data show, with in-sample intervals throughout.
 
 \section{From predictive information to economic
 measurement}\label{sec:measurement}
@@ -86,12 +100,9 @@ $H$. A history-based estimator can predict only the component accessible from
 those observations; estimated historical loadings also contain measurement
 error. We keep these objects distinct. The task-alignment result concerns a
 declared target determined by history, whereas the risk decomposition below
-allows uncertainty remaining after history is observed. The application uses
-historical loadings as an exposure proxy and evaluates how well a fitted
-regression predicts that proxy for held-out firms. This target makes the
-economic units explicit while leaving the quality of the proxy open to
-assessment. Predicting the estimated historical coordinate and recovering a
-latent exposure are different empirical claims.
+allows uncertainty remaining after history is observed. The application does
+not estimate exposures from features; it asks whether the native geometry of
+frozen representations orders firms the way their returns co-move.
 
 \subsection{Prediction and distance}
 A prediction task can reward information different from that needed for risk
@@ -100,7 +111,8 @@ exposures. An encoder that preserves only the expected cash flow can therefore
 solve a mean-prediction task while merging economically distinct firms.
 The task's outcome and loss jointly determine the distinction it rewards:
 squared loss targets a conditional mean, quantile loss a conditional quantile,
-and a strictly proper distributional score a conditional law~\cite{gneiting}.
+and a strictly proper distributional score a conditional
+law~\cite{gneiting2011}.
 Predicting future cash flows and reconstructing contemporaneous accounts can
 reward different information even with the same loss.
 
@@ -112,17 +124,18 @@ when equal task statistics imply equal targets.
 Proposition~\ref{prop:factorization} in Appendix~\ref{sec:theory} states this
 condition formally. A particular encoder may retain more information than the
 task requires. Conversely, the existence of a recovering map gives no bound on
-its complexity or the financial sample needed to estimate it. We assess the
-observed features through a fitted exposure regression, without assuming that
-their supplied valuation task is sufficient for exposures.
+its complexity or the financial sample needed to estimate it. The application
+therefore tests the native geometry of the supplied features directly, without
+assuming that their valuation task is sufficient for exposures.
 
 Even full target information leaves feature distance undetermined. Replacing
 $E$ by $T E$ and a prediction function $h$ by $h\circ T^{-1}$ preserves
 predictions for invertible $T$, while stretching coordinates changes distances,
-even after normalization~\cite{steck}. A calibrated readout instead
+even after normalization~\cite{steck2024}. A calibrated readout instead
 maps features
 into declared exposure units. Task-centric, retrieval-based explanations of
-tabular transfer motivate studying useful comparison procedures~\cite{shaheen};
+tabular transfer motivate studying useful comparison
+procedures~\cite{shaheen2026};
 they do not identify the economic metric of exported states.
 
 \subsection{Estimating exposures}
@@ -154,7 +167,8 @@ information, approximation, and fitting error under explicit empirical-risk
 discrepancy conditions. Its full setup and proof appear in
 Appendix~\ref{sec:theory}. The bound is conditional on those assumptions and
 supplies no pretraining-specific convergence rate. Related-task
-learning~\cite{baxter,maurer} and self-supervised transfer~\cite{lee} motivate
+learning~\cite{baxter2000,maurer2016} and self-supervised
+transfer~\cite{lee2021} motivate
 examining the auxiliary-to-financial relationship rather than inferring it
 from general tabular performance.
 
@@ -204,9 +218,100 @@ probability interfaces
 and proof checks are documented in Appendices~\ref{app:finite-probability}
 and~\ref{app:traceability}.
 
-\IfFileExists{build/crsp-study.tex}{\input{build/crsp-study}}{
-  \section{Empirical design}The CRSP\textendash{}SEC result report has not yet
-been generated.}
+\section{Empirical design}\label{sec:design}
+\subsection{Population, returns and information}
+CRSP CIZ monthly total returns for 2001--2025 include delisting returns, applied
+once. Each December ranks US common stocks by capitalization and the largest
+1,000 form the following year's roster. Selected share classes are grouped by
+formation PERMCO into issuer portfolios with lagged capitalization weights, and
+three monthly returns compound into each quarterly outcome. A
+formation cohort is
+one December roster followed for the next 40 quarters, through exits; no
+complete-case sample is constructed. Issuers enter the analysis when a verified
+CRSP\textendash{}SEC link and as-of SEC CompanyFacts exist; unresolved links are
+reported as coverage.
+
+Information at a quarter start consists of facts filed before the preceding
+CRSP close. Fern\'andez's four characteristics combine CRSP issuer market equity
+(ME) at the balance-sheet month with entity-wide US-GAAP books: ME over assets,
+ME over positive parent equity, annual common dividends over ME, and noncurrent
+over total reported debt, excluding leases as in her pre-2019 sample. Missing
+components stay missing; implausible values and balance sheets older than 15
+months are unavailable. Two information sets enter the models: ten annual as-of
+slots of the four characteristics, and the latest as-of value of
+every entity-wide
+standard-taxonomy CompanyFacts concept reported by at least 10\% of issuers.
+Representations are formed each January and held for the year, as the roster is.
+
+\subsection{Networks without fitted readouts}
+Four pinned tabular foundation models
+(TabPFN~3.5~\cite{hollmann2025}, TabFM~1.1~\cite{kong2026tabfm},
+Kumo-Tabular~\cite{nvidia2026kumo} and LimiX-2~\cite{zhang2026limix})
+encode each
+information set with labeled support rows available before the query quarter. A
+direct control standardizes the same features after support-median
+imputation with
+missingness indicators. No readout or decoder is fitted to the representations:
+each network is defined by distances between frozen states, so the spatial
+coefficient is the only network parameter estimated from returns.
+
+Fern\'andez's replication networks keep her kernel
+$W=\mathrm{rownorm}(\exp(-d))$ on Spearman chord distances
+$d_{ij}=\sqrt{2(1-r_{ij})}$ of characteristic histories, reranked on each pair's
+common years~\cite{fernandez2011}. Chord distances between high-dimensional
+representations concentrate near $\sqrt2$, so any smooth kernel on
+them is nearly
+uniform; then $Wy$ is close to the cross-sectional mean and the
+spatial coefficient
+is not identified separately from an intercept. Comparison networks
+are therefore
+symmetrized, row-normalized $k$-nearest-neighbour graphs ($k=10$; 5 and 20 as
+sensitivities), which depend only on the order of distances. They are built from
+each representation, the direct control, Fern\'andez's joint distance and size;
+industry links equal two-digit SIC codes, and a permutation null relabels the
+Fern\'andez joint graph.
+
+\subsection{Estimation and in-sample inference}
+The replication follows Fern\'andez. MM CAPM betas~\cite{yohai1987}
+are estimated
+from each issuer's observed quarterly excess returns, and the outcome
+is its median
+quarterly excess return. Cross-sections are fitted by OLS, by the
+spatial lag with
+her two-stage least squares instruments $[X,WX]$~\cite{kelejian1998}
+and by maximum
+likelihood, and by the spatial error model~\cite{anselin1988}. Her
+specification has
+no intercept; because a nearly uniform $\rho Wy$ then also absorbs the
+cross-sectional mean, every model is also reported with an intercept. Residual
+Moran's $I$ and Lagrange multiplier tests~\cite{anselin1996} use OLS with an
+intercept. For the 2015 formation, a stationary bootstrap over
+quarters~\cite{politis1994}, with Politis\textendash{}White block
+length~\cite{politis2004,patton2009}, refits betas, medians and every
+spatial model,
+so intervals account for generated regressors. Her portfolio value-at-risk is
+evaluated at the fitted parameters.
+
+Co-movement is measured by quarterly spatial panels of excess returns for
+2011--2025 with period effects, the regressor
+$\hat\beta_i\times{(\text{Mkt}-\text{RF})}_t$
+and each quarter's as-of graph. Period effects absorb common shocks,
+so the spatial
+coefficient measures co-movement beyond the market along the network. Intervals
+use profile-likelihood curvature and a quarter bootstrap. Networks with equal
+parameter counts are compared through per-quarter log-likelihood
+differences~\cite{vuong1989} with bootstrap intervals and Holm
+adjustment~\cite{holm1979}. Finally, a parameter-free Mantel
+correlation~\cite{mantel1967} measures how each distance orders realized
+excess-return correlations, with node-bootstrap intervals. Spatial estimates,
+covariances and diagnostics use statadic~\cite{statadic2026};
+resampling refits use
+an eigenvalue profile likelihood that must reproduce statadic on the original
+sample. All estimates are in sample: no forecast or backtest is reported.
+
+\section{Results}\label{sec:results}
+\IfFileExists{build/crsp-study.tex}{\input{build/crsp-study}}{The saved-result
+report has not yet been generated.}
 
 \section{Conclusion}
 The theory distinguishes a predictive representation from an economically
@@ -274,7 +379,8 @@ where $p_c$ is the conditional outcome law, $q_c$ is strictly positive,
 $\pi_c$ is the context probability, and zero-probability terms are zero.
 \lean{FreeFoundations.Score.pretraining_excess}\leanok{}
 This identity concerns the conditional law rewarded by log loss. A task prior
-specifies generated contexts in a prior-data fitted network~\cite{pfn,nagler};
+specifies generated contexts in a prior-data fitted
+network~\cite{muller2022,nagler2023};
 transferring its performance to finance additionally requires a relationship
 between the generated and financial tasks.
 
@@ -733,7 +839,7 @@ FreeFoundations.FiniteProbability.transfer_failure_probability}\leanok{}
 Unrestricted task precisions and unnormalized good-event restrictions retain
 their original interfaces. A finite candidate family does not require finite
 observations. The finite-law interface imports the pinned MathEconLib
-dependency~\cite{matheconlib} directly and retains the project's
+dependency~\cite{matheconlib2026} directly and retains the project's
 financial-transfer adapters.
 
 \subsection{Design comparative statics and research
@@ -878,7 +984,7 @@ holes and unsupported transitive axioms. Only \texttt{propext},
 source-hashed
 report records the toolchain, dependency revisions, exclusions and coverage;
 negative fixtures test rejection. The checker implementation is an explicit
-trusted tool. These practices follow MathEconLib~\cite{matheconlib}; the
+trusted tool. These practices follow MathEconLib~\cite{matheconlib2026}; the
 implementation uses Lean 4.35 and the pinned MathEconLib dependency.
 Complete types do not freeze the
 semantics of definitions, so pinned dependencies, mathematical review and
@@ -905,143 +1011,29 @@ empirical validation remain separate requirements.
 
 \section{Empirical construction and
 reproducibility}\label{sec:empirical-supplement}
-The versioned study contract declares one quarterly clock, lagged-December
-membership, formation-date issuer grouping, information cutoffs, pairwise moment
-conventions and inference settings. DVC restores frozen CRSP, SEC and factor
-sources without reacquiring them. Preparation writes one master observation
-ledger and the analytical panel shared by all numerical stages. Every result
-records the same roster and mask identities; publication rejects mismatches.
+One parameter file declares the population, information sets, networks and
+inference settings. DVC restores the frozen CRSP, SEC and factor sources without
+reacquiring them; preparation writes one master issuer-quarter ledger and the
+analytical panel shared by every stage. Each saved result binds the
+panel, roster
+and outcome-mask identities, and the report is rendered only from
+saved tables, so
+every number in Section~\ref{sec:results} is traceable to a stage output.
 
-Original definitions are retained where SEC evidence identifies the required
-market value, share-class scope, price and dividend basis.
-Unavailable components
-remain missing and are distinct from failed acquisition or unresolved identity.
-No missing dividend tag is interpreted as zero. An indefinite pairwise moment
-matrix is retained in the audit and regularized explicitly before a procedure
-requires a covariance matrix. Neutral links identify the disclosed completion of
-an otherwise undefined characteristic correlation.
+Each characteristic records its CRSP and SEC components. Unavailable components
+remain missing and are distinct from failed acquisition or unresolved
+identity; no
+missing dividend tag is interpreted as zero. Neutral links mark characteristic
+pairs without two common years. Representation states record
+checkpoint revisions,
+model runtimes, the labeled support and state checksums.
 
-The historical current-survivor manuscript and its DVC specification are
-preserved in the repository's Git history. They establish prior
-research provenance,
-not numerical evidence for the new CRSP experiment. The saved-result report
-states whether source recovery and the prescribed comparisons are complete.
+CompanyFacts reports revised rather than filing-date values, and the pretrained
+weights postdate the sample, so the representations are retrospective
+measurements. Market equity sums the share classes present in the CRSP extract,
+which lacks terminal-return flags, and industry codes are current. None of these
+limitations is removed by a successful pipeline run.
 
-\begin{thebibliography}{99}
-  \bibitem{fernandez}
-  Fern\'andez, V. (2011).
-  Spatial linkages in international financial markets.
-  \emph{Quantitative Finance}, 11(2), 237--245.
-  \url{https://doi.org/10.1080/14697680903127403}.
-  \bibitem{fernandezworking}
-  Fern\'andez, V. (2007).
-  Spatial Linkages in International Financial Markets.
-  IIIS Discussion Paper No.~234, November.
-  \url{https://www.tcd.ie/triss/assets/PDFs/iiis/iiisdp234.pdf}.
-  \bibitem{robustpackage}
-  Wang, J. et al. (2024).
-  \texttt{robust}: Port of the S+ Robust Library. R package version
-  0.7-5. % chktex 8
-  \url{https://CRAN.R-project.org/package=robust}.
-  \bibitem{assetembeddings}
-  Gabaix, X., Koijen, R. S. J., Richmond, R. J., and Yogo, M. (2025).
-  Asset Embeddings. BFI Working Paper 2025-51, April version. % chktex 8
-% tex-fmt: off
-  \url{https://bfi.uchicago.edu/wp-content/uploads/2025/04/BFI_WP_2025-51.pdf}. % chktex 8
-% tex-fmt: on
-  \bibitem{fulleotto}
-  F\"ulle, M. J., and Otto, P. (2024).
-  Spatial GARCH models for unknown spatial locations---an application to
-  financial stock returns.\ \emph{Spatial Economic Analysis}, 19(1), 92--105.
-  \url{https://doi.org/10.1080/17421772.2023.2237067}.
-  \bibitem{baxter}
-  Baxter, J. (2000). A model of inductive bias learning.
-  \emph{Journal of Artificial Intelligence Research}, 12, 149--198.
-  \url{https://doi.org/10.1613/jair.731}.
-  \bibitem{maurer}
-  Maurer, A., Pontil, M., and Romera-Paredes, B. (2016).
-  The benefit of multitask representation learning.
-  \emph{Journal of Machine Learning Research}, 17(81), 1--32.
-  \url{https://jmlr.org/papers/v17/15-242.html}. % chktex 8
-  \bibitem{lee}
-  Lee, J. D., Lei, Q., Saunshi, N., and Zhuo, J. (2021).
-  Predicting what you already know helps: Provable self-supervised learning.
-  \emph{Advances in Neural Information Processing Systems}, 34.
-  \url{https://proceedings.neurips.cc/paper/2021/hash/02e656adee09f8394b402d9958389b7d-Abstract.html}.
-  \bibitem{tabpfn}
-  Hollmann, N., et al. (2025).
-  Accurate predictions on small data with a tabular foundation model.
-  \emph{Nature}, 637, 319--326.
-  \url{https://doi.org/10.1038/s41586-024-08328-6}. % chktex 8
-  \bibitem{tabfm}
-  Kong, W., et al. (2026).
-  TabFM\@: A Zero-Shot Foundation Model for Tabular Data.
-  \emph{arXiv preprint}, arXiv:2609.37959.
-  \url{https://arxiv.org/abs/2609.37959}.
-  \bibitem{kumo}
-  NVIDIA (2026). Kumo-Tabular: A foundation model for tabular prediction.
-  Model description and released checkpoints.
-  \url{https://huggingface.co/blog/nvidia/kumo-tabular}.
-  \bibitem{limix}
-  Zhang, X., et al. (2026). LimiX-2: A Contextual Mechanism Network
-  Towards General
-  Structured-Data Intelligence.\ \emph{arXiv preprint}, arXiv:2609.17488.
-  \url{https://arxiv.org/abs/2609.17488}.
-  \bibitem{pfn}
-  M\"uller, S., Hollmann, N., Pineda Arango, S., Grabocka, J., and Hutter, F.
-  (2022). Transformers can do Bayesian inference.\ \emph{International
-  Conference on Learning Representations}.
-  \bibitem{nagler}
-  Nagler, T. (2023). Statistical foundations of prior-data fitted networks.
-  \emph{Proceedings of the 40th International Conference on Machine Learning},
-  PMLR 202.
-  \bibitem{gneiting}
-  Gneiting, T. (2011). Making and evaluating point forecasts.
-  \emph{Journal of the American Statistical Association}, 106(494), 746--762.
-  \url{https://doi.org/10.1198/jasa.2011.r10138}.
-  \bibitem{secapi}
-  US Securities and Exchange Commission.
-  EDGAR Application Programming Interfaces.
-  \url{https://www.sec.gov/search-filings/edgar-application-programming-interfaces}.
-  \bibitem{kps}
-  Kelly, B., Pruitt, S., and Su, Y. (2019).
-  Characteristics are covariances: A unified model of risk and return.
-  \emph{Journal of Financial Economics}, 134(3), 501--524.
-  \url{https://doi.org/10.1016/j.jfineco.2019.05.001}.
-  \bibitem{gkx}
-  Gu, S., Kelly, B., and Xiu, D. (2021).
-  Autoencoder asset pricing models.
-  \emph{Journal of Econometrics}, 222(1), 429--450.
-  \url{https://doi.org/10.1016/j.jeconom.2020.07.009}.
-  \bibitem{alouadi}
-  Alouadi, A., and Lehalle, C.-A. (2026).
-  The Fundamental Structure of Risk: From Characteristics to Covariance.
-  \emph{arXiv preprint}, arXiv:2607.24410, July version.
-  \url{https://arxiv.org/abs/2607.24410v1}.
-  \bibitem{ye}
-  Ye, H.-J., Liu, S.-Y., and Chao, W.-L. (2025).
-  A Closer Look at TabPFN v2: Understanding Its Strengths and Extending Its
-  Capabilities.\ \emph{Advances in Neural Information Processing Systems}, 38.
-  \url{https://papers.nips.cc/paper_files/paper/2025/file/c57b3718381cb2bf9c1ccd63377f2448-Paper-Conference.pdf}.
-  \bibitem{steck}
-  Steck, H., Ekanadham, C., and Kallus, N. (2024).
-  Is Cosine-Similarity of Embeddings Really About Similarity?
-  \emph{Companion Proceedings of the ACM Web Conference 2024}.
-  \url{https://doi.org/10.1145/3589335.3651526}.
-  \bibitem{shaheen}
-  Shaheen, N., Ma, J., Labach, A., Hutter, F., Thomas, V., and Caterini, A. L.
-  (2026). Understanding the Surprising Generalization Properties of Tabular
-  Foundation Models.\ \emph{arXiv preprint}, arXiv:2608.17957.
-  \url{https://arxiv.org/abs/2608.17957}.
-  \bibitem{purucker}
-  Purucker, L., et al. (2026).
-  Beyond IID\@:  How General Are Tabular Foundation Models, Really?
-  \emph{arXiv preprint}, arXiv:2606.30410.
-  \url{https://arxiv.org/abs/2606.30410}.
-  \bibitem{matheconlib}
-  MathEconLib contributors (2026).
-  MathEconLib: Machine-checked mathematical economics in Lean 4.
-  Software, reviewed revision \texttt{6c0e61e}.
-  \url{https://github.com/matheconlib/matheconlib/tree/6c0e61ed4c95252e2c985ccc456e2c53617fb941}.
-\end{thebibliography}
+\bibliographystyle{plainnat}
+\bibliography{refs}
 \end{document}

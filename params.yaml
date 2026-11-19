@@ -1,0 +1,38 @@
+# One quarterly CRSP–SEC study: population, information, networks and in-sample
+# inference. Every DVC stage declares the keys it reads; the CLI reads this file.
+study:
+  version: crsp-sec-quarterly-v2
+  # Population: lagged-December top-N CRSP common stocks, issuer (PERMCO) portfolios.
+  archive_start: "2001-01-01"
+  archive_end: "2025-12-31"
+  # SEC XBRL information begins in 2009; the spatial panel starts with full coverage.
+  feature_start: "2009-01-01"
+  panel_start: "2011-01-01"
+  top_n: 1000
+  frequency: quarterly
+  # Fernández: ten annual characteristic snapshots and forty quarterly outcomes.
+  characteristic_history_years: 10
+  window_quarters: 40
+  # December formations whose following forty quarters lie inside the archive.
+  formation_years: [2010, 2011, 2012, 2013, 2014, 2015]
+  primary_formation: 2015
+  # MM betas need this many observed quarters inside the window.
+  min_beta_quarters: 8
+  # Comparison networks: symmetrized, row-normalized k-nearest neighbours, declared
+  # before estimation. Fernández networks keep her literal exp(-d) kernel.
+  neighbours: 10
+  neighbour_sensitivities: [5, 20]
+  seed: 42
+  # Foundation-model context: column block width and labeled support rows. States are
+  # encoded each January (first quarter) and networks held for that year's quarters.
+  block_columns: 500
+  # Standard rung: latest as-of value of each standard concept reported by at least
+  # this share of the view's issuer-quarters (disclosure coverage, never outcomes).
+  standard_min_coverage: 0.1
+  support_rows: 256
+  # In-sample inference: generated-beta refits, paired likelihood and Mantel draws.
+  generated_beta_draws: 999
+  likelihood_draws: 9999
+  mantel_draws: 999
+  rungs: [fernandez, standard_xbrl]
+  models: [tabpfn_full, tabfm, kumo, limix]

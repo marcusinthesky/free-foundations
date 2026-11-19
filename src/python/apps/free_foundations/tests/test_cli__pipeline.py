@@ -1,24 +1,53 @@
-"""Protect the common quarterly panel, frozen sources and saved-result publication."""
+"""Protect the layered pipeline: frozen sources, one panel, in-sample research stages."""
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "dvc.yaml").is_file())
 PIPELINE = yaml.safe_load((ROOT / "dvc.yaml").read_text())["stages"]
-STUDY = "research/crsp-study"
-SPEC = f"{STUDY}/study.json"
 PACKAGE = "src/python/apps/free_foundations/src/free_foundations"
+PANEL = "data/processed/crsp-sec/panel"
+STATES = "data/processed/crsp-sec/representations"
+RESEARCH = ("replication", "comovement", "alignment")
 # Git-tracked fingerprint JSON is a control output, not a numerical result.
 CONTROL = {"semflow_refresh"}
+COMMANDS = {
+    "prepare": "processed/prepare",
+    "representations": "processed/encode",
+    "replication": "research/replicate",
+    "comovement": "research/comovement",
+    "alignment": "research/alignment",
+    "publication": "research/publish",
+}
+
+
+VARIABLES = {
+    name: value
+    for item in yaml.safe_load((ROOT / "dvc.yaml").read_text())["vars"]
+    for name, value in item.items()
+}
+
+
+def command(name: str) -> str:
+    """A stage command with its DVC variables expanded."""
+    text = PIPELINE[name]["cmd"]
+    for variable, value in VARIABLES.items():
+        text = text.replace(f"${{{variable}}}", value)
+    return text
 
 
 def outputs(name: str) -> list[str]:
     return [item if isinstance(item, str) else next(iter(item)) for item in PIPELINE[name]["outs"]]
 
 
+@pytest.mark.unit
 def test_each_output_has_one_owner_without_directory_overlap() -> None:
+    # Arrange
     owned = [(Path(path), name) for name in PIPELINE for path in outputs(name)]
+
+    # Act / Assert
     for i, (path, name) in enumerate(owned):
         for other, owner in owned[i + 1 :]:
             detail = (name, path, owner, other)
@@ -27,122 +56,111 @@ def test_each_output_has_one_owner_without_directory_overlap() -> None:
             assert other not in path.parents, detail
 
 
-def test_pipeline_contains_only_one_study_and_supporting_replication() -> None:
+@pytest.mark.unit
+def test_pipeline_has_raw_processed_and_research_layers_only() -> None:
+    # Act / Assert
     assert set(PIPELINE) == {
         "semflow_refresh",
-        "sources",
+        "crsp_sec_sources",
         "model_checkpoints",
-        "prepare",
-        "representations",
-        "measurement",
-        "replication",
-        "publication",
+        *COMMANDS,
     }
-    assert PIPELINE["prepare"]["cmd"] == "${ff} study prepare"
-    assert PIPELINE["representations"]["cmd"] == "${models} study encode"
-    assert PIPELINE["measurement"]["cmd"] == "${ff} study run"
-    assert PIPELINE["replication"]["cmd"] == "${ff} study replicate"
+    for name, entry in COMMANDS.items():
+        assert f"stages {entry.replace('/', ' ')}" in command(name)
+        assert PIPELINE[name]["desc"]
 
 
+@pytest.mark.unit
 def test_financial_sources_are_restored_without_running_acquisition() -> None:
-    assert PIPELINE["sources"]["frozen"] is True
-    assert PIPELINE["sources"]["cmd"] == "false"
-    assert outputs("sources") == [f"{STUDY}/sources"]
-    assert SPEC in PIPELINE["sources"]["deps"]
-    assert "src/python/uv.lock" in PIPELINE["sources"]["deps"]
-    for stage in PIPELINE.values():
-        assert not any(".tmp/" in path for path in stage.get("deps", []))
-        assert "study acquire" not in stage["cmd"]
+    # Arrange
+    stage = PIPELINE["crsp_sec_sources"]
+
+    # Act / Assert
+    assert stage["frozen"] is True
+    assert stage["cmd"] == "false"
+    assert outputs("crsp_sec_sources") == ["data/raw/crsp-sec"]
+    for item in PIPELINE.values():
+        assert "raw acquire" not in item["cmd"]
+        assert not any(path.startswith("data/staging") for path in item.get("deps", []))
 
 
-def test_expensive_states_are_owned_separately_from_measurement() -> None:
-    assert outputs("representations") == [f"{STUDY}/representations"]
-    assert set(outputs("representations")) <= set(PIPELINE["measurement"]["deps"])
-    assert outputs("prepare") == [f"{STUDY}/prepared"]
-    assert f"{STUDY}/sources" in PIPELINE["prepare"]["deps"]
-    for stage in ("representations", "measurement", "replication"):
-        assert f"{STUDY}/prepared" in PIPELINE[stage]["deps"]
-    assert "research/model-checkpoints.json" in PIPELINE["representations"]["deps"]
-    assert "--extra" not in PIPELINE["measurement"]["cmd"]
+@pytest.mark.unit
+def test_every_estimating_stage_declares_its_params() -> None:
+    # Arrange
+    params = yaml.safe_load((ROOT / "params.yaml").read_text())["study"]
+
+    # Act / Assert
+    for name in COMMANDS:
+        declared = PIPELINE[name]["params"]
+        assert declared, name
+        for key in declared:
+            assert key == "study" or key.removeprefix("study.") in params, (name, key)
 
 
-def test_publication_reads_the_complete_retained_results_without_estimation() -> None:
+@pytest.mark.unit
+def test_states_are_computed_once_and_research_reads_saved_panels() -> None:
+    # Act / Assert
+    assert outputs("prepare") == [PANEL]
+    assert outputs("representations") == [STATES]
+    assert "--extra" in command("representations")
+    for name in RESEARCH:
+        assert {PANEL, STATES} <= set(PIPELINE[name]["deps"])
+        assert outputs(name) == [f"data/research/crsp-sec/{name}"]
+        assert "--extra" not in command(name)
+    assert f"{PACKAGE}/fernandez/betas.R" in PIPELINE["replication"]["deps"]
+
+
+@pytest.mark.unit
+def test_publication_reads_every_saved_result_without_estimation() -> None:
+    # Arrange
     dependencies = set(PIPELINE["publication"]["deps"])
-    for stage in ("model_checkpoints", "representations", "measurement", "replication"):
-        assert set(outputs(stage)) <= dependencies
-    assert f"{STUDY}/prepared/manifest.json" in dependencies
-    assert "src/latex/main.tex" in dependencies
-    assert PIPELINE["publication"]["cmd"] == "${ff} study report"
-    assert outputs("publication") == [
-        "src/latex/build/crsp-study.tex",
-        f"{STUDY}/publication",
-    ]
-    assert "src/latex/build/main.pdf" not in outputs("publication")
-    assert not any("cache/models" in path for path in dependencies)
 
-
-def test_replication_has_no_model_or_discarded_experiment_dependency() -> None:
-    dependencies = PIPELINE["replication"]["deps"]
-    assert f"{STUDY}/prepared" in dependencies
-    assert f"{PACKAGE}/fernandez/betas.R" in dependencies
-    assert "infra/nix/devenv.nix" in dependencies
-    assert "devenv.lock" in dependencies
+    # Act / Assert
+    for name in RESEARCH:
+        assert set(outputs(name)) <= dependencies
+    assert f"{PANEL}/manifest.json" in dependencies
+    assert "src/latex/build/crsp-study.tex" in outputs("publication")
+    # Metrics live inside the tracked output, so they are declared at the top level.
+    metrics = "data/research/crsp-sec/publication/metrics.json"
+    assert yaml.safe_load((ROOT / "dvc.yaml").read_text())["metrics"] == [metrics]
+    assert "data/research/crsp-sec/publication" in outputs("publication")
+    assert "metrics" not in PIPELINE["publication"]
     assert not any(
-        "representations" in path or "model-checkpoints" in path for path in dependencies
+        path.startswith("data/raw/models/") and path.endswith("/") for path in dependencies
     )
-    assert "--extra" not in PIPELINE["replication"]["cmd"]
 
 
-def test_geometry_is_a_saved_result_extension_of_the_measurement_stage() -> None:
-    # The directory has one owner, including its saved geometry and inference artifacts.
-    assert outputs("measurement") == [f"{STUDY}/measurement"]
-    assert f"{STUDY}/measurement" in PIPELINE["publication"]["deps"]
-    assert "geometry" not in PIPELINE
-    for stage in PIPELINE.values():
-        assert not any("daily-scores" in path for path in stage.get("deps", []))
-
-
+@pytest.mark.unit
 def test_numerical_outputs_can_be_restored_from_the_dvc_cache() -> None:
+    # Act / Assert
     for name in set(PIPELINE) - CONTROL:
         for output in PIPELINE[name]["outs"]:
             if isinstance(output, dict):
                 assert next(iter(output.values())).get("cache", True)
-    assert outputs("sources") == [f"{STUDY}/sources"]
-    assert outputs("replication") == [f"{STUDY}/replication"]
 
 
-def test_all_study_stages_bind_the_same_spec_and_command_fingerprints() -> None:
-    commands = {
-        "prepare": "prepare",
-        "representations": "encode",
-        "measurement": "run",
-        "replication": "replicate",
-        "publication": "report",
-    }
-    for stage, command in commands.items():
-        assert SPEC in PIPELINE[stage]["deps"]
-        assert "src/python/uv.lock" in PIPELINE[stage]["deps"]
-        assert (
-            f".semflow/hashes/entrypoints/free-foundations/study/{command}.json"
-            in PIPELINE[stage]["deps"]
-        )
-    legacy = ("research/universe/", "research/panel/", "research/replication/")
-    for stage in PIPELINE.values():
-        assert not any(path.startswith(legacy) for path in stage.get("deps", []))
+@pytest.mark.unit
+def test_study_stages_bind_the_lock_and_their_command_fingerprints() -> None:
+    # Act / Assert
+    for name, entry in COMMANDS.items():
+        deps = PIPELINE[name]["deps"]
+        assert "src/python/uv.lock" in deps
+        assert f".semflow/hashes/entrypoints/free-foundations/stages/{entry}.json" in deps
 
 
-def test_user_recipes_use_the_active_study_without_executing_wrds_script() -> None:
+@pytest.mark.unit
+def test_user_recipes_use_the_layered_stages_without_executing_the_wrds_script() -> None:
+    # Arrange
     recipes = (ROOT / "justfile").read_text()
-    assert "free-foundations study acquire" in recipes
-    assert "study acquire --output research/crsp-study/recovery" in recipes
-    assert "free-foundations study freeze" in recipes
-    assert "dvc unprotect" not in recipes
-    assert "free-foundations study report" in recipes
-    assert "dvc commit -f sources" in recipes
-    assert "dvc repro measurement" in recipes
-    assert "dvc repro representations" in recipes
-    assert "dvc repro replication" in recipes
-    assert "dvc repro publication" in recipes
-    assert "free-foundations universe run" not in recipes
-    assert "python src/latex/render_results.py" not in recipes
+
+    # Act / Assert
+    assert 'stages := "env -u PYTHONPATH' in recipes
+    assert 'free-foundations stages"' in recipes
+    assert "{{ stages }} raw acquire" in recipes
+    assert "{{ stages }} raw freeze" in recipes
+    assert "dvc commit -f crsp_sec_sources" in recipes
+    for name in ("representations", "replication", "comovement", "alignment", "publication"):
+        assert f"dvc repro {name}" in recipes
+    assert "study acquire" not in recipes
+    assert "research/crsp-study" not in recipes
     assert "python .tmp/get_crsp_returns.py" not in recipes

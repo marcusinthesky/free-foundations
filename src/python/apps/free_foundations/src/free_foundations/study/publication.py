@@ -1,411 +1,526 @@
-"""Render saved quarterly results after reconciling their exact master experiment."""
+"""Render the empirical tables, figure, number macros and metrics from saved results.
+
+Nothing is estimated here. Every number in ``crsp-study.tex`` comes from a saved
+research table and is also written to ``metrics.json`` and the claims ledger, so
+the manuscript's prose can cite macros whose values are audited.
+"""
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import re
 from typing import TYPE_CHECKING, Any
 
+import matplotlib as mpl
 import numpy as np
 import pandas as pd
 
 from free_foundations.data import write_json
 from free_foundations.study.source_io import atomic_bytes, atomic_csv
-from free_foundations.study.spec import StudySpec, file_hash, frame_digest, panel_contract
+from free_foundations.study.spec import StudySpec
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from pathlib import Path
 
-STAGES = ("representations", "measurement", "replication")
-DISPLAY_COLUMNS = {
-    "core": ["quarter", "method", "estimator", "status", "premium_market", "intensity"],
-    "decoder_quality": ["quarter", "method", "status", "decoder_r2", "labeled_issuers"],
-    "conditional_intervals": [
-        "contrast_family",
-        "left",
-        "right",
-        "difference",
-        "block_quarters",
-        "lower",
-        "upper",
-        "defined_quarters",
-    ],
-    "generated_intervals": [
-        "quarter",
-        "method",
-        "estimator",
-        "parameter",
-        "status",
-        "defined_draws",
-        "lower",
-        "upper",
-    ],
-    "geometry": [
-        "quarter",
-        "method",
-        "firms",
-        "undefined_pairs",
-        "identity_shrink",
-        "positive_rank",
-    ],
-    "forecasts": [
-        "quarter",
-        "method",
-        "status",
-        "parameter",
-        "variance_fallbacks",
-        "exposure_fallbacks",
-    ],
-    "calendar": ["quarter", "firms", "observed_firms", "status"],
+CHARACTERISTIC_LABELS = {
+    "market_cap_assets": "Market cap / assets",
+    "market_to_book": "Market-to-book",
+    "dividend_yield": "Dividend yield",
+    "debt_maturity": "Debt maturity",
+    "joint": "Joint (RMS)",
 }
+MODEL_LABELS = {
+    "direct": "Direct features",
+    "tabpfn_full": "TabPFN 3.5",
+    "tabfm": "TabFM 1.1",
+    "kumo": "Kumo-Tabular",
+    "limix": "LimiX-2",
+}
+RUNG_LABELS = {"fernandez": "Fernández histories", "standard_xbrl": "CompanyFacts XBRL"}
+ESTIMATOR_LABELS = {
+    "ols": "OLS",
+    "lag_iv": "Spatial lag (2SLS)",
+    "lag_ml": "Spatial lag (ML)",
+    "error_ml": "Spatial error (ML)",
+}
+
+
+def network_label(name: str) -> str:
+    """Human-readable network names used in every table."""
+    base, _, construction = name.partition("|")
+    prefix, _, suffix = base.partition(":")
+    # The Fernández rung shares the "fernandez:" prefix with her characteristic networks.
+    if prefix == "fernandez" and suffix in CHARACTERISTIC_LABELS:
+        label = f"Fernández: {CHARACTERISTIC_LABELS[suffix]}"
+    elif ":" in base:
+        label = f"{MODEL_LABELS.get(suffix, suffix)} ({RUNG_LABELS.get(prefix, prefix)})"
+    else:
+        label = {"size": "Size", "industry": "Industry (SIC-2)", "null": "Permutation null"}.get(
+            base, base
+        )
+    if construction.startswith("knn"):
+        label += f", {construction[3:]}-NN"
+    if construction.endswith("@contemporaneous"):
+        label += ", window-end histories"
+    return label
 
 
 def _escape(value: object) -> str:
     replacements = {
-        "\\": r"\textbackslash{}",
         "_": r"\_",
         "%": r"\%",
         "&": r"\&",
         "#": r"\#",
         "$": r"\$",
-        "{": r"\{",
-        "}": r"\}",
-        "^": r"\textasciicircum{}",
-        "~": r"\textasciitilde{}",
+        "á": r"\'a",
+        "é": r"\'e",
+        "\u2013": "--",
     }
     return "".join(replacements.get(character, character) for character in str(value))
 
 
-def _table(frame: pd.DataFrame, *, limit: int = 80) -> str:
-    """Display a bounded preview; the complete table remains a saved CSV artifact."""
-    if frame.empty:
-        return "No numerical result is available for this task.\n"
-    return frame.head(limit).to_latex(index=False, escape=True, longtable=len(frame) > 25)
+def _number(value: object, digits: int = 3) -> str:
+    try:
+        number = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return "--"
+    return f"{number:.{digits}f}" if np.isfinite(number) else "--"
 
 
-def _stage_records(root: Path, master: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    records: dict[str, dict[str, Any]] = {}
-    for stage in STAGES:
-        path = root / stage / "manifest.json"
-        if not path.exists():
-            records[stage] = {"status": "not_run"}
-            continue
-        record = json.loads(path.read_text())
-        if record.get("master") != master:
-            message = f"{stage} used a different roster, clock, outcome mask or specification."
-            raise ValueError(message)
-        status = record.get("status")
-        if stage == "representations" and status is None:
-            states = record.get("states", [])
-            for state in states:
-                if state.get("master") != master:
-                    message = "A representation state belongs to a different master experiment."
-                    raise ValueError(message)
-            status = (
-                "complete"
-                if states and all(item.get("status") == "complete" for item in states)
-                else "incomplete"
-            )
-        records[stage] = record | {"status": status or "recorded", "sha256": file_hash(path)}
-    return records
+def _interval(low: object, high: object, digits: int = 3) -> str:
+    if _number(low) == "--" or _number(high) == "--":
+        return "--"
+    return f"[{_number(low, digits)}, {_number(high, digits)}]"
 
 
-def _defined_rows(frame: pd.DataFrame, table: str) -> NDArray[np.bool_]:
-    field = {
-        "core": "premium_market",
-        "scores": "score_per_issuer",
-        "decoder_quality": "decoder_r2",
-    }.get(table)
-    defined = np.zeros(len(frame), dtype=bool)
-    if field is not None and field in frame:
-        defined = np.isfinite(pd.to_numeric(frame[field], errors="coerce").to_numpy(float))
-        if "status" in frame:
-            defined &= frame["status"].eq("available").to_numpy(bool)
-    return defined
+def _tabular(  # noqa: PLR0913 -- one table's caption, label, cells and alignment.
+    caption: str,
+    label: str,
+    header: list[str],
+    rows: list[list[str]],
+    note: str,
+    *,
+    text_columns: int = 1,
+) -> str:
+    columns = "l" * text_columns + "r" * (len(header) - text_columns)
+    body = "\n".join(" & ".join(row) + r" \\" for row in rows)
+    return (
+        "\\begin{table}[htbp]\n\\centering\\small\n"
+        f"\\caption{{{caption}}}\\label{{{label}}}\n"
+        f"\\begin{{tabular}}{{{columns}}}\n\\toprule\n"
+        + " & ".join(header)
+        + " \\\\\n\\midrule\n"
+        + body
+        + "\n\\bottomrule\n\\end{tabular}\n"
+        + f"\\par\\smallskip\\parbox{{0.95\\linewidth}}{{\\footnotesize {note}}}\n"
+        + "\\end{table}\n"
+    )
 
 
-def _result_tables(
-    root: Path,
-    destination: Path,
-    records: dict[str, dict[str, Any]],
-    master: dict[str, Any],
-) -> tuple[list[str], list[dict[str, object]]]:
-    """Consume actual saved parquet schemas; perform no estimator fitting or selection."""
-    parts: list[str] = []
-    inventory: list[dict[str, object]] = []
-    for stage in ("replication", "measurement"):
-        folder = root / stage
-        files = records[stage].get("files", {})
-        for name in (*DISPLAY_COLUMNS, "scores", "exposures"):
-            if name not in files:
-                continue
-            filename = files[name]
-            path = folder / filename
-            if not path.resolve().is_relative_to(folder.resolve()):
-                message = "Saved-result path escapes its declared analytical stage."
-                raise ValueError(message)
-            if not path.exists():
-                message = f"Declared saved-result table is missing: {stage}/{name}."
-                raise ValueError(message)
-            frame = pd.read_parquet(path)
-            provenance: dict[str, object] = {
-                "stage": stage,
-                "table": name,
-                "source": str(path),
-                "sha256": file_hash(path),
-                "rows": len(frame),
-                "columns": frame.columns.tolist(),
-                "master": master,
-            }
-            defined = _defined_rows(frame, name)
-            provenance["defined_numerical_rows"] = int(defined.sum())
-            inventory.append(provenance)
-            write_json(destination / f"{stage}-{name}.json", provenance)
-            atomic_csv(destination / f"{stage}-{name}.csv", frame)
-            if frame.empty:
-                continue
-            if name == "scores":
-                selected = frame.loc[defined]
-                summary = (
-                    selected.groupby("method", sort=True)
-                    .agg(
-                        defined_quarters=("quarter", "size"),
-                        mean_score_per_issuer=("score_per_issuer", "mean"),
+def _macro_name(key: str) -> str:
+    words = re.split(r"[^A-Za-z]+", key)
+    return "\\ff" + "".join(word[:1].upper() + word[1:] for word in words if word)
+
+
+class Report:
+    """Collects tables, macros and audited claims for one rendering."""
+
+    def __init__(self) -> None:
+        """Start with no tables or claims."""
+        self.parts: list[str] = []
+        self.metrics: dict[str, float | int | str] = {}
+
+    def claim(self, key: str, value: float | str, digits: int = 3) -> None:
+        """Record a scalar and define its manuscript macro."""
+        self.metrics[key.replace(" ", "_")] = value
+        text = (
+            value
+            if isinstance(value, str)
+            else (f"{value:,}" if isinstance(value, int) else _number(value, digits))
+        )
+        self.parts.insert(0, f"\\newcommand{{{_macro_name(key)}}}{{{_escape(text)}}}\n")
+
+
+def _sample(report: Report, replication: Path, comovement: Path, spec: StudySpec) -> None:
+    rosters = pd.read_parquet(replication / "roster.parquet")
+    ledger = pd.read_parquet(comovement / "ledger.parquet")
+    rows = []
+    for formation, group in rosters.groupby("formation"):
+        window = spec.window(int(str(formation)))
+        available = group["status"].eq("available")
+        rows.append(
+            [
+                f"{formation}",
+                f"{window[0].year}--{window[-1].year}",
+                f"{len(group):,}",
+                f"{int(available.sum()):,}",
+                _number(group.loc[available, "observed_quarters"].mean(), 1),
+                _number(group.loc[available, "mm_beta"].median(), 2),
+            ]
+        )
+    primary = rosters.loc[rosters["formation"].eq(spec.primary_formation)]
+    report.claim("primary roster", len(primary))
+    report.claim("primary issuers", int(primary["status"].eq("available").sum()))
+    quarters = ledger.loc[ledger["quarter"].notna()] if "quarter" in ledger else ledger
+    report.claim("panel quarters", len(quarters))
+    report.claim("panel issuer quarters", int(quarters["issuers"].sum()))
+    report.parts.append(
+        _tabular(
+            "Formation cohorts and stage-one estimation",
+            "tab:cohorts",
+            ["Formation", "Window", "Roster", "Estimated", "Mean quarters", "Median MM $\\beta$"],
+            rows,
+            "Roster: December top-1,000 issuers with verified SEC information at the window "
+            "start, followed through exits with CRSP delisting returns. Estimated: issuers "
+            f"with at least {spec.min_beta_quarters} observed quarters and a converged MM fit.",
+        )
+    )
+
+
+def _replication(report: Report, replication: Path, spec: StudySpec) -> None:
+    estimates = pd.read_parquet(replication / "estimates.parquet")
+    primary = estimates.loc[estimates["formation"].eq(spec.primary_formation)]
+    intervals = (
+        pd.read_parquet(replication / "intervals.parquet").set_index("quantity")
+        if (replication / "intervals.parquet").exists()
+        else pd.DataFrame(columns=["low", "high"])
+    )
+
+    def boot(network: str, estimator: str, name: str, *, intercept: bool) -> str:
+        label = "with" if intercept else "without"
+        key = f"{network}|{estimator}:{name}:{label}"
+        if key not in intervals.index:
+            return "--"
+        return _interval(intervals.loc[key, "low"], intervals.loc[key, "high"])
+
+    for intercept in (False, True):
+        rows = []
+        subset = primary.loc[primary["with_intercept"].eq(intercept)]
+        ols = subset.loc[subset["estimator"].eq("ols")].iloc[0]
+        rows.append(
+            [
+                "OLS",
+                "",
+                _number(ols.get("beta")),
+                _interval(ols.get("beta_low"), ols.get("beta_high")),
+                "--",
+                "--",
+                _number(ols.get("aic"), 1),
+            ]
+        )
+        for name, characteristic in CHARACTERISTIC_LABELS.items():
+            network = f"fernandez:{name}|exp"
+            for estimator in ("lag_iv", "lag_ml", "error_ml"):
+                row = subset.loc[subset["network"].eq(network) & subset["estimator"].eq(estimator)]
+                if row.empty or row.iloc[0]["status"] != "available":
+                    rows.append(
+                        [
+                            characteristic,
+                            ESTIMATOR_LABELS[estimator],
+                            "--",
+                            "--",
+                            "--",
+                            "--",
+                            "--",
+                        ]
                     )
-                    .reset_index()
-                )
-                summary["calendar_quarters"] = len(master["quarters"])
-                atomic_csv(destination / f"{stage}-score-summary.csv", summary)
-                parts.extend(
+                    continue
+                item = row.iloc[0]
+                rows.append(
                     [
-                        r"\paragraph{Observed quarterly predictive scores}",
-                        (
-                            "Means use defined scores only; missing quarters remain in the "
-                            "saved calendar and intervals."
-                        ),
-                        _table(summary),
+                        characteristic,
+                        ESTIMATOR_LABELS[estimator],
+                        _number(item.get("beta")),
+                        boot(network, estimator, "premium", intercept=intercept),
+                        _number(item.get("spatial")),
+                        boot(network, estimator, "spatial", intercept=intercept),
+                        _number(item.get("aic"), 1),
                     ]
                 )
-            elif name == "exposures":
-                counts = (
-                    frame.groupby("status", sort=True).size().reset_index(name="issuer_quarters")
-                )
-                parts.extend([r"\paragraph{Published-factor proxy availability}", _table(counts)])
-            else:
-                columns = [column for column in DISPLAY_COLUMNS[name] if column in frame]
-                parts.extend(
-                    [f"\\paragraph{{{_escape(stage + ': ' + name)}}}", _table(frame[columns])]
-                )
-    return parts, inventory
-
-
-def _source_recovery(prepared: dict[str, Any]) -> dict[str, Any]:
-    """Require affirmative full-source evidence before publishing a completed study."""
-    receipt = prepared.get("source_recovery")
-    if not isinstance(receipt, dict):
-        return {
-            "status": "not_evaluated",
-            "complete": False,
-            "full_xbrl_complete": False,
-            "reasons": ["No full-source recovery receipt was saved during preparation."],
-        }
-    complete = (
-        receipt.get("status") == "complete"
-        and receipt.get("complete") is True
-        and receipt.get("full_xbrl_complete") is True
-        and receipt.get("unresolved_linkage_issuer_quarters") == 0
-        and receipt.get("originals_pending") == 0
-    )
-    normalized: dict[str, Any] = {
-        "status": "not_evaluated",
-        "full_xbrl_complete": False,
-        "reasons": [],
-    } | receipt
-    if normalized["status"] == "complete" and not complete:
-        normalized["declared_status"] = "complete"
-        normalized["status"] = "incomplete"
-    return normalized | {"complete": complete}
-
-
-def _numerical_availability(inventory: list[dict[str, object]]) -> dict[str, dict[str, int]]:
-    counts = {"replication": {"core": 0}, "measurement": {"scores": 0, "decoder_quality": 0}}
-    for item in inventory:
-        stage, table = str(item["stage"]), str(item["table"])
-        if stage in counts and table in counts[stage]:
-            counts[stage][table] += int(str(item["defined_numerical_rows"]))
-    return counts
-
-
-def render(root: Path, spec: StudySpec) -> None:
-    """Publish only saved results, with explicit unavailable sources and pending claims."""
-    destination = root / "publication"
-    destination.mkdir(parents=True, exist_ok=True)
-    prepared = json.loads((root / "prepared/manifest.json").read_text())
-    master = prepared["master"]
-    panel = pd.read_parquet(root / "prepared/panel.parquet")
-    if master != panel_contract(panel, spec):
-        message = "Prepared panel bytes/roster/mask do not match the publication experiment."
-        raise ValueError(message)
-    population = pd.read_parquet(root / "prepared/population.parquet")
-    if prepared.get("population_sha256") != frame_digest(population):
-        message = "Population availability ledger changed after preparation."
-        raise ValueError(message)
-    records = _stage_records(root, master)
-    characteristics = pd.read_parquet(root / "prepared/characteristics.parquet")
-    coverage = (
-        population.groupby("quarter", sort=True)
-        .agg(
-            population_issuers=("issuer_id", "size"),
-            xbrl_issuers=("xbrl_available", "sum"),
-            observed_return_issuers=("observed", "sum"),
+        suffix = "with" if intercept else "without"
+        report.parts.append(
+            _tabular(
+                f"Fern\\'andez spatial CAPM, {spec.primary_formation} formation, "
+                f"{suffix} an intercept",
+                f"tab:fernandez-{suffix}",
+                [
+                    "Network",
+                    "Estimator",
+                    "Premium",
+                    "95\\% CI",
+                    "$\\rho$/$\\lambda$",
+                    "95\\% CI",
+                    "AIC",
+                ],
+                rows,
+                "Outcome: median quarterly excess return; regressor: MM CAPM beta. Networks: "
+                "$W=\\mathrm{rownorm}(\\exp(-d))$ on Spearman chord distances of formation-date "
+                "characteristic histories. Intervals: stationary quarter bootstrap refitting "
+                "betas, medians and the spatial model "
+                f"({spec.generated_beta_draws} draws). Without an intercept the spatial term "
+                "also absorbs the cross-sectional mean (her specification).",
+                text_columns=2,
+            )
         )
-        .reset_index()
-    )
-    atomic_csv(destination / "quarterly-coverage.csv", coverage)
-    status_rows = population[["xbrl_status"]].rename(columns={"xbrl_status": "status"})
-    status_rows["reason"] = population.get("xbrl_reason", pd.Series("", index=population.index))
-    sources = (
-        status_rows.fillna("not_evaluated")
-        .groupby(["status", "reason"], dropna=False)
-        .size()
-        .reset_index(name="issuer_quarters")
-    )
-    atomic_csv(destination / "source-availability.csv", sources)
-    components = (
-        characteristics.groupby(["characteristic", "status"])
-        .size()
-        .reset_index(name="issuer_quarters")
-        if not characteristics.empty
-        else pd.DataFrame(columns=["characteristic", "status", "issuer_quarters"])
-    )
-    atomic_csv(destination / "characteristic-availability.csv", components)
-    result_parts, inventory = _result_tables(root, destination, records, master)
-    defined_results = sum(int(str(item["defined_numerical_rows"])) for item in inventory)
-    numerical = _numerical_availability(inventory)
-    required_results = numerical["replication"]["core"], numerical["measurement"]["scores"]
-    source_recovery = _source_recovery(prepared)
-    complete = all(records[stage]["status"] in {"complete", "available"} for stage in STAGES)
-    status = (
-        "no_verified_xbrl_panel"
-        if master["rows"] == 0
-        else "no_defined_empirical_results"
-        if complete and not any(required_results)
-        else "results_pending"
-        if not complete
-        else "source_recovery_pending"
-        if not source_recovery["complete"]
-        else "incomplete_empirical_results"
-        if not all(required_results)
-        else "complete"
-    )
-    stage_audits = {
-        stage: {
-            key: value
-            for key, value in records[stage].items()
-            if key in {"status", "sha256", "estimator_availability", "tasks"}
-        }
-        for stage in STAGES
-    }
-    write_json(
-        destination / "claims-audit.json",
-        {
-            "master": master,
-            "status": status,
-            "stages": stage_audits,
-            "source_statuses": prepared["availability"],
-            "source_reasons": prepared.get("availability_reasons", {}),
-            "source_recovery": source_recovery,
-            "defined_numerical_rows": defined_results,
-            "defined_rows_by_task": numerical,
-            "claims": {
-                "common_population_clock_and_mask": True,
-                "sec_source_recovery_complete": source_recovery["complete"],
-                "new_empirical_findings_available": status == "complete",
-                "terminal_crsp_adjustments_independently_certified": False,
-                "complete_issuer_capitalization_independently_certified": False,
-                "historically_available_pretrained_weights": False,
-            },
-            "historical_current_survivor_results": "archived; not evidence for this experiment",
-        },
-    )
-    parts = [
-        r"\section{Matched CRSP--SEC empirical design}\label{sec:chronology}",
-        (
-            "The frozen archive contains monthly CRSP CIZ total returns for 2001--2025, "
-            "compounded once to a common quarterly clock. Annual membership uses the preceding "
-            "December's top 1,000 securities. Formation-selected classes are grouped by issuer "
-            "and use preceding-month capitalization weights. These selected-class portfolios "
-            "need not contain every share class. Terminal-adjustment completeness is not "
-            "independently certified by the exported fields."
-        ),
-        (
-            "Every procedure consumes one issuer-quarter roster and the same observed-return "
-            "mask. No balanced lifetime sample or complete-case date deletion is imposed. "
-            "SEC filing availability determines accounting information; pre-XBRL return "
-            "history does not supply unavailable accounting observations."
-        ),
-        r"\subsection{Source availability and reconciliation}",
-        (
-            f"The feature-era population has {len(population):,} issuer-quarters; "
-            f"the verified XBRL panel has {master['rows']:,}, including "
-            f"{master['observed_issuer_quarters']:,} observed return outcomes. "
-            "Unresolved identity, missing disclosure and recovery failures retain "
-            "separate statuses."
-        ),
-        _table(sources),
-        _table(components),
-        r"\subsection{Replication and representation ladder}\label{sec:replication}",
-        (
-            "The descriptive core uses full-feature-era quarterly CAPM MM betas, median excess "
-            "returns, and no second-stage intercept. The four original characteristic histories "
-            "define pairwise-overlap Spearman correlations, with ranks recomputed on each "
-            "intersection. An unidentified off-diagonal correlation receives neutral value zero. "
-            "Original spatial weights use the unshrunk completed distance; identity shrinkage "
-            "defines the positive-definite Gram. The matched spatial arm uses unit-chord "
-            "distances from exactly that same repaired Gram, with a common geometry-only "
-            "effective-neighbour target."
-        ),
-        (
-            "The information ladder comprises original characteristic histories, standard scalar "
-            "XBRL facts, and filing-level scalar facts including custom concepts and dimensions. "
-            "Native missingness adapters and deterministic full-coverage column blocks are "
-            "declared separately from support-imputed conventional controls. Unsupported model "
-            "or context cells remain unavailable."
-        ),
-        r"\subsection{Risk estimation and uncertainty}\label{sec:geometry}",
-        (
-            "Forecasts use strictly preceding quarters, "
-            f"with at most {spec.return_lookback_quarters} "
-            "prior quarters of returns. "
-            "Published FF5 plus momentum ridge proxies are distinct from structural "
-            "latent exposures and from the full-sample descriptive MM betas. Gaussian scores "
-            "integrate unobserved returns through covariance marginals. Conditional inference "
-            f"uses {spec.bootstrap_draws:,} paired quarterly resamples, expected blocks "
-            f"{', '.join(map(str, spec.bootstrap_blocks))} quarters. The generated-beta core "
-            f"requests {spec.generated_beta_draws:,} MM reestimates; failed draws "
-            "are recorded rather than replaced by selected converged draws."
-        ),
-        r"\subsection{Current numerical status}",
-        (
-            f"Saved-result status: \\texttt{{{_escape(status)}}}. "
-            f"Full SEC-source recovery: \\texttt{{{_escape(source_recovery['status'])}}}. "
-            "Earlier current-survivor results are archived and supply no finding for this study. "
-            "Estimator availability and interval completion counts qualify each numerical table."
-        ),
+    joint = primary.loc[
+        primary["network"].eq("fernandez:joint|exp")
+        & primary["estimator"].eq("lag_ml")
+        & ~primary["with_intercept"].astype(bool)
     ]
-    parts.extend(result_parts)
-    target = Path("src/latex/build/crsp-study.tex")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    atomic_bytes(target, ("\n\n".join(parts) + "\n").encode())
-    write_json(
-        destination / "manifest.json",
-        {
-            "master": master,
-            "status": status,
-            "source_recovery": source_recovery,
-            "defined_rows_by_task": numerical,
-            "saved_results": inventory,
-            "tex_sha256": file_hash(target),
-            "claims_sha256": file_hash(destination / "claims-audit.json"),
-        },
+    if not joint.empty:
+        report.claim("fernandez joint rho", float(joint.iloc[0]["spatial"]))
+        report.claim("fernandez joint premium", float(joint.iloc[0]["beta"]))
+
+
+def _matched(report: Report, replication: Path, spec: StudySpec) -> None:
+    estimates = pd.read_parquet(replication / "estimates.parquet")
+    diagnostics = pd.read_parquet(replication / "diagnostics.parquet")
+    networks = pd.read_parquet(replication / "networks.parquet")
+    intervals = (
+        pd.read_parquet(replication / "intervals.parquet").set_index("quantity")
+        if (replication / "intervals.parquet").exists()
+        else pd.DataFrame(columns=["low", "high"])
+    )
+    primary = estimates.loc[
+        estimates["formation"].eq(spec.primary_formation) & estimates["with_intercept"].astype(bool)
+    ]
+    suffix = f"|knn{spec.neighbours}"
+    names = [name for name in primary["network"].unique() if name.endswith(suffix)] + [
+        "industry|sic2"
+    ]
+    rows = []
+    for name in names:
+        lag = primary.loc[primary["network"].eq(name) & primary["estimator"].eq("lag_ml")]
+        error = primary.loc[primary["network"].eq(name) & primary["estimator"].eq("error_ml")]
+        test = diagnostics.loc[
+            diagnostics["network"].eq(name) & diagnostics["formation"].eq(spec.primary_formation)
+        ]
+        shape = networks.loc[
+            networks["network"].eq(name) & networks["formation"].eq(spec.primary_formation)
+        ]
+        key = f"{name}|lag_ml:spatial:with"
+        rows.append(
+            [
+                _escape(network_label(name)),
+                _number(lag.iloc[0].get("spatial")) if not lag.empty else "--",
+                _interval(intervals.loc[key, "low"], intervals.loc[key, "high"])
+                if key in intervals.index
+                else "--",
+                _number(error.iloc[0].get("spatial")) if not error.empty else "--",
+                _number(test.iloc[0].get("moran_residual")) if not test.empty else "--",
+                _number(test.iloc[0].get("moran_residual_p")) if not test.empty else "--",
+                _number(shape.iloc[0].get("effective_neighbours"), 1) if not shape.empty else "--",
+            ]
+        )
+    report.parts.append(
+        _tabular(
+            f"Matched networks on the {spec.primary_formation} formation (with intercept)",
+            "tab:matched",
+            [
+                "Network",
+                "$\\rho$ (lag ML)",
+                "95\\% CI",
+                "$\\lambda$ (error ML)",
+                "Moran's $I$",
+                "$p$",
+                "Eff. neighbours",
+            ],
+            rows,
+            f"Every network is a symmetrized, row-normalized {spec.neighbours}-nearest-neighbour "
+            "graph on formation-date distances, except industry (same SIC-2). Only the spatial "
+            "coefficient is fitted to returns. Moran's $I$: OLS residuals with an intercept.",
+        )
+    )
+
+
+def _comovement(report: Report, comovement: Path, spec: StudySpec) -> None:
+    estimates = pd.read_parquet(comovement / "estimates.parquet")
+    comparisons = pd.read_parquet(comovement / "comparisons.parquet")
+    suffix = f"|knn{spec.neighbours}"
+    rows = []
+    lag = estimates.loc[estimates["process"].eq("lag") & estimates["status"].eq("available")]
+    for item in lag.to_dict("records"):
+        name = str(item["network"])
+        if not (name.endswith(suffix) or name.startswith("industry")):
+            continue
+        rows.append(
+            [
+                _escape(network_label(name)),
+                _number(item["spatial"]),
+                _interval(item["spatial_low"], item["spatial_high"]),
+                _interval(item.get("bootstrap_low"), item.get("bootstrap_high")),
+                _number(item["capm_slope"]),
+                _number(item["log_likelihood"], 1),
+            ]
+        )
+    report.parts.append(
+        _tabular(
+            "Quarterly spatial co-movement panels (spatial lag, period effects)",
+            "tab:comovement",
+            [
+                "Network",
+                "$\\rho$",
+                "Profile 95\\% CI",
+                "Bootstrap 95\\% CI",
+                "CAPM slope",
+                "Log-lik.",
+            ],
+            rows,
+            f"Quarterly excess returns, {spec.panel_start[:4]}--{spec.archive_end[:4]}. Period "
+            "effects absorb common shocks; the regressor is the MM beta times Mkt-RF. Each "
+            "quarter's graph uses only information available before that quarter.",
+        )
+    )
+    rows = []
+    for item in comparisons.loc[comparisons["process"].eq("lag")].to_dict("records"):
+        rows.append(
+            [
+                _escape(network_label(str(item["network"]))),
+                _escape(network_label(str(item["reference"]))),
+                _number(item["mean_difference"], 2),
+                _interval(item["low"], item["high"], 2),
+                _number(item["p_holm"]),
+            ]
+        )
+    report.parts.append(
+        _tabular(
+            "Paired in-sample likelihood differences per quarter",
+            "tab:likelihood",
+            ["Network", "Reference", "$\\Delta\\ell$/quarter", "95\\% CI", "Holm $p$"],
+            rows,
+            "Positive differences favour the network over its reference. Intervals: "
+            f"stationary quarter bootstrap ({spec.likelihood_draws} draws) of the mean "
+            "per-quarter log-likelihood difference at each network's in-sample fit.",
+            text_columns=2,
+        )
+    )
+
+
+def _alignment(report: Report, alignment: Path) -> None:
+    mantel = pd.read_parquet(alignment / "mantel.parquet")
+    gaps = pd.read_parquet(alignment / "gaps.parquet")
+    rows = [
+        [
+            _escape(network_label(str(item["network"]))),
+            _number(item["mantel"]),
+            _interval(item["low"], item["high"]),
+            _number(item["p_holm"]),
+        ]
+        for item in mantel.to_dict("records")
+    ]
+    report.parts.append(
+        _tabular(
+            "Mantel alignment with realized excess-return co-movement",
+            "tab:mantel",
+            ["Distance", "Spearman Mantel", "Node-bootstrap 95\\% CI", "Holm $p$"],
+            rows,
+            "Target: chord distance of pairwise excess-return correlations over the primary "
+            "window. No parameter is fitted.",
+        )
+    )
+    rows = [
+        [
+            _escape(network_label(str(item["network"]))),
+            _escape(network_label(str(item["reference"]))),
+            _number(item["gap"]),
+            _interval(item["low"], item["high"]),
+        ]
+        for item in gaps.to_dict("records")
+    ]
+    report.parts.append(
+        _tabular(
+            "Paired Mantel gaps",
+            "tab:mantel-gaps",
+            ["Distance", "Reference", "Gap", "95\\% CI"],
+            rows,
+            "Gap: Mantel correlation of the distance minus that of its reference, on shared "
+            "node-bootstrap draws.",
+            text_columns=2,
+        )
+    )
+
+
+def _figure(replication: Path, output: Path, spec: StudySpec) -> str:
+    mpl.use("Agg")
+    # TrueType fonts embed cleanly in the xdvipdfmx-built manuscript; Type 3 fonts do not.
+    mpl.rcParams["pdf.fonttype"] = 42
+    import matplotlib.pyplot as plt  # noqa: PLC0415 -- after selecting the backend.
+
+    estimates = pd.read_parquet(replication / "estimates.parquet")
+    selected = estimates.loc[
+        estimates["estimator"].eq("lag_ml")
+        & estimates["with_intercept"].astype(bool)
+        & estimates["status"].eq("available")
+    ]
+    figure, axis = plt.subplots(figsize=(6.4, 3.4))
+    for name in ("fernandez:joint|exp", f"fernandez:joint|knn{spec.neighbours}"):
+        series = selected.loc[selected["network"].eq(name)].sort_values("formation")
+        if series.empty:
+            continue
+        axis.errorbar(
+            series["formation"],
+            series["spatial"],
+            yerr=[
+                series["spatial"] - series["spatial_low"],
+                series["spatial_high"] - series["spatial"],
+            ],
+            capsize=3,
+            marker="o",
+            label=network_label(name),
+        )
+    axis.axhline(0, color="0.5", linewidth=0.8)
+    axis.set_xlabel("December formation")
+    axis.set_ylabel(r"$\hat\rho$ (lag ML, 95% Wald CI)")
+    axis.legend(frameon=False, fontsize=8)
+    figure.tight_layout()
+    path = output / "rolling-rho.pdf"
+    figure.savefig(path, metadata={"CreationDate": None})
+    plt.close(figure)
+    return (
+        "\\begin{figure}[htbp]\n\\centering\n"
+        f"\\includegraphics[width=0.8\\linewidth]{{build/{path.name}}}\n"
+        "\\caption{Spatial lag coefficient by formation window (with intercept).}"
+        "\\label{fig:rolling}\n\\end{figure}\n"
+    )
+
+
+def render(  # noqa: PLR0913 -- every saved input of the report is explicit.
+    panel: Path,
+    *,
+    replication: Path,
+    comovement: Path,
+    alignment: Path,
+    output: Path,
+    tex: Path,
+    params: Path,
+) -> None:
+    """Write tables, figure, macros, metrics and the claims ledger."""
+    spec = StudySpec.read(params)
+    output.mkdir(parents=True, exist_ok=True)
+    report = Report()
+    _sample(report, replication, comovement, spec)
+    _replication(report, replication, spec)
+    _matched(report, replication, spec)
+    _comovement(report, comovement, spec)
+    _alignment(report, alignment)
+    tex.parent.mkdir(parents=True, exist_ok=True)
+    report.parts.append(_figure(replication, tex.parent, spec))
+    atomic_bytes(tex, "".join(report.parts).encode())
+    prepared = json.loads((panel / "manifest.json").read_text())
+    metrics: dict[str, Any] = dict(report.metrics) | {
+        "analytical_issuer_quarters": prepared["analytical_issuer_quarters"],
+        "population_issuer_quarters": prepared["population_issuer_quarters"],
+        "unresolved_linkage_issuer_quarters": prepared["source_recovery"][
+            "unresolved_linkage_issuer_quarters"
+        ],
+    }
+    write_json(output / "metrics.json", metrics)
+    atomic_csv(
+        output / "claims.csv",
+        pd.DataFrame(
+            [
+                {"macro": _macro_name(key), "key": key, "value": value}
+                for key, value in report.metrics.items()
+            ]
+        ),
     )

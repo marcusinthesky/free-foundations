@@ -130,28 +130,31 @@ data-push:
 # Source acquisition is frozen so routine repros never refetch it. This recipe never
 # executes the extraction script or accesses WRDS. EDGAR_IDENTITY can provide your SEC
 # contact name and email.
+stages := "env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations stages"
 
-# Freeze the staged CRSP extract and record SEC and factor recovery (uses the network).
-python-universe:
-    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study acquire --output research/crsp-study/recovery
-    env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study freeze
-    just dvc commit -f sources
+# Stage SEC and factor recovery for a CRSP extract, promote it, and record the DVC stage.
+sources crsp script:
+    {{ stages }} raw acquire --crsp-csv "{{ crsp }}" --extraction-script "{{ script }}"
+    {{ stages }} raw freeze
+    just dvc commit -f crsp_sec_sources
 
-# The paper has one declared study; preparation and model extraction are cached separately.
-python-panel:
-    just dvc repro measurement
-
-python-representations:
+# Each research stage reruns only when its inputs, parameters or code fingerprints change.
+representations:
     just dvc repro representations
 
-# The supporting original quarterly MM CAPM and spatial core do not load models.
-python-fernandez:
+replication:
     just dvc repro replication
 
-python-publication:
+comovement:
+    just dvc repro comovement
+
+alignment:
+    just dvc repro alignment
+
+publication:
     just dvc repro publication
 
 # Render saved study results for the manuscript without running DVC stages.
 latex-assets:
     mkdir -p src/latex/build
-    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations study report
+    MPLCONFIGDIR="$PWD/src/latex/build/matplotlib" {{ stages }} research publish

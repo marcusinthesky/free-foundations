@@ -11,11 +11,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 import pytest
+import yaml
 
 from free_foundations.study import factors, features
 from free_foundations.study.factors import acquire_factors, parse_monthly, quarterly_factors
-from free_foundations.study.publication import render
-from free_foundations.study.spec import StudySpec, frame_digest, panel_contract
+from free_foundations.study.spec import StudySpec, panel_contract
+from tests._strategies import compact_spec
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -96,7 +97,7 @@ def test_factor_acquisition_reuses_frozen_bytes_without_network(
         raise AssertionError(message)
 
     monkeypatch.setattr(factors.httpx, "get", forbidden)
-    spec = replace(StudySpec(), archive_end="2001-12-31", feature_start="2001-01-01")
+    spec = compact_spec("2001-01-01", "2001-12-31")
     assert not acquire_factors(tmp_path, spec, offline=True)
     (tmp_path / factors.FILES["ff5"]).write_bytes(
         _source(("Mkt-RF", "SMB", "HML", "RMW", "CMA", "RF"))
@@ -114,10 +115,10 @@ def test_factor_acquisition_reuses_frozen_bytes_without_network(
 
 def test_contract_binds_observed_masks_and_configuration_version(tmp_path: Path) -> None:
     spec = StudySpec()
-    path = tmp_path / "study.json"
-    path.write_text(json.dumps(spec.payload()))
+    path = tmp_path / "params.yaml"
+    path.write_text(yaml.safe_dump({"study": spec.payload()}))
     assert StudySpec.read(path) == spec
-    path.write_text(json.dumps(spec.payload() | {"version": "unknown-version"}))
+    path.write_text(yaml.safe_dump({"study": spec.payload() | {"version": "unknown-version"}}))
     with pytest.raises(ValueError, match="supported explicit version"):
         StudySpec.read(path)
     panel = pd.DataFrame(
@@ -143,98 +144,31 @@ def test_contract_binds_observed_masks_and_configuration_version(tmp_path: Path)
     "build",
     [
         lambda: StudySpec(frequency="monthly"),
-        lambda: StudySpec(return_lookback_quarters=0),
-        lambda: StudySpec(bootstrap_blocks=(0,)),
-        lambda: StudySpec(bootstrap_draws=-1),
-        lambda: StudySpec(rungs=("fernandez", "standard_xbrl", "full_xbrl", "full_xbrl")),
+        lambda: StudySpec(neighbours=0),
+        lambda: StudySpec(generated_beta_draws=-1),
+        lambda: StudySpec(rungs=("fernandez", "standard_xbrl", "full_xbrl")),
+        lambda: StudySpec(primary_formation=2009),
+        lambda: StudySpec(panel_start="2008-01-01"),
+        lambda: StudySpec(min_beta_quarters=41),
     ],
 )
 def test_invalid_scientific_contract_is_rejected(build: Callable[[], StudySpec]) -> None:
-    with pytest.raises(ValueError, match=r"quarterly|lookbacks|Bootstrap|unique"):
+    with pytest.raises(
+        ValueError, match=r"quarterly|Neighbour|nonnegative|rungs|formation|MM|archive"
+    ):
         build()
 
 
-def _publication_inputs(root: Path) -> tuple[StudySpec, pd.DataFrame]:
-    prepared = root / "prepared"
-    prepared.mkdir(parents=True)
-    spec = replace(StudySpec(), archive_end="2010-03-31", feature_start="2010-01-01")
-    population = pd.DataFrame(
-        {
-            "issuer_id": ["A", "B"],
-            "quarter": pd.to_datetime(["2010-03-31"] * 2),
-            "total_return": [0.1, np.nan],
-            "observed": [True, False],
-            "xbrl_available": [True, False],
-            "xbrl_status": ["available", "unresolved_identity"],
-        }
-    )
-    panel = population.iloc[:1].copy()
-    panel.to_parquet(prepared / "panel.parquet", index=False)
-    population.to_parquet(prepared / "population.parquet", index=False)
-    pd.DataFrame(
-        {"characteristic": ["market_to_book"], "status": ["unverifiable_public_price"]}
-    ).to_parquet(prepared / "characteristics.parquet", index=False)
-    manifest = {
-        "master": panel_contract(panel, spec),
-        "population_sha256": frame_digest(population),
-        "availability": {"available": 1, "unresolved_identity": 1},
-    }
-    (prepared / "manifest.json").write_text(json.dumps(manifest))
-    return spec, panel
+@pytest.mark.unit
+def test_population_digest_ignores_analysis_settings() -> None:
+    # Arrange: two specifications differing only in an analysis setting.
+    base = StudySpec()
+    changed = replace(base, neighbours=20)
 
-
-def test_publication_reads_saved_parquets_and_keeps_missing_stages_pending(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    spec, panel = _publication_inputs(tmp_path)
-    destination = tmp_path / "measurement"
-    destination.mkdir()
-    score = pd.DataFrame(
-        {
-            "quarter": [pd.Timestamp("2010-03-31")],
-            "method": ["baseline"],
-            "status": ["available"],
-            "score_per_issuer": [-123.456],
-        }
-    )
-    score.to_parquet(destination / "scores.parquet", index=False)
-    (destination / "manifest.json").write_text(
-        json.dumps(
-            {
-                "master": panel_contract(panel, spec),
-                "status": "available",
-                "files": {"scores": "scores.parquet"},
-            }
-        )
-    )
-    monkeypatch.chdir(tmp_path)
-    render(tmp_path, spec)
-    audit = json.loads((tmp_path / "publication/claims-audit.json").read_text())
-    assert audit["status"] == "results_pending"
-    assert not audit["claims"]["new_empirical_findings_available"]
-    saved = pd.read_csv(tmp_path / "publication/measurement-score-summary.csv")
-    assert saved.loc[0, "mean_score_per_issuer"] == -123.456
-    text = (tmp_path / "src/latex/build/crsp-study.tex").read_text()
-    assert "-123.456" in text
-    assert "results\\_pending" in text
-
-
-def test_publication_rejects_changed_master_or_stage_mask(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    spec, panel = _publication_inputs(tmp_path)
-    monkeypatch.chdir(tmp_path)
-    wrong = panel_contract(panel, spec) | {"mask_sha256": "wrong"}
-    stage = tmp_path / "replication"
-    stage.mkdir()
-    (stage / "manifest.json").write_text(json.dumps({"master": wrong, "status": "complete"}))
-    with pytest.raises(ValueError, match="different roster"):
-        render(tmp_path, spec)
-    (stage / "manifest.json").unlink()
-    changed = panel.assign(total_return=0.9)
-    changed.to_parquet(tmp_path / "prepared/panel.parquet", index=False)
-    with pytest.raises(ValueError, match="panel bytes/roster/mask"):
-        render(tmp_path, spec)
+    # Act / Assert: preparation identity is shared; the full digest is not.
+    assert changed.population_digest == base.population_digest
+    assert changed.digest != base.digest
+    assert replace(base, top_n=500).population_digest != base.population_digest
 
 
 def test_streamed_features_match_small_tables_and_load_only_requested_rows(

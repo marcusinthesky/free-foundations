@@ -38,16 +38,16 @@ depends_on = ["free_foundations.contracts", "free_foundations", "free_foundation
 
 [[modules]]
 path = "free_foundations.fernandez"
-depends_on = ["free_foundations.contracts"]
-
-[[modules]]
-path = "free_foundations.panel"
-depends_on = ["free_foundations.contracts", "free_foundations.representations"]
+depends_on = []
 
 [[modules]]
 path = "free_foundations.study"
-depends_on = ["free_foundations.contracts", "free_foundations.data", "free_foundations.representations", "free_foundations.fernandez", "free_foundations.panel"]
+depends_on = ["free_foundations.contracts", "free_foundations.data", "free_foundations.representations", "free_foundations.fernandez"]
+
+[[modules]]
+path = "free_foundations.stages"
+depends_on = ["free_foundations.representations", "free_foundations.study"]
 
 [[modules]]
 path = "free_foundations.cli"
-depends_on = ["free_foundations.representations", "free_foundations.study"]
+depends_on = ["free_foundations.stages"]

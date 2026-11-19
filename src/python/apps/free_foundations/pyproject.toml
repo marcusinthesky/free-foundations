@@ -9,20 +9,15 @@ dependencies = [
   "scipy>=1.15,<2",
   "scikit-learn>=1.7.2,<2",
   "typer>=0.16,<1",
-  # Study acquisition, spatial estimators and saved-result publication.
-  "spreg>=1.9.1,<2",
-  "libpysal>=4.13,<5",
-  "esda>=2.7,<3",
-  "yfinance>=1.7,<2",
-  "pandas-datareader>=0.11.1,<0.12",
-  "edgartools>=5.62,<6",
+  # Study acquisition and saved-result publication.
   "httpx>=0.28,<1",
-  "marimo>=0.25,<0.26",
   "pyarrow>=20",
   "matplotlib>=3.10,<4",
   "jinja2>=3.1,<4",  # pandas LaTeX tables and manuscript scalar bindings
   "tabulate>=0.10,<1",  # pandas Markdown tables in saved-result reports
-  "arch>=7.2,<8",
+  "pyyaml>=6.0.2,<7",  # DVC params.yaml is the study configuration
+  # Spatial estimation, spatial inference, Mantel association and resampling.
+  "statadic==0.5.0a2",
 ]
 
 [project.scripts]

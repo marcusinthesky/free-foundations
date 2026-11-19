@@ -13,8 +13,10 @@ model = "children"
 template = "children.md.j2"
 -->
 
-_No open children._
+| Status | Item | Description |
+| --- | --- | --- |
+| in-progress | [Journal-ready in-sample CRSP–SEC study](.context/plan/journal-study/README.md) | In-sample, parameter-light CRSP–SEC study and manuscript ready for journal submission. |
 
-`0 open; 0 terminal`
+`1 open; 0 terminal`
 
 <!-- insitu:end -->

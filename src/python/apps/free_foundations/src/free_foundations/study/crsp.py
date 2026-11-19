@@ -130,20 +130,18 @@ def _membership(monthly: pd.DataFrame, spec: StudySpec) -> pd.DataFrame:
     )
 
 
-def _calendar(membership: pd.DataFrame, spec: StudySpec, *, history: bool = False) -> pd.DataFrame:
-    """Keep all twelve eligible months, including months after the final source row."""
+def _calendar(membership: pd.DataFrame, spec: StudySpec, *, cohort: bool = False) -> pd.DataFrame:
+    """Keep all twelve eligible months, or one formation cohort's whole outcome window."""
     start = pd.Timestamp(spec.archive_start).to_period("M").to_timestamp("M")
     end = pd.Timestamp(spec.archive_end).to_period("M").to_timestamp("M")
     active = membership.loc[membership["effective_year"].between(start.year, end.year)].copy()
-    if history:
-        if active.empty or not active["effective_year"].eq(active["effective_year"].iloc[0]).all():
-            message = "A historical portfolio calendar needs exactly one formation cohort."
+    if cohort:
+        if active.empty or not active["formation_year"].eq(active["formation_year"].iloc[0]).all():
+            message = "A cohort calendar needs exactly one formation year."
             raise ValueError(message)
-        year = int(active["effective_year"].iloc[0])
-        lookback_years = (spec.return_lookback_quarters + 3) // 4
-        history_start = max(start, pd.Timestamp(year - lookback_years, 1, 31))
-        history_end = min(end, pd.Timestamp(year, 12, 31))
-        months = pd.date_range(history_start, history_end, freq="ME")
+        window = spec.window(int(active["formation_year"].iloc[0]))
+        first = window[0].to_period("Q").start_time.to_period("M").to_timestamp("M")
+        months = pd.date_range(max(start, first), min(end, window[-1]), freq="ME")
         return active.merge(pd.DataFrame({"month": months}), how="cross")
     grid = active.merge(pd.DataFrame({"month_number": range(1, 13)}), how="cross")
     grid["month"] = pd.to_datetime(
@@ -172,7 +170,7 @@ def _issuer_monthly(
     membership: pd.DataFrame,
     spec: StudySpec,
     *,
-    history: bool = False,
+    cohort: bool = False,
 ) -> pd.DataFrame:
     """Portfolio only selected classes, using every class's preceding calendar-month cap.
 
@@ -180,7 +178,7 @@ def _issuer_monthly(
     changes are reported without losing known returns of its selected PERMNOs.
     An absent class row does not identify a delisting or its settlement proceeds.
     """
-    grid = _calendar(membership, spec, history=history)
+    grid = _calendar(membership, spec, cohort=cohort)
     if grid.empty:
         return pd.DataFrame(columns=PORTFOLIO_COLUMNS)
     current = monthly[
@@ -313,30 +311,27 @@ def build_crsp(csv: Path, spec: StudySpec) -> dict[str, pd.DataFrame]:
         "membership": membership,
         "issuer_monthly": issuer_monthly,
         "quarterly": _quarterly(issuer_monthly),
-        "history": build_history(monthly, membership, spec),
+        "cohorts": build_cohorts(monthly, membership, spec),
     }
 
 
-def build_history(monthly: pd.DataFrame, membership: pd.DataFrame, spec: StudySpec) -> pd.DataFrame:
-    """Backcast each known annual selected-class portfolio for return estimation.
+def build_cohorts(monthly: pd.DataFrame, membership: pd.DataFrame, spec: StudySpec) -> pd.DataFrame:
+    """Follow each declared December formation cohort through its outcome window.
 
-    ``asof_year`` identifies the selected PERMNO set known at that year's start.
-    Its prior returns do not require prior top-1000 membership, and source PERMCO
-    changes do not discard a selected security's history. Query code must select
-    quarters strictly before its own forecast cutoff. Computation is bounded to
-    the configured lookback plus the current year, one formation year at a time.
+    Selected classes keep their formation PERMCO identity and lagged-cap weights after
+    leaving the top-``top_n``. CRSP CIZ returns include delisting returns; months
+    after a class's final source row are unobserved, never filled.
     """
-    start_year = pd.Timestamp(spec.archive_start).year
-    end_year = pd.Timestamp(spec.archive_end).year
-    active = membership.loc[membership["effective_year"].between(start_year, end_year)]
     pieces = []
-    for _, selected in active.groupby("effective_year", sort=True):
-        portfolios = _issuer_monthly(monthly, selected, spec, history=True)
-        piece = _quarterly(portfolios)
-        piece.insert(0, "asof_year", int(selected["effective_year"].iloc[0]))
+    for formation in spec.formation_years:
+        selected = membership.loc[membership["formation_year"].eq(formation)]
+        if selected.empty:
+            continue
+        piece = _quarterly(_issuer_monthly(monthly, selected, spec, cohort=True))
+        piece.insert(0, "formation_year", formation)
         pieces.append(piece)
     if not pieces:
-        return pd.DataFrame(columns=["asof_year", *QUARTER_COLUMNS])
+        return pd.DataFrame(columns=["formation_year", *QUARTER_COLUMNS])
     return pd.concat(pieces, ignore_index=True).sort_values(
-        ["asof_year", "issuer_id", "quarter"], ignore_index=True
+        ["formation_year", "issuer_id", "quarter"], ignore_index=True
     )

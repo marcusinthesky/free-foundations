@@ -158,10 +158,12 @@ def test_path_and_memory_contexts_have_identical_inputs_and_support_for_every_ru
             assert "xbrl:IndustryCode:category=0020" in streamed.features
             assert "xbrl:Audited:category=True" in streamed.features
         identities.append((streamed.support_ids, streamed.tickers))
-    assert identities[0] == identities[1] == identities[2]
+    assert identities[0] == identities[1]
 
 
-def test_known_fields_missing_from_selected_context_keep_all_na_columns(tmp_path: Path) -> None:
+@pytest.mark.component
+def test_fields_never_reported_in_the_context_are_not_encoded(tmp_path: Path) -> None:
+    # Arrange: a standard field reported only as missing, outside the selected rows.
     panel, chars, broad, spec, quarter = _inputs()
     selected = _context_panel(panel, chars, quarter, spec)
     selected_keys = pd.MultiIndex.from_frame(selected[encoding.KEYS])
@@ -178,13 +180,13 @@ def test_known_fields_missing_from_selected_context_keep_all_na_columns(tmp_path
         is_standard=True,
         value_type="numeric",
     )
-    extended = pd.concat([broad, pd.DataFrame([base])], ignore_index=True)
-    path = _save(extended, tmp_path)
-    for rung in ("standard_xbrl", "full_xbrl"):
-        context = _context(path, panel, chars, spec, quarter, rung)
-        column = context.features.index("xbrl:ReportedNil")
-        assert np.isnan(context.support[:, column]).all()
-        assert np.isnan(context.query[:, column]).all()
+    path = _save(pd.concat([broad, pd.DataFrame([base])], ignore_index=True), tmp_path)
+
+    # Act
+    context = _context(path, panel, chars, spec, quarter, "standard_xbrl")
+
+    # Assert: below the coverage floor, the field never becomes a model column.
+    assert "xbrl:ReportedNil" not in context.features
 
 
 def test_future_columns_and_categories_do_not_change_an_earlier_streamed_context(
@@ -193,7 +195,7 @@ def test_future_columns_and_categories_do_not_change_an_earlier_streamed_context
     panel, chars, broad, spec, quarter = _inputs()
     historical = broad.loc[broad["quarter"].le(quarter)].copy()
     path = _save(historical, tmp_path)
-    before = _context(path, panel, chars, spec, quarter, "full_xbrl")
+    before = _context(path, panel, chars, spec, quarter, "standard_xbrl")
     future = broad.loc[broad["quarter"].gt(quarter)].copy()
     future.loc[future["feature_id"].eq("Policy"), "value"] = "future-only-category"
     added = future.iloc[[0]].assign(feature_id="FutureOnly", value="future-only-field")
@@ -202,7 +204,7 @@ def test_future_columns_and_categories_do_not_change_an_earlier_streamed_context
     _schema(pd.concat([historical, future], ignore_index=True)).to_parquet(
         tmp_path / "schema.parquet", index=False
     )
-    after = _context(path, panel, chars, spec, quarter, "full_xbrl")
+    after = _context(path, panel, chars, spec, quarter, "standard_xbrl")
     assert before.features == after.features
     assert before.digest == after.digest
     assert all(
@@ -211,23 +213,70 @@ def test_future_columns_and_categories_do_not_change_an_earlier_streamed_context
     np.testing.assert_allclose(before.query, after.query, equal_nan=True)
 
 
-def test_streamed_reader_is_called_with_only_support_and_query_keys(
+@pytest.mark.component
+def test_streamed_reader_reads_each_part_with_only_support_and_query_keys(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Arrange: one source part per issuer.
     panel, chars, broad, spec, quarter = _inputs()
     path = _save(broad, tmp_path)
     original = encoding.read_feature_rows
-    observed: list[pd.MultiIndex] = []
+    observed: list[tuple[str, pd.MultiIndex]] = []
 
     def capture(source: Path, keys: pd.MultiIndex) -> pd.DataFrame:
-        observed.append(keys)
+        observed.append((source.name, keys))
         return original(source, keys)
 
     monkeypatch.setattr(encoding, "read_feature_rows", capture)
-    _context(path, panel, chars, spec, quarter, "full_xbrl")
-    assert len(observed) == 1
-    assert len(observed[0]) == spec.support_rows + 3
-    assert len(observed[0]) < len(panel)
+
+    # Act
+    _context(path, panel, chars, spec, quarter, "standard_xbrl")
+
+    # Assert: every part is read once, in order, for the selected keys only.
+    assert [name for name, _ in observed] == [
+        "part-000000.parquet",
+        "part-000001.parquet",
+        "part-000002.parquet",
+    ]
+    assert all(len(keys) == spec.support_rows + 3 < len(panel) for _, keys in observed)
+
+
+@pytest.mark.component
+def test_streamed_latest_fact_matches_one_pass_when_an_issuer_spans_parts(
+    tmp_path: Path,
+) -> None:
+    # Arrange: a later part restates A's query-quarter Assets at the same filing
+    # time, and adds an older B Assets lag that the original filing supersedes.
+    panel, chars, broad, spec, quarter = _inputs()
+    original = broad.loc[broad["feature_id"].eq("Assets") & broad["quarter"].eq(quarter)]
+    restated = original.loc[original["issuer_id"].eq("A")].assign(value=999.0)
+    lagged = original.loc[original["issuer_id"].eq("B")].assign(
+        value=-1.0,
+        fact_available_at=lambda frame: frame["fact_available_at"] - pd.Timedelta(1, "D"),
+    )
+    extra = pd.concat([restated, lagged], ignore_index=True)
+    path = _save(broad, tmp_path)
+    _write_partition(extra, path, 999)
+    combined = pd.concat([broad, extra], ignore_index=True)
+    selected = _context_panel(panel, chars, quarter, spec)
+
+    # Act
+    views = []
+    for source in (combined, path):
+        facts, schema = _quarter_facts(source, selected, quarter)
+        views.append(
+            encoding.rung_view(selected, chars, facts, spec, "standard_xbrl", schema=schema)
+        )
+    memory, streamed = views
+
+    # Assert: the tie takes the later part and the older lag never wins.
+    assert streamed.loc[("A", quarter), "xbrl:Assets"] == 999.0
+    assert (
+        streamed.loc[("B", quarter), "xbrl:Assets"]
+        == original.set_index("issuer_id").loc["B", "value"]
+    )
+    pd.testing.assert_frame_equal(memory, streamed)
+    assert memory.attrs == streamed.attrs
 
 
 def test_conflicting_declared_types_are_rejected_in_context_and_catalogue(tmp_path: Path) -> None:
@@ -236,14 +285,14 @@ def test_conflicting_declared_types_are_rejected_in_context_and_catalogue(tmp_pa
         "categorical"
     )
     with pytest.raises(ValueError, match="exactly one declared"):
-        _context(broad, panel, chars, spec, quarter, "full_xbrl")
+        _context(broad, panel, chars, spec, quarter, "standard_xbrl")
     path = _save(broad, tmp_path)
     with pytest.raises(ValueError, match=r"exactly one declared|disagrees"):
-        _context(path, panel, chars, spec, quarter, "full_xbrl")
+        _context(path, panel, chars, spec, quarter, "standard_xbrl")
 
 
 def test_declared_numeric_feature_rejects_nonnumeric_values() -> None:
     panel, chars, broad, spec, quarter = _inputs()
     broad.loc[broad["feature_id"].eq("Assets"), "value"] = "nonnumeric"
     with pytest.raises(ValueError, match="Declared numeric XBRL"):
-        _context(broad, panel, chars, spec, quarter, "full_xbrl")
+        _context(broad, panel, chars, spec, quarter, "standard_xbrl")

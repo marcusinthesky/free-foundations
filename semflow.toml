@@ -4,6 +4,7 @@
 project-root = "."
 pipeline-file = "dvc.yaml"
 hash-dir = ".semflow/hashes"
+# Statadic is a pinned PyPI dependency; source roots cover repository code only.
 source-roots = ["src/python/apps/free_foundations/src"]
 
 [applications]

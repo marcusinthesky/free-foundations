@@ -5,6 +5,9 @@ requires-python = "~=3.13.0"
 
 [tool.uv]
 package = false
+# TabFM pins jaxtyping<0.3 for annotations only; statadic needs runtime shape checks
+# from 0.3.3. The TabFM adapter test exercises the overridden version.
+override-dependencies = ["jaxtyping>=0.3.3"]
 
 [tool.uv.workspace]
 members = ["apps/*"]
@@ -91,6 +94,7 @@ dev = [
   "pytest-testmon>=2.2,<3",
   "pytest-layout-enforcer",
   "hypothesis[numpy]>=6.170,<7",
+  "types-pyyaml>=6.0.12,<7",
   "pandas-stubs>=2.2,<3",
   "scipy-stubs>=1.15,<2",
   "dvc[s3]>=3.60,<4",

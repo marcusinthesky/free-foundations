@@ -44,26 +44,19 @@ lean_decls
 *.toc
 *.synctex.gz
 
-# Downloads, model weights and expensive intermediates live in DVC's cache and the
-# Hugging Face bucket (dvc.yaml, *.dvc); Git keeps their pointers and DVC's own
-# .gitignore files.
-research/**/cache/*
-!research/**/cache/*.dvc
-!research/**/cache/.gitignore
-# Generated numerical results, contexts and detailed manifests are DVC outputs.
-# Protocols and inexpensive human-readable reports remain in Git.
-research/**/*.parquet
-research/**/*.npz
-research/**/embeddings/
-research/crsp-study/sources/
-research/crsp-study/prepared/
-research/crsp-study/representations/
-research/crsp-study/measurement/
-research/crsp-study/replication/
-research/crsp-study/publication/
-research/crsp-study/recovery/
-research/crsp-study/.sources.lock
-# Per-distance fingerprints: thousands of sidecars, cached by DVC with their matrices.
-research/panel/**/distances/
+# Data layers (data/README.md): DVC owns raw sources, processed panels and research
+# results; Git keeps only their documentation. Staging, model weights and the
+# representation state cache are local and reproducible, never uploaded.
+/data/raw/crsp-sec/
+/data/raw/models/*/
+/data/raw/.sources.lock
+/data/staging/
+/data/processed/crsp-sec/panel/
+/data/processed/crsp-sec/representations/
+/data/processed/crsp-sec/state-cache/
+/data/research/crsp-sec/replication/
+/data/research/crsp-sec/comovement/
+/data/research/crsp-sec/alignment/
+/data/research/crsp-sec/publication/
 # Generated blueprint declaration lists; the sources are src/lean/blueprint/src.
 src/lean/blueprint/manuscript_decls

@@ -1,6 +1,5 @@
 """Metric invariants, label preservation and past-only feature/target preparation."""
 
-from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +9,6 @@ from hypothesis import given
 from numpy.testing import assert_allclose
 
 from free_foundations.contracts import FloatArray
-from free_foundations.representations.baselines import supervised_states
 from free_foundations.representations.distance import pairwise_distance, save_distance
 from free_foundations.representations.encoding import (
     Prepared,
@@ -85,13 +83,3 @@ def _prepared(seed: int = 0) -> Prepared:
         rng.normal(size=(len(index), 2)), index=index, columns=["income", "operating_cash"]
     )
     return prepare(view, labels, tuple("ABCDEF"), 2020, "income")
-
-
-def test_supervised_states_use_support_rows_only() -> None:
-    data = _prepared(1)
-    first = supervised_states(data)
-    assert first.shape == (len(data.query), 16)
-    assert_allclose(supervised_states(data), first)
-    # Training sees support rows only: re-encoding a query subset gives the same rows.
-    subset = replace(data, query=data.query[[3, 1]], tickers=("D", "B"))
-    assert_allclose(supervised_states(subset), first[[3, 1]], atol=1e-6)

@@ -6,25 +6,22 @@ description: "Typed measurements of firm proximity from tabular foundation model
 
 The [paper](src/latex/main.tex), *Pretrained Tabular Features and the Measurement of
 Financial Proximity*, separates predictive information, economic alignment and
-exposure estimation. Its mathematical framework is checked in Lean while the
-empirical study migrates to CRSP CIZ total returns and dated SEC disclosures.
-Numerical conclusions from the earlier current-survivor experiment remain only in
-the Git history; they are not findings of this study.
+exposure estimation. Its mathematical framework is checked in Lean; the empirical
+study is an in-sample, few-parameter test on CRSP CIZ total returns and dated SEC
+CompanyFacts.
 
-Annual membership selects the prior-December top 1,000 CRSP securities, then groups
-selected classes into issuer portfolios. All analyses use the same quarterly issuer
-roster, calendar and observed return mask; missing characteristics do not create
-separate complete-case samples. The original Fernández characteristic-history
-spatial CAPM is the replication benchmark. A ladder adds standard entity-wide XBRL
-facts and then all structured scalar facts, and four pinned pretrained tabular
-models and conventional controls share each information rung.
+Each December's top 1,000 CRSP issuers form a cohort followed through exits. The
+study replicates Fernández's characteristic-history spatial CAPM, then asks whether
+networks built directly from four pinned tabular foundation models' representations
+organize return premia and co-movement. Only the spatial coefficient is fitted to
+returns; every estimate carries an in-sample interval.
 
 | Directory | Purpose |
 | --- | --- |
 | `src/python` | The `free-foundations` study application in a uv workspace |
 | `src/lean` | Lean definitions, proofs, frozen type contracts and the blueprint |
 | `src/latex` | The manuscript and supplement |
-| `research` | The DVC pipeline, study contract and data pointers |
+| `data` | The layered DVC pipeline, study contract and data pointers |
 | `.context` | Project plans and reference records |
 
 ## Get ready
@@ -49,17 +46,17 @@ Run `just --list` to discover commands; each language has a module, for example
 stage reaches, so documentation edits do not rerun model inference.
 
 ```sh
-just python-universe          # deliberately recover sources and record the frozen stage
+just sources EXTRACT.csv EXTRACT.py  # deliberately recover sources, freeze, record
 just build                    # check fingerprints, then run stale DVC stages
 just latex::paper             # render saved results and compile the paper
 ```
 
-The [research guide](research/README.md) describes every stage, acquisition rules
+The [data guide](data/README.md) describes every stage, acquisition rules
 and artifact restoration from the private data remote.
 
 ## Find your way
 
-- [The study contract](research/crsp-study/README.md) governs every empirical stage.
+- [The study contract](data/research/crsp-sec/README.md) governs every empirical stage.
 - [The Python workspace](src/python/README.md) explains code and commands.
 - [The Lean workspace](src/lean/README.md) records proof assumptions and audits.
 - [The LaTeX workspace](src/latex/README.md) explains rendering and compilation.

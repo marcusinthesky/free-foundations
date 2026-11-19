@@ -10,9 +10,11 @@ import pytest
 from free_foundations.representations import cache, checkpoints
 
 
-def test_checkpoint_migration_verifies_bytes_and_never_rewrites_expected(
+@pytest.mark.component
+def test_checkpoint_reuse_verifies_bytes_and_never_rewrites_expected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Arrange: a pinned snapshot already present under root/name/revision.
     payload = b"independently verified fixture"
     record = {
         "repository": "owner/model",
@@ -23,34 +25,19 @@ def test_checkpoint_migration_verifies_bytes_and_never_rewrites_expected(
     inventory = tmp_path / "expected.json"
     inventory.write_text(json.dumps({"example": record}))
     monkeypatch.setattr(checkpoints, "INVENTORY", inventory)
-    legacy = tmp_path / "models/example"
-    legacy.mkdir(parents=True)
-    (legacy / "weights").write_bytes(payload)
-    resolved = checkpoints.resolve("example", tmp_path)
-    path = Path(resolved["root"]) / "weights"
-    assert path.parent.name == "pinned-revision"
-    assert path.read_bytes() == payload
-    path.write_bytes(b"changed")
+    snapshot = tmp_path / "models/example/pinned-revision"
+    snapshot.mkdir(parents=True)
+    (snapshot / "weights").write_bytes(payload)
+
+    # Act
+    resolved = checkpoints.resolve("example", tmp_path / "models")
+
+    # Assert: verified reuse; altered bytes fail; the inventory is never rewritten.
+    assert Path(resolved["root"]) == snapshot
+    (snapshot / "weights").write_bytes(b"changed")
     with pytest.raises(ValueError, match="verification failed"):
-        checkpoints.resolve("example", tmp_path)
+        checkpoints.resolve("example", tmp_path / "models")
     assert json.loads(inventory.read_text())["example"] == record
-
-
-def test_checkpoint_rejects_wrong_legacy_revision(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(
-        checkpoints,
-        "expected",
-        lambda _="example": {"repository": "owner/model", "revision": "expected"},
-    )
-    legacy = tmp_path / "models/example"
-    legacy.mkdir(parents=True)
-    (legacy / "provenance.json").write_text(
-        json.dumps({"repository": "owner/model", "revision": "wrong"})
-    )
-    with pytest.raises(ValueError, match="provenance disagrees"):
-        checkpoints.resolve("example", tmp_path)
 
 
 def test_embedding_reuse_checks_identity_shapes_and_bytes(tmp_path: Path) -> None:
@@ -84,7 +71,7 @@ def test_embedding_reuse_checks_identity_shapes_and_bytes(tmp_path: Path) -> Non
 def test_missing_embedding_metadata_is_not_silently_trusted(tmp_path: Path) -> None:
     contract = {"model": "fixture", "tickers": ["A", "B"], "readouts": ["late"]}
     path = cache.location(tmp_path, contract)
-    path.parent.mkdir(parents=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(path, late=np.ones((2, 3)))
     with pytest.raises(FileNotFoundError):
         cache.load(path, contract)

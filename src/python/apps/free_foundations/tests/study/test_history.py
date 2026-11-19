@@ -9,9 +9,9 @@ import pandas as pd
 import pytest
 from scipy.stats import spearmanr
 
-from free_foundations.study.analysis import fernandez_geometries
 from free_foundations.study.encoding import original_view
 from free_foundations.study.history import annual_history_slots
+from free_foundations.study.networks import characteristic_distances
 from free_foundations.study.spec import CHARACTERISTICS, StudySpec
 
 
@@ -43,26 +43,33 @@ def _histories() -> tuple[pd.DataFrame, pd.DataFrame, StudySpec, np.ndarray]:
     return panel, frame, replace(StudySpec(), characteristic_history_years=4), expected
 
 
+@pytest.mark.unit
 def test_fernandez_network_and_encoder_use_the_same_annual_slots_and_pair_intersections() -> None:
+    # Arrange
     panel, characteristics, spec, expected = _histories()
     encoded = original_view(panel, characteristics, spec)
-    network = fernandez_geometries(
-        characteristics, tuple(panel["issuer_id"]), panel["quarter"].iloc[0], spec
+    years = spec.characteristic_history_years
+
+    # Act: networks read the encoder's slots and rerank each pair on its overlap.
+    distances = characteristic_distances(
+        {
+            name: encoded[[f"original:{name}:annual_lag{lag}" for lag in range(years)]].to_numpy(
+                float
+            )
+            for name in CHARACTERISTICS
+        }
     )
+
+    # Assert: equation (9), sqrt(2(1 - Spearman)), on each pair's common slots.
     for name in CHARACTERISTICS:
-        selected = encoded[
-            [f"original:{name}:annual_lag{lag}" for lag in range(spec.characteristic_history_years)]
-        ].to_numpy(float)
-        np.testing.assert_array_equal(selected, expected)
-        item = network[f"fernandez_{name}"]
-        assert item.overlap_counts is not None
-        assert item.raw_correlation is not None
+        selected = encoded[[f"original:{name}:annual_lag{lag}" for lag in range(years)]]
+        np.testing.assert_array_equal(selected.to_numpy(float), expected)
+        distance, _ = distances[name]
         for left in range(len(panel)):
-            for right in range(len(panel)):
+            for right in range(left + 1, len(panel)):
                 overlap = np.isfinite(expected[left]) & np.isfinite(expected[right])
-                assert item.overlap_counts[left, right] == int(overlap.sum())
                 rho = float(spearmanr(expected[left, overlap], expected[right, overlap]).statistic)
-                assert item.raw_correlation[left, right] == pytest.approx(rho)
+                assert distance[left, right] == pytest.approx(np.sqrt(2 * (1 - rho)), abs=1e-6)
 
 
 def test_intervening_quarters_and_future_snapshots_cannot_change_original_histories() -> None:
@@ -73,13 +80,6 @@ def test_intervening_quarters_and_future_snapshots_cannot_change_original_histor
     before = original_view(panel, characteristics, spec)
     after = original_view(panel, changed, spec)
     pd.testing.assert_frame_equal(before, after)
-    issuers = tuple(panel["issuer_id"])
-    first = fernandez_geometries(characteristics, issuers, "2012Q2", spec)
-    second = fernandez_geometries(changed, issuers, "2012Q2", spec)
-    for name in first:
-        np.testing.assert_array_equal(first[name].distance, second[name].distance)
-        np.testing.assert_array_equal(first[name].weights, second[name].weights)
-        np.testing.assert_array_equal(first[name].gram, second[name].gram)
 
 
 def test_missing_annual_snapshots_remain_missing_and_duplicate_snapshots_are_rejected() -> None:

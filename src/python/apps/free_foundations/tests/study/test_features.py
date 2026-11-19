@@ -3,8 +3,8 @@
 import json
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
+import pytest
 
 from free_foundations.study.features import build_features
 from free_foundations.study.spec import StudySpec
@@ -44,6 +44,63 @@ def _fact(
     return result
 
 
+def _equity_panels(equity: float = 1000.0) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """One issuer-quarter whose CRSP market equity is known at the fiscal year end."""
+    quarters, monthly = _panels()
+    december = monthly.assign(date="2023-12-29", market_cap_usd=equity)
+    return quarters, pd.concat([december, monthly], ignore_index=True)
+
+
+@pytest.mark.component
+def test_crsp_equity_and_sec_books_define_the_four_ratios(tmp_path: Path) -> None:
+    # Arrange: CRSP equity 1,000 at December 2023 and fiscal-2023 SEC books.
+    root = _sources(
+        tmp_path,
+        {
+            "us-gaap": {
+                "Assets": {"units": {"USD": [_fact(100)]}},
+                "StockholdersEquity": {"units": {"USD": [_fact(50)]}},
+                "PaymentsOfDividendsCommonStock": {
+                    "units": {"USD": [_fact(10, start="2023-01-01")]}
+                },
+                "LongTermDebtNoncurrent": {"units": {"USD": [_fact(30)]}},
+                "DebtCurrent": {"units": {"USD": [_fact(10)]}},
+                "FinanceLeaseLiabilityNoncurrent": {"units": {"USD": [_fact(500)]}},
+            },
+            "dei": {"EntityPublicFloat": {"units": {"USD": [_fact(99999)]}}},
+        },
+    )
+    quarterly, monthly = _equity_panels()
+
+    # Act
+    result = build_features(quarterly, monthly, root, StudySpec())
+
+    # Assert: public float and lease liabilities never enter the ratios.
+    values = result["characteristics"].set_index("characteristic")["value"]
+    assert values["market_cap_assets"] == pytest.approx(10.0)
+    assert values["market_to_book"] == pytest.approx(20.0)
+    assert values["dividend_yield"] == pytest.approx(0.01)
+    assert values["debt_maturity"] == pytest.approx(0.75)
+    assert result["availability"].iloc[0]["original_characteristics_available"] == 4
+
+
+@pytest.mark.component
+def test_missing_components_and_scale_errors_stay_missing(tmp_path: Path) -> None:
+    # Arrange: assets tagged in millions by mistake, no dividend or debt tags.
+    root = _sources(tmp_path, {"us-gaap": {"Assets": {"units": {"USD": [_fact(0.0001)]}}}})
+    quarterly, monthly = _equity_panels()
+
+    # Act
+    rows = build_features(quarterly, monthly, root, StudySpec())["characteristics"]
+
+    # Assert
+    reasons = rows.set_index("characteristic")["reason"]
+    assert rows["value"].isna().all()
+    assert reasons["market_cap_assets"] == "outside_plausible_range"
+    assert reasons["dividend_yield"] == "crsp_market_equity_or_annual_common_dividends_unavailable"
+    assert reasons["debt_maturity"] == "noncurrent_and_total_reported_debt_unavailable"
+
+
 def _panels() -> tuple[pd.DataFrame, pd.DataFrame]:
     quarters = pd.DataFrame(
         {"issuer_id": ["PERMCO:2"], "permco": [2], "quarter": [pd.Timestamp("2024-06-30")]}
@@ -58,29 +115,6 @@ def _panels() -> tuple[pd.DataFrame, pd.DataFrame]:
         }
     )
     return quarters, monthly
-
-
-def test_available_xbrl_does_not_imply_observed_prices_or_full_class_cap(tmp_path: Path) -> None:
-    root = _sources(
-        tmp_path,
-        {
-            "us-gaap": {
-                "Assets": {"units": {"USD": [_fact(100)]}},
-                "StockholdersEquity": {"units": {"USD": [_fact(70)]}},
-                "LongTermDebtAndCapitalLeaseObligations": {"units": {"USD": [_fact(20)]}},
-                "DebtAndCapitalLeaseObligations": {"units": {"USD": [_fact(40)]}},
-            }
-        },
-    )
-    quarterly, monthly = _panels()
-    result = build_features(quarterly, monthly, root, StudySpec(feature_start="2009-01-01"))
-    assert bool(result["availability"].iloc[0]["xbrl_available"])
-    values = result["characteristics"].set_index("characteristic")["value"]
-    assert values["debt_maturity"] == 0.5
-    assert np.isnan(values["market_cap_assets"])
-    assert np.isnan(values["market_to_book"])
-    assert np.isnan(values["dividend_yield"])
-    assert result["availability"].iloc[0]["original_characteristics_available"] == 1
 
 
 def test_last_trading_day_filing_and_future_restatement_cannot_leak(tmp_path: Path) -> None:
@@ -139,81 +173,6 @@ def test_candidate_identity_does_not_become_xbrl_availability(tmp_path: Path) ->
     assert not bool(result["availability"].iloc[0]["xbrl_available"])
     assert result["availability"].iloc[0]["reason"] == "linkage_unresolved"
     assert len(result["characteristics"]) == 4
-
-
-def test_public_float_is_not_promoted_to_market_cap_even_by_catalog(tmp_path: Path) -> None:
-    root = _sources(
-        tmp_path,
-        {
-            "us-gaap": {"Assets": {"units": {"USD": [_fact(100)]}}},
-            "dei": {"EntityPublicFloat": {"units": {"USD": [_fact(1000)]}}},
-        },
-    )
-    pd.DataFrame(
-        [
-            {
-                "concept": "dei:EntityPublicFloat",
-                "component": "market_cap",
-                "unit": "USD",
-                "scope": "entire_common_equity",
-                "status": "verified",
-                "evidence_url": "https://www.sec.gov/Archives/a",
-            }
-        ]
-    ).to_csv(root / "metadata/component-semantics.csv", index=False)
-    quarterly, monthly = _panels()
-    result = build_features(quarterly, monthly, root, StudySpec())
-    assert (
-        result["characteristics"]
-        .loc[result["characteristics"]["characteristic"].eq("market_cap_assets"), "value"]
-        .isna()
-        .all()
-    )
-
-
-def test_reviewed_sec_market_components_can_identify_original_ratios(tmp_path: Path) -> None:
-    root = _sources(
-        tmp_path,
-        {
-            "us-gaap": {
-                "Assets": {"units": {"USD": [_fact(100)]}},
-                "StockholdersEquity": {"units": {"USD": [_fact(50)]}},
-                "CommonStockDividendsPerShareCashPaid": {
-                    "units": {"USD/shares": [_fact(1, start="2023-01-01")]}
-                },
-            },
-            "acme": {
-                "FullIssuerMarketCapitalization": {"units": {"USD": [_fact(1000)]}},
-                "ReportedCommonShareMarketPrice": {"units": {"USD/shares": [_fact(10)]}},
-            },
-        },
-    )
-    pd.DataFrame(
-        [
-            {
-                "concept": "acme:FullIssuerMarketCapitalization",
-                "component": "market_cap",
-                "unit": "USD",
-                "scope": "entire_common_equity",
-                "status": "verified",
-                "evidence_url": "https://www.sec.gov/Archives/a",
-            },
-            {
-                "concept": "acme:ReportedCommonShareMarketPrice",
-                "component": "market_price",
-                "unit": "USD/shares",
-                "scope": "single_common_class",
-                "status": "verified",
-                "evidence_url": "https://www.sec.gov/Archives/a",
-            },
-        ]
-    ).to_csv(root / "metadata/component-semantics.csv", index=False)
-    quarterly, monthly = _panels()
-    result = build_features(quarterly, monthly, root, StudySpec())
-    values = result["characteristics"].set_index("characteristic")["value"]
-    assert values["market_cap_assets"] == 10
-    assert values["market_to_book"] == 20
-    assert values["dividend_yield"] == 0.1
 
 
 def test_full_rung_retains_old_periods_and_revises_only_asof(tmp_path: Path) -> None:

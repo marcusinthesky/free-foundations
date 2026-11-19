@@ -1,3 +1,3 @@
 [codespell]
-skip = uv.lock,devenv.lock,lake-manifest.json,research/expanded/*.csv,research/expanded/*.json,research/expanded/*.svg,dvc.lock,.semflow/*
+skip = uv.lock,devenv.lock,lake-manifest.json,dvc.lock,.semflow/*
 ignore-words-list = insitu,acn,statics

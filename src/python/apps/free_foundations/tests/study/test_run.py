@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+import yaml
 
 from free_foundations.study import run
 from free_foundations.study.spec import StudySpec, panel_contract
@@ -79,9 +80,18 @@ def _factor_sources(destination: Path, _spec: StudySpec, **_kwargs: object) -> N
 
 
 def _acquire(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Path, Path]:
-    study = StudySpec(archive_start="2008-01-01", archive_end="2010-12-31", top_n=1)
-    spec_path = tmp_path / "study.json"
-    spec_path.write_text(json.dumps(study.payload()))
+    study = StudySpec(
+        archive_start="2008-01-01",
+        archive_end="2010-12-31",
+        panel_start="2009-01-01",
+        top_n=1,
+        window_quarters=4,
+        formation_years=(2008,),
+        primary_formation=2008,
+        min_beta_quarters=3,
+    )
+    spec_path = tmp_path / "params.yaml"
+    spec_path.write_text(yaml.safe_dump({"study": study.payload()}))
     csv = tmp_path / "staged.csv"
     dates = pd.date_range("2008-01-31", "2010-12-31", freq="ME")
     frame = pd.DataFrame(
@@ -101,9 +111,11 @@ def _acquire(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Pat
     monkeypatch.setattr(run, "acquire_sources", _sec_sources)
     monkeypatch.setattr(run, "acquire_factors", _factor_sources)
     monkeypatch.setattr(run, "_recover_links", _no_links)
-    output = tmp_path / "study"
-    run.acquire(csv, script, output=output, spec_path=spec_path, offline=True)
-    return output, spec_path, csv
+    staging = tmp_path / "staging"
+    run.acquire(
+        csv, script, staging=staging, canonical=tmp_path / "raw", params=spec_path, offline=True
+    )
+    return staging / "sources", spec_path, csv
 
 
 def _no_links(_monthly: pd.DataFrame, _sources: Path, *, offline: bool) -> None:
@@ -113,32 +125,43 @@ def _no_links(_monthly: pd.DataFrame, _sources: Path, *, offline: bool) -> None:
 def test_frozen_source_to_one_unbalanced_panel(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    output, spec_path, csv = _acquire(tmp_path, monkeypatch)
-    assert (output / "sources/crsp.csv").read_bytes() == csv.read_bytes()
-    assert "Do not execute" in (output / "sources/extraction.py.txt").read_text()
-    run.prepare(output=output, spec_path=spec_path)
-    study, tables = run.inputs(output, spec_path)
-    population = pd.read_parquet(output / "prepared/population.parquet")
-    manifest = json.loads((output / "prepared/manifest.json").read_text())
+    sources, spec_path, csv = _acquire(tmp_path, monkeypatch)
+    assert (sources / "crsp.csv").read_bytes() == csv.read_bytes()
+    assert "Do not execute" in (sources / "extraction.py.txt").read_text()
+    prepared = tmp_path / "panel"
+    run.prepare(sources, prepared, spec_path)
+    study, tables = run.inputs(prepared, spec_path)
+    population = pd.read_parquet(prepared / "population.parquet")
+    manifest = json.loads((prepared / "manifest.json").read_text())
     assert len(population) == 8
     assert len(tables["panel"]) == 7
     missing = tables["panel"]["quarter"].eq(pd.Timestamp("2009-09-30"))
     assert not bool(tables["panel"].loc[missing, "observed"].iloc[0])
     assert len(tables["characteristics"]) == 32
-    assert tables["characteristics"]["value"].isna().all()
+    ratio = tables["characteristics"].loc[
+        tables["characteristics"]["characteristic"].eq("market_cap_assets")
+    ]
+    # CRSP equity of 10 thousand USD over SEC assets of 100: available once filed,
+    # missing before the filing and after the balance sheet is fifteen months old.
+    assert ratio["value"].tolist()[1:6] == [100.0] * 5
+    assert ratio["reason"].tolist()[-2:] == ["balance_sheet_older_than_15_months"] * 2
     assert manifest["master"] == panel_contract(tables["panel"], study)
+    assert str(tables["panel"]["sic"].dtype) == "string"
     assert manifest["no_complete_case_selection"]
     assert set(tables["panel"]["issuer_id"]) == {"PERMCO:2"}
-    assert tables["history"]["quarter"].min() == pd.Timestamp("2008-03-31")
+    cohort = tables["cohorts"]
+    assert set(cohort["formation_year"]) == {2008}
+    assert cohort["quarter"].min() == pd.Timestamp("2009-03-31")
+    assert cohort["quarter"].max() == pd.Timestamp("2009-12-31")
 
 
 @pytest.mark.parametrize("cache_link", ["hardlink", "symlink"])
 def test_prepare_rerun_preserves_all_previous_dvc_cache_bytes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, cache_link: str
 ) -> None:
-    output, spec_path, _ = _acquire(tmp_path, monkeypatch)
-    run.prepare(output=output, spec_path=spec_path)
-    prepared = output / "prepared"
+    sources, spec_path, _ = _acquire(tmp_path, monkeypatch)
+    prepared = tmp_path / "panel"
+    run.prepare(sources, prepared, spec_path)
     cache = tmp_path / "dvc-cache"
     cache.mkdir()
     old = []
@@ -153,13 +176,13 @@ def test_prepare_rerun_preserves_all_previous_dvc_cache_bytes(
         else:
             path.symlink_to(cached)
         old.append((path, cached, content))
-    run.prepare(output=output, spec_path=spec_path)
+    run.prepare(sources, prepared, spec_path)
     for path, cached, content in old:
         assert cached.read_bytes() == content
         assert path.exists()
         assert not path.is_symlink()
         assert not path.samefile(cached)
-    _, tables = run.inputs(output, spec_path)
+    _, tables = run.inputs(prepared, spec_path)
     assert len(tables["panel"]) == 7
     assert len(pd.read_parquet(prepared / "factors.parquet")) == 12
 
@@ -167,65 +190,24 @@ def test_prepare_rerun_preserves_all_previous_dvc_cache_bytes(
 def test_source_vintage_and_prepared_features_reject_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    output, spec_path, csv = _acquire(tmp_path, monkeypatch)
-    run.prepare(output=output, spec_path=spec_path)
-    facts = next((output / "prepared/broad").glob("part-*.parquet"))
+    sources, spec_path, csv = _acquire(tmp_path, monkeypatch)
+    prepared = tmp_path / "panel"
+    run.prepare(sources, prepared, spec_path)
+    facts = next((prepared / "broad").glob("part-*.parquet"))
     frame = pd.read_parquet(facts)
     frame["value"] = "999"
     frame.to_parquet(facts, index=False)
     with pytest.raises(ValueError, match="Frozen artifact bytes changed"):
-        run.inputs(output, spec_path)
+        run.inputs(prepared, spec_path)
     csv.write_text(csv.read_text().replace(",0.01,", ",0.02,"))
     with pytest.raises(ValueError, match="CRSP source vintage already exists"):
-        run.acquire(csv, output=output, spec_path=spec_path, offline=True)
-    (output / "sources/sec/crosswalk.csv").write_text("changed")
+        run.acquire(
+            csv,
+            staging=sources.parent,
+            canonical=tmp_path / "raw",
+            params=spec_path,
+            offline=True,
+        )
+    (sources / "sec/crosswalk.csv").write_text("changed")
     with pytest.raises(ValueError, match="Frozen artifact bytes changed"):
-        run.prepare(output=output, spec_path=spec_path)
-
-
-def test_companyfacts_only_source_cannot_be_reported_as_full_filing_xbrl(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    output, spec_path, _ = _acquire(tmp_path, monkeypatch)
-    run.prepare(output=output, spec_path=spec_path)
-    run.encode(output=output, spec_path=spec_path)
-    prepared = json.loads((output / "prepared/manifest.json").read_text())
-    manifest = json.loads((output / "representations/manifest.json").read_text())
-    full = [record for record in manifest["states"] if record["rung"] == "full_xbrl"]
-    assert len(full) == 7
-    assert {record["status"] for record in full} == {"source_rung_unavailable"}
-    assert {record["reason"] for record in full} == {"original_filing_recovery_incomplete"}
-    assert manifest["master"] == prepared["master"]
-    assert not prepared["source_recovery"]["complete"]
-    assert not prepared["source_recovery"]["full_xbrl_complete"]
-
-
-def test_task_dispatch_reuses_identical_master(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from free_foundations.study import analysis  # noqa: PLC0415
-
-    output, spec_path, _ = _acquire(tmp_path, monkeypatch)
-    run.prepare(output=output, spec_path=spec_path)
-    observed: list[tuple[str, dict[str, object]]] = []
-
-    def record(
-        panel: pd.DataFrame,
-        _characteristics: pd.DataFrame,
-        _factors: pd.DataFrame,
-        _states: object,
-        study: StudySpec,
-        _destination: Path,
-        **kwargs: object,
-    ) -> None:
-        observed.append((str(kwargs["tasks"]), panel_contract(panel, study)))
-
-    def empty_states(*_args: object, **_kwargs: object) -> dict[object, object]:
-        return {}
-
-    monkeypatch.setattr(run, "load_representations", empty_states)
-    monkeypatch.setattr(analysis, "run_analyses", record)
-    run.analyze(output=output, spec_path=spec_path)
-    run.analyze(output=output, spec_path=spec_path, replication_only=True)
-    assert [task for task, _ in observed] == ["measurement", "replication"]
-    assert observed[0][1] == observed[1][1]
+        run.prepare(sources, prepared, spec_path)
