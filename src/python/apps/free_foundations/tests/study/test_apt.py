@@ -63,6 +63,24 @@ def test_crossfit_prediction_ignores_the_held_out_issuers_own_exposure() -> None
 
 
 @pytest.mark.unit
+def test_clipping_an_outlying_column_does_not_change_the_selected_readout() -> None:
+    # Arrange: one near-constant column with a single extreme value, beside signal.
+    rng = np.random.default_rng(7)
+    features = rng.normal(size=(60, 80))
+    target = features[:, :3] @ rng.normal(size=(3, 2)) + rng.normal(scale=0.5, size=(60, 2))
+    outlying = features.copy()
+    outlying[:, -1] = 0.0
+    outlying[0, -1] = 1e6
+
+    # Act: clipping at ten training standard deviations.
+    _, unclipped = crossfit_readout(features, target, 5, (0.01, 1.0, 100.0), seed=8)
+    _, clipped = crossfit_readout(outlying, target, 5, (0.01, 1.0, 100.0), seed=8)
+
+    # Assert: the clipped column cannot push the penalty choice to its degenerate end.
+    assert clipped == unclipped
+
+
+@pytest.mark.unit
 def test_monthly_score_is_the_marginal_gaussian_density_on_observed_issuers() -> None:
     # Arrange: one month with a missing issuer.
     rng = np.random.default_rng(4)

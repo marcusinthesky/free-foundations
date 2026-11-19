@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.stages.research:apt",
-  "digest": "sha256:b6d6f78a89c1c9d7197ae5901b14adcf8506e1ff253eaba82439d76535d49ca8",
+  "digest": "sha256:62286c7596478a6df5bdf9fba5b84ee3aab26311a09ca2167a3f1f081b5a1884",
   "entrypoint": "free-foundations stages research apt",
   "fallbacks": [
     {"module":"free_foundations.contracts","path":"src/python/apps/free_foundations/src/free_foundations/contracts.py","reason":"imported reference FloatArray could not resolve 'FloatArray'"}
@@ -64,7 +64,7 @@
     {"digest":"sha256:2c4e2c64845a7042847e97693e33790f51dc9c2c55334c8dc9d833f885d2acec","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:_paired"},
     {"digest":"sha256:faf0b1659d24c3ee8a4eadce9e932f24e4faedb90383b4cfbd6aa7b27318c138","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:_returns"},
     {"digest":"sha256:18719f3df2850c7686c1abb5c9f060466f50b5d3c5ba391dc5d09326119894d6","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:_ridge_loo"},
-    {"digest":"sha256:9afdad220c17572fe74951bdbe38213c60094297026373558835589b0c140cba","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:_standardize"},
+    {"digest":"sha256:6b7b75d149399331bb482600242a95371e385e71df5aa72b53a9ff100284da8f","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:_standardize"},
     {"digest":"sha256:a48703435ddb20f2d4e86f277af8b141d33c4a45beff99aae3f63f4928fa43e9","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:certified_rows"},
     {"digest":"sha256:71465d81b85ad5da1288f4ac04c688f048a91162c40251f7b9ee2546fd0f4f46","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:crossfit_readout"},
     {"digest":"sha256:150d2a8506cd2375e6d0ed33e9e4f1a238c9d042b12e71702e5a9a6f80e9544b","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/apt.py","symbol":"free_foundations.study.apt:euclidean_distance"},

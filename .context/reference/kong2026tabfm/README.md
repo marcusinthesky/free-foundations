@@ -1,5 +1,5 @@
 ---
-type: article
+type: article-journal
 title: 'TabFM: a zero-shot foundation model for tabular data'
 description: TabFM encoder.
 author:
@@ -9,8 +9,7 @@ author:
 issued:
   date-parts:
   - - 2026
-container-title: arXiv
-number: '2609.37959'
+container-title: 'arXiv preprint arXiv:2609.37959'
 URL: https://arxiv.org/abs/2609.37959
 links: []
 ---

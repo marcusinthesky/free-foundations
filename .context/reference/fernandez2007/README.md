@@ -1,7 +1,7 @@
 ---
 type: report
 title: Spatial linkages in international financial markets
-description: Working paper with estimation details.
+description: Working paper.
 author:
 - family: Fernández
   given: Viviana

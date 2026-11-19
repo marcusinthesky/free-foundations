@@ -1,5 +1,5 @@
 ---
-type: article
+type: article-journal
 title: 'LimiX-2: a contextual mechanism network towards general structured-data intelligence'
 description: LimiX-2 encoder.
 author:
@@ -9,8 +9,7 @@ author:
 issued:
   date-parts:
   - - 2026
-container-title: arXiv
-number: '2609.17488'
+container-title: 'arXiv preprint arXiv:2609.17488'
 URL: https://arxiv.org/abs/2609.17488
 links: []
 ---

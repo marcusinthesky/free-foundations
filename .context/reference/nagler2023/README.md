@@ -1,7 +1,7 @@
 ---
 type: paper-conference
 title: Statistical foundations of prior-data fitted networks
-description: Theory of prior-data fitted networks.
+description: PFN theory.
 author:
 - family: Nagler
   given: Thomas

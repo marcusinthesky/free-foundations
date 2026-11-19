@@ -144,7 +144,7 @@ def symmetric_root(matrix: FloatArray) -> FloatArray:
 
 
 def _standardize(train: FloatArray, test: FloatArray, clip: float) -> tuple[FloatArray, FloatArray]:
-    """Training-fold centring and scaling, clipped at ``clip`` standard deviations.
+    """Training-fold scaling, clipped at ``clip`` standard deviations, then centred.
 
     Constant training columns are dropped. Clipping bounds the leverage of
     near-constant disclosure columns, whose held-out values can otherwise lie
@@ -156,7 +156,10 @@ def _standardize(train: FloatArray, test: FloatArray, clip: float) -> tuple[Floa
         np.clip((values[:, keep] - mean[keep]) / scale[keep], -clip, clip)
         for values in (train, test)
     ]
-    return scaled[0], scaled[1]
+    # Clipping moves the training mean; re-centre so the leave-one-out leverage of the
+    # intercept-free ridge on centred features stays exact.
+    centre = scaled[0].mean(axis=0)
+    return scaled[0] - centre, scaled[1] - centre
 
 
 def _ridge_loo(features: FloatArray, target: FloatArray, alphas: tuple[float, ...]) -> float:
