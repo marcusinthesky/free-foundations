@@ -1,6 +1,34 @@
 \section{Technical Proofs and Formalization}
 \label{app:proofs}
 
+\paragraph{Economic distance and task recovery.}
+For loadings $b_i,b_j$ on centered common shocks $q$ with finite second
+moments, the root mean square of $(b_i-b_j)^\top q$ measures the difference
+in return responses in units of return. Writing $\Omega$ for the shock
+covariance and $a_i=\Omega^{1/2}b_i$ gives the distance $\norm{a_i-a_j}$.
+\lean{FreeFoundations.Score.response_sq}
+Perfect marginal forecasts can be consistent with different joint responses:
+two fair binary returns can agree in one regime and move oppositely in
+another while each retains the same marginal distribution.
+\lean{FreeFoundations.Alignment.marginals_free_of_state}
+\lean{FreeFoundations.Alignment.joint_depends_on_state}
+
+Suppose ideal task predictions satisfy $\tau=Ca+v$, where $a$ is a
+risk-scaled exposure and $v$ the mismatch. For a finite-dimensional
+exposure space, a linear map satisfying $\norm{Cu}\geq\kappa\norm u$
+in all directions with $\kappa>0$ admits a linear decoder $L$ with
+\[
+  \norm{L\widehat\tau-a}\leq
+  (\norm{\widehat\tau-\tau}+\norm v)/\kappa .
+\]
+Thus the bound tightens as the tasks distinguish exposure directions more
+sharply. For finite labels and contexts with positive predicted
+probabilities, excess log loss measures average divergence from the task's
+conditional label law.
+\lean{FreeFoundations.Recovery.exists_decoder}
+\lean{FreeFoundations.Recovery.exposure_error_mismatch}
+\lean{FreeFoundations.Score.pretraining_excess}
+
 \paragraph{Recoverability and the transformation class.}
 If $s=r\circ z$, histories in the same fibre of $z$ share the same
 target. Conversely, define $r$ on $z(H)$ by the unique target of each
@@ -34,8 +62,10 @@ $\norm{\widehat a_j-a_j}\leq\delta_j\leq\delta_{\max}$ for every
 issuer. Each distance in row $i$ can move by at most
 $\delta_i+\delta_{\max}$. Therefore an estimated strict gap between
 selected and unselected neighbours exceeding
-$2(\delta_i+\delta_{\max})$ preserves that set. Ties and smaller gaps
-leave the conclusion open.
+$2(\delta_i+\delta_{\max})$ preserves that set. For the study's
+ten-neighbour rule the relevant gap is between the tenth
+and eleventh distances. The certificate applies to estimated exposure
+distances when the exposure-error bounds are available.
 
 \paragraph{Statistical alignment and transfer.}
 Under squared loss the economic conditional mean must be a measurable
@@ -126,6 +156,33 @@ bootstrap distribution for a constrained refit can still be computed
 when the corresponding original fit is unavailable. In that case the
 percentiles describe the constrained refits, while the
 original-sample estimate retains its recorded fit status.
+
+\paragraph{Frozen model readouts.}
+For TabPFN 3.5 we take the native query embedding of a single regression
+ensemble member. For TabFM 1.1 we extract query rows after the in-context
+predictor's final layer normalization \citep{kong2026tabfm}. For
+Kumo-Tabular we take the input to the in-context prediction head, and
+for LimiX-2 the input to the regression decoder
+\citep{nvidia2026kumo,zhang2026limix}. When financial inputs span several
+column blocks, we concatenate the issuer's vectors in block order before
+computing chord distances.
+
+\paragraph{Coverage of characteristic histories.}
+A neutral distance enters a characteristic comparison when fewer than two
+annual observations overlap or the paired ranks have undefined correlation.
+Coverage varies across characteristics and over the panel
+(Table~\ref{tab:neutral}). For ten-neighbour selection we break distance
+ties in the ordered issuer roster before joining the two directed choices.
+
+\begin{table}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-neutral.tex}{\input{generated/tables/matched-neutral}}{\ffmissing}
+  \caption{Share of issuer pairs assigned neutral distance (\%) in each
+    characteristic. The pooled share counts unordered pairs within quarter
+  across the matched panel.}
+  \label{tab:neutral}
+\end{table}
 
 \section{Scope of the Empirical Evidence}
 \label{app:scope}

@@ -11,14 +11,13 @@ submission materials. The [official call](https://finfm.finhorizons.org/)
 sets the deadline at **20 November 2026 23:59 AoE**,
 equivalent to **21 November 13:59 SAST**.
 
-The paper presents two conditional measurement and spatial stability results,
-a US reimplementation of Fernández on observed quarters of the fixed December
-2015 formation, and a dated descriptive TabPFN geometry analysis. In the
-reimplementation the no-intercept joint-kernel estimate is large. The
-intercept fit is invalid or on the boundary. The refit percentiles and the
-formation accounting have distinct limitations documented in the
-[audit](audit.md). The PCoA comparison describes the organization of ratios
-that enter the encoder.
+The paper asks when a frozen tabular encoder improves on peers chosen from
+the same financial records. It compares factor-adjusted return fits, peer
+weighting rules and four encoders, then examines how many of the selected
+model's neighbours survive projection onto its leading valuation coordinate.
+The four-firm example explains how changing coordinates can change peer
+weights while preserving predictions. The [candidate handoff](tasks/t07-submission-bundle/evidence/candidate.md)
+identifies the reviewed PDF and the matched evidence awaiting canonical reconciliation.
 
 ## Author decisions
 

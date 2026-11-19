@@ -1,14 +1,5 @@
 \section{Results}
 
-\paragraph{Which financial quantity do the coordinates track?}
-In the January 2016 ratio-only TabPFN representation, the first three
-principal coordinates explain about 93\% of market-equity-to-assets rank
-variation among 960 issuers and 0.25\% of estimated market-beta rank
-variation among 878. These descriptive rank regressions use the same
-coordinate system. Valuation enters the inputs and labels the historical
-examples, while market beta is estimated separately from returns.
-Appendix~\ref{app:scope} gives the formation and observation details.
-
 \paragraph{When many firms share the same peer return.}
 In the December 2015 cohort, the joint exponential kernel gives each issuer
 an average of \ffnum[0]{quarterly-fernandez-joint-effective-neighbours}
@@ -22,7 +13,8 @@ absorbing the mean. On the repeated-formation panel we can absorb the common
 level with quarter effects and compare more concentrated peer weights.
 
 \paragraph{Peer returns after factor adjustment.}
-Across 51,782 issuer-quarters, both peer graphs improve on the factor-only
+Across \ffmatched{observations} issuer-quarters, both peer graphs
+improve on the factor-only
 model. As the controls expand from the market alone to FF5 plus momentum,
 the advantage of ratio-based TabPFN over Fern\'andez's joint graph narrows
 to \ffmatched{factor-gain} nats per issuer-quarter (paired 95\% interval
@@ -79,14 +71,26 @@ estimated gain over its direct graph is slightly negative on the ratio
 histories and positive on their underlying financial quantities, with both
 intervals spanning zero. With the broader disclosures, all four encoders
 show positive point estimates against the direct graph, and TabPFN records
-the largest estimated improvement of the twelve combinations.
+the largest estimated improvement of the twelve combinations, at
+\ffmatched{broad-gain} nats per issuer-quarter over its own direct graph.
 
-\paragraph{Which peers does the leading coordinate recover?}
-For the selected broad-input TabPFN model, the first principal coordinate
-summarizes \ffmatched{inertia}\% of positive inertia in the January 2016
+\paragraph{From valuation ranks to peer sets.}
+In the January 2016 ratio-only embedding, the first three coordinates
+explain \ffmatched{historical-value-r2}\% of market-equity-to-assets rank
+variation among \ffmatched{historical-value-n} issuers and
+\ffmatched{historical-beta-r2}\% of market-beta rank variation among
+\ffmatched{historical-beta-n} issuers with return-based estimates
+(Appendix~\ref{app:scope}). Valuation enters the inputs and supplies the
+historical context labels. Its prominence in these coordinates raises a
+further question for the broad-input model selected on return fit.
+How many of its financial peers can be
+recovered from its leading axis?
+
+In the broad-input representation, the leading coordinate accounts
+for \ffmatched{inertia}\% of positive inertia in the January 2016
 formation distances. Because this share exceeds the prespecified 25\%
 threshold, we examine which firms occupy nearby positions on this axis.
-The coordinate orders issuers strongly by market equity over
+It orders issuers strongly by market equity over
 assets (absolute rank correlation \ffmatched{valuation}), a ratio supplied
 to the model and used to label its historical examples.
 

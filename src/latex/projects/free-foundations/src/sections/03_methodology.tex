@@ -1,45 +1,26 @@
 \section{Pretraining and financial proximity}
 
-Fix the dated context. Let $F(h)$ be the ideal task prediction for an
-issuer history $h$, and let $s(h)$ be its economic target.
+A predictor and a spatial model use the same issuer vector in different
+ways. The predictor reads out a quantity from each vector, while the spatial
+model compares vectors across firms. For a fixed dated context, let $F(h)$
+denote the ideal prediction for history $h$ and $s(h)$ its economic target.
 
-\begin{proposition}[Task alignment]
-  \label{prop:alignment}
-  For a nonempty target space, every representation from which $F$ can
-  be recovered also admits an unrestricted readout of $s$ if and only if
-  $F(h)=F(h')$ implies $s(h)=s(h')$ for every pair of histories.
+\begin{proposition}[Task recovery and peer selection]
+  \label{prop:recovery}
+  Suppose the target space is nonempty. Every representation that admits
+  an exact readout of $F$ admits an unrestricted readout of $s$ if and only
+  if $F(h)=F(h')$ implies $s(h)=s(h')$ for all histories.
+  For any representation $z$ with $s=r\circ z$ and any bijection $g$ of
+  its representation space, $r\circ g^{-1}$ recovers $s$ from $g\circ z$.
+  Such a recoding can change the symmetrized nearest-neighbour graph.
   \lean{FreeFoundations.Alignment.optimal_imp_sufficient_iff}
 \end{proposition}
 
-To see necessity, take the representation to be $F$ itself. For
-sufficiency, assign each value of $F$ the common exposure of the histories
-giving that prediction and extend the readout arbitrarily off the image.
-A particular encoder can retain distinctions beyond those the task requires.
-
-Task diversity can also make recovery stable. A task measuring the sum
-of financing and operating exposures gives the same prediction for
-$(1,0)$ and $(0,1)$. Measuring their difference as well distinguishes
-the two directions. More generally, suppose a vector of task predictions
-satisfies $\tau=Ca+v$ for risk-scaled exposure $a$ and mismatch $v$.
-If $\norm{Cu}\geq\kappa\norm u$ in every direction for $\kappa>0$ in
-finite dimension, there is a linear decoder $L$ satisfying
-\[
-  \norm{L\widehat\tau-a}\leq
-  (\norm{\widehat\tau-\tau}+\norm v)/\kappa.
-\]
-The margin describes the economic directions covered by the tasks.
-The issuer study varies the financial fields supplied to the encoder.
-\lean{FreeFoundations.Recovery.exists_decoder}
-\lean{FreeFoundations.Recovery.exposure_error_mismatch}
-
-\begin{proposition}[Recoverability and geometric identification]
-  \label{prop:recovery}
-  Let $s:H\to S$ and $z:H\to Z$, with $S$ nonempty. An unrestricted
-  pointwise readout $r:Z\to S$ with $s=r\circ z$ exists exactly when
-  $s$ is constant on the fibres of $z$. For any bijection $g:Z\to Z$,
-  the recoding $g\circ z$ recovers the same target with readout
-  $r\circ g^{-1}$. Such a recoding can change nearest neighbours.
-\end{proposition}
+The first statement follows by taking $F$ itself as the representation
+in the forward direction. In the reverse direction, each value of $F$
+determines one value of $s$, so a readout of $F$ also supplies a readout
+of $s$. The second statement matters whenever the return model assigns
+peer weights from distances between the vectors.
 
 Consider $A=(1,1)$, $B=(1,0)$, $C=(1,4)$ and $D=(1,5)$.
 Stretch the first coordinate by four. A readout of the original vectors
@@ -49,13 +30,9 @@ initially $C,A,D,C$ and become $B,A,D,C$. Joining firms whenever either
 selects the other therefore removes the $AC$ edge and changes peer weights.
 \lean{FreeFoundations.Neighbours.symmetrized_chord_edge_flip}
 
-For ten neighbours, a sufficient certificate uses distances between
-estimated exposures. If every issuer's exposure error is bounded by
-$\delta_j\leq\delta_{\max}$, a strict gap above
-$2(\delta_i+\delta_{\max})$ between issuer $i$'s tenth and eleventh
-estimated distances preserves its selected set. Applying this certificate
-to native hidden-state distances would require evidence relating them
-to exposure distances. Appendix~\ref{app:proofs} gives the derivation.
+The example uses one neighbour to make the edge change visible. In the
+return comparisons each issuer selects ten neighbours before the graph is
+symmetrized.
 
 \paragraph{Distances and weights.}
 For the US benchmark, we compute Spearman chord distance for each

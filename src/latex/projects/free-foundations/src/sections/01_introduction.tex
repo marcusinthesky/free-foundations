@@ -1,24 +1,13 @@
 \section{Introduction}
 
-Suppose two firms each have an even chance of a return gain. Their returns
-move together in one regime and in opposite directions in another. Exact
-marginal predictions are compatible with either dependence structure.
-What would a tabular prediction task have to preserve for its learned
-features to measure financial proximity?
-\lean{FreeFoundations.Alignment.marginals_free_of_state}
-\lean{FreeFoundations.Alignment.joint_depends_on_state}
-
-For firms with loadings $b_i,b_j$ on centered common shocks $q$, define
-proximity through the root mean square of $(b_i-b_j)^\top q$. This gives
-distance an economic unit, the size of the difference in the firms'
-return responses to the same shocks. A training task guarantees recovery
-of a history-based exposure precisely when its ideal prediction separates
-histories with different exposures. Even then, the choice of metric
-determines whose returns enter each firm's peer average.
-\lean{FreeFoundations.Score.response_sq}
-
-We compare a frozen encoder with the characteristic-history distance of
-\citet{fernandez2011} and with peers selected directly from the same filings.
+Two firms with similar leverage can differ widely in cash flow or market
+exposure. In a spatial model of equity returns, the choice among these
+measures determines whose returns enter each firm's peer average and how
+much weight each peer receives. \citet{fernandez2011} constructs those
+weights from histories of financial characteristics. We ask what a frozen
+tabular model adds when it selects peers from the same financial records,
+using both her characteristic-history distance and a direct comparison of
+the standardized financial features as benchmarks.
 
 In our US reimplementation of Fern\'andez's spatial CAPM, the joint
 characteristic kernel spreads weight across so many issuers that firms with

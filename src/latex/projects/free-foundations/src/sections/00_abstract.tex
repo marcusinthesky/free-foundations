@@ -1,14 +1,18 @@
-When can a pretrained tabular model measure firms' exposure to common shocks?
-We show that every representation supporting a prediction task preserves
-a specified economic exposure exactly when its ideal predictions distinguish
-histories with different exposures. An invertible recoding can nevertheless
-change the peer graph constructed from normalized vectors.
-In January 2016 the first three coordinates of a ratio-based TabPFN
-representation explain about 93\% of valuation-rank variation and 0.25\%
-of estimated market-beta-rank variation on their respective samples.
-Across US issuer-quarters, its peers improve in-sample return fit over
-Fern\'andez's characteristic-history peers after adjustment for five
-Fama--French factors and momentum. Under market controls its gain over
-direct use of the four ratios is close to zero. With broader disclosures
-TabPFN has the largest estimated gain over its corresponding direct
-benchmark among twelve model and input combinations.
+Two firms with similar leverage can differ widely in cash flow or market
+exposure, so the choice of a financial distance determines whose returns
+enter each firm's peer average. On a matched US equity panel, we compare
+peers selected by a frozen tabular encoder with peers selected directly
+from the same financial records. With five Fama--French factors and
+momentum, a TabPFN graph built from four ratios improves in-sample return
+fit over Fern\'andez's characteristic-history distance. Under market
+controls, the estimated gain over standardized distances on the ratios is
+close to zero. With broader disclosures, TabPFN achieves the largest
+estimated gain over its own direct graph among the four encoders and three
+input sets we compare under market controls. A four-firm construction
+shows how an
+invertible recoding can preserve predictions while changing the peer graph
+even after normalization and symmetrization. In the selected broad-input
+representation, the leading coordinate accounts for \ffmatched{inertia}\%
+of positive inertia and orders firms by valuation, yet selecting peers
+along this axis yields mean Jaccard overlap of only \ffmatched{overlap}
+with the full graph.

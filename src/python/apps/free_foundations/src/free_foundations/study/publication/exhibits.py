@@ -28,6 +28,27 @@ def _interval(row: pd.Series, digits: int = 4) -> str:
     return f"{row.gain_per_observation:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
 
 
+def _neutral_table(graphs: pd.DataFrame, tables: Path) -> None:
+    rows = []
+    for key, name in [
+        ("market_cap_assets", "Market equity/assets"),
+        ("market_to_book", "Market-to-book"),
+        ("dividend_yield", "Dividend yield"),
+        ("debt_maturity", "Debt maturity"),
+    ]:
+        periods = graphs.loc[graphs.cell.eq(f"{key}:direct|knn10")].sort_values("quarter")
+        pairs = periods.issuers * (periods.issuers - 1) / 2
+        percent = 100 * periods.neutral_pairs / pairs
+        pooled = 100 * periods.neutral_pairs.sum() / pairs.sum()
+        rows.append([name, percent.iloc[0], percent.iloc[-1], pooled])
+    quarters = pd.PeriodIndex(graphs["quarter"], freq="Q")
+    endpoints = [period.strftime("%Y Q%q") for period in (quarters.min(), quarters.max())]
+    frame = pd.DataFrame(rows, columns=["Characteristic", *endpoints, "Pooled"])
+    atomic_bytes(
+        tables / "matched-neutral.tex", frame.to_latex(index=False, float_format="%.2f").encode()
+    )
+
+
 def render(results: Path, generated: Path) -> None:
     """Write the matched exhibits and numeric bindings from indexed results."""
     verify_evidence(results, results / "evidence/manifest.json")
@@ -122,12 +143,10 @@ def render(results: Path, generated: Path) -> None:
         .encode(),
     )
     kernels = _comparisons(results, "kernels")
-    graphs = (
-        pd.read_parquet(results / "kernels/graphs.parquet")
-        .groupby("cell")
-        .effective_neighbours.mean()
-    )
-    fig, ax = plt.subplots(figsize=(5.8, 2.3), layout="constrained")
+    diagnostics = pd.read_parquet(results / "kernels/graphs.parquet")
+    _neutral_table(diagnostics, tables)
+    graphs = diagnostics.groupby("cell").effective_neighbours.mean()
+    fig, ax = plt.subplots(figsize=(3.4, 1.8), layout="constrained")
     labels = []
     for y, (key, name) in enumerate(
         [("knn10", "10-NN"), ("gaussian", "Gaussian"), ("exp", "Exponential")]
@@ -139,16 +158,24 @@ def render(results: Path, generated: Path) -> None:
         labels.append(f"{name} ({graphs[reference]:.0f}, {graphs[candidate]:.0f})")
     ax.set_yticks(range(3), labels)
     ax.axvline(0, color="grey", linewidth=0.7)
-    ax.set_xlabel("TabPFN minus Fernández (nats per issuer-quarter)")
+    ax.tick_params(labelsize=8)
+    ax.set_xlabel("Gain (nats per issuer-quarter)", fontsize=9)
     output = generated / "figures/matched-kernels.pdf"
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output)
     plt.close(fig)
     factor = _contrast(factors, ("ff5_mom|tabpfn_full", "ff5_mom|direct_characteristics"))
-    _render_geometry(results, generated, factor)
+    broad = _contrast(encoders, ("standard_xbrl:tabpfn_full", "standard_xbrl:direct"))
+    values = {
+        "observations": f"{baselines.loc['ff5_mom'].observations:,.0f}",
+        "broad-gain": f"{broad.gain_per_observation:.4f}",
+        "factor-gain": f"{factor.gain_per_observation:.4f}",
+        "factor-interval": f"[{factor.low_per_observation:.4f}, {factor.high_per_observation:.4f}]",
+    }
+    _render_geometry(results, generated, values)
 
 
-def _render_geometry(results: Path, generated: Path, factor: pd.Series) -> None:
+def _render_geometry(results: Path, generated: Path, values: dict[str, str]) -> None:
     selected = json.loads((results / "geometry/manifest.json").read_text())["selected"]
     associations = pd.read_parquet(results / "geometry/selected_associations.parquet")
     valuation = associations.set_index("descriptor").spearman_pc1.abs().loc["market_cap_assets"]
@@ -173,13 +200,21 @@ def _render_geometry(results: Path, generated: Path, factor: pd.Series) -> None:
         generated / "tables/matched-ablation.tex",
         table.to_latex(index=False, escape=False).encode(),
     )
-    values = {
-        "factor-gain": f"{factor.gain_per_observation:.4f}",
-        "factor-interval": f"[{factor.low_per_observation:.4f}, {factor.high_per_observation:.4f}]",
-        "inertia": f"{100 * selected['positive_inertia_shares'][0]:.2f}",
-        "valuation": f"{valuation:.2f}",
-        "overlap": f"{means['pc1']:.3f}",
-        "projected-gain": f"{_contrast(ablations, ('pc1', 'full')).gain_per_observation:.4f}",
-    }
+    history = results / "historical-geometry"
+    beta = json.loads((history / "manifest.json").read_text())["beta_overlay"]
+    descriptors = pd.read_parquet(history / "historical_ratio_associations.parquet")
+    ratio = descriptors.set_index("descriptor").loc["market_cap_assets"]
+    values.update(
+        {
+            "historical-beta-r2": f"{100 * beta['leading_rank_r2']:.2f}",
+            "historical-beta-n": str(beta["n"]),
+            "historical-value-r2": f"{100 * ratio.leading_rank_r2:.0f}",
+            "historical-value-n": f"{ratio.n:.0f}",
+            "inertia": f"{100 * selected['positive_inertia_shares'][0]:.2f}",
+            "valuation": f"{valuation:.2f}",
+            "overlap": f"{means['pc1']:.3f}",
+            "projected-gain": f"{_contrast(ablations, ('pc1', 'full')).gain_per_observation:.4f}",
+        }
+    )
     bindings = "".join(f"\\ffDeclareValue{{matched-{k}}}{{{v}}}\n" for k, v in values.items())
     atomic_bytes(generated / "matched-values.tex", bindings.encode())

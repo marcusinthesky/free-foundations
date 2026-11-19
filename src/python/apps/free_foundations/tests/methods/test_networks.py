@@ -121,6 +121,4 @@ def test_chord_stretch_removes_a_symmetrized_peer_edge() -> None:
     np.testing.assert_allclose(
         before, [[0, 0.5, 0.5, 0], [1, 0, 0, 0], [0.5, 0, 0, 0.5], [0, 0, 1, 0]]
     )
-    np.testing.assert_allclose(
-        after, [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
-    )
+    np.testing.assert_allclose(after, [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])
