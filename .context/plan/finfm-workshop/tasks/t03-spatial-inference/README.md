@@ -31,7 +31,7 @@ Existing replication/co-movement outputs and proposed `spatial_fit/` research ou
 
 - [ ] Compare faithful ratios, direct inputs, native and calibrated TFM networks, industry, return-based and null controls on identical masks. Inventory fitted preprocessing, readouts, betas, variances and spatial parameters.
 - [ ] Evaluate exposure alignment and residual dependence as distinct hypotheses. Compare fitted and common marginal variances. Record convergence, boundary reasons, degree ratios and multiplier conditioning.
-- [ ] Record how estimated exposures enter ridge calibration and evaluation, including cross-fitting where targets are reused. Pair native and calibrated distances with the same direct-input baseline. Report proxy-graph overlap separately from the sufficient certificate.
+- [ ] Record how estimated exposures enter ridge calibration and evaluation, identifying any reuse of a calibration target and qualifying its in-sample association. Pair native and calibrated distances with the same direct-input baseline. Report proxy-graph overlap separately from the sufficient certificate.
 - [ ] Report historical portfolio variance and plug-in VaR with distribution, holdings date and exit convention. Supply corrected estimates and exclusions for the baseline table and financial-effect figure.
 
 <!-- insitu:begin sql

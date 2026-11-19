@@ -15,7 +15,7 @@ Prepare an anonymous AAAI-27 FinFM long paper on what frozen tabular representat
 measure about firms. Ground the descriptive and inferential study in a US
 reimplementation of Fernández using CRSP–SEC formation cohorts. Use frozen
 encoders, economically calibrated readouts and in-sample spatial inference.
-New deep-learning training belongs to the journal roadmap. Authors control submission by 20 Nov 2026
+Keep pretrained weights fixed. Estimate every financial contrast in sample on its declared roster and outcome mask. The workshop excludes train/test splits, forecasting and portfolio backtests. Authors control submission by 20 Nov 2026
 23:59 AoE and the in-person presentation in Montréal.
 
 Use the [work allocation](work-allocation.md) to find each task's inputs, write

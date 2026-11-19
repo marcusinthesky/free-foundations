@@ -18,7 +18,9 @@ Spatial worker. Consume t03.2 and verified state identities. Pilot the original 
 
 ## Acceptance
 
-- [ ] Disclose exposure-proxy reliability, loadings, readout fitting and timing. Report paired alternatives without treating a failed sufficient certificate as a failed recovery test.
+- [ ] Bind native frozen-state, calibrated frozen-state and direct-input geometries to the same formation, ordered issuers, mask, exposure target and dated fitting information. Record their identities and reject mismatches.
+- [ ] Document proxy reliability, estimated loadings, readout specification and any reuse of its calibration target. Interpret agreement on a reused target as descriptive in-sample fit. Report observed neighbourhood agreement separately from its sufficient certificate.
+- [ ] Hand t06.3 the paired contrasts, estimation units and fixed or refitted quantities for dependence-aware uncertainty. Include this comparison in FinFM only after these checks.
 
 <!-- insitu:begin sql
 id = "planning-children"

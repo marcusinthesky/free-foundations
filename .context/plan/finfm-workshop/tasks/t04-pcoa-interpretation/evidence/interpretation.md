@@ -2,7 +2,7 @@
 
 This bounded pilot uses the frozen `fernandez:tabpfn_full` state for information at the January 2016 formation, stored under quarter end **2016-03-31**. It uses the complete, sorted 967-issuer analytical roster for the geometry and for every ratio comparison. The 2015 formation's saved 878 available replication estimates are a verified subset of that roster, but are not used to select coordinates or observations. Each ratio comparison uses the finite values within those same 967 rows. The state has shape 967 × 1,024. This is one date, not evidence of temporal stability.
 
-The pilot calls `rosters.load`, which verifies the prepared inventory and master contract, then `RepresentationStore`, which checks the manifest, input and implementation provenance, the state file hash, inventory, embedding validity and issuer order. Identities at baseline `793ae468309e02b5f46fc73a2ab00080464e973d`:
+The pilot calls `study.experiments.inputs.load`, which verifies the prepared inventory and master contract, then `RepresentationStore`, which checks the manifest, input and implementation provenance, the state file hash, inventory, embedding validity and issuer order. Identities at baseline `793ae468309e02b5f46fc73a2ab00080464e973d`:
 
 - Panel manifest SHA-256: `a56bd4ea963bcfd6556b75da3f769fffd875c1ce7593e776e21b1b642be594ff`.
 - Representation manifest SHA-256: `eb059e01597fd5ef9db09a52c93912a100dcb76efce634eeb42dbaa75c8eefa7`.

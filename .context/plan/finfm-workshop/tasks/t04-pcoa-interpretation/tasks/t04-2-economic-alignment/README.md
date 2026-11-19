@@ -19,7 +19,8 @@ Interpretation worker. Consume t04.1 and t02 ratios. Exposure alignment also req
 
 ## Acceptance
 
-- [ ] Check sign and rotation ambiguity, label any alignment as descriptive or inferential with its matching null and interval, and disclose the attribution target if tested.
+- [x] Describe January 2016 alignment with encoder-input ratios on each observed subset of the 967-issuer roster. The interpretation receipt records the PC1 sign check and rotation-invariant three-coordinate summary.
+- [ ] For an independent economic descriptor, name the target and document its independence from encoder inputs and calibration. An exposure target requires accepted t03 loadings. For a stability claim, compare subspaces across dated formations and record roster overlap. Label descriptive associations and supply a structured null and uncertainty for any inferential claim.
 
 <!-- insitu:begin sql
 id = "planning-children"

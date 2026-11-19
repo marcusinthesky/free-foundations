@@ -20,6 +20,7 @@ A reader outside the drafting role reviews the candidate from [07f](../f-editori
 
 - [x] Trace the abstract, each headline claim and each exhibit to its proof or saved output. Inspect references, page breaks, footnotes, appendix pointers, axes, captions and uncertainty in the compiled PDF.
 - [x] Record review findings, affected page or claim, responsible writer and disposition. Writers revise, the editor rebuilds and the reviewer rechecks the affected passages on the exact candidate.
+- [ ] Review the rebuilt Results paragraph and page layout after the uniform-neighbour edit. Bind the review to the exact replacement PDF before promoting it.
 - [ ] Record co-author review and any outstanding decisions. Hand the bundle owner the reviewed PDF identity, matched abstract and unresolved limitations. Keep final upload authorization with the authors.
 
 <!-- insitu:begin sql

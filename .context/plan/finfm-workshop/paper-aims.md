@@ -16,12 +16,11 @@ for each aim and a way to narrow the paper if an output is unavailable.
 | Use spatial theory for risk, pricing and interpretation | 03/06's paired financial effects with intervals, 05's pricing restrictions, and 04's dated PCoA alignment, attribution and portfolio evidence | Describe covariance and model-implied VaR under their assumptions. Pricing and factor-mimicking claims require their own restriction or spanning evidence. |
 | Assess AI representations as economic measurements | 01's representability and geometric identification result, paired with 03's exposure-proxy and neighbourhood evidence and 04's interpretation | State the economic target, proxy reliability, observed agreement and sufficient stability conditions. Interpret input attribution as a property of the measurement. |
 
-Use the page budget first for the Fernández table, the estimation inventory,
-the measurement proposition and empirical contrast, a financial-effect plot
-with intervals, and a PCoA exhibit with economic labels. These are slots in
-the brief. Each becomes a finding only when the corresponding evidence is
-available. The scorecard in Results records supported, unsupported and
-unidentified claims.
+The current Results section contains the December 2015 Fernández intercept
+comparison and a descriptive January 2016 TabPFN alignment with input ratios.
+The two theoretical results appear in Methodology. The fitted-component
+inventory, matched financial contrasts and independent exposure alignment
+remain research deliverables. Include them only as their evidence clears review.
 
 For the workshop evidence cut, use corrected cohort and terminal-return
 accounting, checked theorem statements and matched inference as prerequisites

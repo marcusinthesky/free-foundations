@@ -16,3 +16,12 @@ abstract matched their companion text files. The displayed author field was
 anonymous and PDF metadata showed no author identifier. Manuscript names
 belonged to cited authors. The reviewer found no remaining PDF blocker.
 Co-author review and submission approval remain pending.
+
+## Revised Results paragraph awaiting review
+
+The uniform off-diagonal benchmark now uses the fitted roster size, expressed
+as `n − 1`. Both manuscript targets built. The revised FinFM build under
+`build/finfm/finfm.pdf` has SHA-256
+`34a4e008fd727e009031c6ccdb9a68bf74d50dae81315db77b23536fe635c465`.
+The independent review above applies to the archived `finfm-candidate` PDF.
+Review the revised paragraph and layout before replacing that candidate.
