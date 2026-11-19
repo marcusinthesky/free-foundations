@@ -94,7 +94,9 @@ def lag_iv(
     regressors = np.column_stack([design, graph.weights @ outcome])
     instruments = np.column_stack([design, graph.weights @ design[:, list(instrument_columns)]])
     projected = instruments @ np.linalg.lstsq(instruments, regressors, rcond=None)[0]
-    coefficients = np.linalg.lstsq(projected, outcome, rcond=None)[0]
+    coefficients, _, rank, _ = np.linalg.lstsq(projected, outcome, rcond=None)
+    if rank < regressors.shape[1]:
+        coefficients.fill(np.nan)
     return coefficients[:-1], float(coefficients[-1])
 
 

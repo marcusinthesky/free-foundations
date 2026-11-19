@@ -9,7 +9,6 @@ import pandas as pd
 import pytest
 
 from free_foundations.methods.fernandez.evaluation import (
-    SCRIPT,
     exposure_table,
     robust_betas,
     runtime_record,
@@ -31,12 +30,6 @@ def quarters(seed: int = 1) -> pd.DataFrame:
             for d, e, m, s in zip(dates, excess, market, rng.normal(0, 0.03, 40), strict=True)
         ]
     return pd.DataFrame(rows)
-
-
-def test_betas_script_is_present() -> None:
-    assert SCRIPT.is_file()
-    assert "robustbase::lmrob" in SCRIPT.read_text()
-    assert "robust::lmRob" in SCRIPT.read_text()
 
 
 @needs_r

@@ -38,23 +38,18 @@ bases = []
 records = []
 for date, roster in zip(dates, rows, strict=True):
     original = tuple(roster.issuer_id.astype(str))
-    inputs.store.records[str(date.date())] = [
-        r for r in inputs.store.records[str(date.date())] if r["rung"] == "fernandez"
-    ]
-    state = inputs.store.states(date, original)["fernandez:tabpfn_full"]
+    state = inputs.store.states(date, original, rung="fernandez")["fernandez:tabpfn_full"]
     indices = {issuer: i for i, issuer in enumerate(original)}
     subset = state[[indices[issuer] for issuer in ids]]
     assert np.isfinite(subset).all() and np.all(np.linalg.norm(subset, axis=1) > 0)
     u, singular = basis(subset)
     bases.append(u)
-    record = next(
-        r for r in inputs.store.records[str(date.date())] if "tabpfn_full" in r.get("models", [])
-    )
+    _, state_sha256 = inputs.store.state_file(date, "fernandez")
     records.append(
         {
             "date": str(date.date()),
             "roster_n": len(original),
-            "state_sha256": record["sha256"],
+            "state_sha256": state_sha256,
             "singular_values_first4": singular.tolist(),
         }
     )

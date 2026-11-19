@@ -10,7 +10,9 @@ The panel manifest SHA-256 is `a56bd4ea963bcfd6556b75da3f769fffd875c1ce7593e776e
 At revision `b6fc9880fe3a9300d5fbe21eaed49b84eaf9fcda`, run with the Agent 1 handoff present.
 
 ```sh
-flock /tmp/finfm-swarm-compute.lock env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/beta_alignment.py' > /tmp/finfm-swarm/t04/beta-alignment.json 2> /tmp/finfm-swarm/t04/beta-alignment.log
+flock /tmp/finfm-swarm-compute.lock env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/pcoa.py --beta-overlay' > /tmp/finfm-swarm/t04/beta-alignment.json 2> /tmp/finfm-swarm/t04/beta-alignment.log
 ```
+
+The live command computes the beta overlay alongside the candidate coordinates. The original standalone command and its output schema are preserved at revision `d2e6a21898d8a729f68dd177c6cc4b9f962ccaa4` in `src/python/pilots/finfm/beta_alignment.py`. The digest below belongs to that historical run.
 
 The JSON SHA-256 is `4a882809d0fb2eef14c1e013bcec96219a2ada0365a03c5a50b486622e5bd794`. The run took 4.50 seconds and recorded 793,448 KiB peak process RSS. The inherited virtual-memory limit was 16 GiB. The JSON includes measured RSS, so a repeat can have a different JSON digest even when the estimates agree.

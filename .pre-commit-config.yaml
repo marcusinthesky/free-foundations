@@ -38,8 +38,8 @@ repos:
         entry: codespell
         language: system
         types: [text]
-        # The AAAI author kit is kept byte-identical to its upstream release.
-        exclude: ^src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)$
+        # Keep the author kit and pinned Vale token patterns byte-identical to upstream.
+        exclude: ^(src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)|\.agents/skills/academic-manuscript/assets/vale/styles/Manuscript/[^/]+\.yml)$
       - id: nix-format
         name: Nix formatting
         entry: nixfmt --check

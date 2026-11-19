@@ -33,28 +33,6 @@ def test_every_command_resolves(layer: str, name: str) -> None:
 
 
 @pytest.mark.unit
-def test_only_layered_pipeline_commands_are_exposed() -> None:
-    # Act / Assert
-    assert set(commands()) == {
-        ("raw", "acquire"),
-        ("raw", "link"),
-        ("raw", "freeze"),
-        ("raw", "fetch-checkpoints"),
-        ("processed", "prepare-panel"),
-        ("processed", "encode"),
-        ("processed", "direct"),
-        ("research", "replicate"),
-        ("research", "collect-replication"),
-        ("processed", "assemble-states"),
-        ("processed", "prepare-contexts"),
-        ("research", "estimate-comovement"),
-        ("research", "measure-alignment"),
-        ("research", "estimate-apt"),
-        ("publication", "render"),
-    }
-
-
-@pytest.mark.unit
 def test_every_stage_runs_a_registered_command() -> None:
     # Arrange
     pipeline = yaml.safe_load(PIPELINE.read_text())

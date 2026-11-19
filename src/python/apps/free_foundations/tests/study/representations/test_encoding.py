@@ -285,6 +285,11 @@ def test_encode_manifest_keeps_shared_rows_and_model_failures_explicit(
     restored = store.states(quarter, ("C", "A"))
     assert {key.split(":")[0] for key in restored} == set(spec.rungs)
     assert all(values.shape[0] == 2 for values in restored.values())
+    rung = available_contexts[-1]["rung"]
+    selected = store.states(quarter, ("C", "A"), rung=rung)
+    assert selected.keys() == {key for key in restored if key.startswith(f"{rung}:")}
+    for key, values in selected.items():
+        np.testing.assert_array_equal(values, restored[key])
     with pytest.raises(ValueError, match="no representation row"):
         store.states(quarter, ("A", "Z"))
     changed = panel.copy()
@@ -292,6 +297,10 @@ def test_encode_manifest_keeps_shared_rows_and_model_failures_explicit(
     changed.loc[0, "total_return"] = np.nan
     with pytest.raises(ValueError, match="different master"):
         saved.RepresentationStore(tmp_path, changed, spec, expected_input_digest=None)
+    state_path, _ = store.state_file(quarter, rung)
+    (tmp_path / state_path).write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="bytes disagree"):
+        store.states(quarter, ("C", "A"), rung=rung)
 
 
 def test_unavailable_training_context_is_reported_without_calling_any_adapter(

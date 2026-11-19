@@ -97,3 +97,17 @@ def test_graph_interval_keeps_the_spatial_filter_invertible() -> None:
     for value in (low, high):
         assert np.all(np.abs(1 - value * graph.spectrum) > 0)
     assert -1 <= low < 0 < high <= 1
+
+
+@pytest.mark.unit
+def test_two_stage_lag_rejects_unidentified_coefficients() -> None:
+    # Arrange
+    weights = (np.ones((4, 4)) - np.eye(4)) / 3
+    graph = spatial_ml.Graph.of(weights)
+
+    # Act
+    coefficients, rho = spatial_ml.lag_iv(np.arange(4.0), np.ones((4, 1)), graph, (0,))
+
+    # Assert
+    assert np.isnan(coefficients).all()
+    assert np.isnan(rho)

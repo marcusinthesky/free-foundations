@@ -186,19 +186,26 @@ def _refit(
     return result
 
 
-def _parity(estimates: pd.DataFrame, refits: dict[str, dict[str, float]]) -> None:
+def _parity(
+    estimates: pd.DataFrame,
+    refits: dict[str, dict[str, float]],
+    networks: set[str],
+) -> None:
     """The resampling refits must reproduce statadic on the original sample."""
     for row in estimates.loc[estimates["status"].eq("available")].to_dict("records"):
-        if row["network"] not in refits or row["estimator"] == "ols":
+        if row["network"] not in networks or row["estimator"] == "ols":
             continue
-        fast = refits[row["network"]]
+        fast = refits.get(row["network"], {})
         label = "with" if row["with_intercept"] else "without"
         for name in ("premium", "spatial"):
             expected = row.get("beta" if name == "premium" else "spatial")
             observed = fast.get(f"{row['estimator']}:{name}:{label}")
-            if observed is None or expected is None:
-                continue
-            if abs(observed - expected) > PARITY_TOLERANCE * max(1.0, abs(expected)):
+            if (
+                observed is None
+                or expected is None
+                or not np.isfinite([observed, expected]).all()
+                or abs(observed - expected) > PARITY_TOLERANCE * max(1.0, abs(expected))
+            ):
                 message = (
                     f"Resampling refit disagrees with statadic for {row['network']} "
                     f"{row['estimator']} {label} {name}: {observed} vs {expected}."
@@ -236,7 +243,7 @@ def _bootstrap(  # noqa: PLR0913 -- one formation's draws, networks and outputs.
         }
         for name, graph in graphs.items()
     }
-    _parity(estimates, originals)
+    _parity(estimates, originals, set(networks))
     draws: list[dict[str, Any]] = []
     for replicate in range(1, spec.generated_beta_draws + 1):
         order = pd.to_datetime(

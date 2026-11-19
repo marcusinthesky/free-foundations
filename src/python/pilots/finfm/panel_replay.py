@@ -1,5 +1,6 @@
 """Replay two saved-state quarterly graphs and compare likelihood conventions."""
 
+import argparse
 import hashlib
 import json
 import resource
@@ -14,7 +15,15 @@ from free_foundations.methods import spatial_ml
 from free_foundations.methods.networks import knn_weights, representation_distance
 from free_foundations.study.experiments.inputs import load
 
-root = Path("/tmp/finfm-swarm/panel")
+parser = argparse.ArgumentParser()
+parser.add_argument("--mask-receipt", required=True, type=Path)
+parser.add_argument("--output", required=True, type=Path)
+args = parser.parse_args()
+assert hashlib.sha256(args.mask_receipt.read_bytes()).hexdigest() == (
+    "1cb7a6000c2057ad9588277038a8059391242f31c10bb2e42f77f25cc919cc56"
+)
+expected_masks = {item["quarter"]: item for item in json.loads(args.mask_receipt.read_text())}
+root = args.output
 root.mkdir(parents=True, exist_ok=True)
 base = Path("data/research/crsp-sec/experiments/comovement/summary")
 inputs = load(
@@ -27,6 +36,7 @@ ledger = pd.read_parquet(base / "ledger.parquet").set_index("quarter")
 names = ["fernandez:direct", "fernandez:tabpfn_full"]
 periods = {name: [] for name in names}
 records = []
+assert set(expected_masks) == {str(q.date()) for q in inputs.spec.panel_calendar}
 for quarter in inputs.spec.panel_calendar:
     formation = pd.Timestamp(year=quarter.year, month=3, day=31)
     formed = set(inputs.roster(formation)["issuer_id"].astype(str))
@@ -37,11 +47,13 @@ for quarter in inputs.spec.panel_calendar:
     assert len(rows) == ledger.loc[quarter, "issuers"]
     issuers = tuple(rows["issuer_id"].astype(str))
     assert len(set(issuers)) == len(issuers)
-    states = inputs.store.states(formation, issuers)
+    states = inputs.store.states(formation, issuers, rung="fernandez")
     rate, market = inputs.factors.loc[quarter, ["RF", "Mkt-RF"]]
     y = rows["total_return"].to_numpy(float) - rate
     x = beta.loc[keep].to_numpy(float) * market
     mask = hashlib.sha256(json.dumps(issuers).encode()).hexdigest()
+    expected = expected_masks[str(quarter.date())]
+    assert (len(issuers), mask) == (expected["issuers"], expected["ordered_mask_sha256"])
     for name in names:
         w = knn_weights(representation_distance(states[name]), 10)
         assert np.allclose(w.sum(axis=1), 1) and np.all(np.diag(w) == 0)

@@ -28,7 +28,7 @@ def main():
     parser.add_argument("--draws", type=int, default=99)
     parser.add_argument("--block", type=float, default=2.218)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--source", type=Path, default=Path("/tmp/finfm-swarm/mean-median"))
+    parser.add_argument("--source", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     source = args.source

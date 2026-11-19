@@ -110,20 +110,27 @@ class RepresentationStore:
             manifest, panel, spec, expected_input_digest, hashlib.sha256(payload).hexdigest()
         )
         self.root = output if manifest.get("relative_paths") else None
-        self.records: dict[str, list[dict[str, Any]]] = {}
+        self._records: dict[str, list[dict[str, Any]]] = {}
         for record in manifest["states"]:
             _validate_context_provenance(record, manifest)
             if "path" in record:
-                self.records.setdefault(record["quarter"], []).append(record)
-        self.statuses = [
-            {key: record.get(key) for key in ("quarter", "rung", "model", "status", "reason")}
-            for record in manifest["states"]
-        ]
+                self._records.setdefault(record["quarter"], []).append(record)
 
-    def states(self, quarter: pd.Timestamp, issuers: tuple[str, ...]) -> dict[str, np.ndarray]:
+    def state_file(self, quarter: pd.Timestamp, rung: str) -> tuple[str, str]:
+        """Return the manifest path and digest for a saved rung."""
+        for record in self._records.get(str(pd.Timestamp(quarter).date()), []):
+            if record["rung"] == rung:
+                return record["path"], record["sha256"]
+        raise KeyError((quarter, rung))
+
+    def states(
+        self, quarter: pd.Timestamp, issuers: tuple[str, ...], *, rung: str | None = None
+    ) -> dict[str, np.ndarray]:
         """``rung:model`` arrays for one quarter, rows reordered to ``issuers``."""
         result: dict[str, np.ndarray] = {}
-        for record in self.records.get(str(pd.Timestamp(quarter).date()), []):
+        for record in self._records.get(str(pd.Timestamp(quarter).date()), []):
+            if rung is not None and record["rung"] != rung:
+                continue
             path = Path(record["path"])
             if self.root is not None:
                 path = self.root / path

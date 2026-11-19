@@ -33,7 +33,7 @@ fixed, so it does not measure the effect of refitting those betas.
 Run from the repository root using the shared compute lock and one BLAS thread.
 
 ```sh
-flock /tmp/finfm-swarm-compute.lock env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/mean_median.py'
+flock /tmp/finfm-swarm-compute.lock env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' timeout 1800 devenv shell -- bash -c 'ulimit -v 16777216; time just python::pilot finfm/mean_median.py --output /tmp/finfm-swarm/mean-median'
 ```
 
 The pilot outputs are under `/tmp/finfm-swarm/mean-median/`. Their SHA-256

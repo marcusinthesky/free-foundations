@@ -1,5 +1,6 @@
 """Offline January 2016 PCoA receipt; run from repository root as documented."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -12,6 +13,10 @@ from free_foundations.methods.networks import representation_distance
 from free_foundations.study.experiments.inputs import load
 from free_foundations.study.spec import file_hash
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--beta-overlay", action="store_true")
+args = parser.parse_args()
+
 panel = Path("data/processed/crsp-sec/panel")
 representations = Path("data/processed/crsp-sec/representations")
 inputs = load(panel, representations, Path("params.yaml"))
@@ -19,14 +24,12 @@ quarter = pd.Timestamp("2016-03-31")
 rows = inputs.roster(quarter)
 ids = tuple(rows.issuer_id.astype(str))
 assert len(ids) == len(set(ids)) == 967
-saved = pd.read_parquet("data/research/crsp-sec/experiments/replication/summary/roster.parquet")
+saved_path = Path("data/research/crsp-sec/experiments/replication/summary/roster.parquet")
+saved = pd.read_parquet(saved_path)
 est = set(saved.loc[(saved.formation == 2015) & (saved.status == "available"), "issuer_id"])
 assert len(est) == 878 and est.issubset(ids)
 # Store checks the manifest, extraction provenance, file hashes, inventory, shape and row order.
-inputs.store.records[str(quarter.date())] = [
-    r for r in inputs.store.records[str(quarter.date())] if r["rung"] == "fernandez"
-]
-states = inputs.store.states(quarter, ids)
+states = inputs.store.states(quarter, ids, rung="fernandez")
 x = states["fernandez:tabpfn_full"]
 d = representation_distance(x)
 n = len(d)
@@ -80,9 +83,7 @@ for name, history in histories.items():
         "top3_rank_response_r2": float(r2),
         "rotated_r2_difference": float(r2_rot - r2),
     }
-record = next(
-    r for r in inputs.store.records[str(quarter.date())] if "tabpfn_full" in r.get("models", [])
-)
+state_path, state_sha256 = inputs.store.state_file(quarter, "fernandez")
 result = {
     "quarter": str(quarter.date()),
     "analytical_n": n,
@@ -90,8 +91,8 @@ result = {
     "ordered_issuer_sha256": hashlib.sha256("\n".join(ids).encode()).hexdigest(),
     "panel_manifest_sha256": file_hash(panel / "manifest.json"),
     "representation_manifest_sha256": file_hash(representations / "manifest.json"),
-    "state_path": record["path"],
-    "state_sha256": record["sha256"],
+    "state_path": state_path,
+    "state_sha256": state_sha256,
     "shape": list(x.shape),
     "eigenvalues_first_5": w[:5].tolist(),
     "positive_count": int(pos.sum()),
@@ -108,4 +109,20 @@ result = {
     "rotation_gram_max_abs_difference": float(np.abs(zg - rg).max()),
     "alignment": align,
 }
+if args.beta_overlay:
+    beta = saved.loc[(saved.formation == 2015) & (saved.status == "available")].sort_values(
+        "issuer_id"
+    )
+    positions = {issuer: index for index, issuer in enumerate(ids)}
+    axes = z[[positions[issuer] for issuer in beta.issuer_id]]
+    y = rankdata(beta.mm_beta.to_numpy())
+    design = np.column_stack((np.ones(len(y)), axes))
+    fitted = design @ np.linalg.lstsq(design, y, rcond=None)[0]
+    result["beta_overlay"] = {
+        "n": len(y),
+        "ordered_issuer_sha256": hashlib.sha256("\n".join(beta.issuer_id).encode()).hexdigest(),
+        "roster_sha256": file_hash(saved_path),
+        "spearman_axes_1_3": [float(spearmanr(axis, y).statistic) for axis in axes.T],
+        "top3_rank_response_r2": float(1 - np.sum((y - fitted) ** 2) / np.sum((y - y.mean()) ** 2)),
+    }
 print(json.dumps(result, indent=2, sort_keys=True))

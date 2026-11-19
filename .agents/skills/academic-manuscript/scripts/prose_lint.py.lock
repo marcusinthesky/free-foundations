@@ -1,0 +1,15 @@
+version = 1
+revision = 3
+requires-python = ">=3.13, <3.14"
+
+[manifest]
+requirements = [{ name = "yalafi", specifier = "==1.5.0" }]
+
+[[package]]
+name = "yalafi"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/95/70/887ec1956c08b8627bec158ce17f7b9b1c9f0d1b1fa8407d263b235a5e71/yalafi-1.5.0.tar.gz", hash = "sha256:fee4c836460609861adc141b47898e359ecebd0b7e90e7c331733f3b1b139773", size = 103512, upload-time = "2024-03-26T13:58:44.027Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/cb/6d9fbcc76202f60ee59ffc50c6d71a6809642208945bb26359671729f729/yalafi-1.5.0-py3-none-any.whl", hash = "sha256:1aaf46a29942238aa8bca21ac5928c76d48831b8be14198bd9bc7059f7026904", size = 94625, upload-time = "2024-03-26T13:58:18.951Z" },
+]

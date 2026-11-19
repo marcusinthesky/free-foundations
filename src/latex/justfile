@@ -1,6 +1,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 project := "projects/free-foundations"
+prose_lint := ".agents/skills/academic-manuscript/scripts/prose_lint.py"
 
 default:
     @just --list
@@ -8,6 +9,19 @@ default:
 # Explicit network preparation of the pinned TeX asset closure.
 setup:
     cd {{ project }} && bash ../../../../infra/nix/retry-tex-setup.sh tectonic -X build --untrusted --target arxiv
+    cd ../.. && env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv sync --frozen --script {{ prose_lint }}
+
+# Review selected authored sections. Matches are advisory.
+[positional-arguments]
+prose-lint *sections:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd {{ quote(invocation_directory()) }}
+    script={{ quote(module_directory() / "../.." / prose_lint) }}
+    if (( $# == 0 )); then
+      set -- {{ quote(module_directory() / project / "src/sections") }}/*.tex
+    fi
+    exec env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --offline --frozen --script "$script" "$@"
 
 # Render saved research results without estimating or acquiring data.
 assets:

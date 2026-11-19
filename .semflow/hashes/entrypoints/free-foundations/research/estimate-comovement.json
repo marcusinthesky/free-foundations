@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "free_foundations.cli.research:comovement",
-  "digest": "sha256:89d350a3a6b7adcd92230d9af81945dcc7843441716f90285aaf9e99ab781a9d",
+  "digest": "sha256:247ad02804865d9bbd870f51b9d9047d3497e4435040783f6299645be46240d3",
   "entrypoint": "free-foundations research estimate-comovement",
   "fallbacks": [
     {"module":"free_foundations.encoders.contracts","path":"src/python/apps/free_foundations/src/free_foundations/encoders/contracts.py","reason":"imported reference FloatArray could not resolve 'FloatArray'"}
@@ -184,7 +184,7 @@
     {"digest":"sha256:3bc61b7f2ee49ab82b2339e3958f754cc1a709cd1f933ad1fb4ce63af2dfa8d1","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:<binding:origins=free_foundations.study.representations.provenance>"},
     {"digest":"sha256:bc6d68f709901c9df0f8654a8e648548a085d2b22f7c5e698b4fa0d287b3dbfc","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:<binding:panel_contract=free_foundations.study.spec:panel_contract>"},
     {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:<binding:pd=pandas>"},
-    {"digest":"sha256:ba08c116a397d9ef7eba7ea1db9df47bd3d7cee952704716bc0fd8d6a814409b","kind":"class","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:RepresentationStore"},
+    {"digest":"sha256:47f0b962e7edd905318c84c426ab266989ec342502e4f49d1a3d6c93c78af560","kind":"class","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:RepresentationStore"},
     {"digest":"sha256:d5e514a5e076e55fa015d8eef63effa28323c89beb13626efb9774033e3534ea","kind":"global","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:_ARCHIVED_MANIFEST"},
     {"digest":"sha256:492e1195b08e229491b9607e4e1e260ddc4be9d4c4971144b01efec80ce7178c","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:_archive_identity"},
     {"digest":"sha256:206c9debcd910a94fe2e33f83f0107417010954b9f04312a5c9ae4422e5c4882","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/representations/store.py","symbol":"free_foundations.study.representations.store:_validate_context_provenance"},

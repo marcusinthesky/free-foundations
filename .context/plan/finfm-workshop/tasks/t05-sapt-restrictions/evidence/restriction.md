@@ -26,6 +26,9 @@ def fit(y):
     return price, rms
 price, rms = fit(mu)
 price_bad, rms_bad = fit(tuple(x + e for x, e in zip(mu, error)))
+factor_mean = 0.015
+traded_rms = sqrt(sum((y - b_i * factor_mean) ** 2 for b_i, y in zip(b, mu)) / len(b))
+assert abs(price - factor_mean) > 0.004 and traded_rms > 0.01
 assert abs(price - 0.01) < 1e-12 and rms < 1e-12
 assert abs(price_bad - 0.01) < 1e-12 and abs(rms_bad - sqrt(0.0002)) < 1e-12
 print(f'restricted price={price:.6f} RMS={rms:.6f}; injected price={price_bad:.6f} RMS={rms_bad:.6f}')

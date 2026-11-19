@@ -55,6 +55,7 @@ in
       stdenv.cc
       tectonic
       tex-fmt
+      vale
       (texliveInfraOnly.withPackages (ps: [
         ps.chktex
         ps.kpathsea

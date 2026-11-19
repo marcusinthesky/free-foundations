@@ -1,5 +1,6 @@
 """Reconstruct the 2015 fixed-formation joint-graph outcome comparison."""
 
+import argparse
 import json
 from pathlib import Path
 
@@ -12,7 +13,9 @@ from free_foundations.study.experiments.inputs import load
 from free_foundations.study.panel.cohorts import cohort_outcomes
 
 ROOT = Path("data/research/crsp-sec/experiments/replication/summary")
-OUT = Path("/tmp/finfm-swarm/mean-median")
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", required=True, type=Path)
+OUT = parser.parse_args().output
 OUT.mkdir(parents=True, exist_ok=True)
 inputs = load(Path("data/processed/crsp-sec/panel"), None, Path("params.yaml"))
 window = inputs.spec.window(2015)

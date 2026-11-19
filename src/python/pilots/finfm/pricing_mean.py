@@ -1,5 +1,6 @@
 """Price the verified 2015 cohort using observed quarterly mean returns."""
 
+import argparse
 import hashlib
 import json
 import resource
@@ -8,8 +9,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-source = Path("/tmp/finfm-swarm/mean-median")
-output = Path("/tmp/finfm-swarm/pricing")
+from free_foundations.study.experiments.inputs import load
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--source", required=True, type=Path)
+parser.add_argument("--output", required=True, type=Path)
+args = parser.parse_args()
+source, output = args.source, args.output
 output.mkdir(parents=True, exist_ok=True)
 expected = {
     "returns.parquet": "b0b414f35dee4e723350936b14348aa03be2685ed080530ac6ecdfd68d4dc76b",
@@ -32,12 +38,22 @@ mean = returns.mean().to_numpy(dtype=float)
 assert np.isfinite(beta).all() and np.isfinite(mean).all()
 price = float(beta @ mean / (beta @ beta))
 errors = mean - beta * price
+inputs = load(Path("data/processed/crsp-sec/panel"), None, Path("params.yaml"))
+window = inputs.spec.window(2015)
+assert pd.DatetimeIndex(returns.index).equals(window)
+factor = inputs.factors["Mkt-RF"].reindex(window)
+assert np.isfinite(factor.to_numpy()).all()
+factor_mean = float(factor.mean())
+traded_errors = mean - beta * factor_mean
 result = {
     "formation": 2015,
     "issuers": len(beta),
     "quarters": len(returns),
     "observed_issuer_quarters": int(returns.count().sum()),
     "slope": price,
+    "factor_mean": factor_mean,
+    "slope_minus_factor_mean": price - factor_mean,
+    "traded_factor_error_rms": float(np.sqrt(np.mean(traded_errors**2))),
     "pricing_error_rms": float(np.sqrt(np.mean(errors**2))),
     "loading_rank": int(np.linalg.matrix_rank(beta[:, None])),
     "input_sha256": expected,
@@ -49,6 +65,7 @@ contributions = pd.DataFrame(
         "mm_beta": beta,
         "mean_excess": mean,
         "pricing_error": errors,
+        "traded_factor_pricing_error": traded_errors,
     }
 )
 contributions.to_csv(output / "issuer_contributions.csv", index=False, float_format="%.17g")

@@ -17,7 +17,12 @@ just latex::paper arxiv  # render saved results, then build
 just latex::paper finfm
 just latex::count arxiv
 just latex::check         # format/lint and both target builds
+just latex::prose-lint     # optional editorial suggestions for all sections
 ```
+
+After `just latex::setup`, the prose check runs offline. Pass individual
+authored `.tex` paths to review selected sections. Matches identify the rule
+and original source location; read the surrounding paragraph before editing.
 
 `just latex::assets` writes `projects/free-foundations/src/generated/` from saved
 CRSP–SEC results. It does not acquire data or fit models. Individual numbers
