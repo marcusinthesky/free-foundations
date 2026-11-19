@@ -2,24 +2,24 @@
 
 \citet{fernandez2011} uses the co-movement of firms' financial
 characteristics over time to define distances and converts those distances
-into weights with an exponential kernel. Her construction supplies both a
-benchmark for our US application and a way to separate two choices that a
-single spatial fit combines. We can use her distance with different weights
-or hold the weighting rule fixed and change the distance. Our empirical
+into weights with an exponential kernel. By retaining her distance
+while varying the weights, and then comparing
+distances under a common weighting rule, we can trace differences in the
+US return fits to the two choices her specification brings together.
+Our empirical
 criterion is the in-sample association of issuer returns with peer returns
 after factor adjustment. The spatial asset-pricing theory of \citet{kou2018}
 gives pricing implications under additional economic restrictions.
 
-Financial representation learning offers a different source of distances.
-\citet{gu2021} learn characteristic-dependent exposures and latent factors
-within an autoencoder asset-pricing model. \citet{hollmann2025} show that
-TabPFN, pretrained across tabular datasets, supports prediction and produces
-reusable embeddings. We use the latter approach to obtain a vector for each
-issuer, with encoder weights fixed before the financial comparison. The
-question for spatial measurement is what a short distance between two such
-vectors implies about the firms.
+In financial representation learning, \citet{gu2021} use an autoencoder
+asset-pricing model to learn how exposures vary with characteristics and to
+estimate latent factors from returns. Tabular pretraining provides a
+different starting point. Drawing on a model trained across datasets,
+\citet{hollmann2025} demonstrate prediction and reusable embeddings with
+TabPFN. We use a frozen encoder to obtain a vector for each issuer and
+evaluate the financial meaning of the distances between those vectors
+through the returns of the firms they bring together.
 
-A result from representation learning clarifies the issue.
 \citet{roeder2021} establish identification up to a linear transformation
 for a family of discriminative models under their assumptions. A linear
 transformation can stretch one direction more than another, changing the

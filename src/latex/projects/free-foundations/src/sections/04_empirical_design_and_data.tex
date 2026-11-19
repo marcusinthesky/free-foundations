@@ -1,58 +1,50 @@
 \section{Empirical Design and Data}
 
-The two return comparisons use different units of observation. To examine
-the original spatial CAPM specification, we follow a fixed cohort and
-summarize each issuer's subsequent returns by its median. To compare peer
-rules after factor adjustment, we form a new roster each December and
-observe one return per issuer per quarter in the following year.
+For the cross-sectional spatial CAPM, we follow a single formation cohort
+and summarize each issuer's subsequent quarterly excess returns by their
+median. For the factor-adjusted comparisons, we form a new roster each
+December and follow its issuers through the four quarters of the coming
+year. The resulting matched panel spans 2011--2025.
 
-The December 2015 formation ranks US common securities in CRSP CIZ by
-market capitalization. Each selected share class has a security
-identifier (PERMNO). We combine the classes belonging to the same
-company at formation (PERMCO) into an issuer portfolio and follow
-those classes over 2016--2025. The top 1,000
-securities represent \ffnum[0]{quarterly-primary-population-issuers}
-issuer portfolios before linkage and feature requirements. The
-analytical formation roster contains
-\ffnum[0]{quarterly-primary-roster} issuers, and
-\ffnum[0]{quarterly-primary-issuers} enter the cross-sectional fit.
-An issuer needs at least eight observed quarters and a converged
-first-stage fit. A selected security remains eligible when it leaves
-a later top-1,000 ranking.
+From the 1,000 largest US common securities by market capitalization in
+CRSP CIZ in December 2015, we group share classes (PERMNOs) belonging to
+the same company (PERMCO) into \ffnum[0]{quarterly-primary-population-issuers}
+issuer portfolios. We follow the selected classes through 2016--2025,
+including those that subsequently fall below the ranking cutoff. After
+linkage and feature requirements, the formation roster contains
+\ffnum[0]{quarterly-primary-roster} issuers, of which
+\ffnum[0]{quarterly-primary-issuers} have at least eight observed quarters
+and the converged first-stage fit required for the cross-section.
 
-For the fixed cohort, the outcome is the median of each issuer's observed
-quarterly excess returns. Following \citet{fernandez2011}, we estimate its
-market exposure by robust regression. Incomplete quarters and the treatment
+Following \citet{fernandez2011}, we estimate each issuer's market exposure
+by robust regression and relate that exposure to its median excess
+return. Incomplete quarters and the treatment
 of delistings determine which returns enter the median
 (Appendix~\ref{app:data}).
 
 The financial comparison begins with the annual histories of four ratios:
 market equity over assets, market-to-book, dividend yield, and debt
-maturity. A second input set supplies the dated financial quantities used
-to construct those ratios, allowing the encoder to learn relationships
-between their components. A third supplies a broader panel of eligible
-financial fields from SEC CompanyFacts. Each January we represent an
-issuer using the financial fields available
-at formation. The encoder's context consists of historical examples labelled
-with next-quarter market equity over assets, whose values are already
-observed by the query date. Wide inputs are encoded in blocks and their
-representations concatenated. Comparing each encoder with peers
-formed directly from its own input set measures what encoding adds at
-that information level. Filing cutoffs govern availability at formation,
-although revised historical filings and checkpoints released after the
-sample make this a retrospective exercise.
+maturity. To examine whether an encoder benefits from seeing the components of a
+ratio, we supply the dated quantities from which the four ratios are
+constructed. For the broadest comparison, we augment the ratio histories
+with financial fields from SEC CompanyFacts. At each January formation,
+we supply the encoder with historical examples for which the label,
+next-quarter market equity over assets, has already been observed.
+For wide inputs we concatenate the representations of
+successive blocks of columns. We date financial inputs by their
+filing cutoffs and conduct the comparison
+retrospectively using later model releases and revised historical filings.
 
 Three peer-selection rules can use exactly the same ratio histories.
 The joint Fern\'andez distance compares annual ranks within each history
-and combines the four distances by their root mean square. The direct-input
-control imputes missing features with historical support medians, includes
-missingness indicators, and standardizes the features before computing
-distances. The encoder graph instead uses distances between the resulting
-issuer representations. Each graph assigns weights to peers, whose weighted
-returns enter the spatial lag.
-Applying the same neighbour rule to all three distances isolates the choice
-of representation. Holding a distance fixed while varying the weighting
-rule measures how concentrating weight on fewer peers changes the fit.
+and combines the four distances by their root mean square. For the
+direct graph, we use the historical examples to impute missing
+features at their medians and standardize the inputs, retaining indicators
+of missingness. The encoder uses the features and labels of those examples
+to represent each issuer. With the same financial fields and neighbour rule
+in both graphs, the difference in return fit measures the gain from this
+context-conditioned representation over distances in standardized feature
+space.
 
 For the repeated-formation panel the outcome is one issuer's excess return
 in one quarter. With $y_t$ the vector of those returns, the spatial lag
@@ -63,14 +55,14 @@ model is
 Each column of $X_t$ multiplies an issuer's estimated factor exposure by
 the corresponding quarterly factor return. The factor comparison considers
 individual controls and joint specifications including the five
-Fama--French factors (FF5) plus momentum. For the nonmarket factors we use
-the study's compounded long--short proxies. Quarter effects absorb the common
-level of returns. The matched sample requires observed outcomes and
-converged exposures across the declared specifications, so a change in
-fit cannot arise simply because a different set of issuers enters.
-The estimated exposures use each issuer's full observed quarterly panel.
-The factor comparison uses the joint Fern\'andez distance for its
-characteristic graph. The encoder ranking instead compares each frozen
-representation with its same-input control. Paired blocks of quarterly
-likelihood contributions quantify variation conditional on the estimated
-loadings and point fits.
+Fama--French factors (FF5) plus momentum. We construct quarterly
+proxies for the nonmarket factors by compounding
+the monthly long--short returns from the French data library. Quarter
+effects absorb the common
+level of returns. We estimate each issuer's exposures on its full
+observed quarterly panel
+and retain issuer-quarters with observed returns and converged exposures
+under every factor specification. On this common sample, the factor
+comparison pairs the ratio-based encoder with Fern\'andez's joint distance,
+while the encoder ranking pairs each representation with the direct graph
+for its own financial inputs.

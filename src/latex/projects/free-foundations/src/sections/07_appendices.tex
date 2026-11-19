@@ -65,11 +65,10 @@ elementary written arguments.
 We weight selected classes by their prior calendar-month
 capitalization. CRSP CIZ monthly total returns already incorporate
 reported delisting returns. We compound the three observed months of
-a quarter once, keeping incomplete quarters unavailable. The source
-lacks separate terminal-event flags, so a missing row leaves the exit
-cause and proceeds unknown. The application describes observed
-quarters, with formation membership and exclusions accounted for
-across the full window.
+a quarter once, keeping incomplete quarters unavailable. When a
+return row is missing, the absence of a separate terminal-event
+flag leaves the cause of exit and its proceeds unknown. The return estimates
+therefore describe the observed quarters of the formation cohort.
 Formation membership is fixed at the December ranking cutoff. An
 issuer retains its formation identity when a selected security's
 subsequent source issuer changes. Missing returns and missing
@@ -87,20 +86,19 @@ quarter bootstrap resamples common date blocks, recomputes betas and
 medians, and refits models while the formation graph stays fixed
 before filtering unavailable issuers and renormalizing its rows. A
 bootstrap distribution for a constrained refit can still be computed
-when the corresponding original fit is unavailable. The paper treats
-that case as an identification or estimation limitation.
+when the corresponding original fit is unavailable. In that case the
+percentiles describe the constrained refits, while the
+original-sample estimate retains its recorded fit status.
 
 \section{Scope of the Empirical Evidence}
 \label{app:scope}
 
-The fixed-cohort fit measures cross-sectional association in median
-returns, while the dated geometry analysis measures how the formation
-inputs align with encoder coordinates. A return-based exposure proxy, a
-residual-dependence parameter and a cross-sectional pricing error
-answer different questions. A dated geometry exhibit describes one
-estimated representation space. Factor spanning, joint pricing
-restrictions, and portfolio evaluation require separate outcomes and
-maintained assumptions.
+Across issuers in the fixed cohort, we relate median excess returns to a
+characteristic-weighted average of peer returns. On the repeated-formation
+panel, we compare the likelihood of the observed quarterly returns under
+different peer weights. The January 2016 geometry analysis then returns to
+the formation roster to examine which financial characteristics organize
+firms within the ratio-based embedding.
 
 \begin{table*}[t]
   \centering
@@ -137,10 +135,7 @@ maintained assumptions.
     \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
     stationary-quarter refits. They describe refit variation
     conditional on the formation graph and the observed-quarter design.
-    Issuer availability can change by draw. Statistical coverage of
-    this interval
-    and complete terminal-outcome coverage of the formation cohort remain
-  unverified.}
+  Each draw uses the issuers with sufficient observed returns for that refit.}
   \label{tab:us-benchmark}
 \end{table}
 \paragraph{Does the encoder add to its inputs?}
@@ -232,9 +227,11 @@ observations and the full broad-input graph as its reference.
 
 Using three coordinates improves on the first-coordinate projection, although
 both projected graphs fit less well than the full graph
-(Table~\ref{tab:ablation}). For each single ratio omission the interval for
-the change in fit includes zero. The retained financial fields can still
-carry information about the omitted ratio.
+(Table~\ref{tab:ablation}). Among the four omissions, removing the
+market-equity-to-assets history
+changes the peer sets most, even with the broad filing fields and historical
+context labels still available. The estimated changes in fit are small,
+with all four omission intervals spanning zero.
 
 \section{Matched factor specifications}
 

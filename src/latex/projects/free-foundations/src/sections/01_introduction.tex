@@ -1,38 +1,36 @@
 \section{Introduction}
 
-Spatial asset pricing begins with a measurement choice. A firm can be
-close to another in leverage, cash flow, or market exposure, and each
-definition creates a different network of peers.
-\citet{fernandez2011} makes that choice explicit by building spatial
-weights from financial characteristics. We ask whether a frozen tabular
-foundation model selects peers whose returns improve the fit of a spatial
-return model, and how much of that fit one can obtain by comparing the same
-financial inputs directly.
+Two firms with similar leverage can differ widely in cash flow or market
+exposure. In a spatial model of equity returns, the choice among these
+measures determines whose returns enter each firm's peer average and how
+much weight each peer receives. \citet{fernandez2011} constructs those
+weights from histories of financial characteristics. We ask what a frozen
+tabular foundation model adds to this comparison when it selects peers from
+the same financial records.
 
-We begin with Fern\'andez's spatial CAPM because it makes the economic
-meaning of a peer return explicit. Each issuer receives a weighted average
-of other issuers' returns, with more weight on firms whose financial
-histories resemble its own. In our US reimplementation, the conventional
-joint kernel spreads weight across so many firms that their peer returns
-approach a common mean. This raises two distinct measurement questions.
-Which firms does a distance identify as close, and how much weight should
-those firms receive?
+In our US reimplementation of Fern\'andez's spatial CAPM, the joint
+characteristic kernel spreads weight across so many issuers that firms with
+quite different histories receive much the same peer return. To separate the
+choice of distance from the concentration of the weights, we compare
+distances under a common ten-neighbour rule and then examine how the
+comparison changes as weight extends to more distant firms.
 
-On a matched panel of quarterly issuer returns, we can vary the distance
-while holding the weighting rule and the return observations fixed.
-After adjustment for the five Fama--French factors and momentum, the graph
-built from TabPFN's representation of the four ratios improves on the graph
-built from Fern\'andez's joint distance. A closer benchmark for the value
-of encoding uses the input features themselves to select peers. Under market
-controls, TabPFN's incremental fit against this benchmark is uncertain on
-the four ratios. With a broad panel of financial disclosures, its estimated
-gain over the corresponding direct graph is the largest among the four
-encoders and three input sets we study.
+Across the matched quarterly panel, peers selected by TabPFN from four
+financial ratios improve return fit over Fern\'andez's joint distance even
+after adjustment for the five Fama--French factors and momentum. To
+determine how much of that fit is already available in the financial inputs,
+we compare each encoder with a graph built directly from the features it
+receives. Under market controls, the estimated TabPFN gain on the four
+ratios is close to zero, with an interval spanning gains and losses. When
+both methods draw on a broad panel of financial disclosures, TabPFN yields
+the largest estimated gain over its direct benchmark among the twelve
+combinations we examine.
 
-Why evaluate peer selection separately from an encoder's predictive ability?
-Two representations can retain exactly the same information about a firm's
-exposure while ranking its peers differently. We give a simple construction
-and bound how changes in peer weights can affect the covariance implied by
-a spatial model. Finally, we examine which financial quantities align with
-the leading coordinate of the selected representation and whether that
-coordinate recovers the neighbours used in the return fit.
+The economic interpretation of these comparisons turns on a distinction
+between recovering a firm's exposure and identifying its peers. Two
+representations can preserve exactly the same exposure while placing
+different firms nearest to it. We show how such a change of coordinates
+can alter the network, derive a bound on the resulting change in implied
+covariance, and examine the distinction empirically by asking how many of
+the selected model's peers can be recovered from its leading valuation
+coordinate alone.

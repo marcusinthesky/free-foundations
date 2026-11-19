@@ -1,15 +1,18 @@
-Can a pretrained tabular model select financially informative peers for a firm?
-We compare peer returns constructed from financial characteristics and from
-frozen representations of the same information in US equity data. After
-adjustment for the five Fama--French factors and momentum, peers selected by
-TabPFN from four financial ratios improve in-sample spatial fit over peers
-selected by Fern\'andez's characteristic-history distance. With the market as
-the sole factor, the gain over direct use of the four ratios is uncertain.
-When both methods use a broad panel of financial disclosures, TabPFN gives the
-largest estimated gain over its own direct-input benchmark among twelve
-encoder and input combinations. Its leading principal coordinate aligns with
-valuation, yet selecting peers along that coordinate recovers little of the
-full network. We show why the distinction matters: an invertible recoding can
-preserve a financial exposure and reverse a firm's nearest neighbour. For
-row-normalized symmetric affinities, we bound the resulting sensitivity of
-the spatial multiplier and implied covariance.
+In a spatial model of equity returns, a firm's peer return is a weighted
+average whose composition depends on how one measures financial proximity.
+Using US issuer portfolios, we compare peers selected by a pretrained tabular
+model with peers selected directly from the same financial records. After
+adjustment for the five Fama--French factors and momentum, a peer network
+constructed by TabPFN from four financial ratios improves in-sample fit
+over one based on Fern\'andez's characteristic-history distance. Under
+market controls, the estimated TabPFN gain over direct use of the four
+ratios is close to zero, whereas on a broader set of financial
+disclosures its gain
+over the corresponding direct benchmark is the largest among twelve model
+and input combinations. Within this representation, the leading
+principal coordinate
+orders firms by valuation but recovers few of the neighbours used in the
+return model. We show how an invertible change of coordinates can preserve a
+firm's exposure while reversing its nearest neighbour, and we bound the
+sensitivity of the spatial multiplier and implied covariance for
+row-normalized symmetric affinities.

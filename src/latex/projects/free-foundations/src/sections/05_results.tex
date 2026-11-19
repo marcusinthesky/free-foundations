@@ -13,14 +13,13 @@ absorbing the mean. On the repeated-formation panel we can absorb the common
 level with quarter effects and compare more concentrated peer weights.
 
 \paragraph{Peer returns after factor adjustment.}
-Across the common issuer-quarters, the ratio-based TabPFN peer return
-improves in-sample fit even after controlling for exposures to the five
-Fama--French factors and momentum. Both peer graphs improve on the
-factor-only fit. Compared directly with
-Fern\'andez's joint graph, TabPFN gains \ffmatched{factor-gain} nats per
-issuer-quarter (paired 95\% interval \ffmatched{factor-interval},
-Table~\ref{tab:matched-factors}). Both graphs select ten neighbours before
-symmetrization, so this difference arises under a common weighting rule.
+Across 51,782 issuer-quarters, both peer graphs improve on the factor-only
+model. As the controls expand from the market alone to FF5 plus momentum,
+the advantage of ratio-based TabPFN over Fern\'andez's joint graph narrows
+to \ffmatched{factor-gain} nats per issuer-quarter (paired 95\% interval
+\ffmatched{factor-interval}, Table~\ref{tab:matched-factors}). In both
+specifications each firm selects ten neighbours before symmetrization, so
+the comparison follows the same peer rule across factor adjustments.
 
 \begin{table*}[t]
   \centering
@@ -44,14 +43,12 @@ symmetrization, so this difference arises under a common weighting rule.
 \end{table*}
 
 \paragraph{How much does the weighting rule matter?}
-To see whether the comparison depends on concentrating weight among close
-peers, we hold market exposure fixed as the sole factor control and vary
-the weighting rule for both graphs. The ratio-based encoder improves on
-the joint characteristic distance with exponential, median-bandwidth
-Gaussian and ten-neighbour weights
-(Figure~\ref{fig:matched-kernels}). The effective neighbour counts
-indicate how much the typical peer
-return averages across firms, even when two rules produce similar fit.
+Under market controls, the advantage of the ratio-based encoder over the
+joint characteristic distance extends to exponential and median-bandwidth
+Gaussian weights (Figure~\ref{fig:matched-kernels}). The three rules give
+quite different meanings to a firm's peer return. With either smooth kernel,
+hundreds of issuers contribute appreciably to the average, whereas the
+ten-neighbour rule concentrates the same unit of weight on a small group.
 
 \begin{figure}[t]
   \centering
@@ -64,17 +61,16 @@ return averages across firms, even when two rules produce similar fit.
 \end{figure}
 
 \paragraph{What does encoding add to the same inputs?}
-Because Fernández compares characteristic ranks over time, its graph
-leaves open how much fit a researcher could obtain by selecting peers
-directly from the financial features supplied to the encoder.
-Table~\ref{tab:matched-encoders} makes this comparison under market
-controls. For TabPFN the estimated gain is slightly negative on the four
-ratio histories and positive on the financial quantities used to
-construct them, with both intervals
-including zero. On broad financial inputs all four point estimates are
-positive, and broad-input TabPFN has the largest estimated gain over its own
-direct graph among the twelve combinations evaluated on this sample. Each
-interval compares an encoder with its direct graph.
+Fern\'andez's distance compares the ranks of paired observations within
+each characteristic history. To see how much the encoder adds when firms
+can instead be compared directly on their financial features, we construct
+a direct graph for each of the three input sets and retain the market
+control throughout (Table~\ref{tab:matched-encoders}). For TabPFN, the
+estimated gain over its direct graph is slightly negative on the ratio
+histories and positive on their underlying financial quantities, with both
+intervals spanning zero. With the broader disclosures, all four encoders
+show positive point estimates against the direct graph, and TabPFN records
+the largest estimated improvement of the twelve combinations.
 
 \paragraph{Which peers does the leading coordinate recover?}
 For the selected broad-input TabPFN model, the first principal coordinate
@@ -85,13 +81,13 @@ The coordinate orders issuers strongly by market equity over
 assets (absolute rank correlation \ffmatched{valuation}), a ratio supplied
 to the model and used to label its historical examples.
 
-We repeat the projection at each annual formation and compare each issuer's
-peers along the first coordinate with its peers in the full representation.
-The mean quarterly Jaccard similarity is \ffmatched{overlap}, where similarity
-is the number of shared peers divided by the number selected by either graph.
-With market controls, the projected graph changes log likelihood by
-$\ffmatched{projected-gain}$ nats per issuer-quarter relative to the full
-graph. The valuation gradient is visible along one axis, but the full graph
-also uses distinctions among firms that improve the spatial fit.
-Appendix~\ref{app:ablation} reports the three-coordinate and
-input-omission comparisons.
+At each annual formation, we project the issuers onto the first coordinate
+and compare each firm's neighbours along that axis with its neighbours in
+the full representation. Averaged first across firms and then across
+quarters, the fraction of peers shared by the two sets relative to their
+union is \ffmatched{overlap} (Jaccard similarity). Under market controls,
+the change in log likelihood from restricting the graph to this axis is
+$\ffmatched{projected-gain}$ nats per issuer-quarter. Although the valuation
+gradient is clear in one dimension, firms close along that gradient often
+have different neighbours in the full representation, and those distinctions
+improve the spatial fit (Appendix~\ref{app:ablation}).

@@ -99,13 +99,13 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/assemble-states.json
       hash: md5
-      md5: 4a32cd5a64f9e48c21816adda27f61bf
+      md5: d458cf046ceeb20ebbe383dd78faa207
       size: 14630
     - path: data/processed/crsp-sec/state-parts
       hash: md5
-      md5: 8fd491eb3c914d18b75ecfff1eeab08b.dir
-      size: 1325038573
-      nfiles: 160
+      md5: 0ed12e6f1d7750db6411b12bf00da620.dir
+      size: 1378719573
+      nfiles: 460
     params:
       params.yaml:
         study.models:
@@ -119,9 +119,9 @@ stages:
     outs:
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
   research_collect_replication:
     cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
       src/python --offline --frozen --package free-foundations free-foundations 
@@ -875,7 +875,7 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 5042e29dd910f55a7911f3465cf5376f
+      md5: 69dd989271567ced2a2efa38373c3164
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -884,9 +884,9 @@ stages:
       nfiles: 4212
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
     - path: devenv.lock
       hash: md5
       md5: 007e104116579ad905e8f1d21e0068dc
@@ -914,7 +914,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2010
       hash: md5
-      md5: 36197ad7bfa2fe164fa0c270fed8e630.dir
+      md5: 80965aec3538119dc02221b1d64b84bb.dir
       size: 109581
       nfiles: 6
   research_replicate@2011:
@@ -926,7 +926,7 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 5042e29dd910f55a7911f3465cf5376f
+      md5: 69dd989271567ced2a2efa38373c3164
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -935,9 +935,9 @@ stages:
       nfiles: 4212
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
     - path: devenv.lock
       hash: md5
       md5: 007e104116579ad905e8f1d21e0068dc
@@ -965,7 +965,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2011
       hash: md5
-      md5: e57717ef179368dca2c68fffee4cf425.dir
+      md5: c511b16a10437f4de5be7d632e1a542b.dir
       size: 114051
       nfiles: 6
   research_replicate@2012:
@@ -977,7 +977,7 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 5042e29dd910f55a7911f3465cf5376f
+      md5: 69dd989271567ced2a2efa38373c3164
       size: 66641
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -986,9 +986,9 @@ stages:
       nfiles: 4212
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
     - path: devenv.lock
       hash: md5
       md5: 007e104116579ad905e8f1d21e0068dc
@@ -1016,7 +1016,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2012
       hash: md5
-      md5: d6d6bb4a95b8a442d9603cb0e7b887e8.dir
+      md5: e3811b06c3a6ecde318f7cc9c2842db1.dir
       size: 115324
       nfiles: 6
   research_replicate@2013:

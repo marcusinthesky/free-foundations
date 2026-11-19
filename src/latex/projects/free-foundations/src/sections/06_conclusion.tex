@@ -1,18 +1,20 @@
 \section{Conclusion}
 
-A financial peer comparison depends on the benchmark and the information
-both methods can see. After adjustment for FF5 and momentum, TabPFN peers
-based on four ratios improve in-sample return fit over peers selected by
-Fern\'andez's joint distance. Under market controls, selecting peers directly
-from those same ratios accounts for much of the fit. With broader financial
-disclosures, TabPFN delivers the largest estimated gain over its own
-direct-input benchmark among the twelve combinations examined.
+For an analyst constructing a peer return from financial statements, the
+value of a frozen representation depends on the information available for
+the comparison. With the four characteristic histories used by
+Fern\'andez, TabPFN selects peers whose returns improve in-sample fit over
+her joint distance after adjustment for FF5 and momentum. Against the more
+direct benchmark of firms close in standardized feature space, the clearest
+gain for TabPFN comes when both methods use the broader financial disclosures
+and the return model controls for the market.
 
-The geometry of that representation helps explain what the comparison
-measures. Its leading coordinate orders firms strongly by valuation, yet
-projecting firms onto that coordinate changes their neighbours and lowers
-spatial fit. For an analyst using peer returns, the relevant evidence is
-therefore how firms compare locally in the full representation. Our
-counterexample shows why recovering a financial target alone cannot settle
-that question, and the covariance bound identifies how the spatial
-coefficient and the distribution of peer weights govern its consequences.
+Within that broad representation, valuation gives the leading coordinate a
+recognizable economic interpretation. Firms with similar values on this
+axis, however, often occupy different neighbourhoods in the full space.
+Restricting peer selection to the valuation coordinate consequently changes
+whose returns enter each firm's peer average, and the resulting graph fits
+the quarterly returns less well. For spatial asset pricing, this local
+ordering matters in its own right, since even representations that recover
+the same exposure can assign different peer weights and imply different
+covariances.

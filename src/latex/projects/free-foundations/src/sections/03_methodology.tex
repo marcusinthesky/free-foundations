@@ -1,13 +1,13 @@
 \section{Methodology}
 
 \paragraph{Economic target and representation.}
-Must two encodings that recover the same exposure also select the same peer?
-Recovery requires that firms with identical encodings share the
-target exposure. Let $h$ be a dated
-financial history, $s(h)$ an economic target, and
-$z(h)$ the representation of that history produced by a frozen
-encoder in a specified context. Targets could be factor exposures or
-another designated economic quantity.
+For a firm with dated financial history $h$, write $s(h)$ for the economic
+quantity of interest, such as a factor exposure, and $z(h)$ for the vector
+that a frozen encoder assigns to that history in a given context. If the
+exposure can be recovered from the vector, any two histories receiving
+the same vector must also share the same exposure. The proposition gives
+the converse and shows how much freedom it leaves in the choice of
+coordinates.
 
 \begin{proposition}[Recoverability and geometric identification]
   \label{prop:recovery}
@@ -51,10 +51,12 @@ weights make the added regressor a linear combination of a constant
 and $y$, so the spatial term requires variation beyond the sample
 mean and the mechanical own-observation correction.
 
-Changing a firm's peers changes a row of $W$. Because each peer return can
-itself depend on other firms' returns, the effect can propagate through the
-network. The spatial multiplier sums these repeated effects. How sensitive
-is the covariance it implies to a change in weights on the same firms?
+Through the spatial lag, a change in the weight assigned to one peer can
+affect firms elsewhere in the network, since that peer's return also
+depends on the returns of its own neighbours. The spatial multiplier sums
+these successive effects. For two sets of weights on the same firms, the
+following bounds relate the size of the multiplier and the change in
+implied covariance to properties of the network.
 
 \begin{proposition}[Spatial stability]
   \label{prop:multiplier}
@@ -83,11 +85,10 @@ implied by the model (Appendix~\ref{app:proofs}).
 \paragraph{Estimation and uncertainty.}
 For the characteristic benchmark the estimated quantities include the
 market betas, the cross-sectional premium, the intercept when
-included, the spatial coefficient, and the error variance. The
-frozen-state comparison fixes model weights, the dated support
-protocol, and the distance convention. Its preprocessing and support
-selection remain part of the measurement procedure. For the quarterly
-fits we hold the estimated loadings and fitted parameters fixed while
-resampling quarterly likelihood contributions in common time blocks.
-The fixed-cohort refits additionally recompute issuer betas and
-median returns within each draw.
+included, the spatial coefficient, and the error variance. For the
+encoder comparisons, we fix the model weights, the rule for
+selecting historical examples, the preprocessing and the distance measure.
+To assess variation across quarters at the estimated loadings and spatial
+parameters, we resample the paired likelihood contributions in common time
+blocks. In the fixed-cohort exercise, where issuer betas and median returns
+enter a single cross-section, we recompute both quantities in each refit.
