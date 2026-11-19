@@ -89,17 +89,21 @@ path = "free_foundations.study.paths"
 depends_on = []
 
 [[modules]]
+path = "free_foundations.study.matched_paths"
+depends_on = ["free_foundations.study.paths"]
+
+[[modules]]
 path = "free_foundations.cli.raw"
 depends_on = ["free_foundations.study.spec", "free_foundations.encoders.backends", "free_foundations.study.sources", "free_foundations.study.paths"]
 
 [[modules]]
 path = "free_foundations.cli.processed"
-depends_on = ["free_foundations.study.paths", "free_foundations.study.panel", "free_foundations.study.spec", "free_foundations.study.representations"]
+depends_on = ["free_foundations.study.paths", "free_foundations.study.panel", "free_foundations.study.spec", "free_foundations.study.representations", "free_foundations.study.matched_paths"]
 
 [[modules]]
 path = "free_foundations.cli.research"
-depends_on = ["free_foundations.study.experiments", "free_foundations.study.paths", "free_foundations.study.spec"]
+depends_on = ["free_foundations.study.experiments", "free_foundations.study.paths", "free_foundations.study.spec", "free_foundations.study.matched_paths"]
 
 [[modules]]
 path = "free_foundations.cli.publication"
-depends_on = ["free_foundations.study.paths", "free_foundations.study.publication", "free_foundations.study.spec"]
+depends_on = ["free_foundations.study.paths", "free_foundations.study.publication", "free_foundations.study.spec", "free_foundations.study.matched_paths"]

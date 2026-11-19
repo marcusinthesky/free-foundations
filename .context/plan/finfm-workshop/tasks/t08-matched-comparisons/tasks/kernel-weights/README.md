@@ -3,7 +3,7 @@ type: task
 title: t08.2 Compare spatial weighting rules
 description: Separate the effect of distance construction from the effect of weighting.
 links: []
-status: backlog
+status: in-progress
 ---
 
 # t08.2 Compare spatial weighting rules

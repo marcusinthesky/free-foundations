@@ -3,7 +3,7 @@ type: task
 title: t08.5 Explain relationships in the selected geometry
 description: Apply the 25% PCoA criterion to the selected financial model.
 links: []
-status: backlog
+status: in-progress
 ---
 
 # t08.5 Explain relationships in the selected geometry

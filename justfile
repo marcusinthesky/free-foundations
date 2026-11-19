@@ -151,6 +151,9 @@ comovement:
 alignment:
     just dvc repro research_measure_alignment
 
+matched-comparisons:
+    just dvc repro publication_render_matched
+
 publication:
     just dvc repro publication_render
 

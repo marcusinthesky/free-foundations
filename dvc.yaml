@@ -258,6 +258,356 @@ stages:
     outs:
     - data/research/crsp-sec/experiments/apt/summary
 
+  processed_prepare_matched_contexts:
+    desc: Prepare aligned financial-input and single-history contexts.
+    cmd: >-
+      ${py} processed prepare-matched-contexts
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-matched-contexts.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/contexts
+    - data/raw/crsp-sec
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/contexts
+
+  processed_matched_encode_legacy:
+    matrix:
+      rung: ${study.rungs}
+      model: ${study.models}
+    desc: Verify or extract one frozen legacy-rung cell.
+    cmd: >-
+      OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+      ${models} processed encode-matched
+      --rung ${item.rung} --model ${item.model} --device ${t08.device} --legacy-cell data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    - t08.device
+    - t08.threads
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    - data/raw/models/manifest.json
+    - data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/cells/${item.rung}/${item.model}
+
+  processed_matched_encode_operands:
+    foreach: ${study.models}
+    do:
+      desc: Extract one frozen model on dated financial operands.
+      cmd: >-
+        OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+        ${models} processed encode-matched
+        --rung operands --model ${item} --device ${t08.device}
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      - t08.device
+      - t08.threads
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/raw/models/manifest.json
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/operands/${item}
+
+  processed_matched_encode_histories:
+    foreach: ${t08.histories}
+    do:
+      desc: Extract TabPFN states on one characteristic history.
+      cmd: >-
+        OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+        ${models} processed encode-matched
+        --rung ${item} --model tabpfn_full --device ${t08.device}
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      - t08
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/raw/models/manifest.json
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/${item}/tabpfn_full
+
+  processed_matched_direct_legacy:
+    foreach: ${study.rungs}
+    do:
+      desc: Verify or build the direct-input control for an established rung.
+      cmd: >-
+        ${py} processed encode-matched
+        --rung ${item} --model direct --legacy-cell data/processed/crsp-sec/state-parts/${item}/direct
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/processed/crsp-sec/state-parts/${item}/direct
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/${item}/direct
+
+  processed_matched_direct_operands:
+    desc: Compute direct-control states on dated financial operands.
+    cmd: >-
+      ${py} processed encode-matched
+      --rung operands --model direct
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/cells/operands/direct
+
+  research_prepare_matched_sample:
+    desc: Freeze the common quarterly outcome and factor-exposure mask.
+    cmd: >-
+      ${py} research prepare-matched-sample
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/prepare-matched-sample.json
+    - data/processed/crsp-sec/panel
+    - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+    - infra/nix/devenv.nix
+    - devenv.lock
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+
+  research_matched_factors:
+    desc: Estimate matched quarterly factor and graph contrasts.
+    cmd: >-
+      ${py} research matched-factors
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-factors.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+
+  research_matched_kernels:
+    desc: Compare weighting rules on direct and frozen TabPFN distances.
+    cmd: >-
+      ${py} research matched-kernels
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-kernels.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/market_cap_assets/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/market_to_book/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/dividend_yield/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/debt_maturity/tabpfn_full
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+
+  research_matched_encoders:
+    desc: Score frozen encoders against matched direct controls and record selection.
+    cmd: >-
+      ${py} research matched-encoders
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    - study.primary_formation
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-encoders.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+
+  research_matched_geometry:
+    desc: Save dated PCoA diagnostics and the prespecified interpretation decision.
+    cmd: >-
+      ${py} research matched-geometry
+    params:
+    - study.version
+    - study.primary_formation
+    - study.characteristic_history_years
+    - study.models
+    - study.panel_start
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-geometry.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+
+  research_matched_historical_geometry:
+    desc: Reproduce the dated ratio-geometry exhibit from its archived TabPFN state.
+    cmd: ${py} research matched-historical-geometry
+    params:
+    - study.version
+    - study.primary_formation
+    - study.characteristic_history_years
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.support_rows
+    - study.rungs
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-historical-geometry.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+
+  research_matched_ablation:
+    desc: Apply the saved trigger to feature and leading-coordinate graph comparisons.
+    cmd: >-
+      OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+      ${models} research matched-ablation
+      --device ${t08.device}
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.rungs
+    - study.primary_formation
+    - t08.device
+    - t08.threads
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-ablation.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    - data/raw/models/manifest.json
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+
+  research_collect_matched:
+    desc: Bind workshop evidence manifests and the results they describe.
+    cmd: >-
+      ${py} research collect-matched
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/collect-matched.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/evidence
+
+  publication_render_matched:
+    desc: Render the workshop comparison evidence from verified saved outputs.
+    cmd: >-
+      ${py} publication render-matched
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/publication/render-matched.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+    - data/research/crsp-sec/experiments/matched-comparisons/evidence
+    outs:
+    - data/publication/crsp-sec/finfm-matched
+
   publication_render:
     desc: Tables, figures and the claims audit from saved results only.
     cmd: >-

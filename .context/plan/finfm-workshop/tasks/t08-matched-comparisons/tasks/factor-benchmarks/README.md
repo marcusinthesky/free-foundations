@@ -3,7 +3,7 @@ type: task
 title: t08.1 Matched Fama–French benchmarks
 description: Estimate joint and separate factor comparisons on the spatial panel.
 links: []
-status: backlog
+status: in-progress
 ---
 
 # t08.1 Matched Fama–French benchmarks

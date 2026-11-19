@@ -26,6 +26,7 @@ just replication                     # Fernández cross-sections and generated-b
 just comovement                      # quarterly spatial panels
 just alignment                       # Mantel alignment
 just publication                     # tables, figure and metrics from saved results
+just matched-comparisons             # FinFM matched fits, interpretation and evidence
 ```
 
 Run one encoding cell with `just dvc repro processed_encode@fernandez-tabpfn_full`
@@ -40,6 +41,21 @@ declares the `params.yaml` keys it reads. [semflow](https://github.com/marcusint
 fingerprints the code each command reaches, so documentation edits do not rerun model
 inference. After code changes run `just semflow-refresh`; after changing stage
 commands review `just semflow-patch`, then run `just semflow-apply`.
+
+## FinFM matched comparisons
+
+The T08 stages consume the verified panel and keep their contexts, model cells,
+fits and publication evidence in dedicated directories. The first targets to
+run are `research_prepare_matched_sample` and
+`processed_prepare_matched_contexts`. Then run `research_matched_factors`,
+`research_matched_kernels` and `research_matched_encoders` as their model cells
+become available. Verify PyTorch CUDA in the pinned devenv shell before launching
+new model cells. The model stage records its device and checkpoint identity.
+
+`just matched-comparisons` runs the full evidence chain, including the dated
+geometry and its recorded ablation decision. The workshop renderer reads the
+research evidence index and writes the review tables to
+`data/publication/crsp-sec/finfm-matched/`.
 
 Acquisition archives the supplied WRDS extraction script. Raw source recovery
 and checkpoint downloads use the network. Each estimator

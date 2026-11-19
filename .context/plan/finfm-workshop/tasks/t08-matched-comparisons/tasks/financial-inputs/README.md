@@ -3,7 +3,7 @@ type: task
 title: t08.3 Build three matched financial input sets
 description: Construct ratio, underlying-financial and broad financial panels.
 links: []
-status: backlog
+status: in-progress
 ---
 
 # t08.3 Build three matched financial input sets

@@ -63,3 +63,6 @@ src/lean/blueprint/manuscript_decls
 /data/processed/crsp-sec/state-parts/
 /data/research/crsp-sec/experiments/replication/formations/
 /data/processed/crsp-sec/contexts/
+/data/processed/crsp-sec/matched-comparisons/
+/data/research/crsp-sec/experiments/matched-comparisons/
+/data/publication/crsp-sec/finfm-matched/

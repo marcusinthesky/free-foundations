@@ -1,0 +1,34 @@
+{
+  "algorithm": "sha256",
+  "callback": "free_foundations.cli.research:collect_matched",
+  "digest": "sha256:a759f537200245c5901eeee6221992f843f44a459fb4545221b9c1f6dd7928a9",
+  "entrypoint": "free-foundations research collect-matched",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/hashes.py","symbol":"free_foundations.artifacts.hashes:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:092cb77ae0770f1627b29bf41b2732722fbcc3a0e1d77a79674801800a2721d1","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/hashes.py","symbol":"free_foundations.artifacts.hashes:<binding:hashlib=hashlib>"},
+    {"digest":"sha256:ae58412e6f157b06b372584ed6c841614847e7a5cd09c0951d293a93581445b6","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/hashes.py","symbol":"free_foundations.artifacts.hashes:file_hash"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:json=json>"},
+    {"digest":"sha256:db14cae1a81ee06a1930fa9f46771b454957916d2bbbc048661adf0613fd70de","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:<binding:uuid=uuid>"},
+    {"digest":"sha256:9b30414938f2ecef2b4868b13a6e3510db115d17e59fa7ee2695c62f96780765","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/artifacts/metadata.py","symbol":"free_foundations.artifacts.metadata:write_json"},
+    {"digest":"sha256:b3dbe4860937c650d75706d629268630beab8e31912d77b641a50e4e66578f24","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:MATCHED_RESULTS=free_foundations.study.matched_paths:MATCHED_RESULTS>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:<binding:typer=typer>"},
+    {"digest":"sha256:d2f4495d198efe58a035cee3fbaa49efd4a4d3cd9662681295decfb56f5dde1b","kind":"global","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:app"},
+    {"digest":"sha256:5272f57fc8cabb9c4de19b7157c35c665aed8b167901ec6837b7affce9a74f46","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/cli/research.py","symbol":"free_foundations.cli.research:collect_matched"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/experiments/matched_evidence.py","symbol":"free_foundations.study.experiments.matched_evidence:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:0d177217bd1f97c1c30ba64d3a398594aae72b69eba596a65dd009f6de028d65","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/experiments/matched_evidence.py","symbol":"free_foundations.study.experiments.matched_evidence:<binding:file_hash=free_foundations.artifacts.hashes:file_hash>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/experiments/matched_evidence.py","symbol":"free_foundations.study.experiments.matched_evidence:<binding:json=json>"},
+    {"digest":"sha256:7dee98a17822f20bd205d2864451cb515215339f980ad128e352e6864f9ac226","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/experiments/matched_evidence.py","symbol":"free_foundations.study.experiments.matched_evidence:<binding:write_json=free_foundations.artifacts.metadata:write_json>"},
+    {"digest":"sha256:f9c812aa55652da9091c7631ad9030363072efc96e3d432bd87a6b9566c24c96","kind":"function","path":"src/python/apps/free_foundations/src/free_foundations/study/experiments/matched_evidence.py","symbol":"free_foundations.study.experiments.matched_evidence:collect"},
+    {"digest":"sha256:000d79045c92e601ed295bd9259bbd7889785d8a93916bc96a5e3f24327d6cbf","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/matched_paths.py","symbol":"free_foundations.study.matched_paths:<binding:RESULTS=free_foundations.study.paths:RESULTS>"},
+    {"digest":"sha256:33dd623cb7f1b4fde5ac5145ccbdcfe755042b40c2858e4e8b30d7e60e36d4d0","kind":"global","path":"src/python/apps/free_foundations/src/free_foundations/study/matched_paths.py","symbol":"free_foundations.study.matched_paths:MATCHED_RESULTS"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/free_foundations/src/free_foundations/study/paths.py","symbol":"free_foundations.study.paths:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:517d8dfb83cd31993be6c293b58b6c253b53850ae63ed28512c41ff9e784b215","kind":"global","path":"src/python/apps/free_foundations/src/free_foundations/study/paths.py","symbol":"free_foundations.study.paths:RESULTS"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

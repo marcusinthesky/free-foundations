@@ -30,6 +30,13 @@ See the [research handoff](research-handoff.md) for review dispositions.
 | [t05 Pricing](tasks/t05-sapt-restrictions/README.md) | t01 and t03 fits, plus t04.3 for a mimicking-factor contrast | Specification-specific mean restrictions and pricing-error test |
 | [t06 Uncertainty](tasks/t06-uncertainty-robustness/README.md) | t02 panel and actual estimation units, then each of t03–t05 as available | Refit parity, interval scope, sensitivities and fitted-parameter inventory |
 | [t07 Manuscript](tasks/t07-submission-bundle/README.md) | Checked theory, accepted evidence for each retained result, all sections, and independent PDF review | Exact reviewed PDF and corresponding author handoff |
+| [t08 Matched comparisons](tasks/t08-matched-comparisons/README.md) | Verified panel, frozen exposures and matched contexts | DVC fits and contrasts, encoder selection, interpretation decision and reviewed exhibit inputs |
+
+T08 assigns three GPT-6.2 Sol Low workers to factors and financial fitting,
+graphs and interpretation, and input construction and encoding. The
+coordinator integrates the CLI, DVC and Semflow contracts and assigns independent
+verification. The [T08 implementation record](tasks/t08-matched-comparisons/evidence/implementation.md)
+fixes the primary comparison and identifies the publication artifacts.
 
 ## Manuscript dependencies
 

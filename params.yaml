@@ -37,6 +37,12 @@ study:
   rungs: [fernandez, standard_xbrl]
   models: [tabpfn_full, tabfm, kumo, limix]
 
+# FinFM matched comparisons. New model cells require an explicit inference device.
+t08:
+  device: cuda
+  threads: 6
+  histories: [market_cap_assets, market_to_book, dividend_yield, debt_maturity]
+
 # Out-of-sample spatial APT (FinFM extension), fixed before its DVC run. One roster
 # (the primary formation's, every training month observed) and one information set
 # (the January 2016 states) are shared by CAPM, APT and every spatial APT network.

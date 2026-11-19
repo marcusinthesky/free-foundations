@@ -37,6 +37,21 @@ COMMANDS = {
     "research_measure_alignment": "research/measure-alignment",
     "research_estimate_apt": "research/estimate-apt",
     "publication_render": "publication/render",
+    "processed_prepare_matched_contexts": "processed/prepare-matched-contexts",
+    "processed_matched_encode_legacy": "processed/encode-matched",
+    "processed_matched_encode_operands": "processed/encode-matched",
+    "processed_matched_encode_histories": "processed/encode-matched",
+    "processed_matched_direct_legacy": "processed/encode-matched",
+    "processed_matched_direct_operands": "processed/encode-matched",
+    "research_prepare_matched_sample": "research/prepare-matched-sample",
+    "research_matched_factors": "research/matched-factors",
+    "research_matched_kernels": "research/matched-kernels",
+    "research_matched_encoders": "research/matched-encoders",
+    "research_matched_geometry": "research/matched-geometry",
+    "research_matched_historical_geometry": "research/matched-historical-geometry",
+    "research_matched_ablation": "research/matched-ablation",
+    "research_collect_matched": "research/collect-matched",
+    "publication_render_matched": "publication/render-matched",
 }
 
 
@@ -105,14 +120,39 @@ def test_financial_sources_are_restored_without_running_acquisition() -> None:
 def test_every_estimating_stage_declares_its_params() -> None:
     # Arrange
     blocks = yaml.safe_load((ROOT / "params.yaml").read_text())
-    params = blocks["study"]
 
-    # Act / Assert: a whole block (`study`, `apt`) or one `study.` setting.
-    for name in COMMANDS:
+    # Act / Assert
+    for name in COMMANDS.keys() - {"research_collect_matched", "publication_render_matched"}:
         declared = PIPELINE[name]["params"]
         assert declared, name
         for key in declared:
-            assert key in blocks or key.removeprefix("study.") in params, (name, key)
+            block, _, field = key.partition(".")
+            assert block in blocks, (name, key)
+            assert not field or field in blocks[block], (name, key)
+
+
+@pytest.mark.unit
+def test_matched_comparisons_depend_on_only_their_required_cells() -> None:
+    # Arrange
+    factors = PIPELINE["research_matched_factors"]["deps"]
+    kernels = PIPELINE["research_matched_kernels"]["deps"]
+    encoder = PIPELINE["research_matched_encoders"]["deps"]
+    evidence = PIPELINE["research_collect_matched"]["deps"]
+    renderer = PIPELINE["publication_render_matched"]["deps"]
+    cell = "data/processed/crsp-sec/matched-comparisons/cells/"
+
+    # Act / Assert
+    assert [path.removeprefix(cell) for path in factors if path.startswith(cell)] == [
+        "fernandez/tabpfn_full",
+    ]
+    assert len([path for path in kernels if path.startswith(cell)]) == 5
+    assert {path.removeprefix(cell) for path in encoder if path.startswith(cell)} == {
+        "fernandez",
+        "operands",
+        "standard_xbrl",
+    }
+    assert set(outputs("research_matched_ablation")) <= set(evidence) & set(renderer)
+    assert set(outputs("research_collect_matched")) <= set(renderer)
 
 
 @pytest.mark.unit

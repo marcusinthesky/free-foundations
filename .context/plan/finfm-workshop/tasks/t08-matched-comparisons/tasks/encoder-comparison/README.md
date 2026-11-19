@@ -3,7 +3,7 @@ type: task
 title: t08.4 Compare frozen encoders on matched inputs
 description: Evaluate the same financial panels across pinned encoders.
 links: []
-status: backlog
+status: in-progress
 ---
 
 # t08.4 Compare frozen encoders on matched inputs

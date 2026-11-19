@@ -2,8 +2,9 @@
 type: task
 title: t08 Matched financial and encoder comparisons
 description: Establish how factor controls, graph weights, financial inputs and encoder choice affect in-sample spatial fit.
-links: []
-status: backlog
+links:
+- .context/plan/finfm-workshop/tasks/t08-matched-comparisons/evidence/implementation.md
+status: in-progress
 ---
 
 # t08 Matched financial and encoder comparisons
@@ -25,11 +26,11 @@ template = "children.md.j2"
 
 | Status | Item | Description |
 | --- | --- | --- |
-| backlog | [t08.4 Compare frozen encoders on matched inputs](tasks/encoder-comparison/README.md) | Evaluate the same financial panels across pinned encoders. |
-| backlog | [t08.1 Matched Fama–French benchmarks](tasks/factor-benchmarks/README.md) | Estimate joint and separate factor comparisons on the spatial panel. |
-| backlog | [t08.3 Build three matched financial input sets](tasks/financial-inputs/README.md) | Construct ratio, underlying-financial and broad financial panels. |
-| backlog | [t08.5 Explain relationships in the selected geometry](tasks/geometry-interpretation/README.md) | Apply the 25% PCoA criterion to the selected financial model. |
-| backlog | [t08.2 Compare spatial weighting rules](tasks/kernel-weights/README.md) | Separate the effect of distance construction from the effect of weighting. |
+| in-progress | [t08.4 Compare frozen encoders on matched inputs](tasks/encoder-comparison/README.md) | Evaluate the same financial panels across pinned encoders. |
+| in-progress | [t08.1 Matched Fama–French benchmarks](tasks/factor-benchmarks/README.md) | Estimate joint and separate factor comparisons on the spatial panel. |
+| in-progress | [t08.3 Build three matched financial input sets](tasks/financial-inputs/README.md) | Construct ratio, underlying-financial and broad financial panels. |
+| in-progress | [t08.5 Explain relationships in the selected geometry](tasks/geometry-interpretation/README.md) | Apply the 25% PCoA criterion to the selected financial model. |
+| in-progress | [t08.2 Compare spatial weighting rules](tasks/kernel-weights/README.md) | Separate the effect of distance construction from the effect of weighting. |
 
 `5 open; 0 terminal`
 

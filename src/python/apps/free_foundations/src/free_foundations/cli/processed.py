@@ -6,6 +6,7 @@ from pathlib import Path  # noqa: TC003 -- Typer resolves annotations at runtime
 
 import typer
 
+from free_foundations.study.matched_paths import MATCHED_CELLS, MATCHED_CONTEXTS
 from free_foundations.study.panel import prepare as panel_prepare
 from free_foundations.study.panel.store import inputs
 from free_foundations.study.paths import (
@@ -102,4 +103,48 @@ def direct(
         rung=rung,
         model="direct",
         contexts=contexts,
+    )
+
+
+@app.command("prepare-matched-contexts")
+def prepare_matched_contexts(
+    panel: Path = PANEL,
+    sources: Path = SOURCES,
+    legacy_contexts: Path = CONTEXTS,
+    output: Path = MATCHED_CONTEXTS,
+    params: Path = PARAMS,
+) -> None:
+    """Materialize the matched financial inputs and single-history contexts."""
+    from free_foundations.study.representations.matched import prepare_contexts  # noqa: PLC0415
+
+    prepare_contexts(panel, sources, legacy_contexts, output, params)
+
+
+@app.command("encode-matched")
+def encode_matched(  # noqa: PLR0913, PLR0917 -- explicit DVC artifact paths.
+    rung: str = typer.Option(...),
+    model: str = typer.Option(...),
+    contexts: Path = MATCHED_CONTEXTS,
+    weights: Path = WEIGHTS,
+    cache: Path = CACHE,
+    legacy_cell: Path | None = None,
+    device: str = "cuda",
+    output: Path | None = None,
+    params: Path = PARAMS,
+) -> None:
+    """Verify and extract a matched model or direct-control cell."""
+    from free_foundations.study.representations.matched import (  # noqa: PLC0415
+        encode_cell as encode,
+    )
+
+    encode(
+        contexts,
+        weights,
+        cache,
+        output or MATCHED_CELLS / rung / model,
+        params,
+        rung=rung,
+        model=model,
+        legacy_cell=legacy_cell,
+        device=device,
     )

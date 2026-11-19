@@ -6,6 +6,7 @@ from pathlib import Path
 
 import typer
 
+from free_foundations.study.matched_paths import MATCHED_PUBLICATION, MATCHED_RESULTS
 from free_foundations.study.paths import (
     PANEL,
     PUBLICATION,
@@ -42,3 +43,15 @@ def render_paper(  # noqa: PLR0913, PLR0917 -- Typer options, every saved input 
         generated=generated,
         params=params,
     )
+
+
+@app.command("render-matched")
+def render_matched(
+    results: Path = MATCHED_RESULTS,
+    evidence: Path = MATCHED_RESULTS / "evidence",
+    output: Path = MATCHED_PUBLICATION,
+) -> None:
+    """Render the FinFM comparison tables from indexed DVC evidence."""
+    from free_foundations.study.publication.matched import render  # noqa: PLC0415
+
+    render(results, evidence, output)
