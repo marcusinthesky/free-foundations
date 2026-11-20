@@ -1,6 +1,7 @@
 """FinFM exhibits from paired spatial-lag comparisons."""
 
 import json
+from math import isfinite
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -26,6 +27,37 @@ def _interval(row: pd.Series, digits: int = 4) -> str:
     low = row.low_per_observation
     high = row.high_per_observation
     return f"{row.gain_per_observation:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
+
+
+def broad_factor_table(comparisons: pd.DataFrame) -> pd.DataFrame:
+    """Compare the same broad-input graphs under three factor-control designs.
+
+    Missing rows identify an older encoder-stage output, which must be rerun.
+    Recorded unavailable fits remain visible instead of becoming numeric claims.
+    """
+    rows = []
+    for factor, label in (("market", "Market"), ("ff5", "FF5"), ("ff5_mom", "FF5 + Momentum")):
+        prefix = "" if factor == "market" else f"{factor}|"
+        key = (f"{prefix}standard_xbrl:tabpfn_full", f"{prefix}standard_xbrl:direct")
+        if key not in comparisons.index:
+            message = (
+                f"Missing broad-input {factor} comparison; rerun research_matched_encoders "
+                "and collect its matched evidence before rendering."
+            )
+            raise ValueError(message)
+        row = _contrast(comparisons, key)
+        if row.status != "available":
+            rows.append([label, "---", "---"])
+            continue
+        gain, low, high = (
+            float(row[name])
+            for name in ("gain_per_observation", "low_per_observation", "high_per_observation")
+        )
+        if not all(isfinite(value) for value in (gain, low, high)) or low > high:
+            message = f"Invalid broad-input {factor} likelihood contrast or interval."
+            raise ValueError(message)
+        rows.append([label, f"{gain:.4f}", f"[{low:.4f}, {high:.4f}]"])
+    return pd.DataFrame(rows, columns=["Control", "Gain", "95% interval"])
 
 
 def _neutral_table(graphs: pd.DataFrame, tables: Path) -> None:
@@ -140,6 +172,12 @@ def render(results: Path, generated: Path) -> None:
             columns=["Encoder", "Ratio histories", "Underlying financials", "Broad financials"],
         )
         .to_latex(index=False)
+        .encode(),
+    )
+    atomic_bytes(
+        tables / "matched-broad-factors.tex",
+        broad_factor_table(encoders)
+        .to_latex(index=False, escape=True, column_format="lrr")
         .encode(),
     )
     kernels = _comparisons(results, "kernels")
