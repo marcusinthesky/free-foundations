@@ -57,6 +57,28 @@ geometry and its recorded ablation decision. The workshop renderer reads the
 research evidence index and writes the review tables to
 `data/publication/crsp-sec/finfm-matched/`.
 
+The encoder stage also compares broad-input TabPFN with its corresponding
+direct-feature graph under Market, FF5 and FF5 plus momentum controls. It
+reuses the same matched issuer-quarters, saved representations, peer graphs
+and stationary-quarter draws across the three controls. Each control refits
+the return model; the intervals remain conditional on fitted loadings and
+parameters. The original market-only ranking and geometry selection are unchanged.
+
+After restoring the private study artifacts, regenerate this comparison and
+its paper table from the repository root inside pinned devenv:
+
+```sh
+just semflow-refresh
+just dvc repro publication_render_matched
+just latex::paper finfm
+```
+
+The table is generated as `generated/tables/matched-broad-factors.tex` in
+the manuscript project and included in the matched-factor appendix. Older
+encoder results without the additional comparisons are rejected by the
+exhibit renderer. Numerical findings require the recorded fits; neither
+the source build nor the tests supply research estimates.
+
 Acquisition archives the supplied WRDS extraction script. Raw source recovery
 and checkpoint downloads use the network. Each estimator
 uses verified local inputs. Set `EDGAR_IDENTITY` to a contact name and email for SEC requests.

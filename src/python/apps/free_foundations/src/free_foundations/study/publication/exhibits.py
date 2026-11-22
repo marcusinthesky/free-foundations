@@ -1,6 +1,7 @@
 """FinFM exhibits from paired spatial-lag comparisons."""
 
 import json
+from math import isfinite
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -28,6 +29,46 @@ def _interval(row: pd.Series, digits: int = 4) -> str:
     return f"{row.gain_per_observation:.{digits}f} [{low:.{digits}f}, {high:.{digits}f}]"
 
 
+def broad_factor_table(comparisons: pd.DataFrame) -> pd.DataFrame:
+    """Compare the same broad-input graphs under three factor-control designs.
+
+    Missing rows identify an older encoder-stage output, which must be rerun.
+    Recorded unavailable fits remain visible instead of becoming numeric claims.
+    """
+    required = {"factor_set", "rung", "model", "contrast"}
+    if not required.issubset(comparisons.columns):
+        message = (
+            "Missing encoder metadata; rerun research_matched_encoders and collect its evidence."
+        )
+        raise ValueError(message)
+    candidates = comparisons.loc[
+        comparisons.rung.eq("standard_xbrl")
+        & comparisons.model.eq("tabpfn_full")
+        & comparisons.contrast.eq("versus_direct_control")
+    ].set_index("factor_set", verify_integrity=True)
+    rows = []
+    for factor, label in (("market", "Market"), ("ff5", "FF5"), ("ff5_mom", "FF5 + Momentum")):
+        if factor not in candidates.index:
+            message = (
+                f"Missing broad-input {factor} comparison; rerun research_matched_encoders "
+                "and collect its matched evidence before rendering."
+            )
+            raise ValueError(message)
+        row = candidates.loc[[factor]].iloc[0]
+        if row.status != "available":
+            rows.append([label, "---", "---"])
+            continue
+        gain, low, high = (
+            float(row[name])
+            for name in ("gain_per_observation", "low_per_observation", "high_per_observation")
+        )
+        if not all(isfinite(value) for value in (gain, low, high)) or low > high:
+            message = f"Invalid broad-input {factor} likelihood contrast or interval."
+            raise ValueError(message)
+        rows.append([label, f"{gain:.4f}", f"[{low:.4f}, {high:.4f}]"])
+    return pd.DataFrame(rows, columns=["Control", "Gain", "95% interval"])
+
+
 def _neutral_table(graphs: pd.DataFrame, tables: Path) -> None:
     rows = []
     for key, name in [
@@ -52,7 +93,10 @@ def _neutral_table(graphs: pd.DataFrame, tables: Path) -> None:
 def render(results: Path, generated: Path) -> None:
     """Write the matched exhibits and numeric bindings from indexed results."""
     verify_evidence(results, results / "evidence/manifest.json")
-    (generated / "tables").mkdir(parents=True, exist_ok=True)
+    encoders = _comparisons(results, "encoders")
+    broad_table = broad_factor_table(encoders).to_latex(
+        index=False, escape=True, column_format="lrr"
+    )
     factors = _comparisons(results, "factors")
     fits = pd.read_parquet(results / "factors/fits.parquet")
     baselines = fits.loc[fits.process.eq("none")].set_index("factor_set")
@@ -116,7 +160,6 @@ def render(results: Path, generated: Path) -> None:
         tables / "matched-factors.tex",
         pd.DataFrame(rows, columns=headings).to_latex(index=False).encode(),
     )
-    encoders = _comparisons(results, "encoders")
     rows = []
     for key, name in [
         ("tabpfn_full", "TabPFN 3.5"),
@@ -141,6 +184,10 @@ def render(results: Path, generated: Path) -> None:
         )
         .to_latex(index=False)
         .encode(),
+    )
+    atomic_bytes(
+        tables / "matched-broad-factors.tex",
+        broad_table.encode(),
     )
     kernels = _comparisons(results, "kernels")
     diagnostics = pd.read_parquet(results / "kernels/graphs.parquet")

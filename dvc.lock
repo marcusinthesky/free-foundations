@@ -10,8 +10,8 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/raw/fetch-checkpoints.json
       hash: md5
-      md5: 4b685a8e45615131da25f7db88630067
-      size: 8521
+      md5: fd5fd5addd9b5e4d84acc44ea20994b4
+      size: 10162
     - path: 
         src/python/apps/free_foundations/src/free_foundations/encoders/checkpoints.json
       hash: md5
@@ -32,9 +32,9 @@ stages:
       size: 762
     - path: src/python/apps/free_foundations/src
       hash: md5
-      md5: 9f76c29eebb973ae1b7661151d05e2d4.dir
-      size: 535185
-      nfiles: 92
+      md5: 6b6c64a2855635f257a31ce7c0558ece.dir
+      size: 548755
+      nfiles: 93
     - path: src/python/pyproject.toml
       hash: md5
       md5: f942fd1c5ea542a94dbd4451d635d0d1
@@ -42,8 +42,8 @@ stages:
     outs:
     - path: .semflow/hashes
       hash: md5
-      md5: 2363db05072cfd0b6f4fe60ba2314aab.dir
-      size: 1051206
+      md5: 709e219b73e9528c320a6aa7426085cc.dir
+      size: 1061544
       nfiles: 23
   raw_sources:
     cmd: 'false'
@@ -62,8 +62,8 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/prepare-panel.json
       hash: md5
-      md5: 1898bd809176db133b0989b6037bee33
-      size: 46231
+      md5: 64bb2a8d97fa45e1972d8550af01f23a
+      size: 46530
     - path: data/raw/crsp-sec
       hash: md5
       md5: c4a7f22f4a64a39b381129b8d0dc789f.dir
@@ -99,8 +99,8 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/assemble-states.json
       hash: md5
-      md5: d458cf046ceeb20ebbe383dd78faa207
-      size: 14630
+      md5: 3c64a6864482f108b307075ba8aa79ea
+      size: 14929
     - path: data/processed/crsp-sec/state-parts
       hash: md5
       md5: 0ed12e6f1d7750db6411b12bf00da620.dir
@@ -130,12 +130,12 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/research/collect-replication.json
       hash: md5
-      md5: ad4508b3a06ad31548b2cc2960b13751
-      size: 12290
+      md5: fafbccf72cbebe2f7af5e90e78895175
+      size: 12589
     - path: data/research/crsp-sec/experiments/replication/formations
       hash: md5
-      md5: e52a8bac3c83c1d95e2e9e1f7475c7ab.dir
-      size: 6129893
+      md5: 0507254bd739fc91cef293f0f16557a3.dir
+      size: 6129793
       nfiles: 38
     params:
       params.yaml:
@@ -151,8 +151,8 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/summary
       hash: md5
-      md5: b45b3738dad772ac1e2c5df4ba4df4b7.dir
-      size: 5847260
+      md5: 76faa36662356177206e118c6a538911.dir
+      size: 5847140
       nfiles: 8
   research_estimate_comovement:
     cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
@@ -164,7 +164,7 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/research/estimate-comovement.json
       hash: md5
-      md5: 31e678a59cf31f9356c37dcd7d11647a
+      md5: 0f69cf2c26940b77f4bbcef3c7953122
       size: 55963
     - path: data/processed/crsp-sec/panel
       hash: md5
@@ -173,9 +173,9 @@ stages:
       nfiles: 4212
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
     - path: devenv.lock
       hash: md5
       md5: 007e104116579ad905e8f1d21e0068dc
@@ -204,8 +204,8 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/comovement/summary
       hash: md5
-      md5: 9a6d897b761a5dd4c11e4d2b484aa5a8.dir
-      size: 110145
+      md5: b42402b4bc07f556c473090ccea3c769.dir
+      size: 110144
       nfiles: 6
   research_measure_alignment:
     cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
@@ -387,8 +387,8 @@ stages:
     - path: 
         .semflow/hashes/entrypoints/free-foundations/processed/prepare-contexts.json
       hash: md5
-      md5: 7b9305682587625cc0be85ac24a2b826
-      size: 30297
+      md5: 547eedc90b2dd0511096214447c5cc8c
+      size: 30596
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -420,8 +420,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -467,8 +467,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -514,8 +514,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -561,8 +561,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -608,8 +608,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -655,8 +655,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -702,8 +702,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -749,8 +749,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/encode.json
       hash: md5
-      md5: 9c85831887369c0357c0b2bb4045a29d
-      size: 60978
+      md5: a29aca797ae89d93183cf4dc180112ac
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -793,8 +793,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/direct.json
       hash: md5
-      md5: df1848db3dd7ef44300b9adf22c6a60e
-      size: 60978
+      md5: 4bb67a57ccdf8995986c38473e9b6dd5
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -834,8 +834,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/processed/direct.json
       hash: md5
-      md5: df1848db3dd7ef44300b9adf22c6a60e
-      size: 60978
+      md5: 4bb67a57ccdf8995986c38473e9b6dd5
+      size: 61277
     - path: data/processed/crsp-sec/contexts
       hash: md5
       md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
@@ -875,8 +875,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 69dd989271567ced2a2efa38373c3164
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -914,7 +914,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2010
       hash: md5
-      md5: 80965aec3538119dc02221b1d64b84bb.dir
+      md5: 19b64c7f68cd13150fe6617afc0c74bf.dir
       size: 109581
       nfiles: 6
   research_replicate@2011:
@@ -926,8 +926,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 69dd989271567ced2a2efa38373c3164
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -965,7 +965,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2011
       hash: md5
-      md5: c511b16a10437f4de5be7d632e1a542b.dir
+      md5: 0e15ed104203a4c0b84938016f2b0ce6.dir
       size: 114051
       nfiles: 6
   research_replicate@2012:
@@ -977,8 +977,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 69dd989271567ced2a2efa38373c3164
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -1016,7 +1016,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2012
       hash: md5
-      md5: e3811b06c3a6ecde318f7cc9c2842db1.dir
+      md5: 9cfdf6cff2e06eac7994b000adf257a1.dir
       size: 115324
       nfiles: 6
   research_replicate@2013:
@@ -1028,8 +1028,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 69dd989271567ced2a2efa38373c3164
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -1067,7 +1067,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2013
       hash: md5
-      md5: e4ef9ca75491ca8de523e77a960e8d8b.dir
+      md5: ba4b70d5825853947d807555edf54799.dir
       size: 114121
       nfiles: 6
   research_replicate@2014:
@@ -1079,8 +1079,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 69dd989271567ced2a2efa38373c3164
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -1118,7 +1118,7 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2014
       hash: md5
-      md5: 1cb419618fe68a903fd3b9171e61068d.dir
+      md5: 2e1562809e88ea7d0bc67faafa7caf92.dir
       size: 112654
       nfiles: 6
   research_replicate@2015:
@@ -1130,8 +1130,8 @@ stages:
     deps:
     - path: .semflow/hashes/entrypoints/free-foundations/research/replicate.json
       hash: md5
-      md5: 5042e29dd910f55a7911f3465cf5376f
-      size: 66641
+      md5: 0e682977d0f234e1e5623d94233a0298
+      size: 66940
     - path: data/processed/crsp-sec/panel
       hash: md5
       md5: 885a1b96b38a8178487d0e3045195c97.dir
@@ -1139,9 +1139,9 @@ stages:
       nfiles: 4212
     - path: data/processed/crsp-sec/representations
       hash: md5
-      md5: 0059534baf67c94f2048bd7f93f3d73b.dir
-      size: 1312884354
-      nfiles: 91
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
     - path: devenv.lock
       hash: md5
       md5: 007e104116579ad905e8f1d21e0068dc
@@ -1169,6 +1169,1519 @@ stages:
     outs:
     - path: data/research/crsp-sec/experiments/replication/formations/2015
       hash: md5
-      md5: ba7389035d4e29fbeae23dcc0ff34561.dir
-      size: 5564162
+      md5: f96939bd9d94a74314913d1384ccdbb0.dir
+      size: 5564062
       nfiles: 8
+  processed_prepare_matched_contexts:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed prepare-matched-contexts
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/prepare-matched-contexts.json
+      hash: md5
+      md5: c27e839cb85976458b1353f127279d03
+      size: 37563
+    - path: data/processed/crsp-sec/contexts
+      hash: md5
+      md5: 5dc70a9d173bca62f766d62d244d6ac0.dir
+      size: 48386606
+      nfiles: 31
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/raw/crsp-sec
+      hash: md5
+      md5: c4a7f22f4a64a39b381129b8d0dc789f.dir
+      size: 6659889202
+      nfiles: 45105
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+  processed_matched_encode_legacy@fernandez-tabpfn_full:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung fernandez --model tabpfn_full --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/fernandez/tabpfn_full
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/fernandez/tabpfn_full
+      hash: md5
+      md5: c255b07205f7364d63664dcaf2b4775f.dir
+      size: 66232063
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+      hash: md5
+      md5: ddbdce6b797c0e0cfadf46fcb3d9371f.dir
+      size: 64844471
+      nfiles: 16
+  processed_matched_encode_legacy@fernandez-tabfm:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung fernandez --model tabfm --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/fernandez/tabfm
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/fernandez/tabfm
+      hash: md5
+      md5: 0261c18c766c38d548fae08ec2dd6dea.dir
+      size: 33508095
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabfm
+      hash: md5
+      md5: 93eb97930bfcc436d45975c8a08197d5.dir
+      size: 32120857
+      nfiles: 16
+  processed_matched_encode_legacy@fernandez-kumo:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung fernandez --model kumo --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/fernandez/kumo
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/fernandez/kumo
+      hash: md5
+      md5: 8e8ff2cf547fc8021e3cf707ec5d3b8c.dir
+      size: 66942463
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez/kumo
+      hash: md5
+      md5: b048d2c1007430ebb44a34feeae10250.dir
+      size: 65555284
+      nfiles: 16
+  processed_matched_encode_legacy@fernandez-limix:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung fernandez --model limix --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/fernandez/limix
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/fernandez/limix
+      hash: md5
+      md5: 06ddd04ee2109ea51153f1495635d6b2.dir
+      size: 67190039
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez/limix
+      hash: md5
+      md5: d9c749eb7e6801d2a253046430e55b9b.dir
+      size: 65802801
+      nfiles: 16
+  processed_matched_encode_legacy@standard_xbrl-tabpfn_full:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung standard_xbrl --model tabpfn_full --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/standard_xbrl/tabpfn_full
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/standard_xbrl/tabpfn_full
+      hash: md5
+      md5: 4cb654bfe138156dd076bf886cd58db1.dir
+      size: 273338160
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl/tabpfn_full
+      hash: md5
+      md5: 4add969333893a4036c30934e49a2b75.dir
+      size: 263691736
+      nfiles: 16
+  processed_matched_encode_legacy@standard_xbrl-tabfm:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung standard_xbrl --model tabfm --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/standard_xbrl/tabfm
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/standard_xbrl/tabfm
+      hash: md5
+      md5: 8732a263d4fadd910a1aaa0cefcd2dcd.dir
+      size: 140952455
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl/tabfm
+      hash: md5
+      md5: 6c2c73beb9e744c276f644b6c1c90037.dir
+      size: 131306385
+      nfiles: 16
+  processed_matched_encode_legacy@standard_xbrl-kumo:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung standard_xbrl --model kumo --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/standard_xbrl/kumo
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/standard_xbrl/kumo
+      hash: md5
+      md5: df46e4cc2d54f54aa3938a5da136e5ca.dir
+      size: 274320528
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl/kumo
+      hash: md5
+      md5: 2660635ff8203887469f7c5022696ff3.dir
+      size: 264674517
+      nfiles: 16
+  processed_matched_encode_legacy@standard_xbrl-limix:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung standard_xbrl --model limix --device cuda --legacy-cell 
+      data/processed/crsp-sec/state-parts/standard_xbrl/limix
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/standard_xbrl/limix
+      hash: md5
+      md5: 51a5666770eccf6b6affefc858aa9cc4.dir
+      size: 277625530
+      nfiles: 46
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl/limix
+      hash: md5
+      md5: ddbf12a432dbee1628df97643ef1f251.dir
+      size: 267979460
+      nfiles: 16
+  processed_matched_encode_operands@tabpfn_full:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung operands --model tabpfn_full --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/operands/tabpfn_full
+      hash: md5
+      md5: 85fcc2351f4e7946af04f8a37d745d5c.dir
+      size: 65108280
+      nfiles: 16
+  processed_matched_encode_operands@tabfm:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung operands --model tabfm --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands/tabfm
+      hash: md5
+      md5: 8605f7b64d8063c7f0af7e20743fe5c5.dir
+      size: 32103081
+      nfiles: 16
+  processed_matched_encode_operands@kumo:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung operands --model kumo --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands/kumo
+      hash: md5
+      md5: bb26d1d84d50efe6b17f574154e4ea01.dir
+      size: 65131432
+      nfiles: 16
+  processed_matched_encode_operands@limix:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung operands --model limix --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands/limix
+      hash: md5
+      md5: f4339ed3b486d1b70e2e356d7997bc10.dir
+      size: 66105809
+      nfiles: 16
+  processed_matched_encode_histories@market_cap_assets:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung market_cap_assets --model tabpfn_full --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08:
+          device: cuda
+          threads: 6
+          histories:
+          - market_cap_assets
+          - market_to_book
+          - dividend_yield
+          - debt_maturity
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/market_cap_assets/tabpfn_full
+      hash: md5
+      md5: 0a0c171d3543a7cf5cb746e576e400d8.dir
+      size: 64704224
+      nfiles: 16
+  processed_matched_encode_histories@market_to_book:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung market_to_book --model tabpfn_full --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08:
+          device: cuda
+          threads: 6
+          histories:
+          - market_cap_assets
+          - market_to_book
+          - dividend_yield
+          - debt_maturity
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/market_to_book/tabpfn_full
+      hash: md5
+      md5: 3b47ece8e22a1eea45196ba201f5643f.dir
+      size: 64015017
+      nfiles: 16
+  processed_matched_encode_histories@dividend_yield:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung dividend_yield --model tabpfn_full --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08:
+          device: cuda
+          threads: 6
+          histories:
+          - market_cap_assets
+          - market_to_book
+          - dividend_yield
+          - debt_maturity
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/dividend_yield/tabpfn_full
+      hash: md5
+      md5: 5c0515f966d4311d47c441e2c493416a.dir
+      size: 46918569
+      nfiles: 16
+  processed_matched_encode_histories@debt_maturity:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations processed encode-matched 
+      --rung debt_maturity --model tabpfn_full --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08:
+          device: cuda
+          threads: 6
+          histories:
+          - market_cap_assets
+          - market_to_book
+          - dividend_yield
+          - debt_maturity
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/debt_maturity/tabpfn_full
+      hash: md5
+      md5: dab656e3aa6eca1afced4219397ed396.dir
+      size: 56139264
+      nfiles: 16
+  processed_matched_direct_legacy@fernandez:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed encode-matched --rung fernandez --model direct --legacy-cell 
+      data/processed/crsp-sec/state-parts/fernandez/direct
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/fernandez/direct
+      hash: md5
+      md5: e5662477531d5f6d236181e9bc282d93.dir
+      size: 4163929
+      nfiles: 46
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez/direct
+      hash: md5
+      md5: d1f3d58988f40faca93a3b0d5d7d113b.dir
+      size: 2783049
+      nfiles: 16
+  processed_matched_direct_legacy@standard_xbrl:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed encode-matched --rung standard_xbrl --model direct --legacy-cell
+      data/processed/crsp-sec/state-parts/standard_xbrl/direct
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/state-parts/standard_xbrl/direct
+      hash: md5
+      md5: 76863d7a8febcdce11f377cc6603b1b5.dir
+      size: 174446311
+      nfiles: 46
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl/direct
+      hash: md5
+      md5: 840cf90963fb9d5cb4e9d7d6ee9c6b6d.dir
+      size: 164823339
+      nfiles: 16
+  processed_matched_direct_operands:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      processed encode-matched --rung operands --model direct
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      hash: md5
+      md5: 7b452145d183ab0f5ac2aacf470bb773
+      size: 67421
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands/direct
+      hash: md5
+      md5: 85e1f1360fa51c35e520951fc497499a.dir
+      size: 4600606
+      nfiles: 16
+  research_prepare_matched_sample:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research prepare-matched-sample
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/prepare-matched-sample.json
+      hash: md5
+      md5: 0fea3bffd0ee994dba288e7525293912
+      size: 51190
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: devenv.lock
+      hash: md5
+      md5: 007e104116579ad905e8f1d21e0068dc
+      size: 2206
+    - path: infra/nix/devenv.nix
+      hash: md5
+      md5: 6fae192e8bf12a3b0ab1dc2a3d8a7936
+      size: 3446
+    - path: 
+        src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+      hash: md5
+      md5: 428fb3ba25b7bce85d827257ac1b5052
+      size: 6340
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.min_beta_quarters: 8
+        study.panel_start: '2011-01-01'
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+  research_matched_factors:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research matched-factors
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-factors.json
+      hash: md5
+      md5: c62c8924aaa519c1394ee77adec50fe8
+      size: 64377
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+      hash: md5
+      md5: ddbdce6b797c0e0cfadf46fcb3d9371f.dir
+      size: 64844471
+      nfiles: 16
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.characteristic_history_years: 10
+        study.likelihood_draws: 9999
+        study.min_beta_quarters: 8
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.seed: 42
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/factors
+      hash: md5
+      md5: 9c592ad507b5c5e13923e66ac7847adf.dir
+      size: 73574
+      nfiles: 4
+  research_matched_kernels:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research matched-kernels
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-kernels.json
+      hash: md5
+      md5: 663cd227a4d6adafe7a23e52f0368b9d
+      size: 71404
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/debt_maturity/tabpfn_full
+      hash: md5
+      md5: dab656e3aa6eca1afced4219397ed396.dir
+      size: 56139264
+      nfiles: 16
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/dividend_yield/tabpfn_full
+      hash: md5
+      md5: 5c0515f966d4311d47c441e2c493416a.dir
+      size: 46918569
+      nfiles: 16
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+      hash: md5
+      md5: ddbdce6b797c0e0cfadf46fcb3d9371f.dir
+      size: 64844471
+      nfiles: 16
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/market_cap_assets/tabpfn_full
+      hash: md5
+      md5: 0a0c171d3543a7cf5cb746e576e400d8.dir
+      size: 64704224
+      nfiles: 16
+    - path: 
+        data/processed/crsp-sec/matched-comparisons/cells/market_to_book/tabpfn_full
+      hash: md5
+      md5: 3b47ece8e22a1eea45196ba201f5643f.dir
+      size: 64015017
+      nfiles: 16
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.characteristic_history_years: 10
+        study.likelihood_draws: 9999
+        study.min_beta_quarters: 8
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.seed: 42
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/kernels
+      hash: md5
+      md5: d675a356571cb2d84c46be9878321a82.dir
+      size: 100857
+      nfiles: 5
+  research_matched_encoders:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research matched-encoders
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-encoders.json
+      hash: md5
+      md5: 80527f55b887e362fce0eb3925e40f7d
+      size: 43453
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez
+      hash: md5
+      md5: 84a37b4d53db2d7bf055b14c40b0dd97.dir
+      size: 231106462
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands
+      hash: md5
+      md5: be44dca2b3c9f876b9b48a1455f1dd12.dir
+      size: 233049208
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+      hash: md5
+      md5: c4797945acb11e5ded324498f8e77742.dir
+      size: 1092475437
+      nfiles: 80
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.characteristic_history_years: 10
+        study.likelihood_draws: 9999
+        study.min_beta_quarters: 8
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.primary_formation: 2015
+        study.seed: 42
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/encoders
+      hash: md5
+      md5: 77ac431ebef01fb1c4aeafe38b600dcb.dir
+      size: 57262
+      nfiles: 5
+  research_matched_geometry:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research matched-geometry
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-geometry.json
+      hash: md5
+      md5: e9f124981033b5e07882ac37415449ab
+      size: 54147
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez
+      hash: md5
+      md5: 84a37b4d53db2d7bf055b14c40b0dd97.dir
+      size: 231106462
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands
+      hash: md5
+      md5: be44dca2b3c9f876b9b48a1455f1dd12.dir
+      size: 233049208
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+      hash: md5
+      md5: c4797945acb11e5ded324498f8e77742.dir
+      size: 1092475437
+      nfiles: 80
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: 
+        data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+      hash: md5
+      md5: c0efea080b6b257b40ad67fd992b28e3
+      size: 1321
+    params:
+      params.yaml:
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.primary_formation: 2015
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/geometry
+      hash: md5
+      md5: c0daf7d42db03d40a540f98ee215308b.dir
+      size: 81370
+      nfiles: 4
+  research_matched_historical_geometry:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research matched-historical-geometry
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-historical-geometry.json
+      hash: md5
+      md5: 85dcaeda1633d071101ff6c91c121c03
+      size: 51191
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/processed/crsp-sec/representations
+      hash: md5
+      md5: 4ab65260c094b08d0ee9d1a6191dd019.dir
+      size: 1302190415
+      nfiles: 31
+    - path: 
+        data/research/crsp-sec/experiments/replication/summary/roster.parquet
+      hash: md5
+      md5: f80dbf4194b1e8d8bab795bb43ad218b
+      size: 119976
+    params:
+      params.yaml:
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.primary_formation: 2015
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+    outs:
+    - path: 
+        data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+      hash: md5
+      md5: cb7c88adda660be78f5aa7fce1ffbb3e.dir
+      size: 81450
+      nfiles: 4
+  research_matched_ablation:
+    cmd: OMP_NUM_THREADS=6 MKL_NUM_THREADS=6 env -u PYTHONPATH -u PYTHONHOME -u 
+      VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python 
+      --offline --frozen --package free-foundations --extra tabpfn --extra tabfm
+      --extra kumo --extra limix free-foundations research matched-ablation 
+      --device cuda
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/matched-ablation.json
+      hash: md5
+      md5: b238c03b237b0c1628e708fe9a088474
+      size: 100012
+    - path: data/processed/crsp-sec/matched-comparisons/cells/fernandez
+      hash: md5
+      md5: 84a37b4d53db2d7bf055b14c40b0dd97.dir
+      size: 231106462
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/operands
+      hash: md5
+      md5: be44dca2b3c9f876b9b48a1455f1dd12.dir
+      size: 233049208
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+      hash: md5
+      md5: c4797945acb11e5ded324498f8e77742.dir
+      size: 1092475437
+      nfiles: 80
+    - path: data/processed/crsp-sec/matched-comparisons/contexts
+      hash: md5
+      md5: ddfaf0c64ce2309bf8aee21a13fea81e.dir
+      size: 56058032
+      nfiles: 106
+    - path: data/processed/crsp-sec/panel
+      hash: md5
+      md5: 885a1b96b38a8178487d0e3045195c97.dir
+      size: 7479426379
+      nfiles: 4212
+    - path: data/raw/models/manifest.json
+      hash: md5
+      md5: 4c0af4960d3f9405e9009af34876c08f
+      size: 2474
+    - path: 
+        data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+      hash: md5
+      md5: c0efea080b6b257b40ad67fd992b28e3
+      size: 1321
+    - path: data/research/crsp-sec/experiments/matched-comparisons/geometry
+      hash: md5
+      md5: c0daf7d42db03d40a540f98ee215308b.dir
+      size: 81370
+      nfiles: 4
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    params:
+      params.yaml:
+        study.archive_end: '2025-12-31'
+        study.block_columns: 500
+        study.characteristic_history_years: 10
+        study.likelihood_draws: 9999
+        study.min_beta_quarters: 8
+        study.models:
+        - tabpfn_full
+        - tabfm
+        - kumo
+        - limix
+        study.panel_start: '2011-01-01'
+        study.primary_formation: 2015
+        study.rungs:
+        - fernandez
+        - standard_xbrl
+        study.seed: 42
+        study.standard_min_coverage: 0.1
+        study.support_rows: 256
+        study.version: crsp-sec-quarterly-v2
+        t08.device: cuda
+        t08.threads: 6
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/ablation
+      hash: md5
+      md5: 0ed45bbd63579d9acb7daa9b4ee9d76e.dir
+      size: 1054939056
+      nfiles: 69
+  research_collect_matched:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      research collect-matched
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/research/collect-matched.json
+      hash: md5
+      md5: 06e0971f5ac0dc3102cb775f068f4184
+      size: 8296
+    - path: data/research/crsp-sec/experiments/matched-comparisons/ablation
+      hash: md5
+      md5: 0ed45bbd63579d9acb7daa9b4ee9d76e.dir
+      size: 1054939056
+      nfiles: 69
+    - path: data/research/crsp-sec/experiments/matched-comparisons/encoders
+      hash: md5
+      md5: 77ac431ebef01fb1c4aeafe38b600dcb.dir
+      size: 57262
+      nfiles: 5
+    - path: data/research/crsp-sec/experiments/matched-comparisons/factors
+      hash: md5
+      md5: 9c592ad507b5c5e13923e66ac7847adf.dir
+      size: 73574
+      nfiles: 4
+    - path: data/research/crsp-sec/experiments/matched-comparisons/geometry
+      hash: md5
+      md5: c0daf7d42db03d40a540f98ee215308b.dir
+      size: 81370
+      nfiles: 4
+    - path: 
+        data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+      hash: md5
+      md5: cb7c88adda660be78f5aa7fce1ffbb3e.dir
+      size: 81450
+      nfiles: 4
+    - path: data/research/crsp-sec/experiments/matched-comparisons/kernels
+      hash: md5
+      md5: d675a356571cb2d84c46be9878321a82.dir
+      size: 100857
+      nfiles: 5
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    outs:
+    - path: data/research/crsp-sec/experiments/matched-comparisons/evidence
+      hash: md5
+      md5: 2e9578b6aa750f753e0d9af4c44a283e.dir
+      size: 3212
+      nfiles: 1
+  publication_render_matched:
+    cmd: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project 
+      src/python --offline --frozen --package free-foundations free-foundations 
+      publication render-matched
+    deps:
+    - path: 
+        .semflow/hashes/entrypoints/free-foundations/publication/render-matched.json
+      hash: md5
+      md5: 24e7f97be9b6097d51a00297e7eea600
+      size: 10436
+    - path: data/research/crsp-sec/experiments/matched-comparisons/ablation
+      hash: md5
+      md5: 0ed45bbd63579d9acb7daa9b4ee9d76e.dir
+      size: 1054939056
+      nfiles: 69
+    - path: data/research/crsp-sec/experiments/matched-comparisons/encoders
+      hash: md5
+      md5: 77ac431ebef01fb1c4aeafe38b600dcb.dir
+      size: 57262
+      nfiles: 5
+    - path: data/research/crsp-sec/experiments/matched-comparisons/evidence
+      hash: md5
+      md5: 2e9578b6aa750f753e0d9af4c44a283e.dir
+      size: 3212
+      nfiles: 1
+    - path: data/research/crsp-sec/experiments/matched-comparisons/factors
+      hash: md5
+      md5: 9c592ad507b5c5e13923e66ac7847adf.dir
+      size: 73574
+      nfiles: 4
+    - path: data/research/crsp-sec/experiments/matched-comparisons/geometry
+      hash: md5
+      md5: c0daf7d42db03d40a540f98ee215308b.dir
+      size: 81370
+      nfiles: 4
+    - path: 
+        data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+      hash: md5
+      md5: cb7c88adda660be78f5aa7fce1ffbb3e.dir
+      size: 81450
+      nfiles: 4
+    - path: data/research/crsp-sec/experiments/matched-comparisons/kernels
+      hash: md5
+      md5: d675a356571cb2d84c46be9878321a82.dir
+      size: 100857
+      nfiles: 5
+    - path: data/research/crsp-sec/experiments/matched-comparisons/sample
+      hash: md5
+      md5: 6267f6b00705b1b9c68a43fde03eea2f.dir
+      size: 15328389
+      nfiles: 4
+    outs:
+    - path: data/publication/crsp-sec/finfm-matched
+      hash: md5
+      md5: 3c3ef6e43a6b5643075fcb8b978af0f6.dir
+      size: 669828
+      nfiles: 24

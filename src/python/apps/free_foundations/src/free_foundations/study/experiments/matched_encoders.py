@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from free_foundations.artifacts.metadata import write_json
-from free_foundations.methods.matched_panel import Period
+from free_foundations.methods.matched_panel import Period, prepare_graph
 from free_foundations.methods.networks import knn_weights, representation_distance
 from free_foundations.study.experiments.matched_panel import (
+    FACTOR_SETS,
     NEIGHBOURS,
     RUNG_ORDER,
     cell_manifest_hash,
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
 
 TIE_TOLERANCE = 1e-8
 PROCESSES: tuple[Process, ...] = ("lag", "error")
+BROAD_FACTOR_SETS = ("market", "ff5", "ff5_mom")
 
 
 def _valid(estimate: Fit | None) -> bool:
@@ -70,56 +72,79 @@ def select_winner(
     )
 
 
-def _periods(cell: Path, sample: Sample) -> tuple[list[Period], str]:
-    periods = []
+def _periods(
+    cell: Path, sample: Sample, factor_sets: tuple[str, ...]
+) -> tuple[dict[str, list[Period]], str]:
+    periods: dict[str, list[Period]] = {name: [] for name in factor_sets}
     for period in sample.quarters:
         state = load_cell(cell, period.formation, period.issuers)
         if state is None:
             reason = f"representation unavailable for {period.formation.date()}"
-            return [], reason
+            return {}, reason
         try:
             weights = knn_weights(representation_distance(state), NEIGHBOURS)
-            periods.append(Period.of(period.outcome, period.design["market"], weights))
-        except (ValueError, np.linalg.LinAlgError) as error:
-            return [], str(error)
+            graph = prepare_graph(weights)
+            for specification in factor_sets:
+                periods[specification].append(
+                    Period.of(period.outcome, period.design[specification], graph)
+                )
+        except ValueError as error:
+            return {}, str(error)
     return periods, ""
 
 
 def run(sample: Path, cells: Path, output: Path, params: Path) -> None:
-    """Score each frozen encoder and every matching direct input control."""
+    """Keep market-only selection and test the broad TabPFN pair under richer controls."""
     common = load_sample(sample, params)
     orders, block = orders_for(common)
     ranking = tuple((rung, model) for rung in RUNG_ORDER for model in common.spec.models)
-    estimates: dict[Process, dict[tuple[str, str], Fit | None]] = {
-        process: {} for process in PROCESSES
-    }
+    estimates: dict[tuple[str, str, str, Process], Fit | None] = {}
     fits: list[dict[str, object]] = []
     comparisons: list[dict[str, object]] = []
     contributions: list[dict[str, object]] = []
     cell_hashes: dict[str, str] = {}
     for rung in RUNG_ORDER:
         for model in ("direct", *common.spec.models):
-            name = f"{rung}:{model}"
+            identity = f"{rung}:{model}"
             cell = cells / rung / model
-            cell_hashes[name] = cell_manifest_hash(cell, common)
-            periods, reason = _periods(cell, common)
-            for process in PROCESSES:
-                estimate, row = (
-                    (None, fit_row(name, process, None, reason))
-                    if reason
-                    else fit_cell(name, process, periods, common)
-                )
-                estimates[process][rung, model] = estimate
-                fits.append({**row, "rung": rung, "model": model})
-                if estimate is not None:
-                    contributions.extend(contribution_rows(name, estimate, common))
-                if model != "direct":
-                    direct = estimates[process][rung, "direct"]
-                    comparison = comparison_row(
-                        name, f"{rung}:direct", process, (estimate, direct), orders
+            cell_hashes[identity] = cell_manifest_hash(cell, common)
+            factor_sets = (
+                BROAD_FACTOR_SETS
+                if rung == "standard_xbrl" and model in ("direct", "tabpfn_full")
+                else ("market",)
+            )
+            periods, reason = _periods(cell, common, factor_sets)
+            for specification in factor_sets:
+                prefix = "" if specification == "market" else f"{specification}|"
+                name = f"{prefix}{identity}"
+                metadata = {"factor_set": specification, "rung": rung, "model": model}
+                for process in PROCESSES:
+                    estimate, row = (
+                        (None, fit_row(name, process, None, reason))
+                        if reason
+                        else fit_cell(name, process, periods[specification], common)
                     )
-                    comparisons.append({**comparison, "contrast": "versus_direct_control"})
-    winner = select_winner(ranking, estimates["lag"])
+                    estimates[specification, rung, model, process] = estimate
+                    fits.append({**row, **metadata})
+                    if estimate is not None:
+                        contributions.extend(
+                            {**contribution, **metadata}
+                            for contribution in contribution_rows(name, estimate, common)
+                        )
+                    if model != "direct":
+                        direct = estimates[specification, rung, "direct", process]
+                        comparison = comparison_row(
+                            name, f"{prefix}{rung}:direct", process, (estimate, direct), orders
+                        )
+                        comparisons.append(
+                            {**comparison, **metadata, "contrast": "versus_direct_control"}
+                        )
+    market_lag_estimates = {
+        (rung, model): estimate
+        for (specification, rung, model, process), estimate in estimates.items()
+        if specification == "market" and process == "lag"
+    }
+    winner = select_winner(ranking, market_lag_estimates)
     selection: dict[str, object] = {
         "status": "unavailable",
         "reason": "selection requires available, interior and nonflat lag fits for the full grid",
@@ -158,6 +183,15 @@ def run(sample: Path, cells: Path, output: Path, params: Path) -> None:
             "mask_sha256": selection["mask_sha256"],
             "cell_manifests": cell_hashes,
             "selection_endpoint": selection["endpoint"],
+            "broad_factor_comparison": {
+                "rung": "standard_xbrl",
+                "candidate": "tabpfn_full",
+                "reference": "direct",
+                "factor_sets": {name: FACTOR_SETS[name] for name in BROAD_FACTOR_SETS},
+                "sample": "same ordered issuer-quarters, outcomes and graphs for every control",
+                "selection": "fixed TabPFN comparison; market-only encoder selection is unchanged",
+            },
+            "weighting": "symmetrized 10-nearest-neighbour",
             "spatial_processes": PROCESSES,
             "bootstrap": "stationary quarterly draws of paired point-fit likelihood contributions",
             "expected_block_quarters": block,

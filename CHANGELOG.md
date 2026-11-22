@@ -34,6 +34,9 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 
 ### Changed
 
+- The matched encoder study now compares broad-input TabPFN with direct features
+  under market, FF5 and FF5 plus momentum controls. The manuscript reports paired
+  conditional intervals on the common issuer-quarter sample.
 - The Python package moved into a uv workspace under `src/python/apps/free_foundations`.
 - Tests mirror the source modules they exercise.
 - Language checks run through per-language justfile modules.

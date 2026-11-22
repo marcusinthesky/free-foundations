@@ -327,6 +327,27 @@ with all four omission intervals spanning zero.
 
 \section{Matched factor specifications}
 
+\paragraph{Broad-input encoder versus direct features.}
+Table~\ref{tab:matched-broad-factors} compares TabPFN with the direct graph
+built from the same broad financial disclosures. Both graphs use the common
+issuer-quarter mask and symmetrized ten-neighbour weights. The historical
+contexts and extracted representations remain fixed. Each factor
+specification refits the spatial-lag model; paired stationary-quarter
+intervals condition on its fitted loadings and parameters. These additional
+factor comparisons do not change the market-controlled encoder selection.
+
+\begin{table}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-broad-factors.tex}{\input{generated/tables/matched-broad-factors}}{\ffmissing}
+  \caption{Broad-input TabPFN minus the direct-feature graph in spatial-lag
+    log likelihood, in nats per issuer-quarter. Positive gains favour
+    TabPFN. All three controls use identical issuer-quarters and peer
+    graphs, with paired conditional 95\% intervals. Dashes denote
+  unavailable fits.}
+  \label{tab:matched-broad-factors}
+\end{table}
+
 The following tables report the factor-only, spatial-lag and spatial-error
 fits on the same issuer-quarters. Reading down each table shows how fit
 changes as factors enter separately, alongside the market, or jointly.
