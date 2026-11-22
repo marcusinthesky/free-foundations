@@ -1,44 +1,57 @@
 """Broad-input factor exhibits keep controls distinct and reject stale results."""
 
+from pathlib import Path
+from unittest.mock import Mock
+
 import pandas as pd
 import pytest
 
+from free_foundations.study.publication import exhibits
 from free_foundations.study.publication.exhibits import broad_factor_table
 
 
 @pytest.fixture
 def contrasts() -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {
-                "cell": "ff5_mom|standard_xbrl:tabpfn_full",
-                "reference": "ff5_mom|standard_xbrl:direct",
-                "status": "available",
-                "total_difference": -70.0,
-                "gain_per_observation": -0.007,
-                "low_per_observation": -0.012,
-                "high_per_observation": -0.002,
-            },
-            {
-                "cell": "standard_xbrl:tabpfn_full",
-                "reference": "standard_xbrl:direct",
-                "status": "available",
-                "total_difference": 200.0,
-                "gain_per_observation": 0.02,
-                "low_per_observation": 0.01,
-                "high_per_observation": 0.03,
-            },
-            {
-                "cell": "ff5|standard_xbrl:tabpfn_full",
-                "reference": "ff5|standard_xbrl:direct",
-                "status": "available",
-                "total_difference": 10.0,
-                "gain_per_observation": 0.001,
-                "low_per_observation": -0.004,
-                "high_per_observation": 0.006,
-            },
-        ]
-    ).set_index(["cell", "reference"], verify_integrity=True)
+    return (
+        pd.DataFrame(
+            [
+                {
+                    "cell": "ff5_mom|standard_xbrl:tabpfn_full",
+                    "reference": "ff5_mom|standard_xbrl:direct",
+                    "status": "available",
+                    "total_difference": -70.0,
+                    "gain_per_observation": -0.007,
+                    "low_per_observation": -0.012,
+                    "high_per_observation": -0.002,
+                },
+                {
+                    "cell": "standard_xbrl:tabpfn_full",
+                    "reference": "standard_xbrl:direct",
+                    "status": "available",
+                    "total_difference": 200.0,
+                    "gain_per_observation": 0.02,
+                    "low_per_observation": 0.01,
+                    "high_per_observation": 0.03,
+                },
+                {
+                    "cell": "ff5|standard_xbrl:tabpfn_full",
+                    "reference": "ff5|standard_xbrl:direct",
+                    "status": "available",
+                    "total_difference": 10.0,
+                    "gain_per_observation": 0.001,
+                    "low_per_observation": -0.004,
+                    "high_per_observation": 0.006,
+                },
+            ]
+        )
+        .assign(
+            factor_set=["ff5_mom", "market", "ff5"],
+            rung="standard_xbrl",
+            model="tabpfn_full",
+            contrast="versus_direct_control",
+        )
+        .set_index(["cell", "reference"], verify_integrity=True)
+    )
 
 
 @pytest.mark.unit
@@ -47,7 +60,7 @@ def test_broad_factor_table_uses_each_control_and_per_observation_units(
 ) -> None:
     # Arrange: distinct saved contrasts are deliberately out of display order.
     # Act
-    table = broad_factor_table(contrasts)
+    table = broad_factor_table(contrasts.reset_index(drop=True))
 
     # Assert
     assert table.to_dict("records") == [
@@ -104,3 +117,28 @@ def test_broad_factor_table_rejects_invalid_available_results(
     # Act and assert
     with pytest.raises(ValueError, match="Invalid broad-input ff5"):
         broad_factor_table(contrasts)
+
+
+@pytest.mark.component
+def test_stale_encoder_evidence_preserves_existing_tables(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, contrasts: pd.DataFrame
+) -> None:
+    # Arrange
+    results = tmp_path / "results"
+    generated = tmp_path / "generated"
+    (results / "encoders").mkdir(parents=True)
+    older = contrasts.reset_index().drop(columns=["rung", "factor_set", "model"])
+    older.assign(process="lag").to_parquet(results / "encoders/comparisons.parquet")
+    tables = generated / "tables"
+    tables.mkdir(parents=True)
+    existing = tables / "matched-factors.tex"
+    existing.write_text("previous exhibit")
+    monkeypatch.setattr(exhibits, "verify_evidence", Mock())
+
+    # Act
+    with pytest.raises(ValueError, match="rerun research_matched_encoders"):
+        exhibits.render(results, generated)
+
+    # Assert
+    assert existing.read_text() == "previous exhibit"
+    assert list(tables.iterdir()) == [existing]

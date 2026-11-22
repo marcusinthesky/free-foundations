@@ -9,9 +9,6 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 
 ### Added
 
-- A matched broad-input TabPFN versus direct-feature comparison under Market,
-  FF5 and FF5 plus momentum controls, with paired conditional intervals and a
-  generated manuscript table on the common issuer-quarter sample.
 - Exordio v0.1.1-alpha configuration with planning and reference workflows.
 - Schematter contracts for work items, references, budgets, skills and this changelog.
 - AgentSync-managed shared instructions and skills for Codex and Claude Code.
@@ -37,6 +34,9 @@ description: Changes to the Free Foundations study, proofs, manuscript and repos
 
 ### Changed
 
+- The matched encoder study now compares broad-input TabPFN with direct features
+  under market, FF5 and FF5 plus momentum controls. The manuscript reports paired
+  conditional intervals on the common issuer-quarter sample.
 - The Python package moved into a uv workspace under `src/python/apps/free_foundations`.
 - Tests mirror the source modules they exercise.
 - Language checks run through per-language justfile modules.
