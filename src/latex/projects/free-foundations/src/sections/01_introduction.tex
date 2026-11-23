@@ -1,0 +1,38 @@
+\section{Introduction}
+
+Two firms with similar leverage can differ widely in cash flow or market
+exposure. In a spatial model of equity returns, the choice among these
+measures determines whose returns enter each firm's peer average and how
+much weight each peer receives. \citet{fernandez2011} constructs those
+weights from histories of financial characteristics. We ask what a frozen
+tabular model adds when it selects peers from the same financial records,
+using both her characteristic-history distance and a direct comparison of
+the standardized financial features as benchmarks.
+
+In our US reimplementation of Fern\'andez's spatial CAPM, the joint
+characteristic kernel spreads weight across so many issuers that firms with
+quite different histories receive much the same peer return. To separate the
+choice of distance from the concentration of the weights, we compare
+distances under a common ten-neighbour rule and then examine how the
+comparison changes as weight extends to more distant firms.
+
+Across the matched quarterly panel, peers selected by TabPFN from four
+financial ratios improve return fit over Fern\'andez's joint distance even
+after adjustment for the five Fama--French factors and momentum. To
+determine how much of that fit is already available in the financial inputs,
+we compare each encoder with a graph built directly from the features it
+receives. Under market controls, the estimated TabPFN gain on the four
+ratios is close to zero, with an interval spanning gains and losses. When
+both methods draw on a broad panel of financial disclosures, TabPFN yields
+the largest estimated gain over its direct benchmark among the twelve
+combinations we examine.
+
+The economic interpretation of these comparisons turns on a distinction
+between recovering a firm's exposure and identifying its peers. Two
+representations can preserve exactly the same exposure while placing
+different firms nearest to it. We show how such a change of coordinates
+can alter the network and bound the change in implied covariance at a
+common spatial coefficient. In the selected broad-input model we also
+measure how many peers remain when we discard all but the leading
+valuation coordinate. This measures the cost of using a one-dimensional
+summary for peer selection.

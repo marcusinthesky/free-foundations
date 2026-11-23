@@ -1,162 +1,179 @@
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
 default_stages: [pre-commit]
-
 repos:
   - repo: builtin
     hooks:
-      # Formatting
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-        args: [--fix=lf]
-
-      # Syntax validation
       - id: check-yaml
       - id: check-toml
       - id: check-json
-
-      # Security
+      - id: check-merge-conflict
+        args: [--assume-in-merge]
       - id: detect-private-key
         stages: [pre-commit, pre-push]
       - id: check-added-large-files
         stages: [pre-commit, pre-push]
-
-      # Cross-platform compatibility
       - id: check-case-conflict
-      - id: fix-byte-order-marker
-      - id: destroyed-symlinks
-
-      # Quality
-      - id: check-merge-conflict
-      - id: check-vcs-permalinks
-
   - repo: local
     hooks:
-      # ── Nix ────────────────────────────────────────────────────────────
-      - id: nixfmt
-        name: nixfmt (RFC 166 format)
-        entry: nixfmt
+      - id: workflow-lint
+        name: GitHub Actions workflow syntax
+        entry: bash -c 'actionlint .github/workflows/*.yml'
         language: system
-        files: \.nix$
-      - id: statix
-        name: statix (Nix anti-patterns)
-        entry: statix check --format errfmt
-        language: system
-        files: \.nix$
         pass_filenames: false
-      - id: deadnix
-        name: deadnix (unused Nix bindings)
+        always_run: true
+      - id: shellcheck
+        name: ShellCheck scripts
+        entry: shellcheck
+        language: system
+        types: [shell]
+        files: \.sh$
+      - id: markdown
+        name: Markdown formatting and local links
+        entry: rumdl check .
+        language: system
+        pass_filenames: false
+        types: [markdown]
+      - id: codespell
+        name: Spelling
+        entry: codespell
+        language: system
+        types: [text]
+        # Keep the author kit and pinned Vale token patterns byte-identical to upstream.
+        exclude: ^(src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)|\.agents/skills/academic-manuscript/assets/vale/styles/Manuscript/[^/]+\.yml)$
+      - id: nix-format
+        name: Nix formatting
+        entry: nixfmt --check
+        language: system
+        types: [nix]
+      - id: nix-lint
+        name: Nix anti-patterns
+        entry: statix check infra/nix
+        language: system
+        pass_filenames: false
+        types: [nix]
+      - id: nix-dead-code
+        name: Unused Nix bindings
         entry: deadnix --fail
         language: system
-        files: \.nix$
-
-      # ── Config ─────────────────────────────────────────────────────────
-      - id: tombi-format
-        name: tombi (TOML format)
-        entry: tombi format --offline
+        types: [nix]
+      - id: toml-format
+        name: TOML formatting
+        entry: tombi format --offline --check
         language: system
-        types_or: [toml]
-      - id: tombi-lint
-        name: tombi (TOML lint)
+        types: [toml]
+        # uv owns its lock files; AgentSync's configuration is template-owned.
+        exclude: (^|/)uv\.lock$|^\.agents/agentsync\.toml$
+      - id: toml-lint
+        name: TOML lint
         entry: tombi lint --offline
         language: system
-        types_or: [toml]
-      - id: prek-validate-config
-        name: prek (config parses)
+        types: [toml]
+      - id: prek-config
+        name: Hook configuration parses
         entry: prek validate-config
         language: system
         files: (^|/)\.pre-commit-config\.yaml$
-
-      # ── Prose ──────────────────────────────────────────────────────────
-      - id: rumdl-fmt
-        name: rumdl (Markdown format)
-        entry: rumdl fmt
-        language: system
-        files: \.md$
-      - id: rumdl
-        name: rumdl (Markdown lint)
-        entry: rumdl check
-        language: system
-        files: \.md$
-      - id: codespell
-        name: codespell
-        entry: codespell
-        language: system
-      # Network gate: rumdl (MD051/MD057) already owns anchors and relative
-      # paths, so this hook makes only the orthogonal claim that external
-      # destinations still respond. The success cache in lychee.toml keeps the
-      # repository-wide sweep cheap.
-      - id: lychee
-        name: lychee (external link integrity)
-        entry: lychee --config lychee.toml .
-        language: system
-        types: [markdown]
-        pass_filenames: false
-
-      # ── Task runner ────────────────────────────────────────────────────
-      # One `--justfile` invocation per file: a bare `just --fmt` resolves the
-      # ROOT justfile only, so module justfiles would go unchecked while the
-      # gate reported green.
-      - id: just-fmt
-        name: just (format justfiles)
+      - id: just-format
+        name: Justfile formatting and syntax
         entry: >-
-          bash -euc 'rc=0; for f; do just --justfile "$f" --fmt --check --unstable || rc=1; done; exit $rc' --
+          bash -c 'rc=0; for f; do just --justfile "$f" --fmt --check --unstable || rc=1; done; exit "$rc"' --
         language: system
-        files: (^|/)justfile$
-      # ── Commit messages ────────────────────────────────────────────────
-      - id: convco
-        name: convco (conventional commits)
+        files: (^|/)([Jj]ustfile|[^/]+\.just)$
+      - id: just-lint
+        name: Justfile analysis
+        entry: >-
+          bash -c 'rc=0; for f; do just-lsp analyze "$f" || rc=1; done; exit "$rc"' --
+        language: system
+        files: (^|/)([Jj]ustfile|[^/]+\.just)$
+      - id: text-check
+        name: Whitespace and final newlines
+        entry: bash infra/nix/check-text.sh
+        language: system
+        types: [text]
+        # DVC owns dvc.lock: its YAML writer leaves a trailing space on wrapped `cmd:`
+        # scalars, re-emitted by every `dvc repro`. The AAAI author kit must stay
+        # byte-identical to the published files.
+        exclude: ^dvc\.lock$|^src/latex/projects/free-foundations/src/vendor/aaai2027\.(sty|bst)$
+      - id: conventional-commit
+        name: Conventional commit message
         entry: bash -euc 'exec convco check --from-stdin < "$1"' --
         language: system
         stages: [commit-msg]
 
-      - id: insitu
-        name: insitu (check projections)
-        entry: uv run --frozen insitu check
-        language: system
-        pass_filenames: false
-        files: \.md$|^insitu/|^insitu\.toml$|^pyproject\.toml$|^uv\.lock$
-      - id: ruff-check
-        name: Ruff lint
-        entry: uv run --project src/python --frozen ruff check
-        language: system
-        files: ^src/python/.*\.py$
-      - id: ruff-format
-        name: Ruff format
-        entry: uv run --project src/python --frozen ruff format --check
-        language: system
-        files: ^src/python/.*\.py$
-      - id: biome
-        name: Biome
-        entry: biome check
-        language: system
-        files: ^src/typescript/.*\.(ts|tsx|js|jsx|json)$
-      - id: typescript
-        name: TypeScript
-        entry: tsc --project src/typescript/tsconfig.json --noEmit
-        language: system
-        pass_filenames: false
-        files: ^src/typescript/.*\.(ts|tsx|json)$
-      - id: lean
-        name: Lean build
-        entry: just lean-build
-        language: system
-        pass_filenames: false
-        files: ^src/lean/.*(\.lean|\.toml|lean-toolchain)$
-      - id: tex-fmt
-        name: LaTeX format
-        entry: tex-fmt --check
-        language: system
-        files: ^src/latex/.*\.(tex|sty|cls)$
-      - id: chktex
-        name: LaTeX lint
-        entry: chktex -q -I0
-        language: system
-        files: ^src/latex/.*\.tex$
-
+      # ── Languages ────────────────────────────────────────────────────────
+      # Full test suites, builds and blueprint PDFs run in `just check` and CI.
       - id: python-quality
-        name: Python types, boundaries, unused code, and tests
-        entry: just python-check
+        name: Python lint, strict types, architecture and test layout
+        entry: bash -c 'just python::lint python::typecheck python::tach python::layout python::vulture'
         language: system
         pass_filenames: false
-        files: ^src/python/.*\.(py|toml)$|^src/python/uv\.lock$
+        files: ^src/python/
+      - id: lean-proofs
+        name: Lean contracts, proof integrity, axioms and lint
+        entry: bash -c 'just lean::proof-audit lean::axiom-audit lean::lint'
+        language: system
+        pass_filenames: false
+        files: ^src/lean/.*(\.lean|\.toml|\.json|lean-toolchain)$
+      - id: lean-checker-tests
+        name: Lean checker regression tests
+        entry: just lean::proof-audit-test
+        language: system
+        pass_filenames: false
+        files: ^src/lean/(tools/|FreeFoundationsApi/Check\.lean)
+      - id: blueprint-declarations
+        name: Blueprint and manuscript declarations
+        entry: just lean::blueprint-check
+        language: system
+        pass_filenames: false
+        files: ^(src/lean/.*\.(lean|tex|toml)|src/latex/projects/free-foundations/src/sections/.*\.tex)$
+      - id: latex-lint
+        name: LaTeX formatting and lint
+        entry: just latex::lint
+        language: system
+        pass_filenames: false
+        files: ^src/latex/.*\.(tex|sty|cls)$
+
+      # ── Data pipeline ────────────────────────────────────────────────────
+      - id: dvc-metadata
+        name: DVC metadata
+        entry: just data-check
+        language: system
+        pass_filenames: false
+        files: ^(dvc\.(yaml|lock)|\.dvc/|.*\.dvc$)
+      # The fingerprint JSON is each stage's code dependency, so a stale one would
+      # suppress a genuine rerun; this read-only check keeps it current.
+      - id: semflow-check
+        name: Semflow fingerprints
+        entry: just semflow-check
+        language: system
+        pass_filenames: false
+        files: ^dvc\.yaml$|^semflow\.toml$|^src/python/.*\.py$|^\.semflow/hashes/.*\.json$
+      # Opt in to upload tracked data on every `git push`: uncomment once the bucket
+      # credentials are in .dvc/config.local. The first push sends about 3.6 GB.
+      # - id: dvc-pre-push
+      #   name: DVC push
+      #   entry: just dvc git-hook pre-push
+      #   language: system
+      #   stages: [pre-push]
+      #   pass_filenames: false
+      #   always_run: true
+
+      # ── Context and agents ───────────────────────────────────────────────
+      - id: context-documents
+        name: Context schemas and generated views
+        entry: just context-check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: schema-changelog-document
+        name: Changelog structure and categories
+        entry: just changelog-check
+        language: system
+        pass_filenames: false
+        files: ^(CHANGELOG\.md|infra/schemas/documents/changelog\.document-schema\.yaml)$
+      - id: skill-documents
+        name: Agent skill documents
+        entry: just skills-check
+        language: system
+        pass_filenames: false
+        files: (^|/)(SKILL\.md|skill\.document-schema\.yaml)$

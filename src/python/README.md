@@ -1,81 +1,88 @@
 # Python
 
-A small typed interface for measuring firm proximity. The package imports NumPy,
-not model runtimes, and never downloads weights on import.
+Typed encoders and one financial measurement study. Importing the public interface
+never downloads weights or imports an optional model runtime.
 
 ## Install and check
 
-From the repository root:
-
 ```sh
-uv sync --project src/python --frozen
-just python-check
-just python-testmon
-just python-model tabpfn
+just python::setup         # locked workspace, model runtimes and tools (uses the network)
+just python::check         # lint, strict types, Tach, test layout, Vulture, tests, build
+just python::test-changed  # Testmon's impacted tests during development
+just python::run processed prepare-panel
 ```
 
-The default environment includes the `data` and `dev` dependency groups:
-`spreg`, `libpysal`, `esda`, `yfinance`, `pandas-datareader`, `edgartools`,
-`marimo`, Arrow, the scientific Python stack, and the quality tools.
-`pandas-datareader` exposes the [Fama–French reader](https://pandas-datareader.readthedocs.io/en/latest/readers/famafrench.html)
-for [Ken French's data library](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html).
-EdgarTools requires an SEC identity before downloads; see its
-[documentation](https://edgartools.readthedocs.io/en/latest/).
-The [research pilot](../../research/pilot/README.md) adds cached data acquisition,
-annual spatial-error comparisons, and a CPU TabPFN experiment.
+This directory is a uv workspace. The `free-foundations` application lives in
+`apps/free_foundations`, with its tests in `apps/free_foundations/tests` mirroring
+the source modules they exercise: `study/sources/sec.py` owns `tests/study/sources/test_sec.py` and
+feature files such as `test_sec__parsing.py`. `just python::layout` enforces this.
 
-`just python-model NAME` adds the selected model extra to the same environment
-as the finance and development tools. `uv sync --project src/python --frozen
---all-extras` installs every retained model runtime together. A plain sync restores
-the default environment without model extras.
+The environment includes scientific Python, spatial estimators, Arrow, `arch`,
+data-acquisition tools, DVC and quality checks. The model extras `tabpfn`, `tabfm`,
+`kumo` and `limix` are installed by setup so strict type checking covers their
+adapters. Model versions and Git revisions are locked in
+`uv.lock`. Actual device selection is explicit and included in state provenance;
+CUDA is used when available, with CPU fallback.
 
-Dependencies for all retained models must resolve together with the data stack.
-Models that need conflicting dependency sets are deferred instead of adding
-separate environments or dependency overrides. Resolution is not a claim that
-checkpoints have been downloaded or inference tested. Linux uses CPU Torch wheels for this small pilot; CUDA/FlashAttention setups
-require a separate deliberate environment choice.
+## Research commands
 
-## Catalogue
+The [study contract](../../data/research/crsp-sec/README.md) has one parameter file,
+[`params.yaml`](../../params.yaml), and one master panel. Commands are organized by
+data layer, each with explicit inputs and outputs:
 
-`MODELS` is a read-only mapping; `model_spec("tabpfn")` returns its metadata.
-Git-only runtimes are pinned to commits in `pyproject.toml`; all resolved versions
-are in `uv.lock`. Checkpoint identity is a separate, required encoding argument.
+```sh
+free-foundations raw acquire --crsp-csv X.csv --extraction-script X.py
+free-foundations raw freeze        # promote completed staging
+free-foundations raw fetch-checkpoints   # verify the four pinned weights
+free-foundations processed prepare-panel # roster, mask, cohorts, characteristics
+free-foundations processed prepare-contexts
+free-foundations processed encode --rung fernandez --model tabpfn_full
+free-foundations processed direct --rung fernandez
+free-foundations processed assemble-states
+free-foundations research replicate --formation 2015
+free-foundations research collect-replication
+free-foundations research estimate-comovement  # quarterly spatial panels
+free-foundations research measure-alignment   # Mantel alignment
+free-foundations publication render     # tables, figure, metrics
+```
 
-| Key / extra | Checkpoint | Readout available here |
+Run them through `just dvc repro <stage>` to honor dependencies. Acquisition is the
+raw financial-source network boundary. Missing weights are fetched by raw fetch-checkpoints.
+
+`cli` exposes the four layers. `study.sources` owns acquisition and source adapters,
+`study.panel` owns panel preparation and verification, and `study.representations`
+owns dated contexts, extraction and saved-state readers. `study.experiments`
+produces research results and `study.publication` renders them. Reusable fitting
+and graph methods live in `methods`, including the Fernández R estimator.
+`encoders` owns the public interfaces and pinned backend adapters.
+
+All research stages verify the shared panel, roster and outcome-mask hashes.
+Features use dated disclosures before each quarter's trading cutoff. Native
+missingness passes to tabular models; the direct control uses support-median
+imputation with indicators. Deterministic column blocks retain every eligible field.
+
+## Reproduce a research pilot
+
+`pilots/finfm/` contains the replay commands for recorded workshop evidence
+and the runners for pending panel and refit work. Use the same uv lock as
+the study. For example, from pinned devenv run
+`just python::pilot finfm/cohort_replay.py`. The task receipts give the input
+identities, resource settings and expected outputs for each run.
+
+## Model catalogue
+
+| Key / extra | Model | Retained readout |
 | --- | --- | --- |
-| `exaone` | [EXAONE-Tabular](https://huggingface.co/LG-AI-Research/EXAONE-Tabular) | Explicit custom extractor |
-| `tabpfn` | [TabPFN 3.5](https://huggingface.co/Prior-Labs/tabpfn_3_5) | Native `get_embeddings` adapter |
-| `limix` | [LimiX-2](https://huggingface.co/stable-ai/LimiX-2) | Explicit custom extractor |
-| `causilo` | [Causilo](https://huggingface.co/nums-ai/causilo) | Explicit custom extractor |
-| `tabfm` | [Google TabFM](https://huggingface.co/google/tabfm-1.1.0-pytorch) | Explicit custom extractor |
-| `sap` | [SAP RPT](https://huggingface.co/SAP/sap-rpt-1-oss) | Explicit custom extractor; gated weights |
+| `tabpfn` | TabPFN 3.5 | Native query embeddings |
+| `tabfm` | Google TabFM 1.1 | Post-ICL query-row state |
+| `kumo` | Kumo-Tabular Large | Query regression-head features |
+| `limix` | LimiX-2 | Query regression-head features |
 
-The custom entries do not expose automatic native embedding integrations.
-The [expanded experiment](../../research/expanded/README.md) includes reviewed
-TabFM and EXAONE forward-pass extractors alongside full and Fast TabPFN. Supply a reviewed layer readout through the protocol below;
-`from_fitted` rejects entries without a verified native row-embedding API.
-
-`expanded.representations` names every readout used by the panel and cross-sectional
-ladder and labels it *state* (TabFM `early_concat`/`early_mean` and a null-label pass,
-EXAONE first-layer item summaries) or *task-conditioned* (TabPFN query embeddings,
-TabFM post-ICL state, EXAONE label token and last-layer item summaries, a supervised
-MLP control). New readouts are cached at float32 precision under per-model readout
-versions. Spatial estimators live in `fernandez.models` (S2SLS, SEM-ML and lag-ML with
-standard errors, checked against `spreg`), `fernandez.diagnostics` (exact residual
-Moran, conditional information criteria) and `fernandez.kernels`. Paired bootstrap and
-model confidence sets use `arch`. Stage-one MM betas call `fernandez/betas.R` through
-the `Rscript` and `robustbase` supplied by `devenv`.
-
-### Deferred models
-
-- **Nori:** its current `synthefy` dependency requires HTTPX below 0.28, conflicting
-  with EdgarTools' HTTPX 0.28.1 requirement. Its Hub 1.x requirement also conflicts
-  with SAP's Transformers 4.x stack. It is excluded from extras and the registry.
-- **Xiaomi-TabLDM:** the linked repository contains checkpoints but no installable
-  runtime source. Its prerequisites-only extra and registry entry are removed.
-
-Revisit these models when upstream releases remove the blockers. Their omission
-is an installation decision, not evidence about predictive or economic quality.
+`MODELS` is read-only; `model_spec(name)` returns installation metadata. Checkpoint
+identity is a separate required encoding argument. Model acquisition verifies
+pinned expected bytes. Numerical state caches verify source/runtime/checkpoint
+identity, ordered observations, payload checksums, shapes and finite values.
+Historical cache entries cannot satisfy a changed extraction contract.
 
 ## Encode against a fixed context
 
@@ -153,24 +160,8 @@ valid. Compare distance/network performance within each measurement system.
 The dependency direction is `contracts` → `pooling` → `encoding`, with an
 independent `registry`; Tach enforces the actual allowed imports. Ruff checks all
 rules, Pyrefly uses its strict preset, and Vulture scans production code and tests
-at 80% confidence. `just python-check` always runs the complete tests.
-`just python-testmon` is the incremental development loop. Hypothesis exercises
+at 80% confidence. `just python::check` always runs the complete tests.
+`just python::test-changed` is the incremental development loop. Hypothesis exercises
 axis permutations, singleton batches, masks, immutable outputs, and native
 ensemble reshaping; focused tests check leakage guards and explicit failures.
 These tests use small structural backends and do not validate checkpoint numerics.
-
-## Fernández and the measurement target
-
-I read *Spatial linkages in international financial markets*, Quantitative
-Finance 11(2), 237–245 (2011), DOI 10.1080/14697680903127403, from the supplied
-local PDF. Section 2.4 uses Spearman correlation distance
-`sqrt(2 * (1 - correlation))` for financial-indicator histories, followed by
-exponentiation and row normalization. Thus the benchmark is not simply a
-single-date ratio distance. The pooled-country application uses 126 firms over
-1997–2006, estimates betas from quarterly returns, then regresses median returns
-on those betas; country-level evidence is mixed. It is not an out-of-sample test
-of future FF5+momentum residual covariance.
-
-This interface keeps checkpoint, context, preprocessing, pooling and observation
-identity explicit because they define the learned measurement of proximity.
-It makes no identification, causal-spillover, or economic-validity claim.

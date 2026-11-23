@@ -1,0 +1,78 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ff-manuscript}[2026/11/19 Shared manuscript semantics]
+\RequirePackage{amsmath,amssymb,amsthm,booktabs,graphicx}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\lean}[1]{\ignorespaces}
+\newcommand{\leanok}{\ignorespaces}
+\newcommand{\ffmissing}{--}
+\newif\ifffsavedvalues
+\newif\ifffmatchedvalues
+\newcommand{\ffLoadValues}{%
+  \InputIfFileExists{generated/numbers.tex}{\ffsavedvaluestrue}{}%
+  \InputIfFileExists{generated/matched-values.tex}{\ffmatchedvaluestrue}{}%
+}
+\newcommand{\ffResultStatus}{%
+  \ifffsavedvalues\else
+    \begin{quote}\emph{Saved numerical results are unavailable in this source build.}\end{quote}%
+  \fi
+}
+\newcommand{\ffDeclareValue}[2]{%
+  \ifcsname ff@value@#1\endcsname
+    \PackageError{ff-manuscript}{Duplicate generated value '#1'}{Regenerate the saved-result bindings.}%
+  \else
+    \expandafter\gdef\csname ff@value@#1\endcsname{#2}%
+  \fi
+}
+\newcommand{\ffDeclareNumber}[2]{%
+  \ifcsname ff@number@#1\endcsname
+    \PackageError{ff-manuscript}{Duplicate generated number '#1'}{Regenerate the saved-result bindings.}%
+  \else
+    \expandafter\gdef\csname ff@number@#1\endcsname{#2}%
+  \fi
+}
+\newcommand{\ffvalue}[1]{%
+  \ifcsname ff@value@#1\endcsname
+    \csname ff@value@#1\endcsname
+  \else
+    \ifffsavedvalues
+      \PackageError{ff-manuscript}{Undefined generated value '#1'}{Run just latex::assets.}%
+    \else
+      \ffmissing
+    \fi
+  \fi
+}
+\newcommand{\ffmatched}[1]{\ifffmatchedvalues\ffvalue{matched-#1}\else\ffmissing\fi}
+\ExplSyntaxOn
+\NewDocumentCommand{\ffnum}{O{3}m}{%
+  \ifcsname ff@number@#2\endcsname
+    \fp_eval:n {round(\csname ff@number@#2\endcsname,#1)}%
+  \else
+    \ffvalue{#2}%
+  \fi
+}
+\NewDocumentCommand{\ffnume}{O{3}m}{%
+  \ifcsname ff@number@#2\endcsname
+    \fp_to_scientific:n {\fp_eval:n {round(\csname ff@number@#2\endcsname,#1)}}%
+  \else
+    \ffvalue{#2}%
+  \fi
+}
+\ExplSyntaxOff
+\newcommand{\ffbibliography}[1]{%
+  \bibliographystyle{#1}%
+  \bibliography{refs}%
+}
+
+% Keep numeric exhibits at the same physical size across layouts.
+\newcommand{\fftabletype}{\fontsize{10}{12}\selectfont\setlength{\tabcolsep}{3pt}}

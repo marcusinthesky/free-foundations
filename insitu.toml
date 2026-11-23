@@ -1,9 +1,8 @@
 version = 1
 
 [sources]
-include = ["**/*.md"]
+include = [".context/**/*.md", "ROADMAP.md"]
 respect_gitignore = true
-exclude = [".git/**", ".devenv/**", ".direnv/**", ".venv/**", ".insitu/**", "**/node_modules/**", "**/.lake/**"]
 
 [paths]
 models = "insitu/models"

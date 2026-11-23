@@ -1,5 +1,9 @@
-import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
-import Mathlib.MeasureTheory.Function.FactorsThrough
+module
+
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
+public import Mathlib.MeasureTheory.Function.FactorsThrough
+
+@[expose] public section
 
 /-!
 # Statistical sufficiency

@@ -1,0 +1,96 @@
+$schema: https://document-schema.org/draft/2026-06/schema
+description: >-
+  Agent Skills frontmatter and this repository's concise, actionable skill structure.
+  Semantic usefulness and invocation accuracy require review and evaluation.
+
+# The Agent Skills specification recommends fewer than 5,000 body tokens and
+# 500 lines. The token budget is enforced here; the line limit is checked by
+# just skills-check because document-schema has no line-count keyword.
+maxTokens: 5000
+maxDepth: 3
+allSections:
+  header:
+    pattern: '^[A-Z0-9]'
+    maxLength: 80
+
+# One title with a required workflow underneath it. Other subsections may explain
+# triggers, examples, edge cases, scripts or references when they are useful.
+# This heading convention is a repository rule, not an Agent Skills requirement.
+sections:
+  - header:
+      pattern: '^.+$'
+    description: A concise title identifying the skill.
+    minContains: 1
+    maxContains: 1
+    sections:
+      - header:
+          pattern: '^(Instructions|Steps|Workflow|Usage|How to Run)$'
+        description: >-
+          Provide actionable instructions, including prerequisites and checks
+          when relevant. Prefer specific guidance based on real experience.
+        minContains: 1
+        maxContains: 1
+        blocks:
+          - type: [paragraph, bullet-list, ordered-list, code]
+            minContains: 1
+    additionalSections: true
+additionalSections: false
+
+frontmatter:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  required: [name, description]
+  additionalProperties: false
+  properties:
+    name:
+      description: >-
+        Skill identifier, matching its parent directory. Use lowercase letters,
+        digits and single hyphens; choose a short, distinctive name.
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+    description:
+      description: >-
+        Describe what the skill does and when to use it, using concrete user
+        intents and relevant keywords. State exclusions when they prevent
+        confusion. Test triggering on varied positive and near-miss prompts.
+      type: string
+      minLength: 1
+      maxLength: 1024
+      pattern: '\S'
+    license:
+      description: A short license identifier or path to a bundled license.
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '\S'
+    compatibility:
+      description: >-
+        Include only when needed; state required tools, versions, environment
+        or network access. The Agent Skills specification caps this at 500.
+      type: string
+      minLength: 1
+      maxLength: 500
+      pattern: '\S'
+    metadata:
+      description: >-
+        Optional uniquely named string metadata. Quote YAML values such as
+        versions to preserve their string type.
+      type: object
+      maxProperties: 32
+      propertyNames:
+        minLength: 1
+        maxLength: 64
+        pattern: '\S'
+      additionalProperties:
+        type: string
+        maxLength: 500
+    allowed-tools:
+      description: >-
+        Experimental, client-dependent space-separated list of pre-approved
+        tools. Tool availability does not itself grant external-action approval.
+      type: string
+      minLength: 1
+      maxLength: 500
+      pattern: '\S'

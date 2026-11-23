@@ -22,16 +22,61 @@ evidence, and a yes to one says nothing about the next.
 4. **Econometric use.** What does the spatial model do with the distances? (`Kernel`,
    `Network`, `Value`, `Likelihood`, `Stability`)
 
-Left on paper:
+Limits and research extensions:
 
-- the dependent-data generalisation bounds (mixing, Rademacher complexity);
-- transfer and task-diversity rates;
+- general mixing-process and function-class generalisation rates; `Selection`
+  proves finite-family independent-block concentration and a supplied-coupling interface;
+- statistical estimation of overlap, economic mismatch and task coverage; `Transfer`
+  proves bounded-density transfer, and `TaskCoverage` proves a finite task-span certificate;
 - objective-specific routes (contrastive, predictive-latent, diffusion, autoregressive),
   each of which would pair a proper-score statement with `Sufficiency`;
 - the PFN posterior derivation and a prior-mismatch term;
-- the log-determinant half of the loss-Lipschitz bound, which needs eigenvalue
-  perturbation;
-- generated-network inference.
+- generated-network inference and nuisance-score orthogonality;
+- Davis--Kahan eigenspace estimation, hierarchical PAC-Bayes and causal identification.
+
+## Baseline and verification contract
+
+The original theory extension starts from commit
+`77607494773b0ab268f8d7ce8b91e6f39a077bc5`. The combined library retains the
+measurement-to-finance extension (`9713a8d`), its finite-probability and audit
+refinements (`a3c412a`), and the state, proxy and identification packages
+(`8a3403c`). These changes do not rerun numerical experiments.
+
+The current toolchain is `leanprover/lean4:v4.35.0`. The manifest pins mathlib
+`56a005855ea17e0b0958f73ec801ae140b0a1679` and the direct
+[MathEconLib dependency](https://github.com/matheconlib/matheconlib/tree/6c0e61ed4c95252e2c985ccc456e2c53617fb941)
+`6c0e61ed4c95252e2c985ccc456e2c53617fb941`. `FiniteProbability` imports upstream
+finite laws and their proofs; project adapters preserve the financial interfaces.
+
+`Audit.lean` remains a readable public-theorem inspection aid.
+`ModuleAudit.lean` provides the fast compiled module-origin summary used by
+`just lean::axiom-audit`, including imported private project declarations. The enforced
+project-wide checker is now `just lean::proof-audit`: it discovers every production
+source independently of umbrella imports, freshly compiles it, and checks private
+declarations, proof bodies, discarded examples and transitive dependencies.
+Only `propext`, `Classical.choice`, and `Quot.sound` are allowed. Parser-based
+policy also rejects proof placeholders and native proof execution. Exact fixture
+and trusted-tool exclusions are reported rather than hidden by directory skips.
+
+`FreeFoundationsApi` is a default Lake target containing complete, frozen type contracts.
+`just lean::build` additionally verifies that every manuscript/blueprint tag has a
+successfully elaborated contract. It queries the compiled environment extension,
+so a commented-out command cannot satisfy coverage. Contracts compare types,
+universe arity and correspondence, and explicit/implicit binder metadata; they
+do not apply a theorem to a weaker example. They protect interfaces rather than
+the semantics of dependency definitions or the empirical economic premises.
+
+The [compatibility record](compatibility/README.md) distinguishes the earlier
+rejected unchanged-statement trial from the corrected migration. Mathlib 4.35
+assigns infinite `eLpNorm` to functions that are not almost everywhere strongly
+measurable. `Measurement.rms_measurement_error` therefore adds an explicit
+`AEStronglyMeasurable` premise for the measured-distance function
+`ω ↦ dist (g (fhat ω)) (s ω)`. Its two existing distance-measurability premises
+do not imply this third one. The RMS inequality and its economic interpretation
+are unchanged on the measurable domain; the older unrestricted statement is not
+claimed to hold under the new dependency semantics. The frozen type contract is
+updated for this reviewed premise, rather than silently accepting an unchanged
+signature with changed meaning.
 
 ## 1. Economic target (`Exposure`, `Score.response_sq`)
 
@@ -58,14 +103,21 @@ Left on paper:
 | `Recovery.exposure_error` | `κ‖â − a‖ ≤ ‖τ̂ − Ca‖`. |
 | `Recovery.exposure_error_mismatch`, `_sq` | With mismatch `τ = Ca + v`: `κ‖â − a‖ ≤ ‖τ̂ − τ‖ + ‖v‖` and `κ²‖â − a‖² ≤ 2(‖τ̂ − τ‖² + ‖v‖²)`. Accuracy cannot remove `v`. |
 | `Recovery.mean_exposure_error` | The same bound in mean square under any measure. |
-| `Recovery.excess_risk`, `excess_risk_condExp` | Excess squared task risk over `E[Y \| X]` equals `‖f − E[Y \| X]‖²` in `L²`. This is the `ε` the exposure bounds take. |
-| `Measurement.measurement_error`, `rms_measurement_error` | Any `K`-Lipschitz readout `g`: `d(g(F̂), s) ≤ K d(F̂, F) + ξ`, and in root mean square `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂` (Minkowski), with alignment error `ξ = d(g(F), s)`. |
+| `Recovery.excess_risk`, `excess_risk_condExp`, `excess_risk_condExp_vector` | Excess squared task risk over `E[Y \| X]` equals `‖f − E[Y \| X]‖²` in `L²`. This is the `ε` the exposure bounds take. |
+| `Measurement.measurement_error`, `rms_measurement_error` | Any `K`-Lipschitz readout `g`: `d(g(F̂), s) ≤ K d(F̂, F) + ξ`, and in root mean square `‖d(g(F̂), s)‖₂ ≤ K‖d(F̂, F)‖₂ + ‖ξ‖₂` (Minkowski), with alignment error `ξ = d(g(F), s)` and explicit a.e. strong measurability of all three distance functions in the RMS statement. `ξ` belongs to the pair `(F, g)`: it adds information `F` lacks, `E‖s − E[s | F]‖²`, to readout error `E‖E[s | F] − g(F)‖²` (the L² projection identity; for a real state this is `Recovery.excess_risk_condExp`). |
 | `Measurement.decoder_lipschitz` | The linear decoder is `1/κ`-Lipschitz, so `Recovery` is the special case `K = 1/κ`. |
 | `Measurement.readout_error_ge`, `aggregate_readout_error` | Lower bound: if a representation merges two histories, every readout misses one state by at least half their distance. Reading `(1, 0)` and `(0, 1)` from their aggregate misses one by at least `√2/2`. |
 | `Measurement.mean_sq_distance`, `sq_norm_mean_le` | `E‖D‖² = ‖E D‖² + E‖D − E D‖²` for `D = Aᵢ − Aⱼ`: distances between posterior-mean exposures understate expected distances by the posterior variance of the difference. |
 | `Recovery.distance_error` | `\|‖âᵢ − âⱼ‖ − ‖aᵢ − aⱼ‖\| ≤ ‖âᵢ − aᵢ‖ + ‖âⱼ − aⱼ‖`. |
 | `Recovery.pairwise_distance_error` | `Σᵢ≠ⱼ (d̂ᵢⱼ − dᵢⱼ)² ≤ 4(N − 1) Σᵢ ‖âᵢ − aᵢ‖²`, with no independence across pairs. |
 | `Recovery.readout_invariant` | Distances between read-out exposures are invariant under any reparametrisation of the states, with the matching readout. |
+
+The calibrated measurement bound (`Score.calibrated_measurement_bound`) combines
+this projection identity with empirical risk minimization. For a fixed encoder
+and context, financial prediction risk is bounded by information error,
+readout approximation error, twice a uniform sample-to-population discrepancy,
+and fitting slack. The theorem proves the deterministic implication; a
+probabilistic rate requires a sampling model and a bound on the discrepancy.
 
 ## 3. Information is not geometry (`Geometry`)
 
@@ -117,5 +169,292 @@ Left on paper:
 | `Score.pretraining_excess` | PFN pretraining loss minus Bayes loss under the task prior is the expected KL to the posterior predictive. |
 | `Score.erm_bound` | An `ε`-minimiser of a risk estimate within `g` of the population risk is within `2g + ε` of every candidate. |
 
-Run `just lean-build` from the repository root. A fresh checkout first needs the prebuilt
+## 7. Explicit finite geometry and financial error propagation
+
+All matrix norms in the following ledger are Euclidean operator norms unless a
+row-sum or Frobenius norm is named explicitly. `MatrixBounds` defines wrappers so
+composition does not depend on a local norm instance. The finite panel contains
+`N` firms; a zero-diagonal normalized network requires `N ≥ 2`.
+
+| Compiled declarations | Contract and interpretation |
+| --- | --- |
+| `MatrixBounds.spectralNorm_le_frobeniusNorm`, `frobeniusNorm_le_sqrt_card_mul_rowSumNorm`, `frobeniusNorm_sq_le_card_mul_spectralNorm_sq` | `‖A‖₂ ≤ ‖A‖F ≤ √N ‖A‖∞`; squared Frobenius norm is at most the number of columns times squared spectral norm. Dimension factors are explicit. |
+| `GramDistance.squared_eq_quadratic`, `squared_error`, `distance_error` | An anchored PSD Gram target with entrywise error `εG ≥ 0` has squared-distance error at most `4εG` and distance error at most `2√εG`. Zero distances are allowed; no division by pairwise separation is used. |
+| `GramDistance.squared_error_spectral`, `distance_error_spectral`, `sharpGram_distance` | Spectral Gram error `εG` gives the different constants `2εG` and `√(2εG)`. A PSD two-point outer-product example attains the entrywise constants. |
+| `GramDistance.uniform_exposure_distance`, `empirical_rms_to_uniform` | Uniform exposure error `e` gives pair-distance error `2e`. An actual-panel RMS certificate `B` gives maximum absolute error at most `√N B`; population RMS needs a separate sampling result. |
+| `Kernel.normalized_l1_le_sharp`, `expRow_l1_le_scaled`, `expRow_l1_le_bandwidth`, `expKernel_row_l1_le_scaled` | Ratio-bounded positive weights normalize within `2(r−1)/(r+1)` in row L1. Scaled-distance error `b ≥ 0` gives `s(b)=2(exp b−1)/(exp b+1)`. With distinct bandwidths a valid choice is `b=δ/h_min + D_max |ĥ−h|/h_min²`; this assumes a bandwidth-error certificate, not stability of its estimator. |
+| `Stability.matrix_covariance_joint_sub_le`, `matrix_covariance_target_sub_le` | Joint network/coefficient error and innovation error contribute `2VM³‖λ̂Ŵ−λW‖₂ + M²‖D̂−D‖₂`; a separately bounded spatial-model approximation error is added for the true second moment. Both inverse norms and nonsingularity are explicit. |
+| `ScoreStability.loss_gap_local`, `loss_gap_le_of_norm_sub`, `abs_logdet_sub_le` | For positive-definite forecast and target, whitened relative error `E` with `‖E‖₂≤r<1` gives score gap at most `‖E‖F²/[2(1−r)]`. A forecast eigenvalue floor `m>e≥0` and total covariance error `e` give `N(e/m)²/[2(1−e/m)]`. A common floor gives global log-determinant continuity. `Score.loss` is twice the ordinary Gaussian negative log score up to constants. |
+| `Stability.matrix_portfolio_regret` | The same spectral covariance error `e` implies variance regret at most `2B²e` on a feasible set with Euclidean portfolio norm bounded by `B`. |
+
+## 8. Information, finite transfer and statistical contracts
+
+`Transfer.rms p f` is the norm of `sqrt(p_i) • f_i` in a finite **L2** product;
+for nonnegative probability weights its square is `Σ p_i ‖f_i‖²`. The population
+interface uses `eLpNorm f 2 P`, which is an extended nonnegative number until its
+finiteness is established. Every source and target measure remains visible.
+
+| Compiled declarations | Contract and interpretation |
+| --- | --- |
+| `TaskInformation.information_quadratic`, `information_increment`, `distinguishes_of_loewner_floor`, `exists_decoder_of_information_floor` | `J=Σ w_t c_t c_tᵀ`, `w_t≥0`; a task-information floor `J ⪰ κ²I` supplies `Recovery.Distinguishes` for the square-root-weighted task operator, and hence the existing decoder when `κ>0`. An appended positive precision increment raises information. |
+| `TaskInformation.task_units_invariant` | `CᵀR⁻¹C` is invariant when both task units and noise covariance change by the same invertible map. This does not identify economic coordinates or their metric. |
+| `TaskInformation.rank_one_inverse`, `rank_one_inverse_le`, `posterior_precision_update`, `posterior_precision_mono` | Starting from the independently augmented positive precision, prove the full rank-one inverse identity and inverse-precision ordering. These are matrix theorems; Gaussian posterior interpretation is an additional statistical model premise. |
+| `Information.nested_projection`, `nested_condExp`, `projection_risk_mono` | With nested closed information subspaces, the decrease in optimal squared error equals the squared difference of projections. The conditional-expectation version holds in vector-valued L2, hence almost everywhere. It makes no finite-learner monotonicity claim. |
+| `Recovery.excess_risk_condExp_vector` | Multitask conditional-mean excess squared risk equals squared vector-valued L2 prediction error. |
+| `TaskCoverage.covered_signal`, `covered_error`, `predicted_task_error` | A declared economic loading in the finite span of training loadings has error multiplier equal to the Euclidean norm of its explicit coefficient vector. Task count alone supplies no coverage certificate. |
+| `Transfer.change_of_weights`, `task_transfer`, `source_target_recovery` | Pointwise `q_i≤ωp_i` transports task RMS with `√ω`; task-mean drift and economic mismatch enter separately, divided by `κ>0` in exposure recovery. No sampling or independence assertion is implicit. |
+| `Transfer.fitted_readout_error` | Uniform task error `ετ`, mismatch `ν`, predicted-statistic bound `Bτ`, and a fitted-map certificate give exposure error `(ετ+ν)/κ + εL Bτ`. The fitted and ideal maps act on the same task-statistic space. The actual clipped, standardized hidden-state ridge procedure needs its own general-readout certificate. |
+| `Transfer.measure_change`, `density_change`, `rnDeriv_change`, `measure_source_target_recovery` | General-measure and Radon--Nikodym versions under bounded density, with target-law measurability for Minkowski. Latent realized states require irreducible uncertainty or a conditional-mean target. Learned functions must satisfy these contracts conditional on their training/support information. |
+| `Selection.bounded_blocks`, `finite_family`, `coupled_finite_family` | Fixed bounded losses on `m≥1` independent blocks give finite-family tail `2K exp(−2mε²)`. A coupled independent copy with matching block marginals adds the probability of **any** coupling mismatch once. Blocks need not be identically distributed; the center is average marginal block risk. |
+| `Selection.risk_discrepancy`, `source_excess`, `task_rms_of_excess` | Add a discrepancy if the block-mixture law differs from source or future-period risk. ERM then yields approximation `+2g+` optimization error; squared-risk excess becomes RMS only after taking a square root. Bounded task-loss normalization must be restored. |
+| `Selection.panel_markov`, `random_panel` | Individual second-moment bounds `E e_i²≤B²` imply `P(∃i:e_i>B√(N/α))≤α`, with the `B=0` case included. Interfirm independence is unnecessary. This is a sampling/moment contract, not a bound on an arbitrary fixed panel. |
+| `Transfer.small_mass_spike` | A finite probability law with mass `r²` at a unit-error point and zero error elsewhere has population RMS `r<1`; that specified point still has error one. Population RMS alone cannot supply a uniform fixed-panel error bound. |
+
+The finite candidate class is fixed before evaluation, or the argument is
+conditional on separate fitting data. Counting only realized models after
+adaptive fitting does not meet the contract. Gaussian log scores are unbounded
+and are not covered by the bounded-loss concentration theorem. Existing inspected
+evaluation years remain development evidence.
+
+`StatisticalFinancial.failure_probability` composes the moment/panel event with
+`EndToEnd.measurement_to_finance`, rather than assuming its financial conclusion.
+`failure_probability_with_learning` uses moments under **unnormalized**
+`μ.restrict good` and adds the probability of the complement once. Fixed finite
+input marginals and `Transfer.source_target_recovery` supply the moments in
+`finite_transfer_failure_probability`. Interfirm independence is unnecessary;
+fixed predictors/decoders, sampling marginals, spatial controls and the local
+score condition remain explicit. These are outer-measure statements unless the
+events are measurable. `EndToEnd.full_score_of_certificate` separately connects
+residual covariance error to full forecasts with a shared conventional factor
+component and a floor on the full forecast.
+
+## 9. Comparative statics and deeper finite interfaces
+
+| Compiled declarations | Contract and interpretation |
+| --- | --- |
+| `Bandwidth.hasDerivAt_expRow`, `hasDerivAt_meanDistance`, `hasDerivAt_entropy`, `herfindahl_antitoneOn`, `effectiveNeighbors_monotoneOn` | At fixed distances and positive bandwidth, mean distance and entropy rise, Herfindahl concentration falls, and effective neighbor count rises. Equal-distance/tied rows are permitted; these weak monotonicity theorems do not establish a unique matching bandwidth. |
+| `Bandwidth.constant_distance_effectiveNeighbors`, `expRow_tendsto_atTop`, `expRow_tendsto_zero`, `matched_effective_not_concentration` | Constant-distance rows are uniform; infinite bandwidth tends to uniform weights and vanishing positive bandwidth tends to uniform weights over all nearest ties. The two explicit Herfindahl profiles `(1/2,1/2)` and `(3/4,3/8)` have equal mean effective-neighbor counts but different mean concentration. |
+| `ReversibleNetwork.detailed_balance`, `weighted_resolvent_bound`, `normalize_resolvent_l2_bound`, `exponential_resolvent_l2_bound` | Symmetric nonnegative kernels have degree-stationary normalized rows. Positive degrees and `|λ|<1` give weighted contraction/invertibility and the Euclidean certificate `√(smax/smin)/(1−|λ|)`. Bounded symmetric exponential distances specialize it to `exp(Dmax/(2h))/(1−|λ|)`. |
+| `ComparativeStatics.swap_covariance_common`, `swap_covariance_spread`, `swap_covariance_not_ge_identity` | Two-firm exchange network: common and spread eigenvalues are `(1−λ)⁻²` and `(1+λ)⁻²`; covariance is not generally increasing in Loewner order. |
+| `Decision.garbling_risk`, `approximate_sufficiency` | Finite states, signals and actions: garbling cannot improve optimal risk. A reverse simulator with prior-weighted TV error at most `ε` preserves optimal risk within `ε` for losses in `[0,1]`. TV is half L1; unrestricted quadratic or Gaussian losses are outside this result. |
+| `Dynamics.gramian_succ`, `gramian_mono`, `observation_gram`, `observable_decoder`, `two_horizons` | Known noiseless finite linear dynamics append PSD observability information; a positive stacked-map margin reuses `Recovery.exists_decoder`. A coordinate-swap example reveals an initially hidden direction. Process noise, unknown maps and causal interpretation remain separate obligations. |
+| `GeneratedTarget.normal_equation_error`, `factor_gram_error`, `cross_moment_error`, `generated_readout_error`, `exposure_gram_error` | Deterministic generated-target errors split factor Gram and cross-moment perturbations, inverse conditioning, readout error and target uncertainty. No covariance sampling rate or structural common-component identification is inferred. |
+| `ReadoutStability.objective_minimizer_unique`, `operator_objective_gap`, `operator_objective_minimizer_unique`, `vector_prediction_replacement_le` | The scalar and Hilbert-valued normal-equation ridge solutions uniquely minimize their regularized quadratic objectives; the vector-target prediction bound has no output dimension factor. With bounded fixed features/targets, `N≥1` support observations and regularization `μ>0`, one replaced observation changes coefficients by at most `2RY(1+R²/μ)/(Nμ)`, and bounded-feature predictions by at most an additional factor `R`. Context-induced feature changes, scaling, clipping and regularization selection require extra terms. |
+| `Geometry.nonlinear_codes_sufficient`, `nonlinear_codes_distort` | The finite recoding `x↦x²` retains states `0,1,2` but sends two equal adjacent intervals to lengths `1` and `3`. Conditional/invertible recovery alone does not identify Euclidean geometry. |
+
+## 10. The compiled composition
+
+`EndToEnd.covariance_from_scaled` accepts a scaled-distance certificate from
+either `exposure_scaled` or `gram_scaled`. For `s(b)=2(exp b−1)/(exp b+1)` it
+uses the explicit error budget
+
+```text
+EΣ = 2 V M³ (|λ| √N s(b) + ελ BW) + M² εD + ρspatial.
+```
+
+`EndToEnd.measurement_to_finance` proves the uniform exposure-error route with
+`b=2e/h`: total spectral covariance error is at most `EΣ`, and a forecast
+eigenvalue floor `m>EΣ` gives score regret at most
+`N(EΣ/m)²/[2(1−EΣ/m)]`. `EndToEnd.tasks_to_finance` supplies the exposure
+certificate using task prediction, economic mismatch and fitted-readout error.
+`EndToEnd.empirical_rms_scaled` retains the extra `√N` factor when the input is
+an actual-panel empirical RMS bound. The alternative Gram route does not need
+a task decoder.
+
+The financial hypotheses explicitly include nonsingular spatial operators,
+bounded resolvents, innovation and coefficient error certificates,
+positive-definite forecast and target, and spatial-model approximation. The
+statistical modules supply conditional learning and sampling events separately;
+their bounds do not certify an arbitrary fixed financial cohort automatically.
+`Stability.matrix_portfolio_regret` consumes the same total covariance error.
+
+Principal blueprint traceability (all names have prefix `FreeFoundations.`;
+each source is under `src/lean/FreeFoundations/`):
+
+| TeX label | Exact conditional statement | Lean declaration | File | Key conditions | Status |
+| --- | --- | --- | --- | --- | --- |
+| `thm:gram-distance` | Entrywise Gram error gives distance error `2√εG` | `GramDistance.distance_error` | `GramDistance.lean` | Both Gram matrices PSD; `εG≥0` | Proved, compiled, integrated |
+| `thm:task-information` | Information floor supplies recovery margin | `TaskInformation.distinguishes_of_loewner_floor` | `TaskInformation.lean` | Finite Euclidean spaces; nonnegative precisions and margin | Proved, compiled, integrated |
+| `thm:transfer-recovery` | Source error, target drift and mismatch bound target exposure RMS | `Transfer.measure_source_target_recovery` | `Transfer.lean` | Measure domination, positive decoder margin, measurability | Proved, compiled, integrated |
+| `thm:finite-block-concentration` | Uniform finite-family tail plus total coupling mismatch | `Selection.coupled_finite_family` | `Selection.lean` | Fixed bounded losses, independent copy, matching marginals | Proved, compiled, integrated |
+| `thm:random-panel` | Individual second moments give a random-panel maximum event | `Selection.random_panel` | `Selection.lean` | Integrable squared errors, moment contract, `α>0` | Proved, compiled, integrated |
+| `thm:score-local-stability` | Spectral covariance error gives local quadratic score regret | `ScoreStability.loss_gap_le_of_norm_sub` | `ScoreStability.lean` | Positive definiteness, eigenvalue floor `m>e` | Proved, compiled, integrated |
+| `thm:end-to-end-tasks` | Task/readout certificates imply covariance and score bounds | `EndToEnd.tasks_to_finance` | `EndToEnd.lean` | Finite uniform panel certificate and all financial conditions above | Proved, compiled, integrated |
+
+Every row above is proved and compiled. The ledger records conditional statements,
+not verification of their economic premises for a checkpoint or financial panel.
+
+Principal manuscript labels use the same compiled declarations:
+
+| Manuscript label | Declaration | Additional review condition |
+| --- | --- | --- |
+| `prop:measurement-stability` | `EndToEnd.measurement_to_finance`, `tasks_to_finance` | Uniform finite-panel error, matrix floors, resolvent bounds, and model approximation |
+| `prop:stability` | `EndToEnd.covariance_from_scaled` | Scaled distances and explicit bandwidth certificate |
+| `eq:task-recovery` | `Transfer.fitted_readout_error` | Same task-statistic space and nonnegative fitted-map error |
+| `eq:block-concentration` | `Selection.finite_family` | Predetermined candidates, nonempty blocks, bounded loss, nonnegative threshold |
+| `thm:statistical-finance` (blueprint) | `StatisticalFinancial.finite_transfer_failure_probability` | Fixed predictor/decoder, declared finite input marginals, structural controls and local domain |
+
+## 11. Finite probability compatibility and stochastic order
+
+All four modules use namespace `FreeFoundations.FiniteProbability`. Their
+`FinDist` is an alias for the actual pinned
+`MathEconLib.Probability.FinDist`; elementary laws, expectations, mixtures,
+conditioning and measures use upstream imports and thin API adapters. The project
+adds RMS, overlap, decision, stochastic-order and financial-transfer bridges.
+There is no locally copied finite-law implementation or separate license copy.
+The direct dependency retains its upstream license. Raw weighted and
+restricted-measure APIs remain intact.
+
+| Blueprint/manuscript label | Compiled interface | Assumptions and meaning |
+| --- | --- | --- |
+| `thm:finite-measure-bridge`, `app:finite-probability` | `integral_eq_expect`, `rms_sq_eq_integral`, `eLpNorm_eq_ofReal_rms` | Finite simplex law, measurable singletons; complete normed real target for vector integration |
+| `thm:finite-mixtures` | `expect_finMixture`, `expect_conditionalOn`, `domination_iff` | Normalized mixture probabilities; positive conditioning mass; nonnegative overlap factor |
+| `thm:finite-typed-simulation` | `approximate_decoder`, `approximate_sufficiency`, `approximate_decoder_uniform` | Probability prior; finite signals/actions; bounded loss in `[0,L]`, including `L=0`; half-L1 TV |
+| `thm:finite-typed-simulation` | `marginalRisk_eq_mixture`, `source_target_recovery`, `transfer_failure_probability` | Exact finite marginal/pushforward laws; existing alignment, overlap, sampling and financial controls |
+| `thm:bandwidth-stochastic-order`, `app:comparatives` | `Bandwidth.likelihoodRatio_cross_le`, `monotone_cost_expectation`, `upperTail_monotoneOn`, `closedUpperTail_monotoneOn`, `cdf_antitoneOn` | Fixed nonempty support and real costs, positive ordered bandwidths; cost ties retained |
+| `thm:bandwidth-stochastic-order` | `exponentialLaw_expect_monotone` | Typed finite law wrapper around the existing exponential row |
+
+Each row is proved, compiled and integrated. Task precisions are not normalized
+probabilities without a retained precision budget. Finite candidate families do
+not make observations finite. A reverse decoder alone supplies only the upper
+risk gap; a forward garbling is needed for its nonnegative lower bound.
+
+The bandwidth theorem orders every increasing observable and threshold tail of
+the fixed cost distribution. It does not order portfolio loss, and it excludes
+the totalized expression at bandwidth zero. Fixed-feature and economic
+identification qualifications from the preceding sections continue to apply.
+
+## 12. State classes, proxy error and the composed bound
+
+The following modules make the economic target and the limits of its recovery explicit.
+They do not establish the assumptions for the empirical PCA/OLS exposure labels or any
+pretrained checkpoint.
+
+| Module | Results and assumptions |
+| --- | --- |
+| `RiskState` | For a declared linear risk-scaling map `L` and structural exposure map `b`, distance is `‖L(b(s)) − L(b(t))‖`. Zero distance identifies a kernel class, and identifies the entire state only when `L ∘ b` is injective. Risk classes embed injectively into the exposure space. Equal common exposures still leave idiosyncratic variances unspecified. |
+| `Proxy` | Triangle, squared-error, finite-panel and L² bounds separate prediction of a historical proxy from proxy-to-latent error. Under an explicit zero integrated inner product between prediction residual and proxy noise, proxy risk equals latent risk plus noise energy. Predictor rankings agree only when this premise holds for both predictors with common noise. |
+| `Recovery` | `excess_risk_condExp_vector` is canonical and `excess_risk_condExp_hilbert` is its compatibility alias. Hilbert-valued conditional-expectation identities split fitted risk into uncertainty after history, information lost by the representation, and readout error. Nested measurable information sets give an exact Bayes-risk ordering, not an ordering of fitted ridge regressions. |
+| `Identifiability` | Under a common observation coupling, one of two expected state-estimation risks is at least one quarter of the expected squared separation between targets. Square integrability is explicit. Reparameterization is an impossibility application only when both worlds remain admissible; invariant economic targets can remain recoverable. |
+| `Pipeline` | Uniform exposure error propagates to the spatial covariance spectral norm through the exponential network. Named row-sum and spectral norms make the `√N` norm conversion explicit. Bandwidth, spatial coefficient and positive diagonal innovation covariance are common; both inverse spectral norms must be bounded. |
+
+`Pipeline.exposure_covariance_error` proves, for `N ≥ 2`, `h > 0`, and uniform
+exposure error at most `r`,
+
+```text
+‖Σ̂ − Σ*‖₂ ≤ 2‖D‖₂ |λ| M³ √N min(2, exp(4r/h) − 1).
+```
+
+`proxy_covariance_error` substitutes the sum of uniform prediction-to-proxy and
+proxy-to-latent errors. `covariance_error_of_sum_sq` uses the realized panel's
+summed squared exposure errors. Its conversion from a panel mean squared error
+is `r = √(N × MSE)`; a population mean risk is not a simultaneous panel bound.
+This fixed-construction theorem neither controls fitted-parameter changes nor establishes
+a score improvement. Its definitions reuse the canonical `MatrixBounds` norms and
+`EndToEnd` spatial map; the stronger joint-parameter certificate in Section 10
+remains available. `Σ*` here is the spatial model built from ideal exposures,
+not an independently identified true covariance.
+
+Boundary examples check singular scaling, distinct total variances under equal common
+exposures, perfect proxy prediction with latent error, the sharp quarter-risk constant,
+and zero exposure error or zero spatial coefficient.
+
+## 13. Verification tooling
+
+| Command | Enforced check |
+| --- | --- |
+| `just lean::build` | Core library, `FreeFoundationsApi`, and compiled contract coverage |
+| `just lean::proof-audit` | Fresh source discovery/build and declaration/example integrity |
+| `just lean::axiom-audit` | Fast compiled module-origin axiom summary; does not replace source auditing |
+| `just lean::proof-audit-test` | Positive and negative integrity/API fixtures using stdlib unittest |
+
+The audit writes `.lake/build/proof-integrity.json`.
+It records the revision and dirty state, toolchain, manifest and actual dependency
+revisions, source/checker hashes, exclusions, coverage, and each declaration's
+axioms. Files changed, added or removed during a run invalidate the report.
+The two explicitly trusted implementation files are `FreeFoundationsApi/Check.lean`
+and `tools/CheckProofIntegrity.lean`; both are compiled. The expected contracts
+and ordinary audit file are fully audited. Production imports of excluded
+negative fixtures are rejected.
+
+The test suite checks orphan sources, private and opaque placeholders, repeated
+anonymous examples, disabled warnings, interpolated proof terms, imported axioms,
+native reflection and syntax quotations, source drift, and exact exclusions.
+Contract tests reject changed hypotheses, constants, norms, universes and binder
+visibility while accepting harmless renaming and definitional aliases. Changes
+to these tools rerun the regression hook; Lean changes rerun the integrity hook.
+
+## Blueprint
+
+[`blueprint/src/content.tex`](blueprint/src/content.tex) restates the principal public
+contracts in ordinary notation, in the [leanblueprint](https://github.com/PatrickMassot/leanblueprint)
+format: each statement carries `\lean{...}` with the declaration it is checked against,
+`\leanok` once the proof has no `sorry`, and `\uses{...}` for the results it builds on.
+The [manuscript](../latex/projects/free-foundations/src/appendix.tex) maintains a curated mathematical appendix
+and its own `\lean{...}` tags. Both sources are checked against the same compiled
+library; the manuscript does not include the full blueprint source.
+
+| Command | Output |
+| --- | --- |
+| `just lean::blueprint-web` | HTML blueprint with the dependency graph in `blueprint/web/` (open `dep_graph_document.html`) |
+| `just lean::blueprint-pdf` | Printable blueprint in `blueprint/print/print.pdf` |
+| `just lean::blueprint-check` | Fails if any `\lean{...}` name in the blueprint or the manuscript is not a compiled declaration |
+| `just lean::blueprint-serve` | Serves `blueprint/web/` on port 8000 |
+
+The Lean project is `src/lean`, not the repository root, so these recipes run the
+`leanblueprint` CLI's steps (`plastex`, `lake exe checkdecls`) directly. They need the
+devenv shell, which provides graphviz for the graph.
+
+Run `just lean::build` from the repository root. A fresh checkout first needs the prebuilt
 Mathlib files: `cd src/lean && lake exe cache get` (about 6–7 GB).
+
+## Current verification outcome (29 October 2026)
+
+- Lean 4.35 builds the combined library and all 303 frozen type contracts.
+- The source integrity audit processed all 43 production sources: 41 audited
+  files and two explicitly trusted checker implementations. Its 867 elaborated
+  declarations include 102 private declarations and five anonymous examples;
+  source hashes remained unchanged throughout the audit, with no issues.
+- The complementary compiled audit checks 887 declarations, including 764
+  theorem declarations and 127 private declarations. Their only axiom
+  dependencies are `propext`, `Classical.choice`, and `Quot.sound`.
+- All 27 integrity and API regression tests pass, including the Lean 4.35 module
+  privacy fixtures. All 301 blueprint declarations and the manuscript's
+  declaration references resolve, and the web blueprint renders.
+- Offline Nix evaluation resolves the pinned Lean 4.35 binary used for these
+  builds. Saved-artifact publication rendering validates 138 score rows and
+  701,091 firm-days; the publication lock is refreshed without empirical reruns.
+
+Source and compiled declaration counts differ because the checks observe
+different elaboration and import environments; neither is a count of distinct
+mathematical results. The source report is `.lake/build/proof-integrity.json`.
+
+## Historical verification outcome (24 October 2026)
+
+These results describe the earlier Lean 4.31 revision, before the combined
+library and corrected migration. They are retained as a historical record and do
+not substitute for current-toolchain verification.
+
+- `just lean::build`: passed with the then-pinned dependencies (3169 build jobs),
+  including all 241 manuscript/blueprint type contracts and compiled coverage.
+- `just lean::proof-audit`: 38 production sources freshly compiled, including 36
+  strictly audited files and two explicitly trusted checker implementations;
+  785 declarations, including 12 private declarations, use no unsupported axioms.
+  The 18 exact fixture exclusions are separately tested.
+- `just lean::proof-audit-test`: all 26 integrity and API regression tests passed.
+- `just lean::blueprint-check`, manuscript format/lint and `just latex::paper`: passed.
+  The 41-page PDF has no unresolved references or overflowing equations/tables;
+  the finite-law, bandwidth, decision, traceability and bibliography pages were inspected.
+- Main text: 3897 words including headings/captions and excluding title/abstract;
+  abstract: 199 words, under the documented TeXcount convention.
+- Repository language, Python test/type/boundary/dead-code, DVC and semflow checks
+  passed. The complete gate still reports two existing SEC URLs returning HTTP 403.
+  The unchanged baseline `src/python/uv.lock` also fails Tombi's read-only
+  formatting check; the broad gate skips that formatter to preserve the lockfile.
+  Neither issue changes the Lean or manuscript build result.
+
+The corrected migration changes dependency pins and the explicit RMS
+measurability contract. It uses saved research artifacts without rerunning
+empirical estimation or changing numerical results. Current validation must use
+the pinned 4.35 toolchain and direct dependency rather than the historical counts
+above.

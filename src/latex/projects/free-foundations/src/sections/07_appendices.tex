@@ -1,0 +1,370 @@
+\section{Technical Proofs and Formalization}
+\label{app:proofs}
+
+\paragraph{Economic distance and task recovery.}
+For loadings $b_i,b_j$ on centered common shocks $q$ with finite second
+moments, the root mean square of $(b_i-b_j)^\top q$ measures the difference
+in return responses in units of return. Writing $\Omega$ for the shock
+covariance and $a_i=\Omega^{1/2}b_i$ gives the distance $\norm{a_i-a_j}$.
+\lean{FreeFoundations.Score.response_sq}
+Perfect marginal forecasts can be consistent with different joint responses:
+two fair binary returns can agree in one regime and move oppositely in
+another while each retains the same marginal distribution.
+\lean{FreeFoundations.Alignment.marginals_free_of_state}
+\lean{FreeFoundations.Alignment.joint_depends_on_state}
+
+Suppose ideal task predictions satisfy $\tau=Ca+v$, where $a$ is a
+risk-scaled exposure and $v$ the mismatch. For a finite-dimensional
+exposure space, a linear map satisfying $\norm{Cu}\geq\kappa\norm u$
+in all directions with $\kappa>0$ admits a linear decoder $L$ with
+\[
+  \norm{L\widehat\tau-a}\leq
+  (\norm{\widehat\tau-\tau}+\norm v)/\kappa .
+\]
+Thus the bound tightens as the tasks distinguish exposure directions more
+sharply. For finite labels and contexts with positive predicted
+probabilities, excess log loss measures average divergence from the task's
+conditional label law.
+\lean{FreeFoundations.Recovery.exists_decoder}
+\lean{FreeFoundations.Recovery.exposure_error_mismatch}
+\lean{FreeFoundations.Score.pretraining_excess}
+
+\paragraph{Recoverability and the transformation class.}
+If $s=r\circ z$, histories in the same fibre of $z$ share the same
+target. Conversely, define $r$ on $z(H)$ by the unique target of each
+fibre and use any value in $S$ outside the image. In the chord example
+the four vectors have coordinates $(x,y)$ with $y=1,0,4,5$ respectively.
+The stretch takes $x=1$ to $x=4$. For heights $y,z$ the squared cosine is
+\[
+  c^2=\frac{(x^2+yz)^2}{(x^2+y^2)(x^2+z^2)}.
+\]
+All dot products are positive, so the unit-vector chord is
+$\sqrt{2-2\sqrt{c^2}}$. For $AB$ the squared cosine rises from $1/2$
+to $16/17$, while for $AC$ it stays at $25/34$. This reverses the
+first firm's choice even on the three-firm roster. With the fourth
+firm present, $C$ and $D$ select one another before and after the stretch.
+\lean{FreeFoundations.Neighbours.chord_neighbour_flip}
+Composing the raw-state readout with the inverse stretch preserves
+predictions. For a
+restricted readout class $\mathcal R$, a bijection $g$ preserves
+the class when $\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$. A
+restricted class preserved under both $g$ and $g^{-1}$ has the same
+attainable functions after the recoding. Equality of the transformed
+class gives closure under composition and inversion. The fibre
+argument is pointwise. A measurable or approximate recovery claim
+requires additional assumptions on the spaces and readout class.
+
+Although recoding can change peers, an estimated exposure can
+preserve the selected peers when the gap at the neighbourhood
+boundary is sufficiently wide. Suppose $a_i$ is a true exposure,
+$\widehat a_i$ its estimate, and
+$\norm{\widehat a_j-a_j}\leq\delta_j\leq\delta_{\max}$ for every
+issuer. Each distance in row $i$ can move by at most
+$\delta_i+\delta_{\max}$. Therefore an estimated strict gap between
+selected and unselected neighbours exceeding
+$2(\delta_i+\delta_{\max})$ preserves that set. For the study's
+ten-neighbour rule the relevant gap is between the tenth
+and eleventh distances. The certificate applies to estimated exposure
+distances when the exposure-error bounds are available.
+
+\paragraph{Statistical alignment and transfer.}
+Under squared loss the economic conditional mean must be a measurable
+function of the task conditional mean almost surely for every representation
+attaining the latter to attain the former.
+\lean{FreeFoundations.Sufficiency.sufficient_iff}
+Transporting a source-law task error to issuers requires further premises.
+If the issuer law is bounded by $\omega$ times the source law, source
+root-mean-square error enters the recovery bound multiplied by
+$\sqrt{\omega}$. Changes in conditional task means and task--exposure
+mismatch enter separately, all divided by the positive separation margin.
+\lean{FreeFoundations.Transfer.source_target_recovery}
+
+\paragraph{Multiplier and covariance.}
+\begin{proposition}[Spatial stability]
+  \label{prop:multiplier}
+  Let $K=K^\top\geq 0$ entrywise, with positive degrees $d_i=\sum_j
+  K_{ij}$, and set $W=D^{-1}K$ for $D=\operatorname{diag}(d_i)$. For
+  $|\rho|<1$, the inverse $P=(I-\rho W)^{-1}$ exists and
+  \[
+    \norm{P}_2\leq \frac{\sqrt{d_{\max}/d_{\min}}}{1-|\rho|}.
+  \]
+  On the same roster, let $\widehat W$ have multiplier $\widehat P$
+  at the same $\rho$. If both inverse norms are at most $M$ and the
+  common innovation covariance has $\norm V_2\leq v$, then
+  \[
+    \norm{\widehat P V\widehat P^\top-PVP^\top}_2
+    \leq 2v|\rho|M^3\norm{\widehat W-W}_2 .
+  \]
+\end{proposition}
+Symmetry makes $d$ stationary for $W$. Jensen's inequality gives
+$\norm{Wx}_D\leq\norm{x}_D$, where $\norm{x}_D^2=x^\top Dx$. Hence
+$\norm{(I-\rho W)x}_D\geq(1-|\rho|)\norm{x}_D$.
+In finite dimension this implies invertibility, and comparing the
+weighted and Euclidean norms gives
+Proposition~\ref{prop:multiplier}'s first inequality. A symmetric
+affinity with isolates gives a block diagonal operator with a zero
+block on the isolates, whose multiplier is identity. The bound
+applies on the positive-degree block.
+
+The inverse identity gives $\widehat P-P=\rho \widehat P(\widehat
+W-W)P$. Expanding the covariance difference as
+$(\widehat P-P)V\widehat P^\top+PV(\widehat P-P)^\top$
+and using submultiplicativity gives the second inequality. A fixed
+portfolio with weights $w$ multiplies the covariance error bound by
+$\norm{w}_2^2$. The displayed bound holds with common $\rho$ and $V$.
+Changes to those quantities contribute additional terms.
+
+\paragraph{Formalized components.}
+The fibre criterion and coding invariance have Lean formalizations.
+\lean{FreeFoundations.Alignment.state_optimal_iff}
+\lean{FreeFoundations.Geometry.sufficient_equiv}
+Lean also checks the neighbour certificate, multiplier bound, and
+covariance bound.
+\lean{FreeFoundations.Neighbours.neighbourSet_of_estimated_margin}
+\lean{FreeFoundations.ReversibleNetwork.normalize_resolvent_l2_bound}
+\lean{FreeFoundations.Stability.matrix_covariance_sub_le}
+The restricted class group argument and isolate decomposition are
+elementary written arguments.
+
+\section{Data Construction and Estimation Details}
+\label{app:data}
+
+We weight selected classes by their prior calendar-month
+capitalization. CRSP CIZ monthly total returns already incorporate
+reported delisting returns. We compound the three observed months of
+a quarter once, keeping incomplete quarters unavailable. When a
+return row is missing, the absence of a separate terminal-event
+flag leaves the cause of exit and its proceeds unknown. The return estimates
+therefore describe the observed quarters of the formation cohort.
+Formation membership is fixed at the December ranking cutoff. An
+issuer retains its formation identity when a selected security's
+subsequent source issuer changes. Missing returns and missing
+prior-month capitalization are explicit. SEC information uses filing
+timestamps before the preceding CRSP close. Negative book equity
+where the ratio calls for a positive denominator, stale balance
+sheets, and undefined paired history correlations each have separate
+availability rules.
+
+The characteristic reimplementation estimates OLS, spatial lag by
+instrumental variables and maximum likelihood, and spatial error by
+maximum likelihood. Fit states distinguish available estimates from
+invalid or boundary fits. For the primary formation, the stationary
+quarter bootstrap resamples common date blocks, recomputes betas and
+medians, and refits models while the formation graph stays fixed
+before filtering unavailable issuers and renormalizing its rows. A
+bootstrap distribution for a constrained refit can still be computed
+when the corresponding original fit is unavailable. In that case the
+percentiles describe the constrained refits, while the
+original-sample estimate retains its recorded fit status.
+
+\paragraph{Frozen model readouts.}
+For TabPFN 3.5 we take the native query embedding of a single regression
+ensemble member. For TabFM 1.1 we extract query rows after the in-context
+predictor's final layer normalization \citep{kong2026tabfm}. For
+Kumo-Tabular we take the input to the in-context prediction head, and
+for LimiX-2 the input to the regression decoder
+\citep{nvidia2026kumo,zhang2026limix}. When financial inputs span several
+column blocks, we concatenate the issuer's vectors in block order before
+computing chord distances.
+
+\paragraph{Coverage of characteristic histories.}
+A neutral distance enters a characteristic comparison when fewer than two
+annual observations overlap or the paired ranks have undefined correlation.
+Coverage varies across characteristics and over the panel
+(Table~\ref{tab:neutral}). For ten-neighbour selection we break distance
+ties in the ordered issuer roster before joining the two directed choices.
+
+\begin{table}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-neutral.tex}{\input{generated/tables/matched-neutral}}{\ffmissing}
+  \caption{Share of issuer pairs assigned neutral distance (\%) in each
+    characteristic. The pooled share counts unordered pairs within quarter
+  across the matched panel.}
+  \label{tab:neutral}
+\end{table}
+
+\section{Scope of the Empirical Evidence}
+\label{app:scope}
+
+Across issuers in the fixed cohort, we relate median excess returns to a
+characteristic-weighted average of peer returns. On the repeated-formation
+panel, we compare the likelihood of the observed quarterly returns under
+different peer weights. The January 2016 geometry analysis then returns to
+the formation roster to examine which financial characteristics organize
+firms within the ratio-based embedding.
+
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/quarterly-likelihood.tex}{%
+    \input{generated/tables/quarterly-likelihood}%
+  }{\ffmissing}
+  \caption{In-sample lag log-likelihood differences per quarter.
+    All graphs use ten-neighbour weights. Ratios denote Fernández
+    histories and XBRL denotes CompanyFacts inputs. Positive values
+    favour the network in the first column.
+    Percentiles resample paired quarterly contributions conditional on
+  fitted parameters. The last column adjusts for multiple comparisons.}
+  \label{tab:quarterly-comparisons}
+\end{table*}
+
+\begin{table}[t]
+  \centering
+  \fftabletype
+  \begin{tabular}{lcc}
+    \toprule
+    Intercept & $\widehat\rho$ & Refit percentiles \\
+    \midrule
+    Excluded & \ffnum{quarterly-fernandez-joint-rho} &
+    $[\ffnum{quarterly-fernandez-joint-rho-bootstrap-low},\
+    \ffnum{quarterly-fernandez-joint-rho-bootstrap-high}]$
+    \\
+    Included & Invalid or boundary & --- \\
+    \bottomrule
+  \end{tabular}
+  \caption{Joint characteristic kernel lag fit for the December 2015
+    US formation.
+    Percentiles are the central 95\% of
+    \ffnum[0]{quarterly-fernandez-joint-rho-bootstrap-draws}
+    stationary-quarter refits. They describe refit variation
+    conditional on the formation graph and the observed-quarter design.
+  Each draw uses the issuers with sufficient observed returns for that refit.}
+  \label{tab:us-benchmark}
+\end{table}
+\paragraph{Does the encoder add to its inputs?}
+The earlier quarterly comparison in Table~\ref{tab:quarterly-comparisons}
+reports differences per quarter. Tables~\ref{tab:matched-factors}
+and~\ref{tab:matched-encoders} report differences per issuer-quarter on
+the common factor sample. With symmetrized ten-neighbour weights, the
+ratio-based TabPFN graph gains
+4.98 log-likelihood units per quarter over the joint characteristic graph,
+while selecting peers directly from the same financial inputs gains 5.91.
+The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
+with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
+against the joint graph has a Holm-adjusted $p$-value of 0.135
+(Table~\ref{tab:quarterly-comparisons}).
+
+\paragraph{The characteristic benchmark.}
+The joint characteristic kernel has
+\ffnum[1]{quarterly-fernandez-joint-effective-neighbours} effective
+neighbours per row on average, compared with $n-1$ for a fitted roster of
+$n$ issuers under uniform
+off-diagonal weights. When most issuers receive similar weights,
+firms share much of the same peer return. These averages carry little
+cross-sectional variation relative to a more concentrated graph. On
+the \ffnum[0]{quarterly-primary-issuers} fitted issuers, the
+joint-kernel lag maximum-likelihood estimate without an intercept is
+$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$.
+Table~\ref{tab:us-benchmark} records the contrast and its
+uncertainty. With an intercept, the joint-kernel fit is flagged as
+invalid or on the boundary. The no-intercept estimate is consistent
+with the spatial term absorbing much of the common mean in this US sample.
+
+The point fit and a separate profile-likelihood calculation agree on
+the saved original-sample betas, issuer medians and reconstructed
+graph. The percentile endpoints recompute betas and medians in common
+time blocks and restrict the graph when firms drop out of a refit.
+They quantify a different source of variation from the standard error
+conditional on the generated beta. These diagnostics
+characterize the US reimplementation, where the original sample is unavailable.
+
+\paragraph{Historical ratio-only geometry.}
+To identify which financial histories organize the learned peers, we
+form principal coordinates from chord distances of the January
+2016 TabPFN states using only the four ratio histories. Because the
+embedding uses information available at formation, the analysis
+includes all \ffnum[0]{quarterly-primary-roster} issuers on the
+analytical roster, including firms with incomplete subsequent
+returns. For each ratio we use the latest
+available annual slot and restrict the comparison to its observed
+issuers. The leading coordinate has stronger absolute rank correlation with
+market capitalization over assets and market-to-book than with
+dividend yield or debt maturity. The same ordering holds for explained
+rank variation after regression on the leading three coordinates and
+an intercept. This subspace comparison is invariant to sign changes and
+orthogonal rotations.
+
+The valuation ratios are part of the encoder inputs. Their alignment
+describes how the model organizes its own inputs on this date.
+The historical ratio embedding puts about 45\% of positive inertia
+in its leading coordinate. For the market-beta comparison we restrict
+these same coordinates to issuers with an available return-based beta
+estimate and regress beta ranks on the three coordinates and an intercept.
+On this formation date the learned geometry is closely associated
+with a valuation measure supplied to the encoder, while its alignment
+with independently estimated market exposure is weak.
+
+\section{Selected broad-input geometry}
+\label{app:ablation}
+
+For the broad-input model selected by its market-controlled gain, we rebuild
+the peer graph using the first one or three principal coordinates at each
+formation. We also omit each engineered ratio history in turn from both
+the historical examples and the issuers being encoded. The underlying broad
+filing fields remain available, so the omission measures the incremental
+role of the supplied ratio history. Each comparison uses the same return
+observations and the full broad-input graph as its reference.
+
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-ablation.tex}{\input{generated/tables/matched-ablation}}{\ffmissing}
+  \caption{Broad-input TabPFN peer graphs after projection or omission.
+    Overlap averages issuer-level Jaccard similarities within each quarter
+    and then across quarters. Fit differences are nats per issuer-quarter
+  relative to the full graph, with paired conditional 95\% intervals.}
+  \label{tab:ablation}
+\end{table*}
+
+Using three coordinates improves on the first-coordinate projection, although
+both projected graphs fit less well than the full graph
+(Table~\ref{tab:ablation}). Among the four omissions, removing the
+market-equity-to-assets history
+changes the peer sets most, even with the broad filing fields and historical
+context labels still available. The estimated changes in fit are small,
+with all four omission intervals spanning zero.
+
+\section{Matched factor specifications}
+
+\paragraph{Broad-input encoder versus direct features.}
+Table~\ref{tab:matched-broad-factors} compares TabPFN with the direct graph
+built from the same broad financial disclosures. Both graphs use the common
+issuer-quarter mask and symmetrized ten-neighbour weights. The historical
+contexts and extracted representations remain fixed. Each factor
+specification refits the spatial-lag model; paired stationary-quarter
+intervals condition on its fitted loadings and parameters. These additional
+factor comparisons do not change the market-controlled encoder selection.
+
+\begin{table}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-broad-factors.tex}{\input{generated/tables/matched-broad-factors}}{\ffmissing}
+  \caption{Broad-input TabPFN minus the direct-feature graph in spatial-lag
+    log likelihood, in nats per issuer-quarter. Positive gains favour
+    TabPFN. All three controls use identical issuer-quarters and peer
+    graphs, with paired conditional 95\% intervals. Dashes denote
+  unavailable fits.}
+  \label{tab:matched-broad-factors}
+\end{table}
+
+The following tables report the factor-only, spatial-lag and spatial-error
+fits on the same issuer-quarters. Reading down each table shows how fit
+changes as factors enter separately, alongside the market, or jointly.
+Within a spatial specification, comparing the two peer graphs at the same
+factor controls isolates the choice of distance. The parameter counts and
+information criteria refer to the return fit conditional on the estimated
+issuer exposures.
+\newcommand{\ffFactorDetail}[2]{
+  \begin{table*}[p]
+    \centering
+    \fftabletype
+    \input{generated/tables/matched-detail-#1}
+    \caption{#2 on the common issuer-quarter mask. Information criteria
+    condition on estimated first-stage exposures.}
+\end{table*}}
+\IfFileExists{generated/tables/matched-detail-none.tex}{
+  \ffFactorDetail{none}{Factor-only models}
+  \ffFactorDetail{lag}{Spatial lag models}
+  \ffFactorDetail{error}{Spatial error models}
+}{\ffmissing}

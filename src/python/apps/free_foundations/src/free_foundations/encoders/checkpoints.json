@@ -1,0 +1,72 @@
+{
+  "kumo": {
+    "repository": "nvidia/Kumo-Tabular",
+    "revision": "c5893d418e162b9f841ae179dc767afefff73831",
+    "files": [
+      "large/regressor.pt"
+    ],
+    "sha256": {
+      "large/regressor.pt": "745e0e5d97e4256d8a24cb61c2eecbd1128da6c83938c196b7589ea6f62e7421"
+    },
+    "upstream": {
+      "large/regressor.pt": {
+        "etag": "745e0e5d97e4256d8a24cb61c2eecbd1128da6c83938c196b7589ea6f62e7421",
+        "size": 862909259
+      }
+    }
+  },
+  "limix": {
+    "repository": "stable-ai/LimiX-2",
+    "revision": "de07b679e74a41b50b9de18251a8fa245e537440",
+    "files": [
+      "LimiX-2.ckpt"
+    ],
+    "sha256": {
+      "LimiX-2.ckpt": "ed01f7a0a18d25451bc9d1058b479ba6b68048aa1ebde06156c8fcfaf8b8fe81"
+    },
+    "upstream": {
+      "LimiX-2.ckpt": {
+        "etag": "ed01f7a0a18d25451bc9d1058b479ba6b68048aa1ebde06156c8fcfaf8b8fe81",
+        "size": 1625774719
+      }
+    }
+  },
+  "tabpfn_full": {
+    "repository": "Prior-Labs/tabpfn_3_5",
+    "revision": "06bf2ba35c80a92a3b9abb436b99cf49e7a0365e",
+    "files": [
+      "tabpfn-v3.5-20260909.safetensors"
+    ],
+    "sha256": {
+      "tabpfn-v3.5-20260909.safetensors": "ece4d67eadfea42eb0e610df5189bea60cb7f31073d81e9c7a019b76eacf0be3"
+    },
+    "upstream": {
+      "tabpfn-v3.5-20260909.safetensors": {
+        "etag": "ece4d67eadfea42eb0e610df5189bea60cb7f31073d81e9c7a019b76eacf0be3",
+        "size": 876027932
+      }
+    }
+  },
+  "tabfm": {
+    "repository": "google/tabfm-1.1.0-pytorch",
+    "revision": "d7cfd3b8d184d7c8fed4210aeba9e1c967d45f2a",
+    "files": [
+      "regression/config.json",
+      "regression/model.safetensors"
+    ],
+    "sha256": {
+      "regression/config.json": "2e0dc47760bb1890629885bc2449550ca49168d88d12f615229757903efdb4c2",
+      "regression/model.safetensors": "6b75cf04d5ace29209dde0106c7969233fda9808983a145b3a742aaee0903d0e"
+    },
+    "upstream": {
+      "regression/config.json": {
+        "etag": "d0381b11fb161c11f8c22b5d92fff88df0857c54",
+        "size": 325
+      },
+      "regression/model.safetensors": {
+        "etag": "6b75cf04d5ace29209dde0106c7969233fda9808983a145b3a742aaee0903d0e",
+        "size": 824695714
+      }
+    }
+  }
+}

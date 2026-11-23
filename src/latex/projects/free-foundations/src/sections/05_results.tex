@@ -1,0 +1,111 @@
+\section{Results}
+
+\paragraph{When many firms share the same peer return.}
+In the December 2015 cohort, the joint exponential kernel gives each issuer
+an average of \ffnum[0]{quarterly-fernandez-joint-effective-neighbours}
+effective neighbours. Because so many issuers receive similar weights, their
+peer returns have little variation around the common mean. When the
+intercept is fixed at zero the estimated spatial coefficient is
+$\widehat{\rho}=\ffnum{quarterly-fernandez-joint-rho}$. Allowing an intercept
+produces an invalid or boundary fit (Table~\ref{tab:us-benchmark}). The
+large coefficient in the first fit is consistent with the peer return
+absorbing the mean. On the repeated-formation panel we can absorb the common
+level with quarter effects and compare more concentrated peer weights.
+
+\paragraph{Peer returns after factor adjustment.}
+Across \ffmatched{observations} issuer-quarters, both peer graphs
+improve on the factor-only
+model. As the controls expand from the market alone to FF5 plus momentum,
+the advantage of ratio-based TabPFN over Fern\'andez's joint graph narrows
+to \ffmatched{factor-gain} nats per issuer-quarter (paired 95\% interval
+\ffmatched{factor-interval}, Table~\ref{tab:matched-factors}). In both
+specifications each firm selects ten neighbours before symmetrization, so
+the comparison follows the same peer rule across factor adjustments.
+
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-factors.tex}{\input{generated/tables/matched-factors}}{\ffmissing}
+  \caption{Factor-only log likelihood and incremental spatial-lag fit.
+    The two gain columns compare each graph with the factor-only fit.
+    Gains are in nats per issuer-quarter, with paired 95\% stationary-quarter
+  intervals conditional on fitted loadings and parameters.}
+  \label{tab:matched-factors}
+\end{table*}
+
+\begin{table*}[t]
+  \centering
+  \fftabletype
+  \IfFileExists{generated/tables/matched-encoders.tex}{\input{generated/tables/matched-encoders}}{\ffmissing}
+  \caption{Market-controlled spatial-lag gain over the direct graph built
+    from the same inputs, in nats per issuer-quarter. Brackets give conditional
+  paired 95\% intervals. All graphs use symmetrized ten-neighbour weights.}
+  \label{tab:matched-encoders}
+\end{table*}
+
+\paragraph{How much does the weighting rule matter?}
+Under market controls, the advantage of the ratio-based encoder over the
+joint characteristic distance extends to exponential and median-bandwidth
+Gaussian weights (Figure~\ref{fig:matched-kernels}). The three rules give
+quite different meanings to a firm's peer return. With either smooth kernel,
+hundreds of issuers contribute appreciably to the average, whereas the
+ten-neighbour rule concentrates the same unit of weight on a small group.
+
+\begin{figure}[t]
+  \centering
+  \IfFileExists{generated/figures/matched-kernels.pdf}{\includegraphics[width=\columnwidth]{generated/figures/matched-kernels.pdf}}{\ffmissing}
+  \caption{Market-controlled lag likelihood gain for the encoder over the
+    joint characteristic distance, with conditional paired 95\% intervals.
+    Parentheses give mean effective neighbours for Fernández and TabPFN,
+  respectively.}
+  \label{fig:matched-kernels}
+\end{figure}
+
+\paragraph{What does encoding add to the same inputs?}
+Fern\'andez's distance compares the ranks of paired observations within
+each characteristic history. To see how much the encoder adds when firms
+can instead be compared directly on their financial features, we construct
+a direct graph for each of the three input sets and retain the market
+control throughout (Table~\ref{tab:matched-encoders}). For TabPFN, the
+estimated gain over its direct graph is slightly negative on the ratio
+histories and positive on their underlying financial quantities, with both
+intervals spanning zero. With the broader disclosures, all four encoders
+show positive point estimates against the direct graph, and TabPFN records
+the largest estimated improvement of the twelve combinations, at
+\ffmatched{broad-gain} nats per issuer-quarter over its own direct graph.
+
+Table~\ref{tab:matched-broad-factors} compares these broad-input TabPFN
+and direct graphs under market, FF5 and FF5 plus momentum controls on the
+same issuer-quarters. The financial inputs, representations and peer
+graphs are fixed across the three fits; the factor controls change.
+
+\paragraph{From valuation ranks to peer sets.}
+In the January 2016 ratio-only embedding, the first three coordinates
+explain \ffmatched{historical-value-r2}\% of market-equity-to-assets rank
+variation among \ffmatched{historical-value-n} issuers and
+\ffmatched{historical-beta-r2}\% of market-beta rank variation among
+\ffmatched{historical-beta-n} issuers with return-based estimates
+(Appendix~\ref{app:scope}). Valuation enters the inputs and supplies the
+historical context labels. Its prominence in these coordinates raises a
+further question for the broad-input model selected on return fit.
+How many of its financial peers can be
+recovered from its leading axis?
+
+In the broad-input representation, the leading coordinate accounts
+for \ffmatched{inertia}\% of positive inertia in the January 2016
+formation distances. Because this share exceeds the prespecified 25\%
+threshold, we examine which firms occupy nearby positions on this axis.
+It orders issuers strongly by market equity over
+assets (absolute rank correlation \ffmatched{valuation}), a ratio supplied
+to the model and used to label its historical examples.
+
+At each annual formation, we project the issuers onto the first coordinate
+and compare each firm's neighbours along that axis with its neighbours in
+the full representation. Averaged first across firms and then across
+quarters, the fraction of peers shared by the two sets relative to their
+union is \ffmatched{overlap} (Jaccard similarity). Under market controls,
+the change in log likelihood from restricting the graph to this axis is
+$\ffmatched{projected-gain}$ nats per issuer-quarter. Although the valuation
+gradient is clear in one dimension, firms close along that gradient often
+have different neighbours in the full representation, and those distinctions
+improve the spatial fit (Appendix~\ref{app:ablation}).

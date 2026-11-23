@@ -1,59 +1,83 @@
-# free-foundations
+---
+description: "Typed measurements of firm proximity from tabular foundation models."
+---
 
-A workspace for Python, Lean, TypeScript, and LaTeX.
+# Free Foundations
+
+The [paper](src/latex/projects/free-foundations/src/body.tex), *Pretrained Tabular
+Features and the Measurement of Financial Proximity*, studies economic measurement
+with frozen tabular representations. The manuscript has shared arXiv and FinFM
+targets. The mathematical framework is checked in Lean; the
+empirical study uses CRSP CIZ total returns and dated SEC CompanyFacts.
+
+Each December's top 1,000 CRSP common securities form issuer portfolios followed
+through the outcome window. The study reimplements Fernández's characteristic-history
+spatial CAPM in US data and examines the geometry of frozen tabular representations.
+The workshop candidate reports an audited characteristic fit and a dated
+descriptive TabPFN comparison.
 
 | Directory | Purpose |
 | --- | --- |
-| `src/python` | Python packages and experiments |
-| `src/lean` | Lean definitions and proofs |
-| `src/typescript` | TypeScript libraries and applications |
-| `src/latex` | Papers and mathematical writing |
+| `src/python` | The `free-foundations` study application in a uv workspace |
+| `src/lean` | Lean definitions, proofs, frozen type contracts and the blueprint |
+| `src/latex` | The manuscript and supplement |
+| `data` | The layered DVC pipeline, study contract and data pointers |
+| `.context` | Project plans and reference records |
 
-## Development
+## Get ready
 
-Install the pinned devenv CLI with `bash nix/install-devenv.sh`, then run
-`direnv allow` or `devenv shell`. Shell entry installs the locked repository
-tooling and Git hooks. Run `just` to see available commands and `just check`
-to run quality gates, including untracked source files.
+Use Linux x86-64 or ARM64 with Git and Nix. Initial setup downloads locked
+dependencies, model runtimes and TeX resources; later checks use prepared inputs.
 
-Shared tools are supplied by `devenv.nix`; Nix inputs are pinned in
-`devenv.lock`. Insitu is installed from our Git repository at the revision in
-`pyproject.toml`, with its dependencies locked in `uv.lock`. Run `just insitu-sync`
-to update projections and `just insitu-check` to detect stale output. Add models
-and templates under `insitu/` as documentation projections become necessary.
+```bash
+bash infra/nix/install-devenv.sh
+devenv shell
+just setup
+just check
+```
 
-Prek runs hygiene, Nix, Tombi, Markdown, spelling, external-link, Insitu,
-Python, TypeScript, Lean, and LaTeX checks. Conventional commits are checked
-at commit time. Lychee needs network access; the first Lean build downloads
-the pinned toolchain through Elan. The first LaTeX build downloads Tectonic's
-TeX bundle. Language checks run when their source files change.
+Run `just --list` to discover commands; each language has a module, for example
+`just python::test`, `just lean::proof-audit` and `just latex::build`.
 
-Python dependencies and the typed model registry live in `src/python`; see
-[the Python guide](src/python/README.md). Install the locked data and development
-environment with `uv sync --project src/python --frozen`. TypeScript starts as a private,
-dependency-free Bun workspace; add packages under its `apps/` or `packages/`
-directories when needed. Run `just lean-build` and `just latex-build` to build
-the starter proof library and document.
+## Study and pipeline
 
-The [expanded experiment](research/expanded/README.md) compares accounting input
-views and four pretrained models, retaining ticker-labeled annual distance matrices.
+[DVC](https://dvc.org) stages in `dvc.yaml` reproduce the study from frozen sources.
+[semflow](https://github.com/marcusinthesky/semflow) fingerprints the code each
+stage reaches, so documentation edits do not rerun model inference.
 
-The [Fernández replication ladder](research/fernandez/README.md) separates the
-published two-stage spatial CAPM from matched-input foundation models and
-full-return covariance forecasts.
+```sh
+just sources EXTRACT.csv EXTRACT.py  # deliberately recover sources, freeze, record
+just build                    # check fingerprints, then run stale DVC stages
+just latex::paper arxiv       # render saved results and compile the arXiv paper
+```
 
-The [larger-universe coverage audit](research/universe/README.md) documents
-1,000 distinct SEC issuers, extended Yahoo and French histories, and annual
-filing availability. Run `just python-universe` with `EDGAR_IDENTITY` set to
-resume its cached acquisition. Its changing annual cohorts are distinct from
-the six-firm complete-history demonstration.
+The [data guide](data/README.md) describes every stage, acquisition rules
+and artifact restoration from the private data remote.
 
-The [working paper](src/latex/main.tex) develops the measurement question,
-chronological panel design, and conditional network-to-covariance stability
-argument, with Finance Research Letters as a provisional outlet.
-Build the PDF with `just latex-build`; empirical conclusions remain open.
+## Find your way
 
-The [chronological panel comparison](research/panel/RESULTS.md) constructs full
-point-in-time characteristics, calibrates one spatial coefficient per approach
-on 2016-2019, and scores 2020-2025 on matched annual cohorts. Run
-`just python-panel` to reproduce its cached input ladder and annual distance matrices.
+- [The study contract](data/research/crsp-sec/README.md) governs every empirical stage.
+- [The Python workspace](src/python/README.md) explains code and commands.
+- [The Lean workspace](src/lean/README.md) records proof assumptions and audits.
+- [The LaTeX workspace](src/latex/README.md) explains rendering and compilation.
+- [Project context](.context/README.md) explains plans and references.
+- [AgentSync](.agents/README.md) manages shared agent instructions and skills.
+- [Architecture](ARCHITECTURE.md) explains ownership and updates.
+
+Edit source, run `just sync`, then `just check`. Formatting and synchronization
+are explicit writes. External links run separately through `just links`.
+
+## Update
+
+Commit local work, then run:
+
+```bash
+env -u PYTHONPATH -u PYTHONHOME uvx --from copier==9.16.0 copier update
+```
+
+Review the diff and conflicts, then run setup, sync and check. Copier selects the
+latest stable tag from the source saved in `.copier-answers.yml`; add
+`--vcs-ref TAG` to choose a specific release. Removing capabilities requires
+manual migration because Copier can remove previously owned paths.
+
+This project uses [Exordio](https://github.com/marcusinthesky/exordio).

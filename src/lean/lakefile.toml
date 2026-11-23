@@ -1,12 +1,28 @@
 name = "free-foundations"
 version = "0.1.0"
-defaultTargets = ["FreeFoundations"]
+defaultTargets = ["FreeFoundations", "FreeFoundationsApi"]
+lintDriver = "batteries/runLinter"
+lintDriverArgs = ["FreeFoundations"]
 
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4"
-rev = "v4.31.0"
+rev = "v4.35.0"
+
+# `lake exe checkdecls blueprint/lean_decls`: every \lean{...} in the blueprint exists.
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
+[[require]]
+name = "matheconlib"
+git = "https://github.com/matheconlib/matheconlib"
+rev = "6c0e61ed4c95252e2c985ccc456e2c53617fb941"
 
 [[lean_lib]]
 name = "FreeFoundations"
+leanOptions = { autoImplicit = false }
+
+[[lean_lib]]
+name = "FreeFoundationsApi"
 leanOptions = { autoImplicit = false }

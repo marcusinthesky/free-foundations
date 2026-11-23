@@ -1,12 +1,40 @@
-import FreeFoundations.Exposure
-import FreeFoundations.Alignment
-import FreeFoundations.Sufficiency
-import FreeFoundations.Network
-import FreeFoundations.Recovery
-import FreeFoundations.Measurement
-import FreeFoundations.Geometry
-import FreeFoundations.Kernel
-import FreeFoundations.Stability
-import FreeFoundations.Score
-import FreeFoundations.Value
-import FreeFoundations.Likelihood
+module
+
+public import FreeFoundations.Exposure
+public import FreeFoundations.Alignment
+public import FreeFoundations.Sufficiency
+public import FreeFoundations.Network
+public import FreeFoundations.Recovery
+public import FreeFoundations.Measurement
+public import FreeFoundations.Geometry
+public import FreeFoundations.Kernel
+public import FreeFoundations.Stability
+public import FreeFoundations.Score
+public import FreeFoundations.Value
+public import FreeFoundations.Likelihood
+public import FreeFoundations.MatrixBounds
+public import FreeFoundations.GramDistance
+public import FreeFoundations.ScoreStability
+public import FreeFoundations.TaskInformation
+public import FreeFoundations.Information
+public import FreeFoundations.Transfer
+public import FreeFoundations.Selection
+public import FreeFoundations.TaskCoverage
+public import FreeFoundations.Bandwidth
+public import FreeFoundations.ReversibleNetwork
+public import FreeFoundations.ComparativeStatics
+public import FreeFoundations.EndToEnd
+public import FreeFoundations.Decision
+public import FreeFoundations.Dynamics
+public import FreeFoundations.GeneratedTarget
+public import FreeFoundations.ReadoutStability
+public import FreeFoundations.StatisticalFinancial
+public import FreeFoundations.FiniteProbability
+public import FreeFoundations.FiniteProbabilityDecision
+public import FreeFoundations.FiniteProbabilityFinancial
+public import FreeFoundations.FiniteProbabilityOrder
+public import FreeFoundations.RiskState
+public import FreeFoundations.Proxy
+public import FreeFoundations.Identifiability
+public import FreeFoundations.Pipeline
+public import FreeFoundations.Neighbours

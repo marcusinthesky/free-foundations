@@ -1,0 +1,21 @@
+# Semantic fingerprints for dvc.yaml: each stage's Python dependency is the code its
+# `free-foundations` command reaches, so comment, docstring and annotation edits do not
+# rerun hours of model inference. `just semflow-check` gates commits.
+project-root = "."
+pipeline-file = "dvc.yaml"
+hash-dir = ".semflow/hashes"
+# Statadic is a pinned PyPI dependency; source roots cover repository code only.
+source-roots = ["src/python/apps/free_foundations/src"]
+
+[applications]
+free-foundations = "free_foundations.cli:app"
+
+[hashing]
+ignore-docstrings = true
+ignore-annotations = true
+ignore-type-checking-blocks = true
+
+[tracking]
+auto-typer = true
+# The fingerprint generator owns the JSON files that the study stages depend on.
+control-stages = ["semflow_refresh"]

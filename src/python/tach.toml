@@ -1,47 +1,105 @@
-source_roots = ["."]
-exclude = ["tests/**", ".venv/**"]
+source_roots = ["apps/free_foundations/src"]
+exclude = ["**/tests/**", "**/.venv/**", "scripts/**"]
 exact = true
+ignore_type_checking_imports = false
+forbid_circular_dependencies = true
 
 [[modules]]
-path = "free_foundations.contracts"
+path = "free_foundations.encoders.contracts"
 depends_on = []
 
 [[modules]]
-path = "free_foundations.pooling"
-depends_on = ["free_foundations.contracts"]
+path = "free_foundations.encoders.pooling"
+depends_on = ["free_foundations.encoders.contracts"]
 
 [[modules]]
-path = "free_foundations.registry"
+path = "free_foundations.encoders.registry"
 depends_on = []
 
 [[modules]]
-path = "free_foundations.encoding"
-depends_on = ["free_foundations.contracts", "free_foundations.pooling", "free_foundations.registry"]
+path = "free_foundations.encoders.encoding"
+depends_on = ["free_foundations.encoders.contracts", "free_foundations.encoders.pooling", "free_foundations.encoders.registry"]
 
 [[modules]]
 path = "free_foundations"
-depends_on = ["free_foundations.contracts", "free_foundations.pooling", "free_foundations.registry", "free_foundations.encoding"]
+depends_on = ["free_foundations.encoders.contracts", "free_foundations.encoders.pooling", "free_foundations.encoders.registry", "free_foundations.encoders.encoding"]
 
 [[modules]]
-path = "free_foundations.pilot"
-depends_on = ["free_foundations"]
+path = "free_foundations.artifacts"
+depends_on = []
 
 [[modules]]
-path = "free_foundations.expanded"
-depends_on = ["free_foundations", "free_foundations.pilot"]
+path = "free_foundations.encoders.runtime"
+depends_on = []
 
 [[modules]]
-path = "free_foundations.fernandez"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded"]
+path = "free_foundations.encoders.backends"
+depends_on = ["free_foundations.encoders.contracts", "free_foundations.encoders.context", "free_foundations.encoders.readout", "free_foundations.encoders.encoding", "free_foundations.artifacts", "free_foundations.encoders.runtime"]
 
 [[modules]]
-path = "free_foundations.universe"
-depends_on = ["free_foundations.pilot", "free_foundations.fernandez"]
+path = "free_foundations.methods.fernandez"
+depends_on = []
 
 [[modules]]
-path = "free_foundations.panel"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.universe"]
+path = "free_foundations.study"
+depends_on = []
 
 [[modules]]
-path = "free_foundations.ladder"
-depends_on = ["free_foundations.pilot", "free_foundations.expanded", "free_foundations.fernandez", "free_foundations.panel"]
+path = "free_foundations.cli"
+depends_on = ["free_foundations.cli.processed", "free_foundations.cli.raw", "free_foundations.cli.research", "free_foundations.cli.publication"]
+
+[[modules]]
+path = "free_foundations.methods"
+depends_on = ["free_foundations.encoders.contracts"]
+
+[[modules]]
+path = "free_foundations.encoders.context"
+depends_on = ["free_foundations.encoders.contracts"]
+
+[[modules]]
+path = "free_foundations.encoders.readout"
+depends_on = ["free_foundations.encoders.context", "free_foundations.encoders.contracts", "free_foundations.encoders.encoding", "free_foundations.encoders.pooling"]
+
+[[modules]]
+path = "free_foundations.study.sources"
+depends_on = ["free_foundations.study.spec", "free_foundations.artifacts"]
+
+[[modules]]
+path = "free_foundations.study.panel"
+depends_on = ["free_foundations.methods.fernandez", "free_foundations.artifacts", "free_foundations.study.sources", "free_foundations.study.spec"]
+
+[[modules]]
+path = "free_foundations.study.representations"
+depends_on = ["free_foundations.study.spec", "free_foundations.encoders.context", "free_foundations.study.panel", "free_foundations.encoders.backends", "free_foundations.artifacts"]
+
+[[modules]]
+path = "free_foundations.study.experiments"
+depends_on = ["free_foundations.artifacts", "free_foundations.methods.fernandez", "free_foundations.study.panel", "free_foundations.study.representations", "free_foundations.methods", "free_foundations.encoders.contracts", "free_foundations.study.spec", "free_foundations.study.sources"]
+
+[[modules]]
+path = "free_foundations.study.publication"
+depends_on = ["free_foundations.artifacts", "free_foundations.study.spec"]
+
+[[modules]]
+path = "free_foundations.study.spec"
+depends_on = ["free_foundations.artifacts"]
+
+[[modules]]
+path = "free_foundations.study.paths"
+depends_on = []
+
+[[modules]]
+path = "free_foundations.cli.raw"
+depends_on = ["free_foundations.study.spec", "free_foundations.encoders.backends", "free_foundations.study.sources", "free_foundations.study.paths"]
+
+[[modules]]
+path = "free_foundations.cli.processed"
+depends_on = ["free_foundations.study.paths", "free_foundations.study.panel", "free_foundations.study.spec", "free_foundations.study.representations"]
+
+[[modules]]
+path = "free_foundations.cli.research"
+depends_on = ["free_foundations.study.experiments", "free_foundations.study.paths", "free_foundations.study.spec"]
+
+[[modules]]
+path = "free_foundations.cli.publication"
+depends_on = ["free_foundations.study.paths", "free_foundations.study.publication", "free_foundations.study.spec"]

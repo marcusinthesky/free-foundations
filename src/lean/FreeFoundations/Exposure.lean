@@ -1,5 +1,9 @@
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.LinearAlgebra.Matrix.DotProduct
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.LinearAlgebra.Matrix.DotProduct
+
+@[expose] public section
 
 /-!
 # Exposure identities

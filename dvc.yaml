@@ -1,0 +1,641 @@
+# Pipeline layers: raw -> processed -> research -> publication (data/README.md).
+#
+## Raw: frozen sources
+# The WRDS CRSP CIZ extract, public SEC CompanyFacts and submissions, historical
+# identifier evidence and French factors, acquired explicitly into data/staging and
+# promoted by `raw freeze`. Pinned model weights are verified local downloads.
+#
+## Processed: reusable panels
+# One quarterly issuer roster and outcome mask, December formation cohorts, as-of
+# characteristics and XBRL facts, then frozen representation states for each rung.
+#
+## Research: in-sample results
+# Fernández cross-sections, quarterly spatial co-movement panels and Mantel
+# alignment, each with in-sample intervals, then the saved-result report.
+vars:
+- py: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --package free-foundations free-foundations
+- models: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV TABPFN_DISABLE_TELEMETRY=1 uv run --project src/python --offline --frozen --package free-foundations --extra tabpfn --extra tabfm --extra kumo --extra limix free-foundations
+- semflow: env -u PYTHONPATH -u PYTHONHOME -u VIRTUAL_ENV uv run --project src/python --offline --frozen --all-packages semflow
+
+# Publication writes its metrics inside its tracked output directory.
+metrics:
+- data/publication/crsp-sec/free-foundations/metrics.json
+
+stages:
+  semflow_refresh:
+    desc: >-
+      Refresh semantic entrypoint fingerprints after source changes. This control
+      stage owns the JSON only; instrumenting dvc.yaml stays a reviewed `just semflow-apply`.
+    cmd: ${semflow} refresh --apply
+    deps:
+    - semflow.toml
+    - src/python/pyproject.toml
+    - src/python/apps/free_foundations/src
+    outs:
+    - .semflow/hashes:
+        cache: false
+
+  raw_sources:
+    desc: >-
+      Frozen CRSP CIZ monthly extract, SEC CompanyFacts, submissions, identifier
+      evidence and French factors. Acquisition is `raw acquire` then `freeze`.
+    cmd: 'false'
+    frozen: true
+    outs:
+    - data/raw/crsp-sec:
+        persist: true
+
+  raw_fetch_checkpoints:
+    desc: Acquire and verify the four pinned pretrained model revisions.
+    cmd: ${models} raw fetch-checkpoints --output data/raw/models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/raw/fetch-checkpoints.json
+    - src/python/apps/free_foundations/src/free_foundations/encoders/checkpoints.json
+    outs:
+    - data/raw/models/manifest.json
+
+  processed_prepare_panel:
+    desc: >-
+      Quarterly issuer roster and outcome mask, December formation cohorts, CRSP-ME
+      characteristics, current SIC and as-of CompanyFacts information sets.
+    cmd: >-
+      ${py} processed prepare-panel --sources data/raw/crsp-sec
+      --output data/processed/crsp-sec/panel
+    params:
+    - study.version
+    - study.archive_start
+    - study.archive_end
+    - study.feature_start
+    - study.top_n
+    - study.frequency
+    - study.formation_years
+    - study.window_quarters
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-panel.json
+    - data/raw/crsp-sec
+    outs:
+    - data/processed/crsp-sec/panel
+
+  processed_prepare_contexts:
+    desc: Materialize shared dated support and query contexts.
+    cmd: ${py} processed prepare-contexts
+    params:
+    - study.panel_start
+    - study.characteristic_history_years
+    - study.standard_min_coverage
+    - study.support_rows
+    - study.rungs
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-contexts.json
+    - data/processed/crsp-sec/panel
+    outs:
+    - data/processed/crsp-sec/contexts
+
+  processed_encode:
+    matrix:
+      rung: ${study.rungs}
+      model: ${study.models}
+    desc: Extract frozen states for one model and information rung.
+    cmd: >-
+      ${models} processed encode --rung ${item.rung} --model ${item.model} --panel data/processed/crsp-sec/panel
+      --weights data/raw/models --states data/cache/crsp-sec/state-cache
+      --output data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+    params:
+    - study.panel_start
+    - study.characteristic_history_years
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.support_rows
+    - study.rungs
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode.json
+    - data/processed/crsp-sec/panel/manifest.json
+    - data/processed/crsp-sec/contexts
+    - data/raw/models/manifest.json
+    outs:
+    - data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+
+  processed_direct:
+    foreach: ${study.rungs}
+    do:
+      desc: Compute the direct control for one information rung.
+      cmd: >-
+        ${py} processed direct --rung ${item} --panel data/processed/crsp-sec/panel
+        --output data/processed/crsp-sec/state-parts/${item}/direct
+      params:
+      - study.panel_start
+      - study.characteristic_history_years
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.support_rows
+      - study.rungs
+      - study.models
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/direct.json
+      - data/processed/crsp-sec/panel/manifest.json
+      - data/processed/crsp-sec/contexts
+      outs:
+      - data/processed/crsp-sec/state-parts/${item}/direct
+
+  processed_assemble_states:
+    desc: Assemble the matched frozen readouts and direct controls.
+    cmd: ${py} processed assemble-states
+    params:
+    - study.models
+    - study.rungs
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/assemble-states.json
+    - data/processed/crsp-sec/state-parts
+    outs:
+    - data/processed/crsp-sec/representations
+
+  research_replicate:
+    foreach: ${study.formation_years}
+    do:
+      desc: >-
+        Fernández cross-sections for every formation and network: MM betas, OLS,
+        spatial lag (IV and ML) and error (ML), with and without an intercept.
+      cmd: >-
+        ${py} research replicate --formation ${item} --panel data/processed/crsp-sec/panel
+        --representations data/processed/crsp-sec/representations
+        --output data/research/crsp-sec/experiments/replication/formations/${item}
+      params:
+      - study.characteristic_history_years
+      - study.min_beta_quarters
+      - study.primary_formation
+      - study.generated_beta_draws
+      - study.neighbours
+      - study.neighbour_sensitivities
+      - study.seed
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/research/replicate.json
+      - data/processed/crsp-sec/panel
+      - data/processed/crsp-sec/representations
+      - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+      - infra/nix/devenv.nix
+      - devenv.lock
+      outs:
+      - data/research/crsp-sec/experiments/replication/formations/${item}
+
+  research_collect_replication:
+    desc: Collect replication tables in formation order.
+    cmd: ${py} research collect-replication
+    params:
+    - study.characteristic_history_years
+    - study.min_beta_quarters
+    - study.primary_formation
+    - study.generated_beta_draws
+    - study.neighbours
+    - study.neighbour_sensitivities
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/collect-replication.json
+    - data/research/crsp-sec/experiments/replication/formations
+    outs:
+    - data/research/crsp-sec/experiments/replication/summary
+
+  research_estimate_comovement:
+    desc: Quarterly spatial panels of excess returns with period effects, by network.
+    cmd: >-
+      ${py} research estimate-comovement --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations
+      --output data/research/crsp-sec/experiments/comovement/summary
+    params:
+    - study.panel_start
+    - study.characteristic_history_years
+    - study.min_beta_quarters
+    - study.generated_beta_draws
+    - study.likelihood_draws
+    - study.neighbours
+    - study.neighbour_sensitivities
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/estimate-comovement.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+    - infra/nix/devenv.nix
+    - devenv.lock
+    outs:
+    - data/research/crsp-sec/experiments/comovement/summary
+
+  research_measure_alignment:
+    desc: Mantel association of network distances with realized return co-movement.
+    cmd: >-
+      ${py} research measure-alignment --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations
+      --output data/research/crsp-sec/experiments/alignment/summary
+    params:
+    - study.primary_formation
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.mantel_draws
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/measure-alignment.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    outs:
+    - data/research/crsp-sec/experiments/alignment/summary
+
+  research_estimate_apt:
+    desc: Out-of-sample spatial APT on characteristic, raw and calibrated foundation-model geometry.
+    cmd: >-
+      ${py} research estimate-apt --panel data/processed/crsp-sec/panel
+      --representations data/processed/crsp-sec/representations
+      --factors data/raw/crsp-sec/factors
+      --output data/research/crsp-sec/experiments/apt/summary
+    params:
+    - study.characteristic_history_years
+    - apt
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/estimate-apt.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    - data/raw/crsp-sec/factors/F-F_Research_Data_5_Factors_2x3_CSV.zip
+    - data/raw/crsp-sec/factors/F-F_Momentum_Factor_CSV.zip
+    outs:
+    - data/research/crsp-sec/experiments/apt/summary
+
+  processed_prepare_matched_contexts:
+    desc: Prepare aligned financial-input and single-history contexts.
+    cmd: >-
+      ${py} processed prepare-matched-contexts
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/prepare-matched-contexts.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/contexts
+    - data/raw/crsp-sec
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/contexts
+
+  processed_matched_encode_legacy:
+    matrix:
+      rung: ${study.rungs}
+      model: ${study.models}
+    desc: Verify or extract one frozen legacy-rung cell.
+    cmd: >-
+      OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+      ${models} processed encode-matched
+      --rung ${item.rung} --model ${item.model} --device ${t08.device} --legacy-cell data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    - t08.device
+    - t08.threads
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    - data/raw/models/manifest.json
+    - data/processed/crsp-sec/state-parts/${item.rung}/${item.model}
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/cells/${item.rung}/${item.model}
+
+  processed_matched_encode_operands:
+    foreach: ${study.models}
+    do:
+      desc: Extract one frozen model on dated financial operands.
+      cmd: >-
+        OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+        ${models} processed encode-matched
+        --rung operands --model ${item} --device ${t08.device}
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      - t08.device
+      - t08.threads
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/raw/models/manifest.json
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/operands/${item}
+
+  processed_matched_encode_histories:
+    foreach: ${t08.histories}
+    do:
+      desc: Extract TabPFN states on one characteristic history.
+      cmd: >-
+        OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+        ${models} processed encode-matched
+        --rung ${item} --model tabpfn_full --device ${t08.device}
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      - t08
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/raw/models/manifest.json
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/${item}/tabpfn_full
+
+  processed_matched_direct_legacy:
+    foreach: ${study.rungs}
+    do:
+      desc: Verify or build the direct-input control for an established rung.
+      cmd: >-
+        ${py} processed encode-matched
+        --rung ${item} --model direct --legacy-cell data/processed/crsp-sec/state-parts/${item}/direct
+      params:
+      - study.version
+      - study.panel_start
+      - study.archive_end
+      - study.characteristic_history_years
+      - study.support_rows
+      - study.block_columns
+      - study.standard_min_coverage
+      - study.models
+      - study.rungs
+      - study.seed
+      deps:
+      - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+      - data/processed/crsp-sec/matched-comparisons/contexts
+      - data/processed/crsp-sec/state-parts/${item}/direct
+      outs:
+      - data/processed/crsp-sec/matched-comparisons/cells/${item}/direct
+
+  processed_matched_direct_operands:
+    desc: Compute direct-control states on dated financial operands.
+    cmd: >-
+      ${py} processed encode-matched
+      --rung operands --model direct
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.characteristic_history_years
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.models
+    - study.rungs
+    - study.seed
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/processed/encode-matched.json
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    outs:
+    - data/processed/crsp-sec/matched-comparisons/cells/operands/direct
+
+  research_prepare_matched_sample:
+    desc: Freeze the common quarterly outcome and factor-exposure mask.
+    cmd: >-
+      ${py} research prepare-matched-sample
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/prepare-matched-sample.json
+    - data/processed/crsp-sec/panel
+    - src/python/apps/free_foundations/src/free_foundations/methods/fernandez/betas.R
+    - infra/nix/devenv.nix
+    - devenv.lock
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+
+  research_matched_factors:
+    desc: Estimate matched quarterly factor and graph contrasts.
+    cmd: >-
+      ${py} research matched-factors
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-factors.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+
+  research_matched_kernels:
+    desc: Compare weighting rules on direct and frozen TabPFN distances.
+    cmd: >-
+      ${py} research matched-kernels
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-kernels.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/market_cap_assets/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/market_to_book/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/dividend_yield/tabpfn_full
+    - data/processed/crsp-sec/matched-comparisons/cells/debt_maturity/tabpfn_full
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+
+  research_matched_encoders:
+    desc: Score frozen encoders against matched direct controls and record selection.
+    cmd: >-
+      ${py} research matched-encoders
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    - study.primary_formation
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-encoders.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+
+  research_matched_geometry:
+    desc: Save dated PCoA diagnostics and the prespecified interpretation decision.
+    cmd: >-
+      ${py} research matched-geometry
+    params:
+    - study.version
+    - study.primary_formation
+    - study.characteristic_history_years
+    - study.models
+    - study.panel_start
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-geometry.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+
+  research_matched_historical_geometry:
+    desc: Reproduce the dated ratio-geometry exhibit from its archived TabPFN state.
+    cmd: ${py} research matched-historical-geometry
+    params:
+    - study.version
+    - study.primary_formation
+    - study.characteristic_history_years
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.support_rows
+    - study.rungs
+    - study.models
+    deps:
+    - data/research/crsp-sec/experiments/replication/summary/roster.parquet
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-historical-geometry.json
+    - data/processed/crsp-sec/panel
+    - data/processed/crsp-sec/representations
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+
+  research_matched_ablation:
+    desc: Apply the saved trigger to feature and leading-coordinate graph comparisons.
+    cmd: >-
+      OMP_NUM_THREADS=${t08.threads} MKL_NUM_THREADS=${t08.threads}
+      ${models} research matched-ablation
+      --device ${t08.device}
+    params:
+    - study.version
+    - study.panel_start
+    - study.archive_end
+    - study.min_beta_quarters
+    - study.characteristic_history_years
+    - study.likelihood_draws
+    - study.seed
+    - study.models
+    - study.support_rows
+    - study.block_columns
+    - study.standard_min_coverage
+    - study.rungs
+    - study.primary_formation
+    - t08.device
+    - t08.threads
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/matched-ablation.json
+    - data/processed/crsp-sec/panel
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders/selection.json
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/processed/crsp-sec/matched-comparisons/contexts
+    - data/raw/models/manifest.json
+    - data/processed/crsp-sec/matched-comparisons/cells/fernandez
+    - data/processed/crsp-sec/matched-comparisons/cells/standard_xbrl
+    - data/processed/crsp-sec/matched-comparisons/cells/operands
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+
+  research_collect_matched:
+    desc: Bind workshop evidence manifests and the results they describe.
+    cmd: >-
+      ${py} research collect-matched
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/research/collect-matched.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+    outs:
+    - data/research/crsp-sec/experiments/matched-comparisons/evidence
+
+  publication_render_matched:
+    desc: Render the workshop comparison evidence from verified saved outputs.
+    cmd: >-
+      ${py} publication render-matched
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/publication/render-matched.json
+    - data/research/crsp-sec/experiments/matched-comparisons/sample
+    - data/research/crsp-sec/experiments/matched-comparisons/factors
+    - data/research/crsp-sec/experiments/matched-comparisons/kernels
+    - data/research/crsp-sec/experiments/matched-comparisons/encoders
+    - data/research/crsp-sec/experiments/matched-comparisons/geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/historical-geometry
+    - data/research/crsp-sec/experiments/matched-comparisons/ablation
+    - data/research/crsp-sec/experiments/matched-comparisons/evidence
+    outs:
+    - data/publication/crsp-sec/finfm-matched
+
+  publication_render:
+    desc: Tables, figures and the claims audit from saved results only.
+    cmd: >-
+      ${py} publication render --panel data/processed/crsp-sec/panel
+      --replication data/research/crsp-sec/experiments/replication/summary
+      --comovement data/research/crsp-sec/experiments/comovement/summary
+      --alignment data/research/crsp-sec/experiments/alignment/summary
+      --apt data/research/crsp-sec/experiments/apt/summary
+      --output data/publication/crsp-sec/free-foundations
+      --generated src/latex/projects/free-foundations/src/generated
+    params:
+    - study.primary_formation
+    - study.window_quarters
+    - study.min_beta_quarters
+    - study.generated_beta_draws
+    - study.neighbours
+    - study.panel_start
+    - study.archive_end
+    - study.likelihood_draws
+    deps:
+    - .semflow/hashes/entrypoints/free-foundations/publication/render.json
+    - data/processed/crsp-sec/panel/manifest.json
+    - data/processed/crsp-sec/panel/membership.parquet
+    - data/research/crsp-sec/experiments/replication/summary
+    - data/research/crsp-sec/experiments/comovement/summary
+    - data/research/crsp-sec/experiments/alignment/summary
+    - data/research/crsp-sec/experiments/apt/summary
+    outs:
+    - src/latex/projects/free-foundations/src/generated
+    - data/publication/crsp-sec/free-foundations

@@ -1,0 +1,55 @@
+$schema: https://document-schema.org/draft/2026-06/schema
+description: Root changelog entries are PR-oriented and use the closed Keep-a-Changelog category
+  vocabulary without imposing a second release/version hierarchy.
+maxDepth: 3
+maxTokens: 15000
+sections:
+- header:
+    const: CHANGELOG
+  additionalBlocks: false
+  sections:
+  - header:
+      pattern: '^(Unreleased|PR #[1-9]\d*: .{1,100})$'
+    minContains: 1
+    maxContains: 1000
+    additionalBlocks: false
+    sections:
+    - header:
+        enum:
+        - Added
+        - Changed
+        - Deprecated
+        - Removed
+        - Fixed
+        - Security
+      minContains: 1
+      maxContains: 6
+      blocks:
+      - type: bullet-list
+        minItems: 1
+        maxItems: 15
+      additionalBlocks: false
+      additionalSections: false
+    additionalSections: false
+  additionalSections: false
+additionalBlocks: false
+additionalSections: false
+frontmatter:
+  $id: https://free-foundations/infra/schemas/changelog-frontmatter/schema.json
+  $schema: https://json-schema.org/draft/2020-12/schema
+  additionalProperties: false
+  description: Closed frontmatter contract for the PR-oriented repository changelog.
+  properties:
+    description:
+      description: One terse discovery sentence; not status, history, or acceptance.
+      maxLength: 200
+      minLength: 1
+      pattern: ^[^\r\n]+$
+      type: string
+    type:
+      const: changelog
+  required:
+  - type
+  - description
+  title: Changelog Frontmatter
+  type: object

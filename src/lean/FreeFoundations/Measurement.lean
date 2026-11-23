@@ -1,7 +1,11 @@
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
-import Mathlib.Topology.MetricSpace.Lipschitz
-import FreeFoundations.Recovery
+module
+
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+public import Mathlib.Topology.MetricSpace.Lipschitz
+public import FreeFoundations.Recovery
+
+@[expose] public section
 
 /-!
 # Measurement through a readout
@@ -9,8 +13,13 @@ import FreeFoundations.Recovery
 `Recovery` decodes exposures with a linear left inverse. The argument works for any readout.
 A learning objective supplies a statistic `F(h)`: a conditional mean, a conditional law, a
 posterior predictive. The economic state `s(h)` lives in its own metric space, and a readout
-`g` maps the first to the second. The alignment error `ξ = d(g(F), s)` is the part of the
-state that the objective's statistic does not carry.
+`g` maps the first to the second. The alignment error `ξ = d(g(F), s)` belongs to the pair
+`(F, g)`, not to `F` alone: a poor readout creates it even when `F` carries the whole state.
+For a square-integrable state the L² projection identity splits it
+(`Recovery.excess_risk_condExp` for a real state; a Euclidean one splits by coordinate),
+`E‖s − g(F)‖² = E‖s − E[s | F]‖² + E‖E[s | F] − g(F)‖²`: information `F` does not carry,
+plus misspecification or estimation error of `g`. A fitted decoder that fails can fail
+through either term.
 
 * **Upper bound.** If `g` is `K`-Lipschitz, the measured state `g(F̂)` misses `s` by at most
   `K d(F̂, F) + ξ` (`measurement_error`). In root mean square the same holds by Minkowski
@@ -45,11 +54,14 @@ theorem measurement_error {g : F → S} {K : NNReal} (hg : LipschitzWith K g) (s
     (f fhat : F) : dist (g fhat) s ≤ K * dist fhat f + dist (g f) s :=
   (dist_triangle _ (g f) _).trans (by gcongr; exact hg.dist_le_mul fhat f)
 
-/-- **In root mean square.** Under any measure, `‖d(g(F̂), s)‖₂ ≤ K ‖d(F̂, F)‖₂ + ‖ξ‖₂`. -/
+/-- **In root mean square.** The measured-distance function is explicitly assumed
+a.e. strongly measurable; bounds on two other distances alone do not ensure this.
+Under any measure, `‖d(g(F̂), s)‖₂ ≤ K ‖d(F̂, F)‖₂ + ‖ξ‖₂`. -/
 theorem rms_measurement_error {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) {g : F → S}
     {K : NNReal} (hg : LipschitzWith K g) (s : Ω → S) (f fhat : Ω → F)
     (hpred : AEStronglyMeasurable (fun ω => dist (fhat ω) (f ω)) μ)
-    (halign : AEStronglyMeasurable (fun ω => dist (g (f ω)) (s ω)) μ) :
+    (halign : AEStronglyMeasurable (fun ω => dist (g (f ω)) (s ω)) μ)
+    (hmeasured : AEStronglyMeasurable (fun ω => dist (g (fhat ω)) (s ω)) μ) :
     eLpNorm (fun ω => dist (g (fhat ω)) (s ω)) 2 μ ≤
       K * eLpNorm (fun ω => dist (fhat ω) (f ω)) 2 μ +
         eLpNorm (fun ω => dist (g (f ω)) (s ω)) 2 μ := by
@@ -58,12 +70,14 @@ theorem rms_measurement_error {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω
   calc eLpNorm (fun ω => dist (g (fhat ω)) (s ω)) 2 μ
       ≤ eLpNorm ((fun ω => (K : ℝ) * dist (fhat ω) (f ω)) +
           fun ω => dist (g (f ω)) (s ω)) 2 μ := by
-        refine eLpNorm_mono_real fun ω => ?_
+        refine eLpNorm_mono_real hmeasured fun ω => ?_
         rw [Real.norm_eq_abs, abs_of_nonneg dist_nonneg]
         exact measurement_error hg (s ω) (f ω) (fhat ω)
     _ ≤ eLpNorm (fun ω => (K : ℝ) * dist (fhat ω) (f ω)) 2 μ +
           eLpNorm (fun ω => dist (g (f ω)) (s ω)) 2 μ :=
-        eLpNorm_add_le (hpred.const_mul _) halign (by norm_num)
+        by
+          have _ := (hpred.const_mul (K : ℝ)).add halign
+          exact eLpNorm_add_le (by norm_num)
     _ = _ := by
         rw [hsmul, eLpNorm_const_smul, Real.enorm_of_nonneg K.coe_nonneg,
           ENNReal.ofReal_coe_nnreal]
@@ -128,7 +142,7 @@ theorem mean_sq_distance {D : Ω → E} (hD : MemLp D 2 μ) :
   have hDm : Integrable (fun ω => D ω - m) μ := hDi.sub (integrable_const m)
   have hc : MemLp (fun ω => D ω - m) 2 μ := hD.sub (memLp_const m)
   have hsq : Integrable (fun ω => ‖D ω - m‖ ^ 2) μ :=
-    (memLp_two_iff_integrable_sq_norm hc.1).mp hc
+    (memLp_two_iff_integrable_sq_norm hc.aestronglyMeasurable).mp hc
   have hin : Integrable (fun ω => inner ℝ m (D ω - m)) μ := hDm.const_inner m
   have h1 : Integrable (fun ω => ‖D ω - m‖ ^ 2 + 2 * inner ℝ m (D ω - m)) μ :=
     hsq.add (hin.const_mul 2)

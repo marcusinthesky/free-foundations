@@ -1,7 +1,13 @@
-import Mathlib.Analysis.Matrix.Order
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import Mathlib.MeasureTheory.Integral.Bochner.Basic
-import FreeFoundations.Exposure
+module
+
+public import Mathlib.Analysis.Matrix.Order
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import FreeFoundations.Exposure
+
+@[expose] public section
+
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # What the scores measure
@@ -220,5 +226,24 @@ theorem erm_bound {Ψ : Type*} (R Rh : Ψ → ℝ) {g ε : ℝ} (hg : ∀ ψ, |R
   have h1 := abs_le.mp (hg ψh)
   have h2 := abs_le.mp (hg ψ)
   linarith [hopt ψ]
+
+/-- **Calibrated measurement.** Conditional on a fixed representation, write population
+risk as irreducible target uncertainty `I` plus readout approximation error `A ψ`.
+Uniform empirical discrepancy and approximate fitting then give the class-level bound.
+The projection identity establishing this decomposition is proved in `Recovery`.
+This deterministic result imposes no independence assumption on the financial sample. -/
+theorem calibrated_measurement_bound {Ψ : Type*} [Nonempty Ψ]
+    (R Rh A : Ψ → ℝ) (I : ℝ) {g ε : ℝ}
+    (hdecomp : ∀ ψ, R ψ = I + A ψ)
+    (hg : ∀ ψ, |Rh ψ - R ψ| ≤ g)
+    {ψh : Ψ} (hopt : ∀ ψ, Rh ψh ≤ Rh ψ + ε) :
+    R ψh ≤ I + sInf (Set.range A) + 2 * g + ε := by
+  have hlower : R ψh - I - 2 * g - ε ≤ sInf (Set.range A) := by
+    apply le_csInf (Set.range_nonempty A)
+    rintro _ ⟨ψ, rfl⟩
+    have h := erm_bound R Rh hg hopt ψ
+    rw [hdecomp ψ] at h
+    linarith
+  linarith
 
 end FreeFoundations.Score

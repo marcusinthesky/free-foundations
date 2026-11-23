@@ -1,7 +1,11 @@
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Data.Real.Basic
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Basic.Real.Basic
+
+@[expose] public section
 
 /-!
 # Network algebra
@@ -93,7 +97,7 @@ theorem uniform_sum_zero (v : n → ℝ) (hv : ∑ j, v j = 0) :
       (Finset.sum_filter_add_sum_filter_not _ _ _).symm
     simp_rw [ite_mul, zero_mul]
     rw [Finset.sum_ite, Finset.sum_const_zero, zero_add, ← Finset.mul_sum, htotal,
-      Finset.filter_eq, if_pos (Finset.mem_univ i), Finset.sum_singleton]
+      Finset.filter_eq, ite_eq_left (Finset.mem_univ i), Finset.sum_singleton]
     ring
   rw [hsplit, hv]
   ring
@@ -107,7 +111,7 @@ theorem placebo_det (W : Matrix n n ℝ) (σ : Equiv.Perm n) (c : ℝ) :
   rw [← det_submatrix_equiv_self σ (1 - c • W)]
   congr 1
   ext i j
-  simp [Matrix.one_apply, sub_apply, smul_apply, submatrix_apply, σ.injective.eq_iff]
+  simp [Matrix.one_apply, Matrix.sub_apply, Matrix.smul_apply, submatrix_apply, σ.injective.eq_iff]
 
 omit [DecidableEq n] in
 /-- A within-group permutation preserves the total weight linking any two groups. -/

@@ -1,0 +1,76 @@
+\section{Pretraining and financial proximity}
+
+A predictor and a spatial model use the same issuer vector in different
+ways. The predictor reads out a quantity from each vector, while the spatial
+model compares vectors across firms. For a fixed dated context, let $F(h)$
+denote the ideal prediction for history $h$ and $s(h)$ its economic target.
+
+\begin{proposition}[Task recovery and peer selection]
+  \label{prop:recovery}
+  Suppose the target space is nonempty. Every representation that admits
+  an exact readout of $F$ admits an unrestricted readout of $s$ if and only
+  if $F(h)=F(h')$ implies $s(h)=s(h')$ for all histories.
+  For any representation $z$ with $s=r\circ z$ and any bijection $g$ of
+  its representation space, $r\circ g^{-1}$ recovers $s$ from $g\circ z$.
+  Such a recoding can change the symmetrized nearest-neighbour graph.
+  \lean{FreeFoundations.Alignment.optimal_imp_sufficient_iff}
+\end{proposition}
+
+The first statement follows by taking $F$ itself as the representation
+in the forward direction. In the reverse direction, each value of $F$
+determines one value of $s$, so a readout of $F$ also supplies a readout
+of $s$. The second statement matters whenever the return model assigns
+peer weights from distances between the vectors.
+
+Consider $A=(1,1)$, $B=(1,0)$, $C=(1,4)$ and $D=(1,5)$.
+Stretch the first coordinate by four. A readout of the original vectors
+can undo the stretch. For peer selection, normalize each vector to unit
+length and compare chord distances. The closest peers of $A,B,C,D$ are
+initially $C,A,D,C$ and become $B,A,D,C$. Joining firms whenever either
+selects the other therefore removes the $AC$ edge and changes peer weights.
+\lean{FreeFoundations.Neighbours.symmetrized_chord_edge_flip}
+
+The example uses one neighbour to make the edge change visible. In the
+return comparisons each issuer selects ten neighbours before the graph is
+symmetrized.
+
+\paragraph{Distances and weights.}
+For the US benchmark, we compute Spearman chord distance for each
+characteristic over paired annual observations. Pairs with fewer than
+two common years or an undefined correlation receive the neutral
+distance $\sqrt{2}$. The joint distance is the root mean square
+across the four characteristics. We set the diagonal of $K$ to zero,
+set $K_{ij}=\exp(-d_{ij})$ off the diagonal, and divide each row by
+its sum. On normalized nonzero embeddings the chord distance is the
+Euclidean distance between unit vectors. To construct a binary
+$k$-nearest-neighbour graph we join two firms if either selects the
+other before row normalization. Both constructions use a symmetric raw affinity.
+
+\paragraph{Spatial specification.}
+Write $y_i$ for median quarterly excess return and $b_i$ for the
+issuer's estimated CAPM beta. We compare the conventional
+cross-section to the spatial lag model
+$y=\alpha\mathbf{1}+\gamma b+\rho Wy+u$, with $\alpha$ either fixed
+to zero or estimated. The corresponding spatial-error specification
+applies the multiplier to the error and leaves the systematic term
+unchanged. With $\alpha=0$, the peer average may absorb the
+cross-sectional mean. With an intercept, exact uniform off-diagonal
+weights make the added regressor a linear combination of a constant
+and $y$, so the spatial term requires variation beyond the sample
+mean and the mechanical own-observation correction.
+
+Peer weights also enter the spatial multiplier.
+Proposition~\ref{prop:multiplier}
+bounds the resulting change in implied covariance for a common roster,
+spatial coefficient and innovation covariance.
+
+\paragraph{Estimation and uncertainty.}
+For the characteristic benchmark the estimated quantities include the
+market betas, the cross-sectional premium, the intercept when
+included, the spatial coefficient, and the error variance. For the
+encoder comparisons, we fix the model weights, the rule for
+selecting historical examples, the preprocessing and the distance measure.
+To assess variation across quarters at the estimated loadings and spatial
+parameters, we resample the paired likelihood contributions in common time
+blocks. In the fixed-cohort exercise, where issuer betas and median returns
+enter a single cross-section, we recompute both quantities in each refit.
