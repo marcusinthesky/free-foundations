@@ -1,16 +1,18 @@
 Because a financial peer group determines whose returns enter a firm's
 peer average in a spatial model of equity returns, the distance used to
-select peers shapes what the model measures. We ask when a frozen tabular
-foundation model selects better peers than a distance computed directly
-from the same financial records, measuring fit by the in-sample
+select peers shapes what the model measures. We ask when peers selected by a
+frozen tabular foundation model fit contemporaneous returns better than
+peers selected by a distance computed directly from the same financial
+records, measuring fit by the in-sample
 spatial-lag log likelihood of US equity returns from 2011 to 2025.
 Although TabPFN peers chosen from four financial ratios fit better than
 peers chosen by Fern\'andez's characteristic-history distance, by
 \ffmatched{factor-gain} nats per issuer-quarter after five Fama--French
 factors and momentum, a ten-neighbour graph on the same standardized
-ratios fits at least as well as TabPFN under market controls. Whereas
-encoding adds little to four ratios, it adds fit once the inputs extend to
-broad filing data, where all four encoders we study have positive estimated
+ratios has a higher estimated fit than TabPFN under market controls.
+Whereas the four encoders we study disagree in sign against that direct
+graph on four ratios, encoding adds fit once the inputs extend to
+broad filing data, where all four encoders have positive estimated
 gains over the direct graph built from the same fields and the TabPFN gain
 of \ffmatched{broad-gain} nats per issuer-quarter under market controls
 remains positive under multifactor controls. A four-firm example shows why

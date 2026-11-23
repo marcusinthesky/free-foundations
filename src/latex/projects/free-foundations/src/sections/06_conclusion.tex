@@ -5,8 +5,9 @@ selection depends on the benchmark against which it is judged. Although
 peers chosen by TabPFN from four ratios fit contemporaneous returns better
 than peers chosen by Fern\'andez's characteristic-history distance, and the
 difference survives five Fama--French factors and momentum, a ten-neighbour
-graph on the same standardized ratios fits at least as well as TabPFN under
-market controls, so that improvement does not require an encoder. Against
+graph on the same standardized ratios has a higher estimated fit than
+TabPFN under market controls, so that improvement does not require an
+encoder. Against
 the direct graph, by contrast, encoding adds fit once the inputs extend to
 broad filing data, where all four encoders have positive estimated gains
 and the TabPFN gain persists under multifactor controls.
@@ -15,8 +16,9 @@ While the selected broad-input representation is organized along a
 valuation axis, its peers are not. Firms close on that axis have few
 neighbours in common with the full representation, and selecting peers
 along it lowers fit by more than the encoder's gain over the direct graph,
-whereas omitting the valuation history changes peers substantially without
-a detectable change in fit. Read alongside
+whereas omitting the valuation history changes peers substantially while
+its interval for the change in fit excludes a loss as large as that from
+selecting peers along the axis. Read alongside
 Proposition~\ref{prop:recovery}, these results show that neither
 prediction accuracy, nor return fit, nor the leading axis identifies the
 peers a representation selects.

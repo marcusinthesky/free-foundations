@@ -28,9 +28,9 @@ intercept produces an invalid or boundary fit
 (Table~\ref{tab:us-benchmark}). Because the peer average is nearly common
 to all issuers, the large coefficient is consistent with the peer return
 absorbing the cross-sectional mean, and it says little about which firms
-the kernel treats as close. Both difficulties are resolved on the
-repeated-formation panel, where quarter effects absorb the common return
-level and a ten-neighbour rule concentrates each issuer's peer return on a
+the kernel treats as close. The repeated-formation panel addresses both
+difficulties, since quarter effects absorb the common return level and a
+ten-neighbour rule concentrates each issuer's peer return on a
 small group whose composition depends on the distance.
 
 \paragraph{Peer returns after factor adjustment.}
@@ -43,8 +43,8 @@ graph or the ratio-based TabPFN graph raises fit relative to the
 factor-only model under every control set in
 Table~\ref{tab:matched-factors}. Although the difference between the two
 graphs narrows as the controls expand, almost all of the narrowing occurs
-when the size, value, profitability and investment factors enter, as
-expected when peers selected on valuation and financing ratios share
+when the size, value, profitability and investment factors enter,
+consistent with peers selected on valuation and financing ratios sharing
 exposure to those factors, and after FF5 plus momentum the TabPFN graph
 still fits better, by \ffmatched{factor-gain} nats per issuer-quarter (paired
 95\% interval \ffmatched{factor-interval}).
@@ -85,33 +85,36 @@ log-likelihood units per quarter, and the paired difference between TabPFN
 and the direct graph has an interval spanning zero
 (Table~\ref{tab:quarterly-comparisons}). The same ordering holds on the
 matched factor sample, where the estimated gain of TabPFN over the direct
-graph on the ratio inputs is slightly negative
-(Table~\ref{tab:matched-encoders}). This decomposition places the
-improvement over
-Fern\'andez's distance in the comparison itself rather than in the
-encoder: it comes from comparing the levels of the standardized ratio
-histories under a concentrated neighbour rule rather than the rank
-co-movement of each characteristic over time. Because a size-based graph
+graph on the ratio inputs is slightly negative and its 95\% interval ends
+at 0.0002 nats per issuer-quarter, a small fraction of the TabPFN graph's
+advantage over the Fern\'andez graph (Tables~\ref{tab:matched-factors}
+and~\ref{tab:matched-encoders}). Because the direct graph differs from the
+Fern\'andez graph in several respects at once, comparing the levels of
+the standardized histories rather than their rank co-movement, imputing
+missing values rather than assigning a neutral distance, and standardizing
+each field, this decomposition shows that the improvement over
+Fern\'andez's distance does not require an encoder, while leaving open
+which of those differences produces it. Because a size-based graph
 and a permutation null both fit worse than the Fern\'andez graph, the
 characteristic-history distance does carry information about peers, which
 the direct comparison improves on.
 
 \paragraph{When encoding adds fit.}
-Having located the improvement over Fern\'andez's distance in the direct
-comparison of standardized ratios, we turn to whether an encoder ever
-improves on that comparison, and the answer depends more on the inputs it
-receives than on which encoder is used (Table~\ref{tab:matched-encoders}).
-Whereas on the ratio inputs the four encoders scatter around the direct
-graph, with one interval above zero and one below, and on the underlying
-inputs two of the four fit worse than the direct graph, on the broad inputs
-all four estimated gains are positive and three of the four intervals
-exclude zero, with TabPFN recording the
+Having established that the improvement over Fern\'andez's distance does
+not require an encoder, we turn to whether an encoder ever improves on the
+direct graph, and the four encoders agree in sign against it only on the
+broad inputs (Table~\ref{tab:matched-encoders}). On the ratio inputs they
+scatter around the direct graph, with one interval above zero and one
+below, and on the underlying inputs two of the four fit worse than the
+direct graph. On the broad inputs, by contrast, all four estimated gains
+are positive and three of the four intervals exclude zero, with TabPFN
+recording the
 largest, at \ffmatched{broad-gain} nats per issuer-quarter. Because the
 direct distance weights every standardized field equally, adding many
 filing fields reduces the relative weight of the four ratios, and on the
 quarterly panel the direct graph's advantage over the Fern\'andez graph is
 smaller with the broad inputs than with the ratios alone
-(Table~\ref{tab:quarterly-comparisons}). The encoders, by contrast,
+(Table~\ref{tab:quarterly-comparisons}). The encoders instead
 condition their representations on labelled historical examples, and with
 the broad inputs each of them improves on the direct graph in point
 estimate.
@@ -167,8 +170,10 @@ omitting each engineered ratio history in turn removes information from its
 inputs, and the omissions show the converse pattern. Although removing the
 market-equity-to-assets history, with the broad filing fields and the
 valuation labels still available, lowers peer overlap with the full graph
-to a Jaccard similarity of 0.25, it leaves no detectable change in fit, and
-the other three omissions leave most peers in place. Because large changes
-in peer membership can leave return fit unchanged, fit does not determine a
-representation's peers any more than prediction accuracy does in
-Proposition~\ref{prop:recovery} (Appendix~\ref{app:ablation}).
+to a Jaccard similarity of 0.25, its interval for the change in fit,
+$[-0.0008, 0.0022]$ nats per issuer-quarter, excludes any loss as large as
+the projection's, and the other three omissions leave most peers in place.
+Because similar fit can therefore accompany substantially different peer
+sets, fit does not determine a representation's peers any more than
+prediction accuracy does in Proposition~\ref{prop:recovery}
+(Appendix~\ref{app:ablation}).

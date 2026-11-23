@@ -11,9 +11,10 @@ peer weights from the co-movement of characteristic histories, frozen
 tabular foundation models offer a different route, in which a model
 pretrained across many tables encodes each firm's financial record
 alongside labelled historical examples and each firm's peers are the firms
-whose representations lie closest. We ask when this route selects better
-peers than a distance computed directly from the same financial records,
-and what the resulting representation reveals about the firms it places
+whose representations lie closest. We ask when this route selects peers
+whose returns fit better than those chosen by a distance computed directly
+from the same financial records, and what the resulting
+representation reveals about the firms it places
 together.
 
 How weight is spread across firms matters as much as the distance itself.
@@ -37,11 +38,12 @@ improvement that a single benchmark would conflate. Although TabPFN peers
 selected from four financial ratios fit better than Fern\'andez peers even
 after the five Fama--French factors and momentum, a second benchmark, which
 selects peers by the distance between the same standardized ratios without
-an encoder, fits at least as well as TabPFN under market controls, so the
-improvement over Fern\'andez's distance does not require encoding. Whereas
-encoding adds little to four ratios, it adds fit once the ratios are
-augmented with financial fields from SEC filings: all four encoders we study
-then have positive estimated gains over the direct graph built from the
+an encoder, has a higher estimated fit than TabPFN under market controls,
+so the improvement over Fern\'andez's distance does not require encoding.
+Whereas the four encoders we study disagree in sign against the direct
+graph on four ratios, encoding adds fit once the ratios are
+augmented with financial fields from SEC filings: all four encoders then
+have positive estimated gains over the direct graph built from the
 same fields, and the TabPFN gain persists under multifactor controls.
 
 These comparisons establish when an encoder improves fit, although neither

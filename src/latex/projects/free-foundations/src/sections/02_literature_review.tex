@@ -16,13 +16,14 @@ in-sample association of issuer returns with contemporaneous peer returns
 after factor adjustment, using the spatial lag and error models of
 \citet{anselin1988} and \citet{lesage2009}.
 
-While representation learning in finance has mostly learned firm structure
-from returns or holdings, with \citet{kelly2019} treating characteristics
-as instruments for time-varying factor exposures, \citet{gu2021} learning
-how exposures vary with characteristics in an autoencoder asset-pricing
-model and \citet{gabaix2025asset} embedding assets through investor
-holdings, tabular pretraining provides a different starting point, because
-the encoder is trained across many unrelated datasets before it sees any
+Representation learning in finance has mostly learned firm structure from
+returns or holdings: \citet{kelly2019} treat characteristics as
+instruments for time-varying factor exposures, \citet{gu2021} learn how
+exposures vary with characteristics in an autoencoder asset-pricing model,
+and \citet{gabaix2025asset} embed assets through investor holdings.
+Whereas these models learn firm structure from financial data itself,
+tabular pretraining provides a different starting point, because the
+encoder is trained across many unrelated datasets before it sees any
 financial record. In a prior-data fitted network, pretraining samples tasks
 and teaches the predictor to infer labels given examples from a new table
 \citep{muller2022,nagler2023}, and \citet{hollmann2025} show that TabPFN
