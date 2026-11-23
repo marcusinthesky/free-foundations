@@ -82,6 +82,9 @@ in
         ps.xcolor
         ps.url
         ps.natbib
+        # Compile and verify the standalone arXiv upload with pdfLaTeX.
+        ps.geometry
+        ps.hyperref
         ps.caption
         ps.booktabs
         ps.amsmath

@@ -59,6 +59,10 @@ build target="arxiv":
 paper target="arxiv": assets
     just build "{{ target }}"
 
+# Build the self-contained arXiv source upload from saved results.
+bundle: assets
+    bash bundle-arxiv.sh {{ project }}
+
 count target="arxiv":
     mkdir -p {{ project }}/build/{{ target }}
     cd {{ project }}/src && texcount -merge -sub=section targets/{{ target }}.tex > ../build/{{ target }}/word-count.txt

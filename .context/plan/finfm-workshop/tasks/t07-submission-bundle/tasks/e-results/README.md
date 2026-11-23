@@ -17,7 +17,6 @@ Own `05_results.tex` and captions of its exhibits. Use [t07.1](../a-manuscript-p
 ## Acceptance
 
 - [ ] Integrate matched factor, kernel, financial-input and encoder results and the conditional geometry decision.
-
 - [x] Lead with the Fernández design bridge. For each retained comparison state the estimand, benchmark, effect size, uncertainty and interpretation. Distinguish recovery of exposure geometry, residual dependence and pricing restrictions.
 - [x] Explain informative negative and unidentified results. Tie scope to actual cohorts and fitted models. Bind quoted numbers to generated macros, and check units, denominators, interval labels and figure references.
 - [x] Hand the editor a list of supported headline claims and unresolved items. Remove or qualify unsupported promised exhibits across the results section.

@@ -1,5 +1,14 @@
 # Independent candidate review
 
+The independent review below records the earlier candidate. The
+[23 November handoff](../../../evidence/candidate.md) identifies the revised
+PDF and its matching abstract. The editorial review of that PDF checked
+the fixed-cohort weight concentration against the saved output, and the
+matched-panel likelihood differences against the factor, encoder and
+projection exhibits. It also checked all ten rendered pages, the anonymous
+title and metadata, and the position of the main-text tables on page 4.
+Co-author approval of the revised version remains open.
+
 The separate science and PDF reviewers used the cohort, theorem, baseline,
 refit, and PCoA receipts to qualify the manuscript.
 

@@ -1,20 +1,30 @@
 \section{Conclusion}
 
-For an analyst constructing a peer return from financial statements, the
-value of a frozen representation depends on the information available for
-the comparison. With the four characteristic histories used by
-Fern\'andez, TabPFN selects peers whose returns improve in-sample fit over
-her joint distance after adjustment for FF5 and momentum. Against the more
-direct benchmark of firms close in standardized feature space, the clearest
-gain for TabPFN comes when both methods use the broader financial disclosures
-and the return model controls for the market.
+For US equities over 2011--2025, what a frozen encoder adds to peer
+selection depends on the benchmark against which it is judged. Although
+peers chosen by TabPFN from four ratios fit contemporaneous returns better
+than peers chosen by Fern\'andez's characteristic-history distance, and the
+difference survives five Fama--French factors and momentum, a ten-neighbour
+graph on the same standardized ratios fits at least as well as TabPFN under
+market controls, so that improvement does not require an encoder. Against
+the direct graph, by contrast, encoding adds fit once the inputs extend to
+broad filing data, where all four encoders have positive estimated gains
+and the TabPFN gain persists under multifactor controls.
 
-Within that broad representation, valuation gives the leading coordinate a
-recognizable economic interpretation. Firms with similar values on this
-axis, however, often occupy different neighbourhoods in the full space.
-Restricting peer selection to the valuation coordinate consequently changes
-whose returns enter each firm's peer average, and the resulting graph fits
-the quarterly returns less well. For spatial asset pricing, this local
-ordering matters in its own right, since even representations that recover
-the same exposure can assign different peer weights and imply different
-covariances.
+While the selected broad-input representation is organized along a
+valuation axis, its peers are not. Firms close on that axis have few
+neighbours in common with the full representation, and selecting peers
+along it lowers fit by more than the encoder's gain over the direct graph,
+whereas omitting the valuation history changes peers substantially without
+a detectable change in fit. Read alongside
+Proposition~\ref{prop:recovery}, these results show that neither
+prediction accuracy, nor return fit, nor the leading axis identifies the
+peers a representation selects.
+
+Because none of these summaries settles which firms an encoder treats as
+peers, an encoder proposed for peer selection should be compared with a
+direct distance on its own inputs, and its peers should be read from the
+full representation rather than from its dominant coordinate. Since our
+comparisons are in-sample and retrospective, the natural next test is
+whether the broad-input gain carries over to peers formed with the model
+releases and filing values available at each formation date.

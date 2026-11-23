@@ -19,7 +19,6 @@ Own `01_introduction.tex`, `00_abstract.tex`, `06_conclusion.tex`, title metadat
 ## Acceptance
 
 - [ ] Reconcile framing with the final matched evidence and review the new anonymous PDF.
-
 - [x] Reconcile the title, research question and contribution with the strongest supported findings. Preserve the reviewed introduction's arc and report material limitations in the conclusion.
 - [x] Read the assembled manuscript end to end. Resolve inconsistent notation, duplicated explanations, missing transitions and stale outline placeholders with the owner of each affected section.
 - [x] Compile both shared targets. Hand t07.7 the candidate revision, FinFM PDF and corresponding plain-text abstract. Review page allocation, exhibit placement and legibility in the actual two-column layout.

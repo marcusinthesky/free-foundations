@@ -15,10 +15,15 @@ just latex::build finfm  # anonymous AAAI-27 pdfLaTeX/BibTeX build
 just latex::assets       # render saved research outputs only
 just latex::paper arxiv  # render saved results, then build
 just latex::paper finfm
+just latex::bundle       # build the arXiv source upload from saved results
 just latex::count arxiv
 just latex::check         # format/lint and both target builds
 just latex::prose-lint     # optional editorial suggestions for all sections
 ```
+
+Upload `projects/free-foundations/build/arxiv/arxiv.tar.gz` to arXiv. The
+archive compiles with pdfLaTeX from `main.tex` and includes the generated
+exhibits and bibliography. Bundling requires the saved study results.
 
 After `just latex::setup`, the prose check runs offline. Pass individual
 authored `.tex` paths to review selected sections. Matches identify the rule

@@ -1,18 +1,23 @@
-Two firms with similar leverage can differ widely in cash flow or market
-exposure, so the choice of a financial distance determines whose returns
-enter each firm's peer average. On a matched US equity panel, we compare
-peers selected by a frozen tabular encoder with peers selected directly
-from the same financial records. With five Fama--French factors and
-momentum, a TabPFN graph built from four ratios improves in-sample return
-fit over Fern\'andez's characteristic-history distance. Under market
-controls, the estimated gain over standardized distances on the ratios is
-close to zero. With broader disclosures, TabPFN achieves the largest
-estimated gain over its own direct graph among the four encoders and three
-input sets we compare under market controls. A four-firm construction
-shows how an
-invertible recoding can preserve predictions while changing the peer graph
-even after normalization and symmetrization. In the selected broad-input
-representation, the leading coordinate accounts for \ffmatched{inertia}\%
-of positive inertia and orders firms by valuation, yet selecting peers
-along this axis yields mean Jaccard overlap of only \ffmatched{overlap}
-with the full graph.
+Because a financial peer group determines whose returns enter a firm's
+peer average in a spatial model of equity returns, the distance used to
+select peers shapes what the model measures. We ask when a frozen tabular
+foundation model selects better peers than a distance computed directly
+from the same financial records, measuring fit by the in-sample
+spatial-lag log likelihood of US equity returns from 2011 to 2025.
+Although TabPFN peers chosen from four financial ratios fit better than
+peers chosen by Fern\'andez's characteristic-history distance, by
+\ffmatched{factor-gain} nats per issuer-quarter after five Fama--French
+factors and momentum, a ten-neighbour graph on the same standardized
+ratios fits at least as well as TabPFN under market controls. Whereas
+encoding adds little to four ratios, it adds fit once the inputs extend to
+broad filing data, where all four encoders we study have positive estimated
+gains over the direct graph built from the same fields and the TabPFN gain
+of \ffmatched{broad-gain} nats per issuer-quarter under market controls
+remains positive under multifactor controls. A four-firm example shows why
+prediction accuracy cannot settle peer selection, since an invertible
+recoding can preserve every prediction while changing nearest neighbours.
+While the leading coordinate of the broad-input representation orders
+firms by valuation, peers chosen along it have a mean Jaccard similarity of
+only \ffmatched{overlap} with the full representation's peers, and
+restricting the graph to that coordinate lowers fit by more than the
+encoder's gain over the direct graph.

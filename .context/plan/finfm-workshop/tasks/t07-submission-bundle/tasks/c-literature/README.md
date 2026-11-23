@@ -18,7 +18,6 @@ Own `02_literature_review.tex` and the canonical CSL records. Start verifying so
 ## Acceptance
 
 - [ ] Verify factor, momentum and checkpoint citations against the final comparison specifications.
-
 - [x] Write the related-work argument linking Fernández, spatial pricing restrictions, frozen representations and economic measurement to the paper's contribution.
 - [x] Check each substantive literature claim against a primary source and each cited work's title, authors, venue and identifier. Coordinate the bibliography export through t07.2 and check anonymous self-citations in the rendered paper.
 

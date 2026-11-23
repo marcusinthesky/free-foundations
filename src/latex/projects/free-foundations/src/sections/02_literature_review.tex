@@ -1,32 +1,47 @@
-\section{Literature Review}
+\section{Related Work}
 
-\citet{fernandez2011} uses the co-movement of firms' financial
-characteristics over time to define distances and converts those distances
-into weights with an exponential kernel. By retaining her distance
-while varying the weights, and then comparing
-distances under a common weighting rule, we can trace differences in the
-US return fits to the two choices her specification brings together.
-Our empirical
-criterion is the in-sample association of issuer returns with peer returns
-after factor adjustment. The spatial asset-pricing theory of \citet{kou2018}
-gives pricing implications under additional economic restrictions.
+Several literatures define peers through economic links and show that the
+returns of linked firms carry information about one another, with customer
+and supplier relationships \citep{cohen2008}, technological proximity
+\citep{lee2019technological} and the similarity of product descriptions
+\citep{hoberg2016} each identifying a different kind of connection. Whereas
+these approaches start from a named relationship, \citet{fernandez2011}
+uses the co-movement of firms' financial characteristics over time to
+define distances and converts those distances into weights with an
+exponential kernel, and the spatial asset-pricing theory of
+\citet{kou2018} derives pricing implications of such weights under
+additional economic restrictions. Because the economic object in our
+application is financial co-movement, we evaluate a set of peers by the
+in-sample association of issuer returns with contemporaneous peer returns
+after factor adjustment, using the spatial lag and error models of
+\citet{anselin1988} and \citet{lesage2009}.
 
-In financial representation learning, \citet{gu2021} use an autoencoder
-asset-pricing model to learn how exposures vary with characteristics and to
-estimate latent factors from returns. Tabular pretraining provides a
-different starting point. Drawing on a model trained across datasets,
-\citet{hollmann2025} demonstrate prediction and reusable embeddings with
-TabPFN. In a prior-data fitted network, pretraining samples tasks and
-teaches the predictor to infer labels given examples from a new table
-\citep{muller2022,nagler2023}. In our application, historical
-examples carry observed next-quarter
-valuation labels. We use the distances between the resulting issuer vectors
-to select peers and evaluate those choices through their quarterly returns.
+While representation learning in finance has mostly learned firm structure
+from returns or holdings, with \citet{kelly2019} treating characteristics
+as instruments for time-varying factor exposures, \citet{gu2021} learning
+how exposures vary with characteristics in an autoencoder asset-pricing
+model and \citet{gabaix2025asset} embedding assets through investor
+holdings, tabular pretraining provides a different starting point, because
+the encoder is trained across many unrelated datasets before it sees any
+financial record. In a prior-data fitted network, pretraining samples tasks
+and teaches the predictor to infer labels given examples from a new table
+\citep{muller2022,nagler2023}, and \citet{hollmann2025} show that TabPFN
+supports both prediction and reusable embeddings. Since the historical
+examples in our application carry observed next-quarter valuation labels,
+we select peers by the distances between the resulting issuer vectors and
+evaluate those choices through quarterly returns.
 
-\citet{roeder2021} establish identification up to a linear transformation
-for a family of discriminative models under their assumptions. A linear
-transformation can stretch one direction more than another, changing the
-ordering of distances even when the transformation is invertible. This
-observation motivates our geometric identification result, which
-separates the information
-a readout can recover from the choice of neighbours in a spatial model.
+Because identification results for learned representations characterize
+them only up to a class of transformations, the choice among equivalent
+representations can matter for peer selection. \citet{roeder2021}
+establish identification up to an invertible linear transformation for a
+family of discriminative models, and identifiability results for
+latent-variable models likewise hold only up to an equivalence class
+\citep{khemakhem2020}. Although common indices of representation
+similarity are invariant to orthogonal transformations and isotropic
+scaling \citep{kornblith2019}, which preserve the ordering of distances, a
+general invertible linear map can stretch one direction more than another
+and thereby reorder neighbours, so two representations that are equivalent
+for prediction need not select the same peers. Our four-firm construction
+makes this concrete, since a change of coordinates preserves the
+recoverable predictions while changing the peer weights in a spatial model.

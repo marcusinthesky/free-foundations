@@ -2,7 +2,7 @@
 \label{app:proofs}
 
 \paragraph{Economic distance and task recovery.}
-For loadings $b_i,b_j$ on centered common shocks $q$ with finite second
+For loadings $b_i,b_j$ on mean-zero common shocks $q$ with finite second
 moments, the root mean square of $(b_i-b_j)^\top q$ measures the difference
 in return responses in units of return. Writing $\Omega$ for the shock
 covariance and $a_i=\Omega^{1/2}b_i$ gives the distance $\norm{a_i-a_j}$.
@@ -48,9 +48,9 @@ Composing the raw-state readout with the inverse stretch preserves
 predictions. For a
 restricted readout class $\mathcal R$, a bijection $g$ preserves
 the class when $\{r\circ g^{-1}:r\in\mathcal R\}=\mathcal R$. A
-restricted class preserved under both $g$ and $g^{-1}$ has the same
-attainable functions after the recoding. Equality of the transformed
-class gives closure under composition and inversion. The fibre
+recoding with this property leaves the attainable predictions unchanged.
+The bijections that preserve $\mathcal R$ form a group under
+composition. The fibre
 argument is pointwise. A measurable or approximate recovery claim
 requires additional assumptions on the spaces and readout class.
 
@@ -90,7 +90,7 @@ mismatch enter separately, all divided by the positive separation margin.
   \]
   On the same roster, let $\widehat W$ have multiplier $\widehat P$
   at the same $\rho$. If both inverse norms are at most $M$ and the
-  common innovation covariance has $\norm V_2\leq v$, then
+  common innovation covariance $V$ satisfies $\norm{V}_2\leq v$, then
   \[
     \norm{\widehat P V\widehat P^\top-PVP^\top}_2
     \leq 2v|\rho|M^3\norm{\widehat W-W}_2 .
@@ -146,8 +146,9 @@ sheets, and undefined paired history correlations each have separate
 availability rules.
 
 The characteristic reimplementation estimates OLS, spatial lag by
-instrumental variables and maximum likelihood, and spatial error by
-maximum likelihood. Fit states distinguish available estimates from
+instrumental variables \citep{kelejian1998} and maximum likelihood
+\citep{lee2004}, and spatial error by maximum likelihood. Fit states
+distinguish available estimates from
 invalid or boundary fits. For the primary formation, the stationary
 quarter bootstrap resamples common date blocks, recomputes betas and
 medians, and refits models while the formation graph stays fixed
@@ -200,12 +201,13 @@ firms within the ratio-based embedding.
   \IfFileExists{generated/tables/quarterly-likelihood.tex}{%
     \input{generated/tables/quarterly-likelihood}%
   }{\ffmissing}
-  \caption{In-sample lag log-likelihood differences per quarter.
-    All graphs use ten-neighbour weights. Ratios denote Fernández
-    histories and XBRL denotes CompanyFacts inputs. Positive values
+  \caption{Market-controlled in-sample spatial-lag log-likelihood differences
+    per quarter on the quarterly panel.
+    All graphs use ten-neighbour weights. Ratios denote the ratio
+    inputs and XBRL denotes the broad inputs. Positive values
     favour the network in the first column.
     Percentiles resample paired quarterly contributions conditional on
-  fitted parameters. The last column adjusts for multiple comparisons.}
+  fitted parameters. The last column reports Holm-adjusted $p$-values.}
   \label{tab:quarterly-comparisons}
 \end{table*}
 
@@ -232,18 +234,18 @@ firms within the ratio-based embedding.
   Each draw uses the issuers with sufficient observed returns for that refit.}
   \label{tab:us-benchmark}
 \end{table}
-\paragraph{Does the encoder add to its inputs?}
-The earlier quarterly comparison in Table~\ref{tab:quarterly-comparisons}
-reports differences per quarter. Tables~\ref{tab:matched-factors}
-and~\ref{tab:matched-encoders} report differences per issuer-quarter on
-the common factor sample. With symmetrized ten-neighbour weights, the
-ratio-based TabPFN graph gains
-4.98 log-likelihood units per quarter over the joint characteristic graph,
-while selecting peers directly from the same financial inputs gains 5.91.
-The paired encoder-minus-direct difference is therefore $-0.94$ per quarter,
-with a 95\% interval of $[-2.67,0.75]$. The positive encoder contrast
-against the joint graph has a Holm-adjusted $p$-value of 0.135
-(Table~\ref{tab:quarterly-comparisons}).
+\paragraph{Encoder and direct graphs on the quarterly panel.}
+Table~\ref{tab:quarterly-comparisons} reports differences per quarter
+across \ffvalue{quarterly-panel-issuer-quarters} issuer-quarters, while
+Tables~\ref{tab:matched-factors} and~\ref{tab:matched-encoders} report
+differences per issuer-quarter on the smaller common factor sample. With
+symmetrized ten-neighbour weights, the ratio-based TabPFN graph gains 4.98
+log-likelihood units per quarter over the Fern\'andez graph, while the
+direct graph on the same ratio inputs gains 5.91, and the paired
+encoder-minus-direct difference is $-0.94$ per quarter with a 95\%
+interval of $[-2.67,0.75]$. Across the family of quarterly comparisons,
+the Holm-adjusted $p$-values \citep{holm1979} are 0.135 for the TabPFN
+contrast with the Fern\'andez graph and 0.055 for the direct contrast.
 
 \paragraph{The characteristic benchmark.}
 The joint characteristic kernel has
@@ -272,14 +274,13 @@ characterize the US reimplementation, where the original sample is unavailable.
 \paragraph{Historical ratio-only geometry.}
 To identify which financial histories organize the learned peers, we
 form principal coordinates from chord distances of the January
-2016 TabPFN states using only the four ratio histories. Because the
-embedding uses information available at formation, the analysis
-includes all \ffnum[0]{quarterly-primary-roster} issuers on the
-analytical roster, including firms with incomplete subsequent
-returns. For each ratio we use the latest
+2016 TabPFN states using only the four ratio histories. We can
+construct these distances for all \ffnum[0]{quarterly-primary-roster}
+issuers on the analytical roster because the calculation requires
+no subsequent returns. For each ratio we use the latest
 available annual slot and restrict the comparison to its observed
 issuers. The leading coordinate has stronger absolute rank correlation with
-market capitalization over assets and market-to-book than with
+market equity over assets and market-to-book than with
 dividend yield or debt maturity. The same ordering holds for explained
 rank variation after regression on the leading three coordinates and
 an intercept. This subspace comparison is invariant to sign changes and
@@ -295,7 +296,7 @@ On this formation date the learned geometry is closely associated
 with a valuation measure supplied to the encoder, while its alignment
 with independently estimated market exposure is weak.
 
-\section{Selected broad-input geometry}
+\section{Selected Broad-Input Geometry}
 \label{app:ablation}
 
 For the broad-input model selected by its market-controlled gain, we rebuild
@@ -305,42 +306,27 @@ the historical examples and the issuers being encoded. The underlying broad
 filing fields remain available, so the omission measures the incremental
 role of the supplied ratio history. Each comparison uses the same return
 observations and the full broad-input graph as its reference.
+Table~\ref{tab:ablation} reports the results. Both projected graphs fit
+less well than the full graph, with intervals below zero. Among the four
+omissions, removing the market-equity-to-assets history changes the peer
+sets most, and all four omission intervals span zero.
 
-\begin{table*}[t]
-  \centering
-  \fftabletype
-  \IfFileExists{generated/tables/matched-ablation.tex}{\input{generated/tables/matched-ablation}}{\ffmissing}
-  \caption{Broad-input TabPFN peer graphs after projection or omission.
-    Overlap averages issuer-level Jaccard similarities within each quarter
-    and then across quarters. Fit differences are nats per issuer-quarter
-  relative to the full graph, with paired conditional 95\% intervals.}
-  \label{tab:ablation}
-\end{table*}
-
-Using three coordinates improves on the first-coordinate projection, although
-both projected graphs fit less well than the full graph
-(Table~\ref{tab:ablation}). Among the four omissions, removing the
-market-equity-to-assets history
-changes the peer sets most, even with the broad filing fields and historical
-context labels still available. The estimated changes in fit are small,
-with all four omission intervals spanning zero.
-
-\section{Matched factor specifications}
+\section{Matched Factor Specifications}
 
 \paragraph{Broad-input encoder versus direct features.}
 Table~\ref{tab:matched-broad-factors} compares TabPFN with the direct graph
 built from the same broad financial disclosures. Both graphs use the common
 issuer-quarter mask and symmetrized ten-neighbour weights. The historical
 contexts and extracted representations remain fixed. Each factor
-specification refits the spatial-lag model; paired stationary-quarter
-intervals condition on its fitted loadings and parameters. These additional
-factor comparisons do not change the market-controlled encoder selection.
+specification has its own spatial-lag fit. We resample paired quarters
+at the fitted loadings and parameters. The market-controlled ranking
+determines which encoder enters this comparison.
 
 \begin{table}[t]
   \centering
   \fftabletype
   \IfFileExists{generated/tables/matched-broad-factors.tex}{\input{generated/tables/matched-broad-factors}}{\ffmissing}
-  \caption{Broad-input TabPFN minus the direct-feature graph in spatial-lag
+  \caption{Broad-input TabPFN minus the direct graph in spatial-lag
     log likelihood, in nats per issuer-quarter. Positive gains favour
     TabPFN. All three controls use identical issuer-quarters and peer
     graphs, with paired conditional 95\% intervals. Dashes denote

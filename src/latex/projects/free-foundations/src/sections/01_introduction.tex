@@ -1,38 +1,72 @@
 \section{Introduction}
 
 Two firms with similar leverage can differ widely in cash flow or market
-exposure. In a spatial model of equity returns, the choice among these
-measures determines whose returns enter each firm's peer average and how
-much weight each peer receives. \citet{fernandez2011} constructs those
-weights from histories of financial characteristics. We ask what a frozen
-tabular model adds when it selects peers from the same financial records,
-using both her characteristic-history distance and a direct comparison of
-the standardized financial features as benchmarks.
+exposure, so the firms that count as financial peers depend both on the
+characteristics used to compare them and on the distance assigned to a
+difference in those characteristics. In a spatial model of equity returns,
+that choice determines whose returns enter each firm's peer average, and
+through the spatial multiplier it also shapes the covariance the model
+implies across firms \citep{kou2018}. While \citet{fernandez2011} builds
+peer weights from the co-movement of characteristic histories, frozen
+tabular foundation models offer a different route, in which a model
+pretrained across many tables encodes each firm's financial record
+alongside labelled historical examples and each firm's peers are the firms
+whose representations lie closest. We ask when this route selects better
+peers than a distance computed directly from the same financial records,
+and what the resulting representation reveals about the firms it places
+together.
 
-In our US reimplementation of Fern\'andez's spatial CAPM, the joint
-characteristic kernel spreads weight across so many issuers that firms with
-quite different histories receive much the same peer return. To separate the
-choice of distance from the concentration of the weights, we compare
-distances under a common ten-neighbour rule and then examine how the
-comparison changes as weight extends to more distant firms.
+How weight is spread across firms matters as much as the distance itself.
+Because the joint characteristic kernel in our US reimplementation of
+Fern\'andez's spatial capital asset pricing model (CAPM) gives each issuer
+about \ffnum[0]{quarterly-fernandez-joint-effective-neighbours} effective
+neighbours among \ffnum[0]{quarterly-primary-issuers} fitted issuers, every
+firm's peer return lies close to the cross-sectional average, and the
+spatial coefficient can absorb the common mean instead of measuring
+co-movement among similar firms. We therefore compare peer graphs on a
+quarterly panel in which quarter effects absorb the common return level and
+each issuer selects ten neighbours, and we confirm that the ranking of
+distances persists under two smooth kernels. Throughout, fit refers to the
+in-sample spatial-lag log likelihood per issuer-quarter. Since the encoders
+were released after the sample and the filing values include later
+revisions, the comparisons measure contemporaneous co-movement
+retrospectively rather than forecast returns.
 
-Across the matched quarterly panel, peers selected by TabPFN from four
-financial ratios improve return fit over Fern\'andez's joint distance even
-after adjustment for the five Fama--French factors and momentum. To
-determine how much of that fit is already available in the financial inputs,
-we compare each encoder with a graph built directly from the features it
-receives. Under market controls, the estimated TabPFN gain on the four
-ratios is close to zero, with an interval spanning gains and losses. When
-both methods draw on a broad panel of financial disclosures, TabPFN yields
-the largest estimated gain over its direct benchmark among the twelve
-combinations we examine.
+With the peer weights concentrated, the design separates two sources of
+improvement that a single benchmark would conflate. Although TabPFN peers
+selected from four financial ratios fit better than Fern\'andez peers even
+after the five Fama--French factors and momentum, a second benchmark, which
+selects peers by the distance between the same standardized ratios without
+an encoder, fits at least as well as TabPFN under market controls, so the
+improvement over Fern\'andez's distance does not require encoding. Whereas
+encoding adds little to four ratios, it adds fit once the ratios are
+augmented with financial fields from SEC filings: all four encoders we study
+then have positive estimated gains over the direct graph built from the
+same fields, and the TabPFN gain persists under multifactor controls.
 
-The economic interpretation of these comparisons turns on a distinction
-between recovering a firm's exposure and identifying its peers. Two
-representations can preserve exactly the same exposure while placing
-different firms nearest to it. We show how such a change of coordinates
-can alter the network and bound the change in implied covariance at a
-common spatial coefficient. In the selected broad-input model we also
-measure how many peers remain when we discard all but the leading
-valuation coordinate. This measures the cost of using a one-dimensional
-summary for peer selection.
+These comparisons establish when an encoder improves fit, although neither
+fit nor prediction accuracy reveals how the encoder organizes firms.
+Because an invertible recoding can preserve every prediction while
+reordering distances, Proposition~\ref{prop:recovery} shows that
+representations equivalent for prediction can select different peers, and a
+four-firm example shows the reordering changing a symmetrized neighbour
+graph. Proposition~\ref{prop:multiplier} then bounds how far such a change
+in peer weights can move the covariance implied by the spatial model. The
+selected broad-input TabPFN representation exhibits this gap in the data.
+Although its leading principal coordinate carries \ffmatched{inertia}\% of
+positive inertia and orders firms by market equity over assets, a ratio the
+model receives both as an input and as the label of its historical
+examples, peers chosen along that coordinate have a mean Jaccard similarity
+of only \ffmatched{overlap} with the full representation's peers, and
+restricting the graph to it lowers fit by more than the encoder's entire
+gain over the direct graph. While the valuation axis summarizes the
+representation, the peers that improve fit depend on the dimensions beyond
+it.
+
+Taken together, these results make three contributions. The first is a
+matched benchmark that separates the choice of distance from the use of an
+encoder. The second is evidence on how that comparison varies across four
+encoders, three input sets and nested factor controls. The third is a
+formal and empirical account of why neither prediction accuracy nor a
+representation's leading axis identifies the peers that the representation
+selects.
