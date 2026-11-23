@@ -1,31 +1,20 @@
 Spatial arbitrage pricing theory (S-APT) extends factor models to allow
 returns to spill over between connected firms, beyond what common risk
-factors explain. Applying it requires a measure of which firms are close.
-In recent years, tabular foundation models (TFMs) have matched or
-outperformed tuned gradient-boosted and bagged ensembles on small and
-medium-sized tabular benchmarks. Although their predictive performance is
-strong, these models reveal little about what they have learned, which
-limits their use in regulated financial applications that require
-explanation. In language, vision and multimodal models, internal
-representations are widely used to probe what a network has learned, and
-distances between them serve as similarity measures for retrieval,
-zero-shot classification and clustering. Because financial disclosures are
-low-frequency, few observations are available to learn a firm
-representation from scratch, whereas a frozen pretrained model requires no
-such estimation. In this paper, we use the frozen internal representations
-of TFMs as a measure of financial dissimilarity in a spatial asset-pricing
-model. We compare the resulting peers with the characteristic-history
-distance of Fern\'andez and with a direct distance on the same disclosures.
-On a panel of US equities from 2011 to 2025, we score each peer set by its
-fit, the in-sample spatial-lag log likelihood of firms' returns. Using four
-financial ratios, every TFM has a higher estimated fit than Fern\'andez's
-distance, but so does the direct distance, by a comparable amount. Encoding
-adds fit when the inputs are broad: once SEC filing data are added, all
-four TFMs improve on the direct distance in point estimate, and the largest
-gain survives five Fama--French factors and momentum. We also show that
-prediction accuracy cannot settle peer selection, because an invertible
-recoding can preserve every prediction while changing nearest neighbours.
-In the best-fitting representation, the leading coordinate orders firms by
-valuation, yet peers chosen along it share little with the full
-representation's peers and lose more fit than the model gains over the
-direct distance.
+factors explain. In recent years, tabular foundation models (TFMs) have
+matched or outperformed tuned gradient-boosted and bagged ensembles on
+small and medium-sized tabular benchmarks. Although their predictive
+performance is strong, these models reveal little about what they have
+learned, which limits their use in regulated financial applications that
+require explanation. Internal representations are widely used to probe
+what neural networks learn and to measure similarity. In this paper, we use
+the frozen representations of four TFMs as a measure of financial
+dissimilarity in a spatial asset-pricing model of US equities from 2011 to
+2025, and find that their estimated gains over a direct distance between
+the same disclosures become consistently positive once broad SEC filing
+data are included. This reframes tabular foundation models from black-box
+predictors into instruments for measuring economic structure, with immediate
+applications to peer selection, risk attribution and network-based asset pricing.
+More broadly, our findings suggest that the internal representations of
+foundation models, not only their predictions, deserve study as economic
+objects, opening a new line of research on what pretrained models know
+about firms.

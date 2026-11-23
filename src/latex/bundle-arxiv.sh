@@ -40,6 +40,8 @@ tar --owner=0 --group=0 --mtime=@0 -czf "$work/arxiv.tar.gz" -T "$work/files"
 mkdir "$work/verify"
 cd "$work/verify"
 tar -xzf "$work/arxiv.tar.gz"
+# Floats can settle only on the third pass, as in the main pdfLaTeX build.
+compile
 compile
 compile
 if rg 'Citation.+undefined|Reference.+undefined|There were undefined|multiply[- ]defined|Rerun to get' main.log; then
