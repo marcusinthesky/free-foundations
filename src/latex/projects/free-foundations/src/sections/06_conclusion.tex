@@ -1,32 +1,36 @@
 \section{Conclusion}
 
-For US equities over 2011--2025, what a frozen encoder adds to peer
-selection depends on the benchmark against which it is judged. Although
-peers chosen by TabPFN from four ratios fit contemporaneous returns better
-than peers chosen by Fern\'andez's characteristic-history distance, and the
-difference survives five Fama--French factors and momentum, a ten-neighbour
-graph on the same standardized ratios has a higher estimated fit than
-TabPFN under market controls, so that improvement does not require an
-encoder. Against
-the direct graph, by contrast, encoding adds fit once the inputs extend to
-broad filing data, where all four encoders have positive estimated gains
-and the TabPFN gain persists under multifactor controls.
+Spatial arbitrage pricing theory takes a measure of proximity between firms
+as given, and our results show that the frozen internal representations of
+TFMs can supply one, although what they add depends on the benchmark
+against which they are judged. Using four financial ratios, every TFM we
+study has a higher estimated fit than Fern\'andez's characteristic-history
+distance, yet a direct distance on the same standardized ratios improves
+on that distance by a comparable amount, so the improvement does not
+require an encoder. Once broad filing data are added, by contrast, all four
+TFMs have positive estimated gains over the direct distance, and the
+largest survives five Fama--French factors and momentum.
 
-While the selected broad-input representation is organized along a
-valuation axis, its peers are not. Firms close on that axis have few
-neighbours in common with the full representation, and selecting peers
-along it lowers fit by more than the encoder's gain over the direct graph,
-whereas omitting the valuation history changes peers substantially while
-its interval for the change in fit excludes a loss as large as that from
-selecting peers along the axis. Read alongside
+Probing these representations shows what they have learned about firms.
+In the ratio-only embedding, the leading coordinates explain almost all of
+the rank variation in valuation and almost none of the variation in market
+beta, and the selected broad-input representation is organized along the
+same valuation axis. That dominant axis does not determine the peers,
+however. Firms close on it have few neighbours in common with the full
+representation, and selecting peers along it lowers fit by more than the
+model's gain over the direct distance. Omitting the valuation history
+changes peers substantially, yet its interval for the change in fit
+excludes a loss of that size. Read alongside
 Proposition~\ref{prop:recovery}, these results show that neither
 prediction accuracy, nor return fit, nor the leading axis identifies the
 peers a representation selects.
 
-Because none of these summaries settles which firms an encoder treats as
-peers, an encoder proposed for peer selection should be compared with a
-direct distance on its own inputs, and its peers should be read from the
-full representation rather than from its dominant coordinate. Since our
-comparisons are in-sample and retrospective, the natural next test is
-whether the broad-input gain carries over to peers formed with the model
-releases and filing values available at each formation date.
+An encoder proposed as the proximity measure for S-APT should therefore be
+compared with a direct distance on its own inputs, and its peers should be
+read from the full representation rather than from its dominant
+coordinate. Because our comparisons are in-sample and retrospective, the
+natural next step is held-out evaluation at each formation date, using the
+model releases and filing values then available. Such an evaluation would
+also allow a fair comparison with representations trained on financial
+data, whose capacity held-out performance can discipline
+\citep{kelly2024virtue}.

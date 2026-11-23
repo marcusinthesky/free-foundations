@@ -1,7 +1,7 @@
 ---
 type: paper-conference
 title: Transformers can do Bayesian inference
-description: Prior-data fitted networks.
+description: PFNs.
 author:
 - family: Müller
   given: Samuel

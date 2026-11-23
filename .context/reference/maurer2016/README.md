@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: The benefit of multitask representation learning
-description: Multitask representation bounds.
+description: Multitask bounds.
 author:
 - family: Maurer
   given: Andreas

@@ -2,7 +2,7 @@
 type: article
 title: Understanding the surprising generalization properties of tabular foundation
   models
-description: Tabular model generalization.
+description: TFM generalization.
 author:
 - family: Shaheen
   given: N.

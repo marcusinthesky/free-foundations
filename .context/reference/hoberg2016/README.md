@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: 'Text-based network industries and endogenous product differentiation'
-description: Text-similarity firm networks.
+description: Text-based peers.
 author:
 - family: Hoberg
   given: Gerard

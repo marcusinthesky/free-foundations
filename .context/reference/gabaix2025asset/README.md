@@ -1,7 +1,7 @@
 ---
 type: report
 title: Asset embeddings
-description: Learned asset representations.
+description: Asset embeddings.
 author:
 - family: Gabaix
   given: Xavier

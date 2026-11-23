@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: Spatial linkages in international financial markets
-description: Replicated spatial CAPM benchmark.
+description: Spatial CAPM benchmark.
 author:
 - family: Fernández
   given: Viviana

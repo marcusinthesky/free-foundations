@@ -1,7 +1,7 @@
 ---
 type: article
 title: 'The fundamental structure of risk: from characteristics to covariance'
-description: Characteristic covariance structure.
+description: Characteristic covariances.
 author:
 - family: Alouadi
   given: A.

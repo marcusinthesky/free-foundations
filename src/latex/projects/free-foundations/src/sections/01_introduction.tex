@@ -1,21 +1,70 @@
 \section{Introduction}
 
-Two firms with similar leverage can differ widely in cash flow or market
-exposure, so the firms that count as financial peers depend both on the
-characteristics used to compare them and on the distance assigned to a
-difference in those characteristics. In a spatial model of equity returns,
-that choice determines whose returns enter each firm's peer average, and
-through the spatial multiplier it also shapes the covariance the model
-implies across firms \citep{kou2018}. While \citet{fernandez2011} builds
-peer weights from the co-movement of characteristic histories, frozen
-tabular foundation models offer a different route, in which a model
-pretrained across many tables encodes each firm's financial record
-alongside labelled historical examples and each firm's peers are the firms
-whose representations lie closest. We ask when this route selects peers
-whose returns fit better than those chosen by a distance computed directly
-from the same financial records, and what the resulting
-representation reveals about the firms it places
-together.
+Spatial arbitrage pricing theory (S-APT) extends the factor structure of
+asset returns by allowing shocks to one firm to spill over to the firms
+connected to it, so that returns co-move beyond what common risk factors
+explain \citep{kou2018}. Because these spillovers travel along a network,
+the theory is only as informative as the measure of proximity that defines
+it. That measure determines whose returns enter each firm's peer average,
+and through the spatial multiplier it also shapes the covariance the model
+implies across firms.
+
+Tabular foundation models (TFMs) offer a new source of such a measure.
+Pretrained across many datasets, these models now match or outperform tuned
+gradient-boosted and bagged ensembles on small and medium-sized tabular
+benchmarks \citep{hollmann2025,ye2025}, predicting for a new table in a
+single forward pass. Although their predictive performance is strong, they
+reveal little about what they have learned, and that opacity limits their
+use in regulated financial applications, where model risk management
+requires predictions to be explained.
+
+In language, vision and multimodal models, the same opacity has been
+approached through the models' internal representations. These
+representations are widely used to probe what a network has learned
+\citep{kornblith2019,huh2024}, and distances between them serve as
+similarity measures for retrieval, zero-shot classification and clustering.
+Applied to financial records, a TFM's representation therefore offers both
+a window into what the model has learned about firms and a candidate
+measure of which firms are close.
+
+Such a representation could in principle be learned directly from
+financial data, but statistical learning theory explains why financial
+panels make this difficult. When a representation is selected from a
+hypothesis set $\mathcal{H}$ by fitting the data, the gap between its
+in-sample and population performance is controlled by the capacity of
+$\mathcal{H}$, measured by its Vapnik--Chervonenkis dimension or Rademacher
+complexity, relative to the number of observations
+\citep{shalevshwartz2014}. Because financial
+disclosures are low-frequency, our panel of at most 1,000 issuers at each
+of fifteen annual formations supplies at most 15,000 firm-years, and
+these observations are
+dependent across firms and over time. A representation flexible enough to
+compare many filing fields belongs to a hypothesis set whose capacity such
+a sample cannot discipline. While heavily parameterized models can still
+predict returns well out of sample \citep{kelly2024virtue}, their
+credibility then rests on held-out evaluation, which an in-sample
+comparison of peer graphs does not provide. A frozen pretrained model
+removes the estimation step instead. Since its weights are fixed before it
+sees the panel, and the labelled historical examples enter only as
+conditioning context, no parameter is fitted to the returns on which the
+peers are evaluated, and pretraining across many datasets takes the place
+of estimation as a prior over prediction tasks
+\citep{muller2022,nagler2023}. The only selection made on the panel is
+among twelve combinations of encoder and input set, a finite hypothesis set
+whose cost grows only with the logarithm of its size.
+
+In this paper, we use the frozen internal representations of four TFMs as a
+measure of financial dissimilarity in a spatial asset-pricing model, and
+we compare the resulting peers with the characteristic-history distance of
+\citet{fernandez2011} and with a direct distance between the same
+standardized disclosures. The comparison matters because two firms with
+similar leverage can differ widely in cash flow or market exposure, so the
+firms that count as peers depend both on the characteristics compared and
+on the distance assigned to their differences. Whereas
+\citet{fernandez2011} builds peer weights from the co-movement of
+characteristic histories, a TFM encodes each firm's financial record
+alongside labelled historical examples, and each firm's peers are the firms
+whose representations lie closest.
 
 How weight is spread across firms matters as much as the distance itself.
 Because the joint characteristic kernel in our US reimplementation of
@@ -34,17 +83,18 @@ revisions, the comparisons measure contemporaneous co-movement
 retrospectively rather than forecast returns.
 
 With the peer weights concentrated, the design separates two sources of
-improvement that a single benchmark would conflate. Although TabPFN peers
-selected from four financial ratios fit better than Fern\'andez peers even
-after the five Fama--French factors and momentum, a second benchmark, which
-selects peers by the distance between the same standardized ratios without
-an encoder, has a higher estimated fit than TabPFN under market controls,
-so the improvement over Fern\'andez's distance does not require encoding.
-Whereas the four encoders we study disagree in sign against the direct
-graph on four ratios, encoding adds fit once the ratios are
-augmented with financial fields from SEC filings: all four encoders then
-have positive estimated gains over the direct graph built from the
-same fields, and the TabPFN gain persists under multifactor controls.
+improvement that a single benchmark would conflate. On four financial
+ratios, all four encoders we study have a higher estimated fit than
+Fern\'andez's distance, and for TabPFN the difference survives the five
+Fama--French factors and momentum. A second benchmark, which selects peers
+by the distance between the same standardized ratios without an encoder,
+improves on Fern\'andez's distance by a comparable amount, so that
+improvement does not require encoding. Whereas the encoders disagree in
+sign against this direct graph on the ratios alone, encoding adds fit once
+the ratios are augmented with financial fields from SEC filings: all four
+encoders then have positive estimated gains over the direct graph built
+from the same fields, and the largest, from TabPFN, stays positive under
+multifactor controls.
 
 These comparisons establish when an encoder improves fit, although neither
 fit nor prediction accuracy reveals how the encoder organizes firms.
@@ -65,10 +115,12 @@ gain over the direct graph. While the valuation axis summarizes the
 representation, the peers that improve fit depend on the dimensions beyond
 it.
 
-Taken together, these results make three contributions. The first is a
-matched benchmark that separates the choice of distance from the use of an
+Taken together, these results make three contributions. The first is to
+use the frozen internal representations of TFMs as the proximity measure in
+a spatial asset-pricing model, evaluated against a matched direct
+benchmark that separates the choice of distance from the use of an
 encoder. The second is evidence on how that comparison varies across four
-encoders, three input sets and nested factor controls. The third is a
-formal and empirical account of why neither prediction accuracy nor a
-representation's leading axis identifies the peers that the representation
-selects.
+TFMs, three input sets and nested factor controls. The third is an
+account, formal and empirical, of what probing such a representation
+reveals, and of why neither prediction accuracy, nor return fit, nor the
+leading axis identifies the peers it selects.

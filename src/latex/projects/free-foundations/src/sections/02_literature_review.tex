@@ -8,9 +8,11 @@ and supplier relationships \citep{cohen2008}, technological proximity
 these approaches start from a named relationship, \citet{fernandez2011}
 uses the co-movement of firms' financial characteristics over time to
 define distances and converts those distances into weights with an
-exponential kernel, and the spatial asset-pricing theory of
-\citet{kou2018} derives pricing implications of such weights under
-additional economic restrictions. Because the economic object in our
+exponential kernel. Spatial arbitrage pricing theory (S-APT) shows how such
+a network, once fixed, restricts expected returns when shocks spill over
+between connected firms \citep{kou2018}, so each of these measures is a
+candidate for the proximity that S-APT takes as given. Because the
+economic object in our
 application is financial co-movement, we evaluate a set of peers by the
 in-sample association of issuer returns with contemporaneous peer returns
 after factor adjustment, using the spatial lag and error models of
@@ -21,16 +23,19 @@ returns or holdings: \citet{kelly2019} treat characteristics as
 instruments for time-varying factor exposures, \citet{gu2021} learn how
 exposures vary with characteristics in an autoencoder asset-pricing model,
 and \citet{gabaix2025asset} embed assets through investor holdings.
-Whereas these models learn firm structure from financial data itself,
-tabular pretraining provides a different starting point, because the
-encoder is trained across many unrelated datasets before it sees any
-financial record. In a prior-data fitted network, pretraining samples tasks
-and teaches the predictor to infer labels given examples from a new table
-\citep{muller2022,nagler2023}, and \citet{hollmann2025} show that TabPFN
-supports both prediction and reusable embeddings. Since the historical
-examples in our application carry observed next-quarter valuation labels,
-we select peers by the distances between the resulting issuer vectors and
-evaluate those choices through quarterly returns.
+Whereas these models estimate their representations from financial data,
+a tabular foundation model (TFM) arrives with a representation fixed before
+it sees any financial record, because it is pretrained across many
+unrelated datasets. In a prior-data fitted network, pretraining samples
+tasks and teaches the predictor to infer labels given examples from a new
+table \citep{muller2022,nagler2023}, and \citet{hollmann2025} show that
+TabPFN supports both prediction and reusable embeddings. Since benchmark
+evidence for TFMs comes mostly from independent and identically
+distributed tables, \citet{purucker2026} ask how far their performance
+extends beyond that setting, a question that financial panels, dependent
+over time and across firms, make pressing. In our application the
+historical examples carry observed next-quarter valuation labels, and we
+select peers by the distances between the resulting issuer vectors.
 
 Because identification results for learned representations characterize
 them only up to a class of transformations, the choice among equivalent
@@ -42,7 +47,10 @@ latent-variable models likewise hold only up to an equivalence class
 similarity are invariant to orthogonal transformations and isotropic
 scaling \citep{kornblith2019}, which preserve the ordering of distances, a
 general invertible linear map can stretch one direction more than another
-and thereby reorder neighbours, so two representations that are equivalent
-for prediction need not select the same peers. Our four-firm construction
-makes this concrete, since a change of coordinates preserves the
+and thereby reorder neighbours. \citet{steck2024} make the corresponding
+point for embeddings, showing that cosine similarities can be arbitrary
+when a model leaves the scale of each embedding dimension free, so the
+similarities used to probe a representation can depend on coordinates
+that its predictions leave undetermined. Our four-firm construction makes
+this concrete for peer selection, since a change of coordinates preserves the
 recoverable predictions while changing the peer weights in a spatial model.

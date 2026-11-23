@@ -1,7 +1,7 @@
 ---
 type: book
 title: Introduction to spatial econometrics
-description: Spatial model interpretation.
+description: Spatial econometrics.
 author:
 - family: LeSage
   given: James

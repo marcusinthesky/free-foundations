@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: The detection of disease clustering and a generalized regression approach
-description: Distance-matrix association.
+description: Mantel test.
 author:
 - family: Mantel
   given: Nathan

@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: Likelihood ratio tests for model selection and non-nested hypotheses
-description: Non-nested likelihood comparison.
+description: Non-nested tests.
 author:
 - family: Vuong
   given: Quang H.

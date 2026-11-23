@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: Asset pricing with spatial interaction
-description: Spatial asset pricing panel.
+description: Spatial APT.
 author:
 - family: Kou
   given: Steven

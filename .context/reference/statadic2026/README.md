@@ -1,7 +1,7 @@
 ---
 type: software
 title: 'statadic: composable statistics on JAX'
-description: Statistical estimation library.
+description: Statistics library.
 author:
 - family: Gawronsky
   given: Marcus

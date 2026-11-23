@@ -29,8 +29,10 @@ peer graphs ask different questions, we use two samples. The
 cross-sectional spatial CAPM relates each
 issuer's median quarterly excess return to its market exposure within a
 single formation cohort. The panel comparison follows successive December
-rosters through the four quarters of the following year, covering
-2011--2025. Each January we encode the issuers on the preceding December
+rosters, each formed from the 1,000 largest US common stocks and grouped by
+company into issuer portfolios, through the four quarters of the following
+year, covering 2011--2025. Each January we encode the issuers on the
+preceding December
 roster. In each quarter we use those representations to select peers
 among the issuers with eligible returns and factor exposures.
 
@@ -53,9 +55,15 @@ yield and debt maturity. The underlying inputs contain histories of the
 numerators and denominators used to construct those ratios. The broad
 inputs augment the ratio histories with the standard-taxonomy financial
 fields from SEC CompanyFacts that are reported for at least 10\% of
-issuer-quarters in the financial panel. At each January formation, the
-frozen encoder receives up to 256 historical examples labelled with an
-already observed value of next-quarter market equity over assets.
+issuer-quarters in the financial panel. We study four TFMs, TabPFN 3.5
+(building on \citealp{hollmann2025}), TabFM 1.1 \citep{kong2026tabfm},
+Kumo-Tabular \citep{nvidia2026kumo} and LimiX-2 \citep{zhang2026limix},
+and call each an encoder when it produces issuer representations
+(Appendix~\ref{app:data}). Their weights are never updated. At each January
+formation, the frozen encoder receives up to 256 historical examples
+labelled with an already observed value of next-quarter market equity over
+assets, which condition the representation without fitting any
+parameter.
 For wide tables we encode successive blocks of up to 500 columns and
 concatenate the issuer vectors. Filing cutoffs date the inputs, but the
 filing values include later revisions and the encoders were released after
@@ -80,7 +88,10 @@ We fit the spatial lag model
 \[
   y_t=\alpha_t\mathbf{1}+X_t\gamma+\rho W_t y_t+u_t .
 \]
-The vector $W_t y_t$ contains contemporaneous peer returns. Quarter
+The vector $W_t y_t$ contains contemporaneous peer returns. Adding this
+spatial lag to a factor model gives the return structure from which S-APT
+derives its pricing restrictions \citep{kou2018}, and we estimate that
+structure under each peer graph without imposing the restrictions. Quarter
 effects absorb the common return level. Each column of $X_t$ multiplies
 an issuer's estimated exposure by the corresponding quarterly factor
 return. We consider individual factors and joint controls including the

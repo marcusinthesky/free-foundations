@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: Common risk factors in the returns on stocks and bonds
-description: CRSP market equity convention.
+description: Market equity convention.
 author:
 - family: Fama
   given: Eugene F.

@@ -1,7 +1,7 @@
 ---
 type: book
 title: 'Spatial econometrics: methods and models'
-description: Spatial likelihood estimation.
+description: Spatial likelihood.
 author:
 - family: Anselin
   given: Luc

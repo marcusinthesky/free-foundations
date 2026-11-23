@@ -1,7 +1,7 @@
 ---
 type: paper-conference
 title: 'Position: the platonic representation hypothesis'
-description: Representational convergence.
+description: Shared representations.
 author:
 - family: Huh
   given: Minyoung

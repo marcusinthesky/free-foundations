@@ -1,7 +1,7 @@
 ---
 type: software
 title: 'robustbase: Basic Robust Statistics'
-description: Primary MM implementation.
+description: MM estimator.
 author:
 - family: Maechler
   given: Martin

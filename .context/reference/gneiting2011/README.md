@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: Making and evaluating point forecasts
-description: Proper scoring conventions.
+description: Scoring rules.
 author:
 - family: Gneiting
   given: Tilmann

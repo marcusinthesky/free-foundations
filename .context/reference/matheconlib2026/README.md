@@ -1,7 +1,7 @@
 ---
 type: software
 title: 'MathEconLib: machine-checked mathematical economics in Lean 4'
-description: Lean finite-probability conventions.
+description: Lean probability library.
 author:
 - literal: MathEconLib contributors
 issued:

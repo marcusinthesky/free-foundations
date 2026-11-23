@@ -1,25 +1,31 @@
-Because a financial peer group determines whose returns enter a firm's
-peer average in a spatial model of equity returns, the distance used to
-select peers shapes what the model measures. We ask when peers selected by a
-frozen tabular foundation model fit contemporaneous returns better than
-peers selected by a distance computed directly from the same financial
-records, measuring fit by the in-sample
-spatial-lag log likelihood of US equity returns from 2011 to 2025.
-Although TabPFN peers chosen from four financial ratios fit better than
-peers chosen by Fern\'andez's characteristic-history distance, by
-\ffmatched{factor-gain} nats per issuer-quarter after five Fama--French
-factors and momentum, a ten-neighbour graph on the same standardized
-ratios has a higher estimated fit than TabPFN under market controls.
-Whereas the four encoders we study disagree in sign against that direct
-graph on four ratios, encoding adds fit once the inputs extend to
-broad filing data, where all four encoders have positive estimated
-gains over the direct graph built from the same fields and the TabPFN gain
-of \ffmatched{broad-gain} nats per issuer-quarter under market controls
-remains positive under multifactor controls. A four-firm example shows why
-prediction accuracy cannot settle peer selection, since an invertible
+Spatial arbitrage pricing theory (S-APT) extends factor models to allow
+returns to spill over between connected firms, beyond what common risk
+factors explain. Applying it requires a measure of which firms are close.
+In recent years, tabular foundation models (TFMs) have matched or
+outperformed tuned gradient-boosted and bagged ensembles on small and
+medium-sized tabular benchmarks. Although their predictive performance is
+strong, these models reveal little about what they have learned, which
+limits their use in regulated financial applications that require
+explanation. In language, vision and multimodal models, internal
+representations are widely used to probe what a network has learned, and
+distances between them serve as similarity measures for retrieval,
+zero-shot classification and clustering. Because financial disclosures are
+low-frequency, few observations are available to learn a firm
+representation from scratch, whereas a frozen pretrained model requires no
+such estimation. In this paper, we use the frozen internal representations
+of TFMs as a measure of financial dissimilarity in a spatial asset-pricing
+model. We compare the resulting peers with the characteristic-history
+distance of Fern\'andez and with a direct distance on the same disclosures.
+On a panel of US equities from 2011 to 2025, we score each peer set by its
+fit, the in-sample spatial-lag log likelihood of firms' returns. Using four
+financial ratios, every TFM has a higher estimated fit than Fern\'andez's
+distance, but so does the direct distance, by a comparable amount. Encoding
+adds fit when the inputs are broad: once SEC filing data are added, all
+four TFMs improve on the direct distance in point estimate, and the largest
+gain survives five Fama--French factors and momentum. We also show that
+prediction accuracy cannot settle peer selection, because an invertible
 recoding can preserve every prediction while changing nearest neighbours.
-While the leading coordinate of the broad-input representation orders
-firms by valuation, peers chosen along it have a mean Jaccard similarity of
-only \ffmatched{overlap} with the full representation's peers, and
-restricting the graph to that coordinate lowers fit by more than the
-encoder's gain over the direct graph.
+In the best-fitting representation, the leading coordinate orders firms by
+valuation, yet peers chosen along it share little with the full
+representation's peers and lose more fit than the model gains over the
+direct distance.

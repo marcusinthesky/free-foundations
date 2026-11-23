@@ -3,6 +3,9 @@
 Although a predictor and a spatial model use the same issuer vector, they
 use it in different ways, since the predictor reads out a quantity from
 each vector whereas the spatial model compares vectors across firms.
+When a TFM's internal representation serves as a similarity measure, the
+question is therefore whether the predictions it supports also determine
+which firms are close.
 For a fixed dated context, let $F(h)$
 denote the ideal task prediction for history $h$ and $s(h)$ the economic
 target of interest. An exact readout is a function of the representation
@@ -79,7 +82,9 @@ For the characteristic benchmark the estimated quantities include the
 market betas, the cross-sectional premium, the intercept when
 included, the spatial coefficient, and the error variance. For the
 encoder comparisons, we fix the model weights, the rule for
-selecting historical examples, the preprocessing and the distance measure.
+selecting historical examples, the preprocessing and the distance measure,
+so the only quantities estimated on the panel are the factor exposures and
+the parameters of the return model.
 For each matched-panel contrast, we divide the difference in total log
 likelihood by the number of matched issuer-quarters. We use natural
 logarithms, so this difference is in nats per issuer-quarter, and we

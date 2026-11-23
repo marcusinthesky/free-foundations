@@ -2,7 +2,7 @@
 type: article-journal
 title: 'Spatial GARCH models for unknown spatial locations: an application to financial
   stock returns'
-description: Spatial dependence in returns.
+description: Spatial GARCH.
 author:
 - family: Fülle
   given: Markus J.

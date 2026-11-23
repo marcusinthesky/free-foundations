@@ -1,7 +1,7 @@
 ---
 type: article-journal
 title: 'Characteristics are covariances: a unified model of risk and return'
-description: Characteristics as covariances.
+description: IPCA.
 author:
 - family: Kelly
   given: Bryan
